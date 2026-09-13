@@ -1,6 +1,10 @@
-# Byetery — Backend Foundation
+# Byetery — Backend Foundation y API DEV
 
-Fase local, sin HTTP, frontend ni conexión a Stellar Testnet. El contrato Rust permanece congelado.
+La API HTTP local sobre Supabase DEV se documenta en [HTTP-API.md](../docs/HTTP-API.md).
+El contrato Rust permanece congelado, sin frontend ni conexión a Stellar Testnet.
+
+El texto siguiente conserva el alcance original de Foundation como referencia histórica;
+las limitaciones sobre HTTP, Auth y WalletVerifier se resolvieron en la nueva capa.
 
 ## Ejecutar
 

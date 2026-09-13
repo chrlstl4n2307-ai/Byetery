@@ -5,6 +5,10 @@
     "demo": "npm --prefix backend run demo",
     "test:backend": "npm --prefix backend run verify",
     "test:python": "python -m unittest discover -s tools/python -p test_*.py -v",
-    "verify": "pwsh -NoProfile -File scripts/verify.ps1"
+    "verify": "pwsh -NoProfile -File scripts/verify.ps1",
+    "api": "npm --prefix backend run api",
+    "demo:api": "npm --prefix backend run demo:api",
+    "test:http:dev": "npm --prefix backend run test:http:dev",
+    "dev:setup": "npm --prefix backend run dev:setup --"
   }
 }

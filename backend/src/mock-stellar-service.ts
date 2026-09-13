@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { serialize, deserialize } from 'node:v8';
 import { Address as StellarAddress } from '@stellar/stellar-sdk';
 import { batteryId, ensure, hash32, nonzeroHash, DomainError, type ActorRole, type Address, type Battery, type Command, type Deployment, type Evidence, type ReturnRequest } from './domain.ts';
 import { evidenceCommitment } from './evidence.ts';
@@ -28,6 +29,31 @@ export class MockStellarService implements StellarService {
     ensure(config.rewardToken !== config.contractAddress, 'InvalidConfiguration');
     this.config = structuredClone(config);
   }
+  /** Server-only opaque snapshot for the local MOCK transport. Never accept client bytes. */
+  exportSnapshot(): Uint8Array {
+    return serialize({ version: 1, config: this.config, state: {
+      batteries: this.batteries, requests: this.requests, roles: this.roles,
+      preparations: this.preparations, proofs: this.proofs, submissions: this.submissions,
+      archived: this.archived, balance: this.balance, balances: this.balances,
+      ledger: this.ledger, rejectTransfer: this.rejectTransfer,
+    } });
+  }
+  static fromSnapshot(config: Deployment, bytes: Uint8Array): MockStellarService {
+    const saved = deserialize(bytes);
+    ensure(saved?.version === 1 && saved.config &&
+      Object.keys(config).every(k => saved.config[k] === config[k as keyof Deployment]), 'SnapshotDeploymentMismatch');
+    const state = saved.state;
+    ensure(state && ['batteries','requests','preparations','proofs','submissions','balances'].every(k => state[k] instanceof Map)
+      && state.roles instanceof Set && state.archived instanceof Set && typeof state.balance === 'bigint'
+      && Number.isSafeInteger(state.ledger) && state.ledger > 0, 'InvalidSnapshot');
+    const mock = new MockStellarService(config);
+    mock.batteries = state.batteries; mock.requests = state.requests; mock.roles = state.roles;
+    mock.preparations = state.preparations; mock.proofs = state.proofs; mock.submissions = state.submissions;
+    mock.archived = state.archived; mock.balance = state.balance; mock.balances = state.balances;
+    mock.ledger = state.ledger; mock.rejectTransfer = state.rejectTransfer;
+    return mock;
+  }
+
   private scope(id: string) { ensure(id === this.config.deploymentId, 'DeploymentMismatch'); }
   async getConfig(id: string) { this.scope(id); return structuredClone(this.config); }
   async getBattery(id: string, bid: string) {

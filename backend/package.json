@@ -10,14 +10,20 @@
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "verify": "npm run typecheck && npm test",
-    "demo": "node --experimental-strip-types src/demo.ts"
+    "demo": "node --experimental-strip-types src/demo.ts",
+    "api": "node --experimental-strip-types src/application/server.ts",
+    "demo:api": "node --experimental-strip-types src/application/demo-api.ts",
+    "test:http:dev": "node --experimental-strip-types --test remote-tests/*.test.ts",
+    "dev:setup": "node --experimental-strip-types src/application/provision.ts"
   },
   "dependencies": {
-    "@stellar/stellar-sdk": "17.0.1"
+    "@stellar/stellar-sdk": "17.0.1",
+    "pg": "8.23.0"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
     "@types/node": "24.13.3",
+    "@types/pg": "8.23.1",
     "supabase": "2.117.0",
     "typescript": "7.0.2"
   }

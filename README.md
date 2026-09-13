@@ -1,7 +1,7 @@
 # Byetery
 
 Monorepo local consolidado. Contrato Soroban congelado, Backend Foundation y demo
-MockStellarService. Sin frontend, Testnet ni Supabase remoto.
+MockStellarService. API HTTP local sobre Supabase Cloud DEV; sin frontend ni Stellar Testnet.
 
 ```text
 Byetery/
@@ -59,3 +59,19 @@ Las migraciones se prueban en PostgreSQL PGlite, no en una instancia completa de
 No se valida todavía Auth, PostgREST, Storage ni concurrencia entre conexiones.
 
 Estado actualizado: ver [checkpoint validado de Windows](docs/verification/WINDOWS-CHECKPOINT.md). Los informes anteriores de bloqueo se conservan como historial.
+
+## API de desarrollo
+
+```powershell
+node scripts/check-dev-connection.mjs
+npm run dev:setup
+npm run api
+# En otra consola o con el servidor detenido (usa su propio puerto):
+npm run demo:api
+npm run test:http:dev
+```
+
+Credenciales reales solo en `.env` ignorado. El provisioning de roles se realiza
+desde la consola del servidor; ver [documentación de endpoints](docs/HTTP-API.md).
+
+Resultados del nuevo checkpoint: [validación HTTP API](docs/verification/HTTP-API-VALIDATION.md).
