@@ -1,0 +1,11 @@
+/target/
+/.tools/
+/test_snapshots/
+/.test-output/
+/.test-*.log
+/.wasm-build.log
+/.clippy.log
+/.verify.log
+.env
+.env.*
+!.env.example

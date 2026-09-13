@@ -1,0 +1,10 @@
+{
+  "source": "Frozen Rust/WASM test snapshot: evidence_commitment_matches_xdr_sha256_and_is_domain_bound.1.json",
+  "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "networkId": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+  "contractAddress": "CAQMY4XEXBSK5OLIHRUQNA2R4TWH3STMNIRRV3OPIFL53QUWBPNW347Y",
+  "batteryId": "BYE-000001",
+  "requestId": "0707070707070707070707070707070707070707070707070707070707070707",
+  "payloadHash": "0303030303030303030303030303030303030303030303030303030303030303",
+  "commitment": "1e985a8468f016db7434d228ccfe80e614a68d81ef70f7a5e87c63c2c3938bb4"
+}

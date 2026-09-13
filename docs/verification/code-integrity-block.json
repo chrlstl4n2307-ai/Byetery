@@ -1,0 +1,11 @@
+{
+  "EventId": 3077,
+  "RecordId": 359344,
+  "Time": "2026-09-12T21:57:05.4207931-03:00",
+  "File": "\\Device\\HarddiskVolume3\\Users\\Christián\\Desktop\\proyecto insta\\Byetery\\contracts\\byetery-contract\\target\\debug\\build\\soroban-env-common-7dfa7961f3512ad7\\build-script-build.exe",
+  "Process": "\\Device\\HarddiskVolume3\\Users\\Christián\\Desktop\\proyecto insta\\Byetery\\contracts\\byetery-contract\\.tools\\rustup\\toolchains\\1.96.0-x86_64-pc-windows-gnu\\bin\\cargo.exe",
+  "Policy": "VerifiedAndReputableDesktop",
+  "PolicyGuid": "{0283ac0f-fff1-49ae-ada1-8a933130cad6}",
+  "Status": "0xc0e90002",
+  "SHA256": "E355CC69D4301EB328462C273D9BB8B2A4B78978D9164FB151464D20AE520EF8"
+}

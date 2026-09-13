@@ -1,0 +1,19 @@
+
+> demo
+> npm --prefix backend run demo
+
+
+> byetery-backend-foundation@0.1.0 demo
+> node --experimental-strip-types src/demo.ts
+
+BYETERY — LOCAL MOCK DEMO (no network, no real keys or tokens)
+Battery ID: BYE-000001
+Request ID: 3dad6f08d4445de0db95579af4406258e8c08fa307343c157b5482f8632e4c68
+Simulated wallet: GACQKBIFAUCQKBIFAUCQKBIFAUCQKBIFAUCQKBIFAUCQKBIFAUCQKG7N
+Physical: REGISTERED | Reward: NOT_ELIGIBLE
+Physical: RETURNED | Reward: NOT_ELIGIBLE
+Physical: COLLECTED | Reward: NOT_ELIGIBLE
+Physical: RECYCLED | Reward: PENDING
+Physical: RECYCLED | Reward: SENT
+REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT
+Reward: SENT | 100000000 base units (10 GREEN-TEST, simulated 7 decimals)

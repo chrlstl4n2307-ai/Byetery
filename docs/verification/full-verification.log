@@ -1,0 +1,170 @@
+
+> verify
+> pwsh -NoProfile -File scripts/verify.ps1
+
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling version_check v0.9.5
+   Compiling cfg-if v1.0.4
+   Compiling serde_core v1.0.229
+   Compiling typenum v1.20.1
+   Compiling serde v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling subtle v2.6.1
+   Compiling const-oid v0.9.6
+   Compiling autocfg v1.5.1
+   Compiling getrandom v0.2.17
+   Compiling strsim v0.11.1
+   Compiling rand_core v0.6.4
+   Compiling generic-array v0.14.9
+   Compiling ident_case v1.0.1
+   Compiling semver v1.0.28
+   Compiling num-traits v0.2.19
+   Compiling cpufeatures v0.2.17
+   Compiling zerocopy v0.8.57
+   Compiling schemars v0.8.22
+   Compiling dyn-clone v1.0.20
+   Compiling data-encoding v2.11.1
+   Compiling paste v1.0.15
+   Compiling rustc_version v0.4.1
+   Compiling escape-bytes v0.1.1
+   Compiling ethnum v1.5.3
+   Compiling ff v0.13.1
+   Compiling ahash v0.8.12
+   Compiling hashbrown v0.17.1
+   Compiling either v1.18.0
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.6
+   Compiling num-integer v0.1.47
+   Compiling syn v2.0.119
+   Compiling syn v3.0.5
+   Compiling digest v0.10.7
+   Compiling arrayvec v0.7.8
+   Compiling equivalent v1.0.2
+   Compiling base16ct v0.2.0
+   Compiling num-bigint v0.4.8
+   Compiling sha2 v0.10.9
+   Compiling itertools v0.13.0
+   Compiling indexmap v2.14.2
+   Compiling group v0.13.0
+   Compiling libm v0.2.16
+   Compiling once_cell v1.21.4
+   Compiling base64 v0.22.1
+   Compiling allocator-api2 v0.2.21
+   Compiling hashbrown v0.15.5
+   Compiling wasmparser v0.116.1
+   Compiling hybrid-array v0.4.15
+   Compiling thiserror v1.0.69
+   Compiling curve25519-dalek v4.1.3
+   Compiling indexmap-nostd v0.4.0
+   Compiling static_assertions v1.1.0
+   Compiling downcast-rs v1.2.1
+   Compiling block-buffer v0.12.1
+   Compiling ppv-lite86 v0.2.21
+   Compiling darling_core v0.24.1
+   Compiling crypto-common v0.2.2
+   Compiling wasmi_core v0.13.0
+   Compiling wasmparser-nostd v0.100.2
+   Compiling curve25519-dalek v5.0.0
+   Compiling fnv v1.0.7
+   Compiling rand_chacha v0.3.1
+   Compiling spin v0.9.9
+   Compiling wasmi_arena v0.4.1
+   Compiling smallvec v1.16.0
+   Compiling prettyplease v0.2.37
+   Compiling darling_core v0.20.11
+   Compiling digest v0.11.3
+   Compiling rand v0.8.8
+   Compiling cpufeatures v0.3.1
+   Compiling zeroize_derive v1.5.0
+   Compiling serde_derive v1.0.229
+   Compiling cfg_eval v0.1.2
+   Compiling enum-ordinalize-derive v4.4.2
+   Compiling ark-serialize-derive v0.5.0
+   Compiling ark-ff-asm v0.5.0
+   Compiling ark-ff-macros v0.5.0
+   Compiling ark-std v0.5.0
+   Compiling derive_arbitrary v1.3.2
+   Compiling num-derive v0.4.2
+   Compiling thiserror-impl v1.0.69
+   Compiling zeroize v1.9.0
+   Compiling curve25519-dalek-derive v0.1.1
+   Compiling enum-ordinalize v4.4.2
+   Compiling keccak v0.1.6
+   Compiling arbitrary v1.3.2
+   Compiling darling_macro v0.24.1
+   Compiling heapless v0.8.0
+   Compiling soroban-env-host v27.0.1
+   Compiling educe v0.6.0
+   Compiling byteorder v1.5.0
+   Compiling der v0.7.10
+   Compiling darling v0.24.1
+   Compiling hash32 v0.3.1
+   Compiling soroban-wasmi v0.31.1-soroban.20.0.1
+   Compiling sec1 v0.7.3
+   Compiling crypto-bigint v0.5.5
+   Compiling darling_macro v0.20.11
+   Compiling soroban-builtin-sdk-macros v27.0.1
+   Compiling serde_with_macros v3.23.0
+   Compiling stable_deref_trait v1.2.1
+   Compiling ark-serialize v0.5.0
+   Compiling signature v2.2.0
+   Compiling hmac v0.12.1
+   Compiling ed25519 v2.2.3
+   Compiling rfc6979 v0.4.0
+   Compiling sha3 v0.10.9
+   Compiling hex-literal v0.4.1
+   Compiling dtor-proc-macro v0.0.6
+   Compiling darling v0.20.11
+   Compiling elliptic-curve v0.13.8
+   Compiling macro-string v0.1.4
+   Compiling ed25519-dalek v2.2.0
+   Compiling dtor v0.1.1
+   Compiling ctor-proc-macro v0.0.6
+   Compiling ecdsa v0.16.9
+   Compiling primeorder v0.13.6
+   Compiling ark-ff v0.5.0
+   Compiling heck v0.5.0
+   Compiling visibility v0.1.1
+   Compiling bytes-lit v0.0.6
+   Compiling ctor v0.5.0
+   Compiling k256 v0.13.4
+   Compiling p256 v0.13.2
+   Compiling crate-git-revision v0.0.6
+   Compiling hex v0.4.3
+   Compiling crate-git-revision v0.0.9
+   Compiling stellar-strkey v0.0.13
+   Compiling stellar-xdr v27.0.0
+   Compiling soroban-env-common v27.0.1
+   Compiling stellar-strkey v0.0.16
+   Compiling soroban-sdk v27.0.6
+   Compiling serde_with v3.23.0
+error: failed to run custom build command for `soroban-env-common v27.0.1`
+
+Caused by:
+  could not execute process `C:\Users\Christián\Desktop\proyecto insta\Byetery\contracts\byetery-contract\target\debug\build\soroban-env-common-86f46f2b87b2d90b\build-script-build` (never executed)
+
+Caused by:
+  Una directiva de Control de aplicaciones bloqueó este archivo. (os error 4551)
+warning: build failed, waiting for other jobs to finish...
+error: failed to run custom build command for `soroban-env-common v27.0.1`
+
+Caused by:
+  could not execute process `C:\Users\Christián\Desktop\proyecto insta\Byetery\contracts\byetery-contract\target\debug\build\soroban-env-common-7dfa7961f3512ad7\build-script-build` (never executed)
+
+Caused by:
+  Una directiva de Control de aplicaciones bloqueó este archivo. (os error 4551)
+Exception: C:\Users\Christián\Desktop\proyecto insta\Byetery\contracts\byetery-contract\scripts\verify.ps1:4
+Line |
+   4 |  … ($LASTEXITCODE -ne 0) { throw "Falló cargo $($Arguments -join ' ')" }
+     |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Falló cargo test --locked
+Exception: C:\Users\Christián\Desktop\proyecto insta\Byetery\scripts\verify.ps1:11
+Line |
+  11 |      if ($LASTEXITCODE -ne 0) { throw 'Contract verification failed' }
+     |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Contract verification failed

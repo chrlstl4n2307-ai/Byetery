@@ -1,0 +1,36 @@
+   Compiling byetery-contract v0.1.0 (C:\Users\Christián\Documents\Codex\Byetery)
+warning: fields `token` and `issuer` are never read
+  --> src\test.rs:17:5
+   |
+ 9 | struct Fixture {
+   |        ------- fields in this struct
+...
+17 |     token: Address,
+   |     ^^^^^
+18 |     issuer: Address,
+   |     ^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `byetery-contract` (lib test) generated 1 warning
+    Finished `test` profile [unoptimized] target(s) in 6.02s
+     Running unittests src\lib.rs (target\debug\deps\byetery_contract-81fdcf4af351b01f.exe)
+
+running 14 tests
+test test::invalid_identifiers_and_empty_hash_are_rejected ... ok
+test test::registration_requires_admin_and_rejects_duplicate_without_mutation ... ok
+test test::revoked_collector_is_rejected_even_with_both_signatures ... ok
+test test::cancel_keeps_tombstone_and_new_request_needs_new_id ... ok
+test test::archived_battery_and_cancelled_request_are_restored_not_recreated ... ok
+test test::no_second_open_request_or_cancellation_after_collection ... ok
+test test::evidence_for_other_battery_or_request_is_rejected ... ok
+test test::cancelled_claim_cannot_be_collected_and_wrong_claim_cannot_be_substituted ... ok
+test test::collection_requires_both_authorizations_early_spike ... ok
+test test::evidence_commitment_matches_xdr_sha256_and_is_domain_bound ... ok
+test test::recycling_requires_recycler_signature_and_correct_evidence ... ok
+test test::roles_require_admin_and_can_be_revoked ... ok
+test test::recycling_cannot_skip_collection_or_repeat ... ok
+test test::user_actions_require_service_and_auth_is_bound_to_arguments ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+

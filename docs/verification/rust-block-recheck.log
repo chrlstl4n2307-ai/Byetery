@@ -1,0 +1,25 @@
+
+> verify
+> pwsh -NoProfile -File scripts/verify.ps1
+
+   Compiling stellar-xdr v27.0.0
+   Compiling ark-poly v0.5.0
+   Compiling soroban-env-common v27.0.1
+error: failed to run custom build command for `soroban-env-common v27.0.1`
+
+Caused by:
+  could not execute process `C:\Users\Christián\Desktop\proyecto insta\Byetery\contracts\byetery-contract\target\debug\build\soroban-env-common-7dfa7961f3512ad7\build-script-build` (never executed)
+
+Caused by:
+  Una directiva de Control de aplicaciones bloqueó este archivo. (os error 4551)
+warning: build failed, waiting for other jobs to finish...
+Exception: C:\Users\Christián\Desktop\proyecto insta\Byetery\contracts\byetery-contract\scripts\verify.ps1:4
+Line |
+   4 |  … ($LASTEXITCODE -ne 0) { throw "Falló cargo $($Arguments -join ' ')" }
+     |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Falló cargo test --locked
+Exception: C:\Users\Christián\Desktop\proyecto insta\Byetery\scripts\verify.ps1:11
+Line |
+  11 |      if ($LASTEXITCODE -ne 0) { throw 'Contract verification failed' }
+     |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Contract verification failed

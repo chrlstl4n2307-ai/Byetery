@@ -1,0 +1,379 @@
+
+> verify
+> pwsh -NoProfile -File scripts/verify.ps1
+
+   Compiling soroban-env-macros v27.0.1
+   Compiling ark-ec v0.5.0
+   Compiling soroban-env-common v27.0.1
+   Compiling soroban-spec v27.0.6
+   Compiling soroban-spec-rust v27.0.6
+   Compiling ark-bn254 v0.5.0
+   Compiling ark-bls12-381 v0.5.0
+   Compiling soroban-sdk-macros v27.0.6
+   Compiling soroban-env-host v27.0.1
+   Compiling soroban-ledger-snapshot v27.0.6
+   Compiling soroban-sdk v27.0.6
+   Compiling byetery-contract v0.1.0 (C:\Users\Christián\Desktop\proyecto insta\Byetery\contracts\byetery-contract)
+    Finished `test` profile [unoptimized] target(s) in 51.62s
+     Running unittests src\lib.rs (target\debug\deps\byetery_contract-81fdcf4af351b01f.exe)
+
+running 20 tests
+test test::invalid_identifiers_and_empty_hash_are_rejected ... ok
+test test::evidence_commitment_matches_xdr_sha256_and_is_domain_bound ... ok
+test test::evidence_for_other_battery_or_request_is_rejected ... ok
+test test::cancel_keeps_tombstone_and_new_request_needs_new_id ... ok
+test test::cancelled_claim_cannot_be_collected_and_wrong_claim_cannot_be_substituted ... ok
+test test::archived_battery_and_cancelled_request_are_restored_not_recreated ... ok
+test test::no_second_open_request_or_cancellation_after_collection ... ok
+test test::collection_requires_both_authorizations_early_spike ... ok
+test test::payment_rejects_missing_service_and_early_lifecycle_states ... ok
+test test::insufficient_funds_keep_pending_then_funding_allows_retry ... ok
+test test::prefunded_green_test_pays_exactly_once_to_locked_recipient ... ok
+test test::registration_requires_admin_and_rejects_duplicate_without_mutation ... ok
+test test::archived_paid_battery_and_confirmed_request_cannot_be_reused_or_repaid ... ok
+test test::roles_require_admin_and_can_be_revoked ... ok
+test test::user_actions_require_service_and_auth_is_bound_to_arguments ... ok
+test test::recycling_requires_recycler_signature_and_correct_evidence ... ok
+test test::revoked_collector_is_rejected_even_with_both_signatures ... ok
+test test::recycling_cannot_skip_collection_or_repeat ... ok
+test test::successful_mutations_emit_exact_business_events ... ok
+test test::token_rejection_rolls_back_sent_write_and_emits_no_payment_event ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.39s
+
+     Running tests\wasm.rs (target\debug\deps\wasm-ad04265fc657dddf.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests byetery_contract
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling ident_case v1.0.1
+   Compiling strsim v0.11.1
+   Compiling version_check v0.9.5
+   Compiling autocfg v1.5.1
+   Compiling typenum v1.20.1
+   Compiling schemars v0.8.22
+   Compiling dyn-clone v1.0.20
+   Compiling cpufeatures v0.2.17
+   Compiling generic-array v0.14.9
+   Compiling data-encoding v2.11.1
+   Compiling cfg-if v1.0.4
+   Compiling escape-bytes v0.1.1
+   Compiling ethnum v1.5.3
+   Compiling semver v1.0.28
+   Compiling either v1.18.0
+   Compiling num-traits v0.2.19
+   Compiling equivalent v1.0.2
+   Compiling thiserror v1.0.69
+   Compiling hashbrown v0.17.1
+   Compiling itertools v0.13.0
+   Compiling prettyplease v0.2.37
+   Compiling fnv v1.0.7
+   Compiling heapless v0.8.0
+   Compiling base64 v0.22.1
+   Compiling byteorder v1.5.0
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.6
+   Compiling hash32 v0.3.1
+   Compiling digest v0.10.7
+   Compiling syn v3.0.5
+   Compiling syn v2.0.119
+   Compiling indexmap v2.14.2
+   Compiling sha2 v0.10.9
+   Compiling rustc_version v0.4.1
+   Compiling stable_deref_trait v1.2.1
+   Compiling static_assertions v1.1.0
+   Compiling heck v0.5.0
+   Compiling num-integer v0.1.47
+   Compiling wasmparser v0.116.1
+   Compiling num-bigint v0.4.8
+   Compiling darling_core v0.24.1
+   Compiling darling_core v0.20.11
+   Compiling macro-string v0.1.4
+   Compiling serde_derive v1.0.229
+   Compiling cfg_eval v0.1.2
+   Compiling num-derive v0.4.2
+   Compiling thiserror-impl v1.0.69
+   Compiling bytes-lit v0.0.6
+   Compiling visibility v0.1.1
+   Compiling darling_macro v0.20.11
+   Compiling darling v0.20.11
+   Compiling darling_macro v0.24.1
+   Compiling darling v0.24.1
+   Compiling serde_with_macros v3.23.0
+   Compiling crate-git-revision v0.0.6
+   Compiling hex v0.4.3
+   Compiling crate-git-revision v0.0.9
+   Compiling stellar-strkey v0.0.13
+   Compiling stellar-xdr v27.0.0
+   Compiling soroban-env-common v27.0.1
+   Compiling stellar-strkey v0.0.16
+   Compiling soroban-sdk v27.0.6
+   Compiling serde_with v3.23.0
+   Compiling soroban-spec v27.0.6
+   Compiling soroban-spec-rust v27.0.6
+   Compiling soroban-env-macros v27.0.1
+   Compiling soroban-sdk-macros v27.0.6
+   Compiling soroban-env-guest v27.0.1
+   Compiling byetery-contract v0.1.0 (C:\Users\Christián\Desktop\proyecto insta\Byetery\contracts\byetery-contract)
+    Finished `release` profile [optimized] target(s) in 1m 50s
+   Compiling byetery-contract v0.1.0 (C:\Users\Christián\Desktop\proyecto insta\Byetery\contracts\byetery-contract)
+    Finished `test` profile [unoptimized] target(s) in 10.50s
+     Running unittests src\lib.rs (target\debug\deps\byetery_contract-83e922cb728ea038.exe)
+
+running 20 tests
+test test::invalid_identifiers_and_empty_hash_are_rejected ... ok
+test test::evidence_for_other_battery_or_request_is_rejected ... ok
+test test::cancel_keeps_tombstone_and_new_request_needs_new_id ... ok
+test test::evidence_commitment_matches_xdr_sha256_and_is_domain_bound ... ok
+test test::archived_battery_and_cancelled_request_are_restored_not_recreated ... ok
+test test::cancelled_claim_cannot_be_collected_and_wrong_claim_cannot_be_substituted ... ok
+test test::no_second_open_request_or_cancellation_after_collection ... ok
+test test::collection_requires_both_authorizations_early_spike ... ok
+test test::payment_rejects_missing_service_and_early_lifecycle_states ... ok
+test test::insufficient_funds_keep_pending_then_funding_allows_retry ... ok
+test test::archived_paid_battery_and_confirmed_request_cannot_be_reused_or_repaid ... ok
+test test::prefunded_green_test_pays_exactly_once_to_locked_recipient ... ok
+test test::registration_requires_admin_and_rejects_duplicate_without_mutation ... ok
+test test::user_actions_require_service_and_auth_is_bound_to_arguments ... ok
+test test::roles_require_admin_and_can_be_revoked ... ok
+test test::recycling_cannot_skip_collection_or_repeat ... ok
+test test::revoked_collector_is_rejected_even_with_both_signatures ... ok
+test test::recycling_requires_recycler_signature_and_correct_evidence ... ok
+test test::successful_mutations_emit_exact_business_events ... ok
+test test::token_rejection_rolls_back_sent_write_and_emits_no_payment_event ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.07s
+
+     Running tests\wasm.rs (target\debug\deps\wasm-cbf674ed59199ffa.exe)
+
+running 1 test
+test wasm_constructor_requires_admin_not_deployment_source ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+   Doc-tests byetery_contract
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking typenum v1.20.1
+    Checking cfg-if v1.0.4
+    Checking subtle v2.6.1
+    Checking const-oid v0.9.6
+    Checking num-traits v0.2.19
+    Checking zeroize v1.9.0
+    Checking zerocopy v0.8.57
+    Checking serde_core v1.0.229
+    Checking cpufeatures v0.2.17
+    Checking base16ct v0.2.0
+    Checking arrayvec v0.7.8
+    Checking either v1.18.0
+    Checking getrandom v0.2.17
+    Checking zmij v1.0.23
+    Checking memchr v2.8.3
+    Checking rand_core v0.6.4
+    Checking itoa v1.0.18
+    Checking der v0.7.10
+    Checking once_cell v1.21.4
+    Checking itertools v0.13.0
+    Checking allocator-api2 v0.2.21
+    Checking dyn-clone v1.0.20
+    Checking data-encoding v2.11.1
+    Checking libm v0.2.16
+    Checking downcast-rs v1.2.1
+    Checking ff v0.13.1
+    Checking hashbrown v0.17.1
+    Checking group v0.13.0
+    Checking equivalent v1.0.2
+    Checking indexmap-nostd v0.4.0
+    Checking num-integer v0.1.47
+    Checking hashbrown v0.15.5
+    Checking generic-array v0.14.9
+    Checking hybrid-array v0.4.15
+    Checking stellar-strkey v0.0.13
+    Checking wasmparser-nostd v0.100.2
+    Checking num-bigint v0.4.8
+    Checking arbitrary v1.3.2
+    Checking block-buffer v0.10.4
+    Checking crypto-common v0.1.6
+    Checking crypto-bigint v0.5.5
+    Checking block-buffer v0.12.1
+    Checking crypto-common v0.2.2
+    Checking indexmap v2.14.2
+    Checking digest v0.10.7
+    Checking sec1 v0.7.3
+    Checking escape-bytes v0.1.1
+    Checking semver v1.0.28
+    Checking spin v0.9.9
+    Checking signature v2.2.0
+    Checking sha2 v0.10.9
+    Checking hmac v0.12.1
+    Checking ethnum v1.5.3
+    Checking wasmi_arena v0.4.1
+    Checking rfc6979 v0.4.0
+    Checking smallvec v1.16.0
+    Checking base64 v0.22.1
+    Checking ed25519 v2.2.3
+    Checking wasmparser v0.116.1
+    Checking digest v0.11.3
+    Checking curve25519-dalek v4.1.3
+    Checking cpufeatures v0.3.1
+    Checking keccak v0.1.6
+    Checking byteorder v1.5.0
+    Checking static_assertions v1.1.0
+    Checking curve25519-dalek v5.0.0
+    Checking stable_deref_trait v1.2.1
+    Checking sha3 v0.10.9
+    Checking hex-literal v0.4.1
+    Checking hash32 v0.3.1
+    Checking dtor v0.1.1
+    Checking thiserror v1.0.69
+    Checking heapless v0.8.0
+    Checking ctor v0.5.0
+    Checking serde v1.0.229
+    Checking serde_json v1.0.151
+    Checking stellar-strkey v0.0.16
+    Checking wasmi_core v0.13.0
+    Checking hex v0.4.3
+    Checking ed25519-dalek v2.2.0
+    Checking elliptic-curve v0.13.8
+    Checking schemars v0.8.22
+    Checking ecdsa v0.16.9
+    Checking primeorder v0.13.6
+    Checking p256 v0.13.2
+    Checking k256 v0.13.4
+    Checking serde_with v3.23.0
+    Checking soroban-wasmi v0.31.1-soroban.20.0.1
+    Checking ppv-lite86 v0.2.21
+    Checking ahash v0.8.12
+    Checking rand_chacha v0.3.1
+    Checking rand v0.8.8
+    Checking stellar-xdr v27.0.0
+    Checking ark-std v0.5.0
+    Checking ark-serialize v0.5.0
+    Checking ark-ff v0.5.0
+    Checking ark-poly v0.5.0
+    Checking ark-ec v0.5.0
+    Checking ark-bn254 v0.5.0
+    Checking ark-bls12-381 v0.5.0
+    Checking soroban-env-common v27.0.1
+    Checking soroban-env-host v27.0.1
+    Checking soroban-ledger-snapshot v27.0.6
+    Checking soroban-sdk v27.0.6
+    Checking byetery-contract v0.1.0 (C:\Users\Christián\Desktop\proyecto insta\Byetery\contracts\byetery-contract)
+    Finished `dev` profile [unoptimized] target(s) in 1m 14s
+
+> byetery-backend-foundation@0.1.0 verify
+> npm run typecheck && npm test
+
+
+> byetery-backend-foundation@0.1.0 typecheck
+> tsc --noEmit
+
+
+> byetery-backend-foundation@0.1.0 test
+> node --experimental-strip-types --test tests/*.test.ts
+
+✔ frozen contract source and Cargo dependencies remain byte-identical (17.502ms)
+✔ all eleven tables have enabled + forced RLS and restrictive browser deny (6754.6111ms)
+✔ anon: grants deny read and writes on every table (62.9141ms)
+✔ authenticated: grants deny read and writes on every table (65.8776ms)
+✔ anon: restrictive RLS blocks even accidental grants and permissive policy (21.8564ms)
+✔ authenticated: restrictive RLS blocks even accidental grants and permissive policy (17.7392ms)
+✔ duplicate battery and request identifiers rejected (18.5097ms)
+✔ battery IDs reject lowercase, unicode and overlength; request requires 32 bytes (16.8901ms)
+✔ wallet owner and recipient cannot be substituted; revoked wallet cannot open request (27.8395ms)
+✔ only one local reservation can occupy a battery (10.173ms)
+✔ cancel returns REGISTERED and leaves immutable cancelled request (21.0023ms)
+✔ deferred constraint rejects detached live request at transaction boundary (16.7173ms)
+✔ evidence cannot reference a different battery and finalized content is immutable (16.9498ms)
+✔ cross-deployment wallet references rejected (9.6998ms)
+✔ backward transition, recipient rewrite, premature SENT and stale ledger rejected (23.8208ms)
+✔ cannot jump from RETURNED to RECYCLED or collection straight to SENT (15.4903ms)
+✔ operation parameters immutable; idempotency unique; UNKNOWN cannot be cancelled locally (18.3593ms)
+✔ reward attempts require recycled battery and pay_reward operation (12.2089ms)
+✔ full SQL projection flow reaches SENT with successful reward attempt (41.6284ms)
+✔ failed payment attempt leaves chain Pending; no concurrent active attempt (18.6824ms)
+✔ configuration, roles identity and evidence history cannot be rewritten or deleted (13.2135ms)
+✔ cannot mark association collected before on-chain confirmation (7.4214ms)
+✔ cannot release a claim while chain request remains OPEN (9.688ms)
+✔ chain claim cannot import a different recipient for a known local claim (7.4111ms)
+✔ manifest content must match its SHA-256 (6.9593ms)
+✔ integrated mock confirmations drive SQL projection through the complete reward flow (41.1447ms)
+✔ full REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT, exact fixed payment (14.3018ms)
+✔ submission is pending and duplicate submission settles only once (3.1099ms)
+✔ cancel resets physical state, retains request and prevents request reuse (1.5987ms)
+✔ collection rejects missing authorization: GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC (4.1874ms)
+✔ collection rejects missing authorization: GABAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEJXA (1.9398ms)
+✔ collection rejects missing authorization: both (0.9433ms)
+✔ collector with both proofs but no role is rejected (1.3743ms)
+✔ administrator has no implicit recycler role (1.6336ms)
+✔ bad evidence: EvidenceBatteryMismatch {"batteryId":"BYE-OTHER"} (1.2154ms)
+✔ bad evidence: EvidenceRequestMismatch {"requestId":"6363636363636363636363636363636363636363636363636363636363636363"} (1.1301ms)
+✔ bad evidence: InvalidEvidence {"version":2} (1.0432ms)
+✔ bad evidence: InvalidEvidence {"kind":"RECYCLING"} (1.2916ms)
+✔ bad evidence: InvalidEvidence {"payloadHash":"0000000000000000000000000000000000000000000000000000000000000000"} (1.1195ms)
+✔ duplicate battery rejected (1.0791ms)
+✔ collection freezes claim; cancellation and backward transition rejected (2.0934ms)
+✔ insufficient funds and token rejection leave Pending and balances unchanged (2.6872ms)
+✔ second reward rejected even when prefunded again (2.4596ms)
+✔ archived records are unavailable, not nonexistent; restore prevents reuse and repayment (2.1385ms)
+✔ proof cannot authorize another preparation or tampered evidence (1.1045ms)
+✔ expired authorization rejected; wrong deployment rejected; mock refuses real mode (0.7743ms)
+✔ returned snapshots cannot mutate service state or fixed recipient (0.7991ms)
+✔ server request ids are 32 random bytes (12.6723ms)
+✔ commitment binds network, contract, battery and request (1.6742ms)
+✔ TypeScript evidence commitment exactly matches frozen Rust/WASM vector (0.3598ms)
+ℹ tests 50
+ℹ suites 0
+ℹ pass 50
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20972.0391
+test_invalid_count (test_tools.ToolTests.test_invalid_count) ... ok
+test_mismatch_and_invalid_input (test_tools.ToolTests.test_mismatch_and_invalid_input) ... ok
+test_reproducible_unique_fictional_batteries (test_tools.ToolTests.test_reproducible_unique_fictional_batteries) ... ok
+test_write_and_verify_exact_bytes (test_tools.ToolTests.test_write_and_verify_exact_bytes) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.734s
+
+OK
+
+> demo
+> npm --prefix backend run demo
+
+
+> byetery-backend-foundation@0.1.0 demo
+> node --experimental-strip-types src/demo.ts
+
+BYETERY — LOCAL MOCK DEMO (no network, no real keys or tokens)
+Battery ID: BYE-000001
+Request ID: 5e019ee3a0ef5da7e315a3d659bfd53936ff0d152168ee69871b361ba96ca45b
+Simulated wallet: GACQKBIFAUCQKBIFAUCQKBIFAUCQKBIFAUCQKBIFAUCQKBIFAUCQKG7N
+Physical: REGISTERED | Reward: NOT_ELIGIBLE
+Physical: RETURNED | Reward: NOT_ELIGIBLE
+Physical: COLLECTED | Reward: NOT_ELIGIBLE
+Physical: RECYCLED | Reward: PENDING
+Physical: RECYCLED | Reward: SENT
+REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT
+Reward: SENT | 100000000 base units (10 GREEN-TEST, simulated 7 decimals)

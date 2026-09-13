@@ -1,0 +1,15 @@
+{
+  "wasm_sha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "files": {
+    "Cargo.toml": "6a04c700c43d73990b1da8b9bb27d69a0153fef0f36a3d4f66b3395ae2da5f51",
+    "Cargo.lock": "04f709c7cb5d1b043cb5d32d310f2640144563a8f056470e95fe84dc3ebeabb9",
+    "rust-toolchain.toml": "3096eb89f5b6c2a60f48ec98754c896b8b0491c65ae2cc2b30f697f24bef8dd0",
+    "src/lib.rs": "4be0f127ed23fcbb83e8d646cca0d37f1ce412e5f084b40016fa2981f1db6141",
+    "src/types.rs": "df13bf53a19c0dcc8d9ead0f1c4cf985ae479474d4a5300386b48d82bc580bad",
+    "src/events.rs": "c823675a220ec86e75d8091ccca0a5505ad103f4747f3d3207b482b1dc7f030e",
+    "src/test.rs": "ed1285ee520d9ffbeb775b5d27087c97ff92d7942fc365a980c2ec0bffaa127f",
+    "tests/wasm.rs": "761a72128c56ae416650eb377487db6c8528d322c1b774417022d284944e5530",
+    "scripts/verify.ps1": "2d9d83cdd614f0ddbd97f67018de5205501fe0295a1319f13369fb701c06ddc6",
+    "scripts/cargo-local.ps1": "73a3ac4e5e7ee819c3fd99e99d3dbaddc0e6f06fc6e8e8ca1e0b922cda18d650"
+  }
+}

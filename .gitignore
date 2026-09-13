@@ -1,0 +1,36 @@
+# Dependencies, builds and local toolchains
+**/node_modules/
+**/.tools/
+**/target/
+**/dist/
+**/build/
+**/.cache/
+**/.temp/
+**/.test-data/
+**/.test-output/
+**/test_snapshots/
+.demo-data/
+**/__pycache__/
+*.py[cod]
+**/.venv/
+**/venv/
+*.log
+*.tmp
+*.temp
+~$*
+*.db
+*.sqlite*
+# Secrets and local configuration
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+**/secrets/
+# Historical validation logs are intentionally versioned
+!docs/checkpoints/*.log
+!docs/verification/*.log

@@ -1,0 +1,70 @@
+
+> byetery-backend-foundation@0.1.0 verify
+> npm run typecheck && npm test
+
+
+> byetery-backend-foundation@0.1.0 typecheck
+> tsc --noEmit
+
+
+> byetery-backend-foundation@0.1.0 test
+> node --experimental-strip-types --test tests/*.test.ts
+
+✔ frozen contract source and Cargo dependencies remain byte-identical (17.8111ms)
+✔ all eleven tables have enabled + forced RLS and restrictive browser deny (2407.0047ms)
+✔ anon: grants deny read and writes on every table (27.6007ms)
+✔ authenticated: grants deny read and writes on every table (31.9631ms)
+✔ anon: restrictive RLS blocks even accidental grants and permissive policy (10.5452ms)
+✔ authenticated: restrictive RLS blocks even accidental grants and permissive policy (7.5738ms)
+✔ duplicate battery and request identifiers rejected (10.7409ms)
+✔ battery IDs reject lowercase, unicode and overlength; request requires 32 bytes (6.6561ms)
+✔ wallet owner and recipient cannot be substituted; revoked wallet cannot open request (13.0344ms)
+✔ only one local reservation can occupy a battery (3.7299ms)
+✔ cancel returns REGISTERED and leaves immutable cancelled request (13.2485ms)
+✔ deferred constraint rejects detached live request at transaction boundary (8.2993ms)
+✔ evidence cannot reference a different battery and finalized content is immutable (9.8767ms)
+✔ cross-deployment wallet references rejected (5.7767ms)
+✔ backward transition, recipient rewrite, premature SENT and stale ledger rejected (9.3279ms)
+✔ cannot jump from RETURNED to RECYCLED or collection straight to SENT (6.2143ms)
+✔ operation parameters immutable; idempotency unique; UNKNOWN cannot be cancelled locally (8.5775ms)
+✔ reward attempts require recycled battery and pay_reward operation (4.749ms)
+✔ full SQL projection flow reaches SENT with successful reward attempt (19.5005ms)
+✔ failed payment attempt leaves chain Pending; no concurrent active attempt (12.4447ms)
+✔ configuration, roles identity and evidence history cannot be rewritten or deleted (8.7757ms)
+✔ cannot mark association collected before on-chain confirmation (3.4174ms)
+✔ cannot release a claim while chain request remains OPEN (4.2969ms)
+✔ chain claim cannot import a different recipient for a known local claim (3.1739ms)
+✔ manifest content must match its SHA-256 (6.4377ms)
+✔ integrated mock confirmations drive SQL projection through the complete reward flow (21.5764ms)
+✔ full REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT, exact fixed payment (9.4388ms)
+✔ submission is pending and duplicate submission settles only once (2.3656ms)
+✔ cancel resets physical state, retains request and prevents request reuse (2.3346ms)
+✔ collection rejects missing authorization: GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC (2.1604ms)
+✔ collection rejects missing authorization: GABAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEJXA (0.6706ms)
+✔ collection rejects missing authorization: both (0.4762ms)
+✔ collector with both proofs but no role is rejected (0.8723ms)
+✔ administrator has no implicit recycler role (0.9264ms)
+✔ bad evidence: EvidenceBatteryMismatch {"batteryId":"BYE-OTHER"} (0.6157ms)
+✔ bad evidence: EvidenceRequestMismatch {"requestId":"6363636363636363636363636363636363636363636363636363636363636363"} (0.5291ms)
+✔ bad evidence: InvalidEvidence {"version":2} (0.649ms)
+✔ bad evidence: InvalidEvidence {"kind":"RECYCLING"} (0.441ms)
+✔ bad evidence: InvalidEvidence {"payloadHash":"0000000000000000000000000000000000000000000000000000000000000000"} (0.4437ms)
+✔ duplicate battery rejected (0.4486ms)
+✔ collection freezes claim; cancellation and backward transition rejected (0.8717ms)
+✔ insufficient funds and token rejection leave Pending and balances unchanged (0.926ms)
+✔ second reward rejected even when prefunded again (0.7569ms)
+✔ archived records are unavailable, not nonexistent; restore prevents reuse and repayment (5.0071ms)
+✔ proof cannot authorize another preparation or tampered evidence (1.3663ms)
+✔ expired authorization rejected; wrong deployment rejected; mock refuses real mode (0.5797ms)
+✔ returned snapshots cannot mutate service state or fixed recipient (0.427ms)
+✔ server request ids are 32 random bytes (3.2415ms)
+✔ commitment binds network, contract, battery and request (0.5717ms)
+✔ TypeScript evidence commitment exactly matches frozen Rust/WASM vector (0.1696ms)
+ℹ tests 50
+ℹ suites 0
+ℹ pass 50
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3891.2549

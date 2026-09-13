@@ -1,0 +1,41 @@
+   Compiling byetery-contract v0.1.0 (C:\Users\Christián\Documents\Codex\Byetery)
+    Finished `test` profile [unoptimized] target(s) in 5.56s
+     Running unittests src\lib.rs (target\debug\deps\byetery_contract-83e922cb728ea038.exe)
+
+running 20 tests
+test test::invalid_identifiers_and_empty_hash_are_rejected ... ok
+test test::evidence_commitment_matches_xdr_sha256_and_is_domain_bound ... ok
+test test::evidence_for_other_battery_or_request_is_rejected ... ok
+test test::archived_battery_and_cancelled_request_are_restored_not_recreated ... ok
+test test::cancel_keeps_tombstone_and_new_request_needs_new_id ... ok
+test test::cancelled_claim_cannot_be_collected_and_wrong_claim_cannot_be_substituted ... ok
+test test::no_second_open_request_or_cancellation_after_collection ... ok
+test test::insufficient_funds_keep_pending_then_funding_allows_retry ... ok
+test test::collection_requires_both_authorizations_early_spike ... ok
+test test::payment_rejects_missing_service_and_early_lifecycle_states ... ok
+test test::prefunded_green_test_pays_exactly_once_to_locked_recipient ... ok
+test test::archived_paid_battery_and_confirmed_request_cannot_be_reused_or_repaid ... ok
+test test::registration_requires_admin_and_rejects_duplicate_without_mutation ... ok
+test test::roles_require_admin_and_can_be_revoked ... ok
+test test::revoked_collector_is_rejected_even_with_both_signatures ... ok
+test test::recycling_cannot_skip_collection_or_repeat ... ok
+test test::user_actions_require_service_and_auth_is_bound_to_arguments ... ok
+test test::recycling_requires_recycler_signature_and_correct_evidence ... ok
+test test::successful_mutations_emit_exact_business_events ... ok
+test test::token_rejection_rolls_back_sent_write_and_emits_no_payment_event ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.72s
+
+     Running tests\wasm.rs (target\debug\deps\wasm-cbf674ed59199ffa.exe)
+
+running 1 test
+test wasm_constructor_requires_admin_not_deployment_source ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+   Doc-tests byetery_contract
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

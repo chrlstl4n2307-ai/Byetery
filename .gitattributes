@@ -1,0 +1,9 @@
+# Preserve frozen bytes; recognize Windows CRLF during whitespace checks.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Preserve existing EOF blank lines in these frozen/historical files only.
+contracts/byetery-contract/README.md whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+contracts/byetery-contract/rust-toolchain.toml whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+contracts/byetery-contract/scripts/cargo-local.ps1 whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+docs/checkpoints/test-build.log whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+docs/checkpoints/test-payments.log whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+docs/checkpoints/test-wasm.log whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,9 @@
+test_invalid_count (test_tools.ToolTests.test_invalid_count) ... ok
+test_mismatch_and_invalid_input (test_tools.ToolTests.test_mismatch_and_invalid_input) ... ok
+test_reproducible_unique_fictional_batteries (test_tools.ToolTests.test_reproducible_unique_fictional_batteries) ... ok
+test_write_and_verify_exact_bytes (test_tools.ToolTests.test_write_and_verify_exact_bytes) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.636s
+
+OK
