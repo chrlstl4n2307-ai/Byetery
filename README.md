@@ -1,13 +1,13 @@
 # Byetery
 
 Monorepo local consolidado. Contrato Soroban congelado, Backend Foundation y demo
-MockStellarService. API HTTP local sobre Supabase Cloud DEV; sin frontend ni Stellar Testnet.
+MockStellarService. API HTTP local y frontend Next.js sobre Supabase Cloud DEV; blockchain exclusivamente MOCK.
 
 ```text
 Byetery/
 ├── contracts/byetery-contract/  # Rust, Cargo.lock, tests y scripts originales
 ├── backend/                   # Foundation TypeScript, mock y 50 tests
-├── frontend/                  # Reservado
+├── frontend/                  # Next.js, Auth DEV, paneles y pruebas
 ├── database/migrations/       # SQL original
 ├── tools/python/              # Datos ficticios y SHA-256
 ├── docs/                      # Arquitectura, documentos y checkpoints
@@ -55,8 +55,8 @@ históricas se preservan aparte de los snapshots que pueden regenerar las prueba
 ARCHITECTURE.md y VALIDATION.md originales se conservan en backend y como referencia
 en docs. El informe de consolidación documenta las nuevas ubicaciones y verificaciones.
 
-Las migraciones se prueban en PostgreSQL PGlite, no en una instancia completa de Supabase.
-No se valida todavía Auth, PostgREST, Storage ni concurrencia entre conexiones.
+Las migraciones conservan sus pruebas PGlite y cuentan además con 82 checks SQL en Supabase DEV.
+La API y la demo visual prueban Auth DEV real y PostgreSQL; Storage público queda pendiente.
 
 Estado actualizado: ver [checkpoint validado de Windows](docs/verification/WINDOWS-CHECKPOINT.md). Los informes anteriores de bloqueo se conservan como historial.
 
@@ -75,3 +75,11 @@ Credenciales reales solo en `.env` ignorado. El provisioning de roles se realiza
 desde la consola del servidor; ver [documentación de endpoints](docs/HTTP-API.md).
 
 Resultados del nuevo checkpoint: [validación HTTP API](docs/verification/HTTP-API-VALIDATION.md).
+
+## Frontend MVP
+
+Con `npm run api` activo, ejecutar `npm run frontend` y abrir `http://127.0.0.1:3000`.
+Instalación reproducible: `npm --prefix frontend ci`. Configurar solo las variables de `frontend/.env.example`.
+
+Ver [pantallas, seguridad y demo visual](frontend/README.md) y [validación frontend](docs/verification/FRONTEND-MVP.md).
+La demo automatizada completa se ejecuta con `npm run demo:visual` después del build del frontend.

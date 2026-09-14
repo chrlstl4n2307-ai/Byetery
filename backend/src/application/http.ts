@@ -4,9 +4,11 @@ import type { AddressInfo } from 'node:net';
 import { SupabaseAuth } from './auth.ts';
 import { Coordinator, type Action } from './coordinator.ts';
 import { AppError, requireThat, type Reply } from './errors.ts';
-interface Route { action?: Action; battery?: string }
+import { profile, batteryDetail } from './frontend-reads.ts';
+interface Route { action?: Action; battery?: string; profile?: boolean }
 function route(method: string, path: string): Route {
   let m: RegExpExecArray|null;
+  if(method==='GET' && path==='/api/me') return {profile:true};
   if(method==='POST' && path==='/api/batteries') return {action:{kind:'register'}};
   if(method==='POST' && path==='/api/wallet/challenge') return {action:{kind:'challenge'}};
   if(method==='POST' && path==='/api/wallet/verify') return {action:{kind:'verify'}};
@@ -31,7 +33,8 @@ export function api(auth: SupabaseAuth, coordinator: Coordinator): Server {
       requireThat(!req.headers.origin,403,'BrowserOriginNotEnabled');
       const target=route(req.method??'',(req.url??'').split('?')[0]);
       const identity=await auth.validate(req.headers.authorization);
-      if(target.battery) reply=await coordinator.get(identity,target.battery);
+      if(target.profile) reply=await profile(coordinator.repo,identity);
+      else if(target.battery) reply=await batteryDetail(coordinator.repo,identity,target.battery);
       else {
         const key=req.headers['idempotency-key'];requireThat(typeof key==='string',400,'IdempotencyKeyRequired');
         reply=await coordinator.mutate(identity,target.action!,await body(req),key);

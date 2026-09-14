@@ -9,6 +9,9 @@
     "api": "npm --prefix backend run api",
     "demo:api": "npm --prefix backend run demo:api",
     "test:http:dev": "npm --prefix backend run test:http:dev",
-    "dev:setup": "npm --prefix backend run dev:setup --"
+    "dev:setup": "npm --prefix backend run dev:setup --",
+    "frontend": "npm --prefix frontend run dev",
+    "verify:frontend": "npm --prefix frontend run verify",
+    "demo:visual": "node --experimental-strip-types scripts/demo-visual.mts"
   }
 }

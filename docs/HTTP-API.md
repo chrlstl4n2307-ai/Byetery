@@ -195,8 +195,8 @@ No se devuelven stack traces, SQL ni mensajes internos del driver.
 El `requestId` del error es correlación HTTP, diferente del claim de 32 bytes.
 
 Solo loopback, sin CORS ni cookies, solicitudes JSON hasta 32 KiB y 600 peticiones
-por minuto por proceso. Las peticiones con Origin se rechazan porque todavía no
-hay frontend autorizado. Las respuestas son JSON, no-store y nosniff. Es una API
+por minuto por proceso. Las peticiones directas con Origin se rechazan. El frontend autorizado usa un proxy
+Next del mismo origen que valida Origin y reenvía únicamente el bearer de sesión. Las respuestas son JSON, no-store y nosniff. Es una API
 de desarrollo; no está configurada para exposición pública.
 
 ## Cleanup y límites pendientes
@@ -214,4 +214,17 @@ privilegio y la auditoría histórica completa quedan para una fase posterior.
 Supabase Advisors no indicó errores de RLS/esquema; informó que la protección Auth
 contra contraseñas filtradas está desactivada. No se modificó esa configuración.
 Ver [protección de contraseñas de Supabase](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
-No hay frontend, wallet gráfica, Storage público, Testnet ni despliegue Vercel.
+El frontend MVP está disponible en frontend/. No hay wallet gráfica, Storage público, Testnet ni despliegue Vercel.
+
+## Lecturas para el frontend MVP
+
+`GET /api/me`: sesión validada, sin parámetros de usuario. Devuelve `userId`, `roles`
+de memberships activas, wallets propias verificadas/no revocadas y las últimas 100
+solicitudes propias (`hasMoreRequests` indica truncamiento). Cada solicitud separa
+estado del claim, estado físico, recompensa y operación pendiente. Una solicitud
+antigua no hereda la recompensa de un claim posterior. Todos los joins incluyen deployment.
+
+`GET /api/batteries/:batteryId` conserva su proyección y agrega `metadata` limitada
+a cadenas `type`, `manufacturer`, `batch`, y `ownRequest` del usuario autenticado
+o null. Nunca revela el claim, wallet o identidad de otro usuario. No hay gestión
+de roles por HTTP ni nuevas mutaciones de negocio. Sin cambios de migración o RLS.

@@ -38,7 +38,14 @@ export async function fixture(faults: Faults = {}) {
         await db.query('update api_private.memberships set enabled=false where deployment_id=$1 and user_id=$2',[config.deploymentId,u.businessId]);
         await db.query('update app_private.wallet_links set revoked_at=clock_timestamp() where deployment_id=$1 and user_id=$2 and revoked_at is null',[config.deploymentId,u.businessId]);
       });
-      if(u.token) await authRequest(config,'/logout?scope=global','POST',{},u.token);
+      if(u.token) {
+        try { await authRequest(config,'/logout?scope=global','POST',{},u.token); }
+        catch(error) {
+          // A browser/password change may already have revoked this fixture token.
+          // Business access is disabled above; admin deletion below removes Auth sessions.
+          if(!(error instanceof Error) || !/^DevAuthHttp(401|403)$/.test(error.message)) throw error;
+        }
+      }
       await authRequest(config,'/admin/users/'+u.id,'DELETE');
     }
     await repo.pool.end();

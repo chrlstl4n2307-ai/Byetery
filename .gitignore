@@ -34,3 +34,11 @@
 # Historical validation logs are intentionally versioned
 !docs/checkpoints/*.log
 !docs/verification/*.log
+
+# Frontend generated files
+**/.next/
+**/out/
+**/coverage/
+**/test-results/
+**/playwright-report/
+*.tsbuildinfo
