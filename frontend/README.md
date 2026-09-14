@@ -1,5 +1,9 @@
 # Byetery frontend MVP — DEV / MOCK
 
+> La demo MOCK valida el flujo completo de la aplicación, pero no ejecuta el contrato Soroban. El contrato Rust está validado por su propia suite de tests y su integración real queda pendiente para Stellar Testnet.
+
+Ver [alcance de la demo y guion de presentación](../docs/DEMO-SCOPE.md).
+
 Next.js App Router + React + TypeScript. Solo Supabase **Byetery Dev** para Auth/datos y `MockStellarService` para blockchain. No Testnet, Vercel ni base de producción.
 
 ## Inicio

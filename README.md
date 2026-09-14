@@ -1,5 +1,9 @@
 # Byetery
 
+> La demo MOCK valida el flujo completo de la aplicación, pero no ejecuta el contrato Soroban. El contrato Rust está validado por su propia suite de tests y su integración real queda pendiente para Stellar Testnet.
+
+Ver [alcance de la demo y guion de presentación](docs/DEMO-SCOPE.md).
+
 Monorepo local consolidado. Contrato Soroban congelado, Backend Foundation y demo
 MockStellarService. API HTTP local y frontend Next.js sobre Supabase Cloud DEV; blockchain exclusivamente MOCK.
 

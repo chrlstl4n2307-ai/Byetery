@@ -3,9 +3,9 @@ import { SessionProvider, Shell } from "@/components/session";
 import "./globals.css";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Byetery · Cada pila cuenta",
+  title: "Byetery · Cada batería cuenta",
   description:
-    "Trazabilidad de pilas y recompensas simuladas. Entorno DEV / MOCK.",
+    "Trazabilidad de baterías y recompensas simuladas. Entorno DEV / MOCK.",
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

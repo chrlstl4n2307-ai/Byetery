@@ -96,7 +96,7 @@ try {
     id = "BYE-" + randomBytes(7).toString("hex").toUpperCase();
   await admin.goto("http://127.0.0.1:3000/admin");
   await admin.getByLabel("Battery ID", { exact: true }).fill(id);
-  await admin.getByLabel("Tipo", { exact: true }).fill("AA alcalina");
+  await admin.getByLabel("Tipo", { exact: true }).fill("Pila AA alcalina");
   await admin.getByLabel("Marca / fabricante").fill("Demo circular");
   await admin.getByLabel("Lote", { exact: true }).fill("DEV-2026");
   await admin
@@ -119,8 +119,8 @@ try {
   await expect(
     a.getByRole("heading", { name: "Wallet verificada ✓" }),
   ).toBeVisible({ timeout: 45000 });
-  await a.getByLabel("Consultar una pila").fill(id);
-  await a.getByRole("button", { name: "Buscar pila →" }).click();
+  await a.getByLabel("Consultar una batería").fill(id);
+  await a.getByRole("button", { name: "Buscar batería →" }).click();
   await a.getByRole("button", { name: "Solicitar devolución" }).click();
   await expect(
     a.getByRole("button", { name: "Cancelar devolución" }),
@@ -135,27 +135,30 @@ try {
     await page.goto("http://127.0.0.1:3000/" + path);
     await page.getByLabel("Battery ID", { exact: true }).fill(id);
     await page.getByLabel("Return Request ID").fill(rid);
-    await page.getByRole("button", { name: "Consultar pila" }).click();
+    await page.getByRole("button", { name: "Consultar batería" }).click();
     await expect(
       page.getByRole("button", { name: button, exact: true }),
     ).toBeEnabled({ timeout: 30000 });
     await page.getByRole("button", { name: button, exact: true }).click();
-    await expect(page.locator(".pill")).toHaveText(state, { timeout: 45000 });
+    await expect(page.locator(".pill")).toHaveText(
+      state === "COLLECTED" ? "RECOLECTADA" : "RECICLADA",
+      { timeout: 45000 },
+    );
     console.log(state + " ✓");
   }
   await expect(
-    recycler.getByRole("heading", { name: "PENDING", exact: true }),
+    recycler.getByRole("heading", { name: "Pendiente", exact: true }),
   ).toBeVisible();
   await admin.goto("http://127.0.0.1:3000/battery/" + id);
   await admin.getByRole("button", { name: "Procesar recompensa DEV" }).click();
   await expect(
-    admin.getByRole("heading", { name: "SENT", exact: true }),
+    admin.getByRole("heading", { name: "Enviada", exact: true }),
   ).toBeVisible({ timeout: 45000 });
   await a.reload();
   await expect(
-    a.getByRole("heading", { name: "SENT", exact: true }),
+    a.getByRole("heading", { name: "Enviada", exact: true }),
   ).toBeVisible({ timeout: 30000 });
-  await expect(a.getByText("10 GREEN-TEST · Envío confirmado")).toBeVisible();
+  await expect(a.getByText("Recompensa enviada ✓")).toBeVisible();
   await mkdir(resolve(root, ".tools/verification"), { recursive: true });
   await a.screenshot({
     path: resolve(root, ".tools/verification/frontend-desktop.png"),
@@ -181,6 +184,7 @@ try {
     data: { batteryId: "BYE-INVALID" },
   });
   assert.equal(denied.status(), 403);
+  await a.getByLabel("Abrir menú de cuenta").click();
   await a.getByRole("button", { name: "Salir", exact: true }).click();
   await expect(a.getByRole("heading", { name: "Qué bueno verte" })).toBeVisible(
     { timeout: 30000 },

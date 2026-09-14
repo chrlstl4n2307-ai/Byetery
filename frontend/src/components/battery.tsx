@@ -12,6 +12,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { ApiFailure, batteryPath, qrValue, request } from "@/lib/client";
 import type { Battery, BatteryState } from "@/lib/types";
 import { useSession } from "./session";
+import { physicalLabel, rewardLabel } from "@/lib/labels";
 export const stages: {
   state: BatteryState;
   label: string;
@@ -67,7 +68,7 @@ export function SearchBattery() {
       }}
     >
       <label htmlFor="battery-search">
-        Consultar una pila
+        Consultar una batería
         <input
           id="battery-search"
           value={id}
@@ -78,7 +79,7 @@ export function SearchBattery() {
           placeholder="BYE-000001"
         />
       </label>
-      <button type="submit">Buscar pila →</button>
+      <button type="submit">Buscar batería →</button>
     </form>
   );
 }
@@ -87,54 +88,93 @@ export function BatteryQR({ id }: { id: string }) {
     <div className="qr">
       <QRCodeSVG value={qrValue(id)} size={136} title={"QR de " + id} />
       <Link href={qrValue(id)}>{id}</Link>
-      <small>Solo identifica la pila. No concede permisos.</small>
+      <small>Solo identifica la batería. No concede permisos.</small>
     </div>
   );
 }
 export function StateSummary({ battery }: { battery: Battery }) {
+  const completed =
+    battery.confirmedBatteryState === "RECYCLED" &&
+    battery.confirmedRewardState === "SENT";
   return (
     <>
       <div className="status-line">
         <span className="pill">
-          {battery.confirmedBatteryState ?? "Sin confirmar"}
+          {physicalLabel(battery.confirmedBatteryState).toLocaleUpperCase("es")}
         </span>
         <span className="caption">
-          Confirmado por la API · {battery.source}
+          {battery.confirmedBatteryState
+            ? "Confirmado"
+            : "Pendiente de confirmación"}{" "}
+          · Entorno de demostración
         </span>
       </div>
       <Timeline state={battery.confirmedBatteryState} />
       {battery.pendingOperation && (
         <p className="notice" role="status">
           {battery.pendingOperation.state === "UNKNOWN"
-            ? "UNKNOWN · Resultado incierto"
-            : "Pending · Operación pendiente"}{" "}
-          — {battery.pendingOperation.command}. El estado físico confirmado no
-          ha cambiado.
+            ? "Resultado incierto"
+            : "Operación pendiente"}
+          . El estado físico confirmado no ha cambiado.
         </p>
       )}
       {battery.lastAttempt?.state === "FAILED" && (
         <p className="notice error">
-          Failed attempt · El último intento de recompensa fue rechazado. El
+          Intento fallido · El último intento de recompensa fue rechazado. El
           estado físico se conserva.
         </p>
       )}
-      <div className="reward">
-        <span className="reward-icon">✳</span>
+      <div className={completed ? "reward reward-complete" : "reward"}>
+        <span className="reward-icon" aria-hidden="true">
+          {completed ? "↻" : "✳"}
+        </span>
         <div>
           <small>RECOMPENSA SIMULADA</small>
-          <h3>{battery.confirmedRewardState ?? "Sin confirmar"}</h3>
+          {completed && (
+            <>
+              <h2>Ciclo completado</h2>
+              <p>
+                Tu batería fue reciclada correctamente en esta demostración.
+              </p>
+              <p className="reward-amount">
+                +10 <span>GREEN-TEST</span>
+              </p>
+            </>
+          )}
+          <h3>{rewardLabel(battery.confirmedRewardState)}</h3>
           <p>
-            {battery.confirmedRewardState === "SENT"
-              ? "10 GREEN-TEST · Envío confirmado"
+            {completed
+              ? "Recompensa enviada ✓"
               : battery.confirmedRewardState === "PENDING"
                 ? "Lista para procesar tras el reciclaje confirmado"
                 : "Disponible después del reciclaje confirmado"}
           </p>
         </div>
       </div>
+      <details className="technical-details">
+        <summary>Detalles técnicos</summary>
+        <dl>
+          <dt>Estado físico</dt>
+          <dd>{battery.confirmedBatteryState ?? "Sin confirmar"}</dd>
+          <dt>Estado de recompensa</dt>
+          <dd>{battery.confirmedRewardState ?? "Sin confirmar"}</dd>
+          <dt>Origen blockchain</dt>
+          <dd>{battery.source} · El mock no ejecuta el contrato Soroban.</dd>
+          {battery.pendingOperation && (
+            <>
+              <dt>Operación</dt>
+              <dd>
+                {battery.pendingOperation.state} ·{" "}
+                {battery.pendingOperation.command}
+              </dd>
+            </>
+          )}
+        </dl>
+      </details>
     </>
   );
 }
+
 /** Preserve an idempotency key + exact input in memory until a definitive response.
  * No automatic retry of mutations. Different uncertain operations cannot replace it. */
 export function useMutation(onSuccess: () => Promise<void> | void) {
@@ -240,14 +280,14 @@ export function BatteryView({ id }: { id: string }) {
         <button onClick={load}>Volver a consultar</button>
       </p>
     );
-  if (!battery) return <p role="status">Consultando pila…</p>;
+  if (!battery) return <p role="status">Consultando batería…</p>;
   const own = battery.ownRequest;
   const canCancel =
     battery.confirmedBatteryState === "RETURNED" &&
     own?.requestState === "OPEN";
   return (
     <>
-      <p className="eyebrow">EL RECORRIDO DE TU PILA</p>
+      <p className="eyebrow">EL RECORRIDO DE TU BATERÍA</p>
       <div className="page-heading">
         <div>
           <h1>{battery.batteryId}</h1>
@@ -329,7 +369,7 @@ export function BatteryView({ id }: { id: string }) {
           )}
         </section>
         <section className="card">
-          <h2>Ficha de la pila</h2>
+          <h2>Ficha de la batería</h2>
           <dl>
             <dt>Tipo</dt>
             <dd>{battery.metadata?.type || "No registrado"}</dd>
@@ -361,7 +401,7 @@ export function RegisterBattery() {
   }
   return (
     <section className="card">
-      <h2>Registrar una pila</h2>
+      <h2>Registrar una batería</h2>
       <form onSubmit={submit}>
         <label>
           Battery ID
@@ -379,7 +419,7 @@ export function RegisterBattery() {
             name="type"
             required
             maxLength={160}
-            placeholder="AA alcalina"
+            placeholder="Pila AA alcalina"
           />
         </label>
         <label>

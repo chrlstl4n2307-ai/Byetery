@@ -656,3 +656,113 @@ footer {
     padding: 26px;
   }
 }
+
+/* Compact account disclosure: no profile name is inferred from an email. */
+.account-menu {
+  position: relative;
+}
+.account-menu > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  list-style: none;
+  min-height: 44px;
+}
+.account-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.account .account-menu span {
+  display: inline;
+  max-width: none;
+}
+.account .account-menu .avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #e8f2dc;
+  color: var(--green);
+  font-weight: 800;
+}
+.account .account-menu .account-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.account-popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  z-index: 20;
+  width: min(300px, calc(100vw - 36px));
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 12px 35px #17382b1a;
+}
+.account-popover p {
+  overflow-wrap: anywhere;
+  margin: 9px 0;
+  font-size: 0.85rem;
+}
+.account-menu summary:focus-visible,
+.technical-details summary:focus-visible {
+  outline: 3px solid #8cc65c;
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+.technical-details {
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.technical-details summary {
+  cursor: pointer;
+}
+.technical-details dl {
+  margin: 12px 0;
+}
+.technical-details dt {
+  margin-top: 12px;
+}
+.reward-complete {
+  background: #e7f3d9;
+  border: 1px solid #c9e3aa;
+  align-items: flex-start;
+  padding: 26px;
+}
+.reward-complete h2 {
+  font-size: 1.55rem;
+  margin: 10px 0 6px;
+}
+.reward-complete h3 {
+  font-size: 1rem;
+  margin-top: 18px;
+}
+.reward .reward-amount {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  color: var(--green);
+  font-weight: 800;
+  margin: 20px 0 0;
+}
+.reward-amount span {
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+@media (max-width: 650px) {
+  .account .account-menu .account-label {
+    display: none;
+  }
+  .reward-complete {
+    padding: 21px;
+  }
+  .reward-complete .reward-icon {
+    display: none;
+  }
+}

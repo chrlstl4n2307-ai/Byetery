@@ -4,6 +4,7 @@ import Link from "next/link";
 import { request, batteryPath, type WalletSigner } from "@/lib/client";
 import type { Challenge } from "@/lib/types";
 import { useSession } from "./session";
+import { physicalLabel, rewardLabel } from "@/lib/labels";
 import { SearchBattery, useMutation } from "./battery";
 export function WalletLink({ signer }: { signer?: WalletSigner }) {
   const { refresh } = useSession();
@@ -150,7 +151,8 @@ export function Dashboard() {
         <div>
           <h1>Tu actividad circular</h1>
           <p>
-            Consulta tus pilas, acompaña su recorrido y revisa tus recompensas.
+            Consulta tus baterías, acompaña su recorrido y revisa tus
+            recompensas.
           </p>
         </div>
         <button className="secondary" onClick={refresh}>
@@ -159,7 +161,7 @@ export function Dashboard() {
       </div>
       <div className="hero-strip">
         <div>
-          <h2>El siguiente paso empieza con una pila.</h2>
+          <h2>El siguiente paso empieza con una batería.</h2>
           <p>
             Busca su identificador para conocer su estado y solicitar una
             devolución.
@@ -192,7 +194,7 @@ export function Dashboard() {
             <div className="empty">
               <span>↗</span>
               <h3>Tu primera devolución está por comenzar</h3>
-              <p>Vincula tu wallet y busca una pila registrada.</p>
+              <p>Vincula tu wallet y busca una batería registrada.</p>
             </div>
           ) : (
             <div className="request-list">
@@ -206,11 +208,11 @@ export function Dashboard() {
                       ? "Solicitud cancelada"
                       : r.confirmedBatteryState === "RETURNED"
                         ? "Devolución solicitada"
-                        : (r.confirmedBatteryState ?? "Sin confirmar")}
+                        : physicalLabel(r.confirmedBatteryState)}
                   </p>
                   <code>{r.requestId}</code>
                   <p>
-                    Reward: <b>{r.confirmedRewardState ?? "Sin confirmar"}</b>
+                    Recompensa: <b>{rewardLabel(r.confirmedRewardState)}</b>
                     {r.confirmedRewardState === "SENT"
                       ? " · 10 GREEN-TEST"
                       : ""}

@@ -40,13 +40,13 @@ export function AuthForm({ signup = false }: { signup?: boolean }) {
       <section className="auth-story">
         <p className="eyebrow">UNA SEGUNDA VIDA EMPIEZA CONTIGO</p>
         <h1>
-          Pequeñas pilas.
+          Pequeñas baterías.
           <br />
           <span>Un gran cambio.</span>
         </h1>
         <p>
-          Devuelve tus pilas y sigue su recorrido, desde la solicitud hasta el
-          reciclaje verificado.
+          Devuelve tus baterías y sigue su recorrido, desde la solicitud hasta
+          el reciclaje verificado.
         </p>
         <div className="battery-art" aria-hidden="true">
           <div>+</div>
@@ -62,7 +62,7 @@ export function AuthForm({ signup = false }: { signup?: boolean }) {
         <h2>{signup ? "Crea tu cuenta" : "Qué bueno verte"}</h2>
         <p>
           {signup
-            ? "Participa en el recorrido de tus pilas."
+            ? "Participa en el recorrido de tus baterías."
             : "Entra para consultar y gestionar tus devoluciones."}
         </p>
         <form onSubmit={submit}>

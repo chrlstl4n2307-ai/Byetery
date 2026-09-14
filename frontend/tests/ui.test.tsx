@@ -75,10 +75,10 @@ describe("frontend critical flows", () => {
   });
   it("manual search normalizes the battery route", () => {
     render(<SearchBattery />);
-    fireEvent.change(screen.getByLabelText("Consultar una pila"), {
+    fireEvent.change(screen.getByLabelText("Consultar una batería"), {
       target: { value: "bye-000001" },
     });
-    fireEvent.click(screen.getByText("Buscar pila →"));
+    fireEvent.click(screen.getByText("Buscar batería →"));
     expect(mocks.push).toHaveBeenCalledWith("/battery/BYE-000001");
   });
   it.each(["REGISTERED", "RETURNED", "COLLECTED", "RECYCLED"] as const)(
@@ -109,7 +109,7 @@ describe("frontend critical flows", () => {
     expect(screen.getByRole("status").textContent).toContain(
       "Resultado incierto",
     );
-    expect(screen.queryByText("10 GREEN-TEST · Envío confirmado")).toBeNull();
+    expect(screen.queryByText("Recompensa enviada ✓")).toBeNull();
   });
   it.each(["PENDING", "SENT"] as const)("shows separate reward %s", (state) => {
     render(
@@ -121,9 +121,17 @@ describe("frontend critical flows", () => {
         }}
       />,
     );
-    expect(screen.getByRole("heading", { name: state })).toBeTruthy();
-    if (state === "SENT")
-      expect(screen.getByText("10 GREEN-TEST · Envío confirmado")).toBeTruthy();
+    expect(
+      screen.getByRole("heading", {
+        name: state === "SENT" ? "Enviada" : "Pendiente",
+      }),
+    ).toBeTruthy();
+    if (state === "SENT") {
+      expect(screen.getByText("Recompensa enviada ✓")).toBeTruthy();
+      expect(screen.getByText("Ciclo completado")).toBeTruthy();
+    } else {
+      expect(screen.queryByText("Ciclo completado")).toBeNull();
+    }
   });
   it("failed attempt is separate from physical state", () => {
     render(
@@ -135,7 +143,7 @@ describe("frontend critical flows", () => {
         }}
       />,
     );
-    expect(screen.getByText(/Failed attempt/)).toBeTruthy();
+    expect(screen.getByText(/Intento fallido/)).toBeTruthy();
     expect(screen.getByText("Reciclada")).toBeTruthy();
   });
   it("QR links to only the battery identity", () => {
@@ -239,7 +247,7 @@ describe("frontend critical flows", () => {
       fireEvent.change(screen.getByLabelText("Return Request ID"), {
         target: { value: "a".repeat(64) },
       });
-      fireEvent.click(screen.getByText("Consultar pila"));
+      fireEvent.click(screen.getByText("Consultar batería"));
       await screen.findAllByText(
         kind === "COLLECTION" ? "RETURNED" : "COLLECTED",
       );

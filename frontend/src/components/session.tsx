@@ -11,6 +11,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { ApiFailure, request } from "@/lib/client";
 import type { Profile, Role } from "@/lib/types";
+import { AccountMenu } from "./account-menu";
 type User = { id: string; email?: string };
 type Session = {
   user: User | null;
@@ -136,12 +137,11 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
         <div className="account">
           {user ? (
-            <>
-              <span>{user.email}</span>
-              <button className="text-button" onClick={logout}>
-                Salir
-              </button>
-            </>
+            <AccountMenu
+              email={user.email}
+              roles={profile?.roles ?? []}
+              onLogout={logout}
+            />
           ) : (
             <Link href="/login">Iniciar sesión</Link>
           )}
@@ -153,7 +153,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <p className="eyebrow">TU ESPACIO CIRCULAR</p>
             <RoleNavigation roles={profile?.roles ?? []} />
             <div className="sidebar-note">
-              Cada pila tiene una historia.
+              Cada batería tiene una historia.
               <br />
               <strong>Hagamos que termine bien.</strong>
               <p>Entorno de demostración. Sin transacciones en Stellar.</p>

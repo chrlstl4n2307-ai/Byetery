@@ -33,13 +33,15 @@ export function Operator({ kind }: { kind: "COLLECTION" | "RECYCLING" }) {
       <h1>{collection ? "Confirmar recepción" : "Confirmar reciclaje"}</h1>
       <p>
         {collection
-          ? "Verifica físicamente la pila y la solicitud entregada por el usuario."
-          : "Comprueba la pila recolectada y registra la evidencia del reciclaje."}
+          ? "Verifica físicamente la batería y la solicitud entregada por el usuario."
+          : "Comprueba la batería recolectada y registra la evidencia del reciclaje."}
       </p>
       <div className="detail-grid">
         <section className="card">
           <h2>
-            {collection ? "RETURNED → COLLECTED" : "COLLECTED → RECYCLED"}
+            {collection
+              ? "Devolución solicitada → Recolectada"
+              : "Recolectada → Reciclada"}
           </h2>
           <label>
             Battery ID
@@ -65,7 +67,7 @@ export function Operator({ kind }: { kind: "COLLECTION" | "RECYCLING" }) {
             onClick={load}
             disabled={!/^[A-Z0-9-]{1,32}$/.test(id)}
           >
-            Consultar pila
+            Consultar batería
           </button>
           <label>
             Nota de evidencia local
