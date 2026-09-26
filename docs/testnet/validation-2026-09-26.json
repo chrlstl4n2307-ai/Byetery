@@ -1,0 +1,737 @@
+{
+  "run": "tn20260926",
+  "date": "2026-09-26T15:22:04.122Z",
+  "network": "Stellar Testnet",
+  "rpc": "https://soroban-testnet.stellar.org",
+  "passphrase": "Test SDF Network ; September 2015",
+  "actors": {
+    "admin": {
+      "identity": "byetery-tn20260926-admin",
+      "address": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F"
+    },
+    "service": {
+      "identity": "byetery-tn20260926-service",
+      "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+    },
+    "collector": {
+      "identity": "byetery-tn20260926-collector",
+      "address": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V"
+    },
+    "recycler": {
+      "identity": "byetery-tn20260926-recycler",
+      "address": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2"
+    },
+    "recipient": {
+      "identity": "byetery-tn20260926-recipient",
+      "address": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ"
+    },
+    "issuer": {
+      "identity": "byetery-tn20260926-issuer",
+      "address": "GCHROKHXHL4L635J6Y6DWFFD5DDHABOAF4BP5TEUZDZQMW4XYS6DIDL7"
+    }
+  },
+  "steps": {
+    "fund-admin": {
+      "status": "DONE",
+      "transactions": []
+    },
+    "fund-service": {
+      "status": "DONE",
+      "transactions": []
+    },
+    "fund-collector": {
+      "status": "DONE",
+      "transactions": []
+    },
+    "fund-recycler": {
+      "status": "DONE",
+      "transactions": []
+    },
+    "fund-recipient": {
+      "status": "DONE",
+      "transactions": []
+    },
+    "fund-issuer": {
+      "status": "DONE",
+      "transactions": []
+    },
+    "deploy-sac": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "bc8a2c4c71b1cbc4219b1025c22b2031b1cde381172cdc5e931f5105e9b7cb54",
+          "ledger": 4882530,
+          "createdAt": "1790436237"
+        }
+      ]
+    },
+    "recipient-trustline": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "7d23d1f53d64d197d524b976c26e587bcd46212e8df11972d0a4e8eb854f2b67",
+          "ledger": 4882532,
+          "createdAt": "1790436247"
+        }
+      ]
+    },
+    "upload-wasm": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "5bce8726a301dfde9f3d2a70b417f1faf17829dd60fda01385f0083b1b40a399",
+          "ledger": 4882534,
+          "createdAt": "1790436257"
+        }
+      ]
+    },
+    "deploy-byetery": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "e97f13bd21513428849a9743a83ffb7b141082c6e286ced19b730243a4585933",
+          "ledger": 4882536,
+          "createdAt": "1790436267"
+        }
+      ]
+    },
+    "role-collector": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "8cb7b74d0e3829ba31dfc0277f9a308d3677c0bcfd3ff0a166698e076bb5e4c9",
+          "ledger": 4882538,
+          "createdAt": "1790436277"
+        }
+      ]
+    },
+    "role-recycler": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "52e381d08baddf43d1a5d7a8cbbc3b5c4cb6285b3c627f02b5f16aea5e38a747",
+          "ledger": 4882540,
+          "createdAt": "1790436287"
+        }
+      ]
+    },
+    "prefund-contract": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "0cf13e4c8eba927fb637d30200f9cd5e4459a02c996be8920b1ec6eea03c11f6",
+          "ledger": 4882542,
+          "createdAt": "1790436297"
+        }
+      ]
+    },
+    "register-battery": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "34b20bf6ad291bc49cacac60a5638b51cec9e54eb76b2cfe963a6cab3d94fef6",
+          "ledger": 4882554,
+          "createdAt": "1790436357"
+        }
+      ]
+    },
+    "open-return": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "99423a60f9c0313e5eba69f6c54324519304813035b0bfc46d32ac14ce3643d3",
+          "ledger": 4882557,
+          "createdAt": "1790436372"
+        }
+      ]
+    },
+    "confirm-collection": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "a57dafee61605c54aa136dd9a5359616ea0d274dc7355ddac292ab7ae94ad64d",
+          "ledger": 4882596,
+          "createdAt": "1790436567"
+        }
+      ]
+    },
+    "confirm-recycling": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "125a122cbf4663921308e92a97e2b5f721a4e66fa616ba39e4c74e716cd36153",
+          "ledger": 4882598,
+          "createdAt": "1790436577"
+        }
+      ]
+    },
+    "pay-reward": {
+      "status": "CONFIRMED",
+      "transactions": [
+        {
+          "hash": "9053c28bc5d711e6cce7e186b0213b14a3cdf03733fc8652e189eb7ca1aee241",
+          "ledger": 4882600,
+          "createdAt": "1790436587"
+        }
+      ]
+    }
+  },
+  "snapshots": {
+    "registered": {
+      "battery": {
+        "collection_hash": null,
+        "collector": null,
+        "recycler": null,
+        "recycling_hash": null,
+        "registration_hash": "24d12cd5dd7550468d7ab03e13029da2d9bce6fe2b8b939eb8d3f80a3c6c5d87",
+        "request_id": null,
+        "reward_state": "NotEligible",
+        "state": "Registered"
+      },
+      "request": null
+    },
+    "returned": {
+      "battery": {
+        "collection_hash": null,
+        "collector": null,
+        "recycler": null,
+        "recycling_hash": null,
+        "registration_hash": "24d12cd5dd7550468d7ab03e13029da2d9bce6fe2b8b939eb8d3f80a3c6c5d87",
+        "request_id": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+        "reward_state": "NotEligible",
+        "state": "Returned"
+      },
+      "request": {
+        "battery_id": "BYE-TN-D7DB910EE8BA",
+        "recipient": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+        "state": "Open"
+      }
+    },
+    "collected": {
+      "battery": {
+        "collection_hash": "bd6f42412b5e1197096b5ec7e5426fee455db2ef8cedfd5ae6553ad66bb21da3",
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "recycler": null,
+        "recycling_hash": null,
+        "registration_hash": "24d12cd5dd7550468d7ab03e13029da2d9bce6fe2b8b939eb8d3f80a3c6c5d87",
+        "request_id": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+        "reward_state": "NotEligible",
+        "state": "Collected"
+      },
+      "request": {
+        "battery_id": "BYE-TN-D7DB910EE8BA",
+        "recipient": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+        "state": "Confirmed"
+      }
+    },
+    "recycled": {
+      "battery": {
+        "collection_hash": "bd6f42412b5e1197096b5ec7e5426fee455db2ef8cedfd5ae6553ad66bb21da3",
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+        "recycling_hash": "b857824e8dc74f3bfdb3b0eaf5193366474fe22f93b26f1d923822976f3f8906",
+        "registration_hash": "24d12cd5dd7550468d7ab03e13029da2d9bce6fe2b8b939eb8d3f80a3c6c5d87",
+        "request_id": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+        "reward_state": "Pending",
+        "state": "Recycled"
+      },
+      "request": {
+        "battery_id": "BYE-TN-D7DB910EE8BA",
+        "recipient": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+        "state": "Confirmed"
+      }
+    },
+    "paid": {
+      "battery": {
+        "collection_hash": "bd6f42412b5e1197096b5ec7e5426fee455db2ef8cedfd5ae6553ad66bb21da3",
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+        "recycling_hash": "b857824e8dc74f3bfdb3b0eaf5193366474fe22f93b26f1d923822976f3f8906",
+        "registration_hash": "24d12cd5dd7550468d7ab03e13029da2d9bce6fe2b8b939eb8d3f80a3c6c5d87",
+        "request_id": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+        "reward_state": "Sent",
+        "state": "Recycled"
+      },
+      "request": {
+        "battery_id": "BYE-TN-D7DB910EE8BA",
+        "recipient": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+        "state": "Confirmed"
+      }
+    }
+  },
+  "negative": [
+    {
+      "name": "duplicate battery",
+      "result": "simulation rejected",
+      "error": "❌ error: transaction simulation failed: HostError: Error(Contract, #2)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #2)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #2)], data:[\"failing with contract error\", 2]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, register_battery], data:[\"BYE-TN-D7DB910EE8BA\", Bytes(24d12cd5dd7550468d7ab03e13029da2d9bce6fe2b8b939eb8d3f80a3c6c5d87)]",
+      "transactionHash": null
+    },
+    {
+      "name": "early reward",
+      "result": "simulation rejected",
+      "error": "❌ error: transaction simulation failed: HostError: Error(Contract, #13)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #13)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #13)], data:[\"failing with contract error\", 13]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, pay_reward], data:\"BYE-TN-D7DB910EE8BA\"",
+      "transactionHash": null
+    },
+    {
+      "name": "wrong evidence battery",
+      "result": "simulation rejected",
+      "error": "❌ error: transaction simulation failed: HostError: Error(Contract, #11)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #11)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #11)], data:[\"failing with contract error\", 11]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, confirm_collection], data:[\"BYE-TN-D7DB910EE8BA\", Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V, {battery_id: \"BYE-OTHER\", kind: [Collection], payload_hash: Bytes(6824598f2a9462243a6faa609c71508c269c9f5ca1d286c6f30e1fc4c8e0da84), request_id: Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), version: 1}]",
+      "transactionHash": null
+    },
+    {
+      "name": "unauthorized collector role",
+      "result": "simulation rejected",
+      "error": "❌ error: transaction simulation failed: HostError: Error(Contract, #9)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #9)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #9)], data:[\"failing with contract error\", 9]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, confirm_collection], data:[\"BYE-TN-D7DB910EE8BA\", Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ, {battery_id: \"BYE-TN-D7DB910EE8BA\", kind: [Collection], payload_hash: Bytes(6824598f2a9462243a6faa609c71508c269c9f5ca1d286c6f30e1fc4c8e0da84), request_id: Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), version: 1}]",
+      "transactionHash": null
+    },
+    {
+      "name": "recycling before collection",
+      "result": "simulation rejected",
+      "error": "❌ error: transaction simulation failed: HostError: Error(Contract, #8)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #8)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #8)], data:[\"failing with contract error\", 8]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, confirm_recycling], data:[\"BYE-TN-D7DB910EE8BA\", Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2, {battery_id: \"BYE-TN-D7DB910EE8BA\", kind: [Recycling], payload_hash: Bytes(7b0312dd36aad8d8a37b4a9feb54c0ded047dc960aa8243f9c961a2aaf020c5c), request_id: Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), version: 1}]",
+      "transactionHash": null
+    },
+    {
+      "name": "missing service authorization",
+      "presentActor": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+      "missingActor": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "result": "authorization rejected (enforcing RPC simulation)",
+      "error": "HostError: Error(Auth, InvalidAction)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Auth, InvalidAction)], data:\"escalating error to VM trap from failed host function call: require_auth\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Auth, InvalidAction)], data:[\"Unauthorized function call for address\", GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, confirm_collection], data:[\"BYE-TN-D7DB910EE8BA\", Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V, {battery_id: \"BYE-TN-D7DB910EE8BA\", kind: [Collection], payload_hash: Bytes(6824598f2a9462243a6faa609c71508c269c9f5ca1d286c6f30e1fc4c8e0da84), request_id: Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), version: 1}]\n",
+      "transactionHash": null
+    },
+    {
+      "name": "missing collector authorization",
+      "presentActor": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "missingActor": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+      "result": "authorization rejected (enforcing RPC simulation)",
+      "error": "HostError: Error(Auth, InvalidAction)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Auth, InvalidAction)], data:\"escalating error to VM trap from failed host function call: require_auth\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Auth, InvalidAction)], data:[\"Unauthorized function call for address\", GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, confirm_collection], data:[\"BYE-TN-D7DB910EE8BA\", Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V, {battery_id: \"BYE-TN-D7DB910EE8BA\", kind: [Collection], payload_hash: Bytes(6824598f2a9462243a6faa609c71508c269c9f5ca1d286c6f30e1fc4c8e0da84), request_id: Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), version: 1}]\n",
+      "transactionHash": null
+    },
+    {
+      "name": "cancel after collection",
+      "result": "simulation rejected",
+      "error": "❌ error: transaction simulation failed: HostError: Error(Contract, #6)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #6)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #6)], data:[\"failing with contract error\", 6]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, cancel_return], data:[\"BYE-TN-D7DB910EE8BA\", Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864)]",
+      "transactionHash": null
+    },
+    {
+      "name": "duplicate reward",
+      "result": "simulation rejected",
+      "error": "❌ error: transaction simulation failed: HostError: Error(Contract, #14)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #14)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #14)], data:[\"failing with contract error\", 14]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, pay_reward], data:\"BYE-TN-D7DB910EE8BA\"",
+      "transactionHash": null
+    },
+    {
+      "name": "constructor reinvocation",
+      "result": "simulation rejected",
+      "error": "HostError: Error(Context, InvalidAction)\n\nEvent log (newest first):\n   0: [Diagnostic Event] topics:[error, Error(Context, InvalidAction)], data:[\"can't invoke a reserved function directly\", __constructor]\n",
+      "transactionHash": null
+    },
+    {
+      "name": "backward collection after recycled",
+      "result": "simulation rejected",
+      "error": "❌ error: transaction simulation failed: HostError: Error(Contract, #6)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #6)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #6)], data:[\"failing with contract error\", 6]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, confirm_collection], data:[\"BYE-TN-D7DB910EE8BA\", Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V, {battery_id: \"BYE-TN-D7DB910EE8BA\", kind: [Collection], payload_hash: Bytes(6824598f2a9462243a6faa609c71508c269c9f5ca1d286c6f30e1fc4c8e0da84), request_id: Bytes(aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864), version: 1}]",
+      "transactionHash": null
+    }
+  ],
+  "protocolVersion": 28,
+  "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "cliVersion": "stellar 28.0.0 (300aaf69ab100536678bdb641428b06f06b318ea)\nstellar-xdr 28.0.0 (d0f1330e43c3a2c0c616da30698b24140d4eea72)\nxdr (9c9c145953e80990d6ff1ae3a6a973a0ce6d0694)",
+  "asset": "GREENTEST:GCHROKHXHL4L635J6Y6DWFFD5DDHABOAF4BP5TEUZDZQMW4XYS6DIDL7",
+  "tokenId": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+  "contractId": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "config": {
+    "admin": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+    "reward_amount": "100000000",
+    "reward_token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+    "schema_version": 1,
+    "service": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+  },
+  "flowStarted": true,
+  "batteryId": "BYE-TN-D7DB910EE8BA",
+  "requestId": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+  "evidence": {
+    "collection": {
+      "battery_id": "BYE-TN-D7DB910EE8BA",
+      "kind": "Collection",
+      "payload_hash": "6824598f2a9462243a6faa609c71508c269c9f5ca1d286c6f30e1fc4c8e0da84",
+      "request_id": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+      "version": 1
+    },
+    "recycling": {
+      "battery_id": "BYE-TN-D7DB910EE8BA",
+      "kind": "Recycling",
+      "payload_hash": "7b0312dd36aad8d8a37b4a9feb54c0ded047dc960aa8243f9c961a2aaf020c5c",
+      "request_id": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+      "version": 1
+    }
+  },
+  "collectionCommitment": "bd6f42412b5e1197096b5ec7e5426fee455db2ef8cedfd5ae6553ad66bb21da3",
+  "recyclingCommitment": "b857824e8dc74f3bfdb3b0eaf5193366474fe22f93b26f1d923822976f3f8906",
+  "balancesBefore": {
+    "contract": "1000000000",
+    "recipient": "0"
+  },
+  "balancesAfter": {
+    "contract": "900000000",
+    "recipient": "100000000"
+  },
+  "duplicateRewardBalancesUnchanged": true,
+  "events": [
+    {
+      "id": "0020970332441587712-0000000000",
+      "ledger": 4882536,
+      "txHash": "e97f13bd21513428849a9743a83ffb7b141082c6e286ced19b730243a4585933",
+      "topics": [
+        "config"
+      ],
+      "data": {
+        "config": {
+          "admin": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+          "reward_amount": "100000000",
+          "reward_token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+          "schema_version": 1,
+          "service": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+        }
+      }
+    },
+    {
+      "id": "0020970341031514112-0000000000",
+      "ledger": 4882538,
+      "txHash": "8cb7b74d0e3829ba31dfc0277f9a308d3677c0bcfd3ff0a166698e076bb5e4c9",
+      "topics": [
+        "role",
+        "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V"
+      ],
+      "data": {
+        "enabled": true,
+        "role": [
+          "Collector"
+        ]
+      }
+    },
+    {
+      "id": "0020970349621456896-0000000000",
+      "ledger": 4882540,
+      "txHash": "52e381d08baddf43d1a5d7a8cbbc3b5c4cb6285b3c627f02b5f16aea5e38a747",
+      "topics": [
+        "role",
+        "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2"
+      ],
+      "data": {
+        "enabled": true,
+        "role": [
+          "Recycler"
+        ]
+      }
+    },
+    {
+      "id": "0020970409750978560-0000000000",
+      "ledger": 4882554,
+      "txHash": "34b20bf6ad291bc49cacac60a5638b51cec9e54eb76b2cfe963a6cab3d94fef6",
+      "topics": [
+        "register",
+        "BYE-TN-D7DB910EE8BA"
+      ],
+      "data": {
+        "registration_hash": {
+          "0": 36,
+          "1": 209,
+          "2": 44,
+          "3": 213,
+          "4": 221,
+          "5": 117,
+          "6": 80,
+          "7": 70,
+          "8": 141,
+          "9": 122,
+          "10": 176,
+          "11": 62,
+          "12": 19,
+          "13": 2,
+          "14": 157,
+          "15": 162,
+          "16": 217,
+          "17": 188,
+          "18": 230,
+          "19": 254,
+          "20": 43,
+          "21": 139,
+          "22": 147,
+          "23": 158,
+          "24": 184,
+          "25": 211,
+          "26": 248,
+          "27": 10,
+          "28": 60,
+          "29": 108,
+          "30": 93,
+          "31": 135
+        }
+      }
+    },
+    {
+      "id": "0020970422635884544-0000000000",
+      "ledger": 4882557,
+      "txHash": "99423a60f9c0313e5eba69f6c54324519304813035b0bfc46d32ac14ce3643d3",
+      "topics": [
+        "opened",
+        "BYE-TN-D7DB910EE8BA"
+      ],
+      "data": {
+        "request_id": {
+          "0": 170,
+          "1": 199,
+          "2": 10,
+          "3": 149,
+          "4": 70,
+          "5": 251,
+          "6": 97,
+          "7": 151,
+          "8": 35,
+          "9": 75,
+          "10": 198,
+          "11": 93,
+          "12": 70,
+          "13": 126,
+          "14": 25,
+          "15": 210,
+          "16": 78,
+          "17": 0,
+          "18": 135,
+          "19": 51,
+          "20": 186,
+          "21": 120,
+          "22": 93,
+          "23": 17,
+          "24": 17,
+          "25": 85,
+          "26": 175,
+          "27": 144,
+          "28": 199,
+          "29": 207,
+          "30": 152,
+          "31": 100
+        }
+      }
+    },
+    {
+      "id": "0020970590139609088-0000000000",
+      "ledger": 4882596,
+      "txHash": "a57dafee61605c54aa136dd9a5359616ea0d274dc7355ddac292ab7ae94ad64d",
+      "topics": [
+        "collected",
+        "BYE-TN-D7DB910EE8BA"
+      ],
+      "data": {
+        "collection_hash": {
+          "0": 189,
+          "1": 111,
+          "2": 66,
+          "3": 65,
+          "4": 43,
+          "5": 94,
+          "6": 17,
+          "7": 151,
+          "8": 9,
+          "9": 107,
+          "10": 94,
+          "11": 199,
+          "12": 229,
+          "13": 66,
+          "14": 111,
+          "15": 238,
+          "16": 69,
+          "17": 93,
+          "18": 178,
+          "19": 239,
+          "20": 140,
+          "21": 237,
+          "22": 253,
+          "23": 90,
+          "24": 230,
+          "25": 85,
+          "26": 58,
+          "27": 214,
+          "28": 107,
+          "29": 178,
+          "30": 29,
+          "31": 163
+        },
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "request_id": {
+          "0": 170,
+          "1": 199,
+          "2": 10,
+          "3": 149,
+          "4": 70,
+          "5": 251,
+          "6": 97,
+          "7": 151,
+          "8": 35,
+          "9": 75,
+          "10": 198,
+          "11": 93,
+          "12": 70,
+          "13": 126,
+          "14": 25,
+          "15": 210,
+          "16": 78,
+          "17": 0,
+          "18": 135,
+          "19": 51,
+          "20": 186,
+          "21": 120,
+          "22": 93,
+          "23": 17,
+          "24": 17,
+          "25": 85,
+          "26": 175,
+          "27": 144,
+          "28": 199,
+          "29": 207,
+          "30": 152,
+          "31": 100
+        }
+      }
+    },
+    {
+      "id": "0020970598729543680-0000000000",
+      "ledger": 4882598,
+      "txHash": "125a122cbf4663921308e92a97e2b5f721a4e66fa616ba39e4c74e716cd36153",
+      "topics": [
+        "recycled",
+        "BYE-TN-D7DB910EE8BA"
+      ],
+      "data": {
+        "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+        "recycling_hash": {
+          "0": 184,
+          "1": 87,
+          "2": 130,
+          "3": 78,
+          "4": 141,
+          "5": 199,
+          "6": 79,
+          "7": 59,
+          "8": 253,
+          "9": 179,
+          "10": 176,
+          "11": 234,
+          "12": 245,
+          "13": 25,
+          "14": 51,
+          "15": 102,
+          "16": 71,
+          "17": 79,
+          "18": 226,
+          "19": 47,
+          "20": 147,
+          "21": 178,
+          "22": 111,
+          "23": 29,
+          "24": 146,
+          "25": 56,
+          "26": 34,
+          "27": 151,
+          "28": 111,
+          "29": 63,
+          "30": 137,
+          "31": 6
+        },
+        "request_id": {
+          "0": 170,
+          "1": 199,
+          "2": 10,
+          "3": 149,
+          "4": 70,
+          "5": 251,
+          "6": 97,
+          "7": 151,
+          "8": 35,
+          "9": 75,
+          "10": 198,
+          "11": 93,
+          "12": 70,
+          "13": 126,
+          "14": 25,
+          "15": 210,
+          "16": 78,
+          "17": 0,
+          "18": 135,
+          "19": 51,
+          "20": 186,
+          "21": 120,
+          "22": 93,
+          "23": 17,
+          "24": 17,
+          "25": 85,
+          "26": 175,
+          "27": 144,
+          "28": 199,
+          "29": 207,
+          "30": 152,
+          "31": 100
+        },
+        "reward_state": [
+          "Pending"
+        ]
+      }
+    },
+    {
+      "id": "0020970607319478272-0000000001",
+      "ledger": 4882600,
+      "txHash": "9053c28bc5d711e6cce7e186b0213b14a3cdf03733fc8652e189eb7ca1aee241",
+      "topics": [
+        "paid",
+        "BYE-TN-D7DB910EE8BA"
+      ],
+      "data": {
+        "amount": "100000000",
+        "recipient": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+        "request_id": {
+          "0": 170,
+          "1": 199,
+          "2": 10,
+          "3": 149,
+          "4": 70,
+          "5": 251,
+          "6": 97,
+          "7": 151,
+          "8": 35,
+          "9": 75,
+          "10": 198,
+          "11": 93,
+          "12": 70,
+          "13": 126,
+          "14": 25,
+          "15": 210,
+          "16": 78,
+          "17": 0,
+          "18": 135,
+          "19": 51,
+          "20": 186,
+          "21": 120,
+          "22": 93,
+          "23": 17,
+          "24": 17,
+          "25": 85,
+          "26": 175,
+          "27": 144,
+          "28": 199,
+          "29": 207,
+          "30": 152,
+          "31": 100
+        },
+        "token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G"
+      }
+    }
+  ],
+  "completed": true,
+  "deployedWasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "finalConfig": {
+    "admin": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+    "reward_amount": "100000000",
+    "reward_token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+    "schema_version": 1,
+    "service": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+  },
+  "additionalChecksComplete": true
+}
