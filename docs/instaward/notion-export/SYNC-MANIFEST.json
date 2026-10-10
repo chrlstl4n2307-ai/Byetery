@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "prepared": "2026-10-09",
+  "notion_tools_callable": false,
+  "plugin_installed_observed": true,
+  "parent_page_id": null,
+  "development_log_database_id": null,
+  "pages": [
+    {
+      "key": "root",
+      "title": "Byetery — Instaward",
+      "file": "root.md",
+      "parent_key": null,
+      "source_document": null,
+      "sha256": "f349c03262c3300eee3a8a1e79dd6dc7027d0605b23a1e2a95e71b1739936872",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/root.md"
+    },
+    {
+      "key": "baseline",
+      "title": "Pre-Sprint Baseline",
+      "file": "Pre-Sprint Baseline.md",
+      "parent_key": "root",
+      "source_document": "PRE-SPRINT-BASELINE.md",
+      "sha256": "1e19f8e4103cddb44770593cd9469da1e423168fd8d801fbf31186c09237dabc",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Pre-Sprint%20Baseline.md"
+    },
+    {
+      "key": "devlog",
+      "title": "Development Log",
+      "file": "Development Log.md",
+      "parent_key": "root",
+      "source_document": "DEV-LOG.md",
+      "sha256": "5297eeb54f44dc1e86b84b4ae43b0026976358cba5c2622869909d3ee3c63b6c",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Development%20Log.md"
+    },
+    {
+      "key": "day0",
+      "title": "Day 0 — Baseline",
+      "file": "Day 0 — Baseline.md",
+      "parent_key": "devlog",
+      "source_document": "NOTION-DAY-0-REPORT.md",
+      "sha256": "e67b3bb578664138ee8b190848d2bec902a7a82daa572e9d6336d54207d83104",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Day%200%20—%20Baseline.md"
+    },
+    {
+      "key": "changelog",
+      "title": "Byetery — Changelog",
+      "file": "Changelog.md",
+      "parent_key": "root",
+      "source_document": "CHANGELOG.md",
+      "sha256": "9a8e4853eaf31dbb92f372c97094566664a012ff83478ea64d4877202148a7db",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Changelog.md"
+    },
+    {
+      "key": "deliverables",
+      "title": "Byetery — Deliverables",
+      "file": "Deliverables.md",
+      "parent_key": "root",
+      "source_document": "DELIVERABLE-STATUS.md",
+      "sha256": "cbc0debcdd058aeaa25c9c957625199508a3c4a97d84c3687309ef309b7ebf5d",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Deliverables.md"
+    },
+    {
+      "key": "d1",
+      "title": "D1 — Reliable Stellar Testnet Integration",
+      "file": "D1.md",
+      "parent_key": "deliverables",
+      "source_document": "deliverables/D1.md",
+      "sha256": "5367cc2f622f0738036f3b3f80e07944e75d019fb32387b4f906769576f982b4",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/D1.md"
+    },
+    {
+      "key": "d2",
+      "title": "D2 — Connected Web MVP & Verification Interface",
+      "file": "D2.md",
+      "parent_key": "deliverables",
+      "source_document": "deliverables/D2.md",
+      "sha256": "f78098cc6074b96cda2a5322961075c3f492faa71f11e77cb7a94b0fbfd3412a",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/D2.md"
+    },
+    {
+      "key": "d3",
+      "title": "D3 — E2E Lifecycle & Test Reward",
+      "file": "D3.md",
+      "parent_key": "deliverables",
+      "source_document": "deliverables/D3.md",
+      "sha256": "733c603dfac336a8420b5cdbe9eeeb532182c8b98ee0ce66ed93bbb0a401bfcd",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/D3.md"
+    },
+    {
+      "key": "evidence",
+      "title": "Tests & Evidence",
+      "file": "Tests & Evidence.md",
+      "parent_key": "root",
+      "source_document": "EVIDENCE-INDEX.md",
+      "sha256": "c710a31fc4531905df83f522761bbc3897818bf480f60abafbfc96db3935ee5c",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Tests%20&%20Evidence.md"
+    },
+    {
+      "key": "tx",
+      "title": "Stellar Transactions",
+      "file": "Stellar Transactions.md",
+      "parent_key": "root",
+      "source_document": "STELLAR-TRANSACTIONS.md",
+      "sha256": "b65030fe81ac1b7b5d954cc2413357ac6b6326131cae2f4469b0163c68c4e5c2",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Stellar%20Transactions.md"
+    },
+    {
+      "key": "decisions",
+      "title": "Issues — Risks — Decisions",
+      "file": "Issues Risks Decisions.md",
+      "parent_key": "root",
+      "source_document": "DECISION-LOG.md",
+      "sha256": "3ac03e461d7b1d65673c858b5f02d523dfd2d8e8c656946bfbd8b7d9a48038bb",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Issues%20Risks%20Decisions.md"
+    },
+    {
+      "key": "limits",
+      "title": "Known Limitations",
+      "file": "Known Limitations.md",
+      "parent_key": "root",
+      "source_document": "KNOWN-LIMITATIONS.md",
+      "sha256": "2d6389dc39c316e2e013f595a167478014f79968e3904bf411eac4b18fc3dea4",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Known%20Limitations.md"
+    },
+    {
+      "key": "final",
+      "title": "Final Evidence Package",
+      "file": "Final Evidence Package.md",
+      "parent_key": "root",
+      "source_document": null,
+      "sha256": "e12d1d91e2186c249a05b8f445cabf006d12ef0c0cdeb35c3f6fb8d80d5a6f81",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Final%20Evidence%20Package.md"
+    },
+    {
+      "key": "template",
+      "title": "Progress Template",
+      "file": "Progress Template.md",
+      "parent_key": "devlog",
+      "source_document": "NOTION-PROGRESS-TEMPLATE.md",
+      "sha256": "b246515a70b93657474445b2dd851a4d9394a773022c2c189058e0a3f1ce7516",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Progress%20Template.md"
+    },
+    {
+      "key": "week1",
+      "title": "Week 1",
+      "file": "Week 1.md",
+      "parent_key": "devlog",
+      "source_document": null,
+      "sha256": "68fdbd4dae23bf7e16e8b59b17afce8780a9e30fe8a457578d98ef0bafa812dc",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Week%201.md"
+    },
+    {
+      "key": "week2",
+      "title": "Week 2",
+      "file": "Week 2.md",
+      "parent_key": "devlog",
+      "source_document": null,
+      "sha256": "da71d456a4f254dab016bc810f3f5794fb2cf5f6b5e050e63f8c9610637f2955",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Week%202.md"
+    },
+    {
+      "key": "week3",
+      "title": "Week 3",
+      "file": "Week 3.md",
+      "parent_key": "devlog",
+      "source_document": null,
+      "sha256": "c85d2c94b1972a724e2d029f982f382b5ae82bd4292d6e51b96b1c5c5c07d28c",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Week%203.md"
+    },
+    {
+      "key": "week4",
+      "title": "Week 4",
+      "file": "Week 4.md",
+      "parent_key": "devlog",
+      "source_document": null,
+      "sha256": "ec35d03832f4c485d6e079da342550f1b24b7d0d7ab36be0349d4cb22441a2fc",
+      "notion_page_id": null,
+      "publication_url": "https://github.com/chrlstl4n2307-ai/Byetery/blob/pre-instaward-baseline-v1/docs/instaward/notion-export/Week%204.md"
+    }
+  ],
+  "update_policy": "Search/reuse stable keys; hash compare; no duplicate import/upsert assumptions; preserve user notes.",
+  "frozen_pre_sprint_ref": "pre-instaward-baseline-v1",
+  "historical_baseline": "252fff88d4c4abbb6986460c12f1766b1ddfb574"
+}

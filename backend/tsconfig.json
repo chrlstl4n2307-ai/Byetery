@@ -16,6 +16,7 @@
   "include": [
     "src/**/*.ts",
     "tests/**/*.ts",
+    "signing-tests/**/*.ts",
     "remote-tests/**/*.ts"
   ]
 }

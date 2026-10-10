@@ -17,7 +17,7 @@ const findings=[];
 function scan(file,bytes){const text=bytes.toString('utf8');if(patterns.some(p=>p.test(text))||secrets.some(s=>text.includes(s)))findings.push({file,kind:'potential-credential'});}
 const files=new Set(git(['ls-files','-z','--cached','--others','--exclude-standard']).toString().split('\0').filter(Boolean));
 function walk(dir){if(!fs.existsSync(dir))return;for(const item of fs.readdirSync(dir,{withFileTypes:true})){const full=path.join(dir,item.name);if(item.isSymbolicLink())continue;if(item.isDirectory())walk(full);else if(/\.(?:json|md|log|txt|mjs|mts|ps1|cmd)$/.test(full))files.add(path.relative(root,full));}}
-walk(path.join(root,'.tools/testnet'));walk(path.join(root,'.tools/verification'));
+walk(path.join(root,'.tools/testnet'));walk(path.join(root,'.tools/verification'));walk(path.join(root,'.tools/cli-signing-review'));
 for(const file of files){const full=path.join(root,file);if(fs.existsSync(full)&&fs.statSync(full).isFile())scan(file,fs.readFileSync(full));}
 const objects=git(['rev-list','--objects','--all']).toString().trim().split('\n').map(row=>{const at=row.indexOf(' ');return {id:at<0?row:row.slice(0,at),name:at<0?'object':row.slice(at+1)};});
 const batch=git(['cat-file','--batch'],{input:objects.map(o=>o.id).join('\n')+'\n'});let cursor=0,blobs=0;

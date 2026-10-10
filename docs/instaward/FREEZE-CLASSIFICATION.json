@@ -1,0 +1,900 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-10-09",
+  "historical_baseline": "252fff88d4c4abbb6986460c12f1766b1ddfb574",
+  "frozen_baseline_ref": "pre-instaward-baseline-v1",
+  "frozen_commit": "Resolve annotated tag; not embedded to avoid circular hash",
+  "official_sprint_start": null,
+  "branch": "codex/testnet-app-integration",
+  "classification": [
+    {
+      "worktree": "testnet-integration",
+      "state": " M",
+      "path": "backend/tsconfig.json",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": " M",
+      "path": "scripts/audit-testnet.mjs",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PRE-EXISTING AUDIT UTILITY CHANGE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "backend/signing-tests/offline.test.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "backend/src/local-secure-store-signer.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "backend/src/stellar-signer.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "backend/tests/local-secure-store-signer.test.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/LOCAL-SECURE-STORE-SIGNER.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/SECURE-STORE-SIGNING-REVIEW.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/TESTNET-APP-INTEGRATION.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/ACCEPTANCE-CRITERIA.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/BASELINE-MANIFEST.json",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/BYETERY-ARCHITECTURE.html",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/BYETERY-ARCHITECTURE.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/BYETERY-TESTNET-VALIDATION.html",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/BYETERY-TESTNET-VALIDATION.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/CHANGELOG.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/DECISION-LOG.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/DELIVERABLE-STATUS.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/DEV-LOG.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/DOCUMENTATION-VALIDATION.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/EVIDENCE-INDEX.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/KNOWN-LIMITATIONS.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/NOTION-DAY-0-REPORT.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/NOTION-PROGRESS-TEMPLATE.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/NOTION-SETUP.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/PRE-SPRINT-BASELINE.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/README.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/STELLAR-TRANSACTIONS.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/deliverables/D1.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/deliverables/D2.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/deliverables/D3.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/evidence/historical-transactions.csv",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/evidence/historical-transactions.json",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Byetery — Development Log.csv",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Byetery-Instaward-Notion.zip",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Changelog.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/D1.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/D2.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/D3.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Day 0 — Baseline.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Deliverable Criteria.csv",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Deliverables.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Development Log.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Final Evidence Package.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/IMPORT-README.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Issues Risks Decisions.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Known Limitations.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/PAGE-MAP.csv",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Pre-Sprint Baseline.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Progress Template.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/SYNC-MANIFEST.json",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Stellar Transactions.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Tests & Evidence.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Week 1.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Week 2.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Week 3.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/Week 4.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "docs/instaward/notion-export/root.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION / HISTORICAL EVIDENCE",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "scripts/create-instaward-report.py",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "DOCUMENTATION UTILITY (NO PRODUCT EXECUTION)",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "scripts/verify-secure-store-signer.ps1",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "tools/stellar-secure-store-signer/Cargo.lock",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "tools/stellar-secure-store-signer/Cargo.toml",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "tools/stellar-secure-store-signer/README.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "tools/stellar-secure-store-signer/build.rs",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "tools/stellar-secure-store-signer/src/lib.rs",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "tools/stellar-secure-store-signer/src/main.rs",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "testnet-integration",
+      "state": "??",
+      "path": "tools/stellar-secure-store-signer/tests/validation.rs",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "PARTIAL / RESEARCH-SPIKE / NOT VALIDATED",
+      "reason": "Reviewed pre-existing work or requested curated documentation; not a sprint completion claim."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "README.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "backend/remote-tests/frontend-reads.test.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "backend/remote-tests/http.test.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "backend/src/application/dev-fixture.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "backend/src/application/frontend-reads.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "backend/src/application/repository.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "backend/src/application/wallet.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "backend/src/wallet-verifier.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "docs/DEMO-SCOPE.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "docs/HTTP-API.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "frontend/README.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "frontend/next.config.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "frontend/package.json",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "frontend/src/app/globals.css",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "frontend/src/components/dashboard.tsx",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "frontend/src/components/operator.tsx",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "frontend/src/lib/client.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "frontend/src/lib/types.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "frontend/vitest.config.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "package.json",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": " M",
+      "path": "scripts/demo-visual.mts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "backend/src/wallet-message.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "backend/tests/database-disconnect.test.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "backend/tests/wallet-protocol.test.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "backend/tests/wallet-storage.test.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "database/migrations/20260914124739_wallet_sep53.sql",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "database/migrations/20260914130553_wallet_guard_search_path.sql",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "docs/CAMERA-QR.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "docs/WALLET-COMPATIBILITY.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "docs/WALLET.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "docs/verification/WALLET-QR.md",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "frontend/src/components/graphical-wallet.tsx",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "frontend/src/components/scan-battery.tsx",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "frontend/src/lib/qr-scanner.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "frontend/src/lib/wallet-adapter.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "frontend/tests/qr.test.tsx",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "frontend/tests/wallet-adapter.test.ts",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "wallet-qr",
+      "state": "??",
+      "path": "frontend/tests/wallet-ui.test.tsx",
+      "classification": "INCLUDE IN BASELINE",
+      "label": "ARCHIVAL SNAPSHOT / NOT MERGED",
+      "reason": "Preserved by base commit plus binary patch/untracked files; active source not combined."
+    },
+    {
+      "worktree": "all",
+      "state": "ignored",
+      "path": ".env / .env.*",
+      "classification": "EXCLUDE GENERATED/TEMPORARY",
+      "label": "EXCLUDED",
+      "reason": "Local credentials/configuration; never versioned"
+    },
+    {
+      "worktree": "all",
+      "state": "ignored",
+      "path": ".tools/",
+      "classification": "EXCLUDE GENERATED/TEMPORARY",
+      "label": "EXCLUDED",
+      "reason": "Toolchains, dependency caches, temporary orchestration and raw logs"
+    },
+    {
+      "worktree": "all",
+      "state": "ignored",
+      "path": "**/target/",
+      "classification": "EXCLUDE GENERATED/TEMPORARY",
+      "label": "EXCLUDED",
+      "reason": "Native/WASM builds, compiler intermediates and generated binaries"
+    },
+    {
+      "worktree": "all",
+      "state": "ignored",
+      "path": "**/node_modules/",
+      "classification": "EXCLUDE GENERATED/TEMPORARY",
+      "label": "EXCLUDED",
+      "reason": "Dependencies reproducible from lockfiles"
+    },
+    {
+      "worktree": "all",
+      "state": "ignored",
+      "path": "frontend/.next/",
+      "classification": "EXCLUDE GENERATED/TEMPORARY",
+      "label": "EXCLUDED",
+      "reason": "Generated frontend build/cache"
+    },
+    {
+      "worktree": "all",
+      "state": "ignored",
+      "path": "temporary databases/screenshots/raw signing output",
+      "classification": "EXCLUDE GENERATED/TEMPORARY",
+      "label": "EXCLUDED",
+      "reason": "Ephemeral or unreviewed generated material"
+    }
+  ],
+  "requires_review_remaining": 0
+}

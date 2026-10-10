@@ -1,0 +1,22 @@
+[package]
+name = "byetery-secure-store-signer"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+# Official library, pinned to the installed CLI. No contract workspace dependency.
+soroban-cli = "=28.0.0"
+# Match CLI v28.0.0's official lockfile. 28.1 changes the strkey error type
+# consumed by CLI 28.0.0, making an unconstrained resolution fail to compile.
+soroban-spec-tools = "=28.0.0"
+soroban-spec-typescript = "=28.0.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt"] }
+stellar-strkey = "=0.0.16"
+
+[workspace]
+
+[profile.dev.package.stellar-xdr]
+debug = 0

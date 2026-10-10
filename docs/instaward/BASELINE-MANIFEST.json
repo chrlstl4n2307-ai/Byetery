@@ -1,0 +1,343 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-10-09",
+  "classification": "PRE-SPRINT BASELINE",
+  "official_sprint_start": null,
+  "repository": "https://github.com/chrlstl4n2307-ai/Byetery",
+  "visibility_observed": "PUBLIC",
+  "baseline_tag": "pre-instaward-baseline-v1",
+  "worktrees": [
+    {
+      "label": "testnet-integration",
+      "branch": "codex/testnet-app-integration",
+      "head": "252fff88d4c4abbb6986460c12f1766b1ddfb574",
+      "dirty_entries": 21,
+      "files": [
+        {
+          "status": " M",
+          "path": "backend/tsconfig.json",
+          "sha256": "dd551a4da7e104d1a0a427ce0d15ca6cd19e83e010c360552705c8dbb2f95d35"
+        },
+        {
+          "status": " M",
+          "path": "scripts/audit-testnet.mjs",
+          "sha256": "1e5e5fc04d2e88808958784c1708ea94eeb13e65c85c2d9d7ec0a50858346cd8"
+        },
+        {
+          "status": "??",
+          "path": "backend/signing-tests/offline.test.ts",
+          "sha256": "06cd237267b7b34da3a3fc0f1fa78121eed83e4d5499ba00871977bc6f39f876"
+        },
+        {
+          "status": "??",
+          "path": "backend/src/local-secure-store-signer.ts",
+          "sha256": "905601ec6c82bacc9b20ffea4e4d7c1fd9c9296831bfa9d2d2a6bac64e6ab50f"
+        },
+        {
+          "status": "??",
+          "path": "backend/src/stellar-signer.ts",
+          "sha256": "75242289c7d15fc7c19dfb8b5cf9af1d8e8a0b6e6a2a1aadb43539c4b99fed41"
+        },
+        {
+          "status": "??",
+          "path": "backend/tests/local-secure-store-signer.test.ts",
+          "sha256": "b856aa3278362e39d776653876c8b0effd98354404d01d14341f8d2f722ee684"
+        },
+        {
+          "status": "??",
+          "path": "docs/LOCAL-SECURE-STORE-SIGNER.md",
+          "sha256": "59a5292ce4ea4d73ee0846a2e6bef40021e41d323f1550096da5a9136affe011"
+        },
+        {
+          "status": "??",
+          "path": "docs/SECURE-STORE-SIGNING-REVIEW.md",
+          "sha256": "724eda20a31cbb5c8d5bf2de1142d30f9528f1ffa938b1772bd4381deb35ba86"
+        },
+        {
+          "status": "??",
+          "path": "docs/TESTNET-APP-INTEGRATION.md",
+          "sha256": "1bf373423f4def88a2506e8f6de72e5c0f44aa369ce7e3227ad77fa9ace5e2e2"
+        },
+        {
+          "status": "??",
+          "path": "docs/instaward/BYETERY-ARCHITECTURE.html",
+          "sha256": "8149fa8b25555491dc07c8ec5fc004b57c8cdb45050fdba3ea1fd1c7132e4b49"
+        },
+        {
+          "status": "??",
+          "path": "docs/instaward/BYETERY-ARCHITECTURE.md",
+          "sha256": "8e1e697184e9237962ef74135da7d28299f14d6761e045ed51a379bc463421ab"
+        },
+        {
+          "status": "??",
+          "path": "docs/instaward/BYETERY-TESTNET-VALIDATION.html",
+          "sha256": "4080d4492fb6698d6c863c2da281b318ae3f27988e23b50fb313c8c749941651"
+        },
+        {
+          "status": "??",
+          "path": "docs/instaward/BYETERY-TESTNET-VALIDATION.md",
+          "sha256": "c86ae377ba4eb5c044c09d04004cfef78accdab0a41b8b02f55ceed7d4b93109"
+        },
+        {
+          "status": "??",
+          "path": "scripts/verify-secure-store-signer.ps1",
+          "sha256": "4bcde4f85aa2c6b93665ca4dfb3f961d20b5b6b40351578f1bc0516300c51e05"
+        },
+        {
+          "status": "??",
+          "path": "tools/stellar-secure-store-signer/Cargo.lock",
+          "sha256": "e644894478477faea5cb630b824a1c3254b5e62796bf7881290104f72785786e"
+        },
+        {
+          "status": "??",
+          "path": "tools/stellar-secure-store-signer/Cargo.toml",
+          "sha256": "a8ea1d5fb4311ad8ae2cc60167e3a8c1509f71ea5de482e8ca397f97e76c50ed"
+        },
+        {
+          "status": "??",
+          "path": "tools/stellar-secure-store-signer/README.md",
+          "sha256": "40e22fa595bbc997fbf3f65f3c8f620153e82c3692a0283adf8c90b80dedc702"
+        },
+        {
+          "status": "??",
+          "path": "tools/stellar-secure-store-signer/build.rs",
+          "sha256": "a95070bdecd8c15c637d71d7a7229ec858774b46c977c01d0ad8c7760f8ecf60"
+        },
+        {
+          "status": "??",
+          "path": "tools/stellar-secure-store-signer/src/lib.rs",
+          "sha256": "8e34de6f809635491f2e1cdd21d2b9d10289d014efd0da0b4e2c91033ebc2147"
+        },
+        {
+          "status": "??",
+          "path": "tools/stellar-secure-store-signer/src/main.rs",
+          "sha256": "df20875961fa70a909ef968a2699c2b0326d6de1bbd440286de939770215513a"
+        },
+        {
+          "status": "??",
+          "path": "tools/stellar-secure-store-signer/tests/validation.rs",
+          "sha256": "04b421f350254c2bddf0c720685c57499852ce53525aa01b47ce278b1800bde5"
+        }
+      ]
+    },
+    {
+      "label": "wallet-qr",
+      "branch": "codex/wallet-qr",
+      "head": "0a572af29b6d4df6c16feb0329ecc225948824f6",
+      "dirty_entries": 38,
+      "files": [
+        {
+          "status": " M",
+          "path": "README.md",
+          "sha256": "d06fdd2db7254e6a0be8be9b4f2d86a34e483dd3855ed5fe7cd212328aa00dc9"
+        },
+        {
+          "status": " M",
+          "path": "backend/remote-tests/frontend-reads.test.ts",
+          "sha256": "223f3c71c9872d9785739a593087510dfd8bf571b28dea514f3231957d06f788"
+        },
+        {
+          "status": " M",
+          "path": "backend/remote-tests/http.test.ts",
+          "sha256": "2af8641980eb6a236bf540149f6eecbdf54c7967000fd4c122bbbd1a7e77c3df"
+        },
+        {
+          "status": " M",
+          "path": "backend/src/application/dev-fixture.ts",
+          "sha256": "4736257fbb8cfa2ea4fc0d31d1d0c78b3fa52cc9bb5929e0a204b8df717ea034"
+        },
+        {
+          "status": " M",
+          "path": "backend/src/application/frontend-reads.ts",
+          "sha256": "6356533ee629f12fc207717b6068e2c6a012144cf1fd6fd987ebbbb020d0932a"
+        },
+        {
+          "status": " M",
+          "path": "backend/src/application/repository.ts",
+          "sha256": "7df9da2b9cccfda077f88cc44e311be80e9556ec5f5405d214c71e387aad5f3c"
+        },
+        {
+          "status": " M",
+          "path": "backend/src/application/wallet.ts",
+          "sha256": "e4293cd3d56688249090ee5c52402edfbb11c6bd50ddeaa9c95dde519f39c1a6"
+        },
+        {
+          "status": " M",
+          "path": "backend/src/wallet-verifier.ts",
+          "sha256": "632be136ab04b86a1ffee931d28c52e772558885211716a616279d8e2eb2d3b4"
+        },
+        {
+          "status": " M",
+          "path": "docs/DEMO-SCOPE.md",
+          "sha256": "e7a4cb82b72fff6f25102efa9584745dc3335235757e662d5344a8056de8aec8"
+        },
+        {
+          "status": " M",
+          "path": "docs/HTTP-API.md",
+          "sha256": "08e4c2015951f0624b76ba3dc37c744df36f5de9bcf245b657efc07b8bae9ed7"
+        },
+        {
+          "status": " M",
+          "path": "frontend/README.md",
+          "sha256": "36c4ebd3e189b496d67bffff30ee457c5f9a19c39ea1c79a7948701b255639d4"
+        },
+        {
+          "status": " M",
+          "path": "frontend/next.config.ts",
+          "sha256": "1a5fd83dcff76abafd0983b0c7b77cfde3c503ad5eafa73ca12a39ea744e700c"
+        },
+        {
+          "status": " M",
+          "path": "frontend/package.json",
+          "sha256": "446bdb051f84584552935a3e58ff6096b415cf6b600636cbf86c3115e71c6e6a"
+        },
+        {
+          "status": " M",
+          "path": "frontend/src/app/globals.css",
+          "sha256": "2a8c1f1081d35d732fa73a584c7feb2e455c2457b1bd40fe3100a4b1c629b64f"
+        },
+        {
+          "status": " M",
+          "path": "frontend/src/components/dashboard.tsx",
+          "sha256": "2e1a6458e7a95e1c276cdfea6f66be0e2010fe29e2e81e83c792fe509ec25c78"
+        },
+        {
+          "status": " M",
+          "path": "frontend/src/components/operator.tsx",
+          "sha256": "2fa69c3a272ed9070bc88d5c6ff1fe305612c4d81cb5e9d9f6368661a89aea6e"
+        },
+        {
+          "status": " M",
+          "path": "frontend/src/lib/client.ts",
+          "sha256": "fbeb35c4574857a0cd65690a133352243bcd05f7b095bb22ccf65cba1dedc9b2"
+        },
+        {
+          "status": " M",
+          "path": "frontend/src/lib/types.ts",
+          "sha256": "c2609f883a800e7fcfa76c56282ec6c49bb42b46edcc9c5a2f2575da268f8c39"
+        },
+        {
+          "status": " M",
+          "path": "frontend/vitest.config.ts",
+          "sha256": "1fbebbe353c089db9a90d901aace241cddfdecfbd28e15afe0f0056f191b04af"
+        },
+        {
+          "status": " M",
+          "path": "package.json",
+          "sha256": "385a239334f84cbb9be85c4c5aaf22555329d040cc1efe8762d9ab47d0e4fbcf"
+        },
+        {
+          "status": " M",
+          "path": "scripts/demo-visual.mts",
+          "sha256": "408c43d6b6016a52b1af4f0987144263236c386400f35cd0d38844c09b1195db"
+        },
+        {
+          "status": "??",
+          "path": "backend/src/wallet-message.ts",
+          "sha256": "22d87e5b1496e12fb9105c4093c40fbb930801a25c4498882d448e43d3ec275a"
+        },
+        {
+          "status": "??",
+          "path": "backend/tests/database-disconnect.test.ts",
+          "sha256": "1e484a0612906294590d765295bd82703605dd270963d16d4bd566745b0609d0"
+        },
+        {
+          "status": "??",
+          "path": "backend/tests/wallet-protocol.test.ts",
+          "sha256": "7caa2b2c066aa639357d651a9639aca387372876eebde7c7e068cdda5c3e3dca"
+        },
+        {
+          "status": "??",
+          "path": "backend/tests/wallet-storage.test.ts",
+          "sha256": "8a55b92b9c0418822d607ec6f36f8246abfd0916fb9dd4585082a38255a23d2b"
+        },
+        {
+          "status": "??",
+          "path": "database/migrations/20260914124739_wallet_sep53.sql",
+          "sha256": "06767d157904fea0d386d13de26595a37aac8be35831f055ba7effe6213068d3"
+        },
+        {
+          "status": "??",
+          "path": "database/migrations/20260914130553_wallet_guard_search_path.sql",
+          "sha256": "d465d2f88c5f72a75ce37695f932c4b0548fb43d78e6aeb976e6ccacfe463398"
+        },
+        {
+          "status": "??",
+          "path": "docs/CAMERA-QR.md",
+          "sha256": "37babc18168a7e0bacffb1707eda36fbbbad71d1a2edb27982dc94ddbcb556a3"
+        },
+        {
+          "status": "??",
+          "path": "docs/WALLET-COMPATIBILITY.md",
+          "sha256": "ad71206f236e400cb63987c7108ee1e9977e382f6ae8a9758394d0c401f76952"
+        },
+        {
+          "status": "??",
+          "path": "docs/WALLET.md",
+          "sha256": "2ce2ca9fd1d261565cd2b4ede6abca9dc3a39af22b70b173a370050ebc4959f3"
+        },
+        {
+          "status": "??",
+          "path": "docs/verification/WALLET-QR.md",
+          "sha256": "622bd567aa331f0bc8e027705849dc29abdffd791182405642b09895a8af3294"
+        },
+        {
+          "status": "??",
+          "path": "frontend/src/components/graphical-wallet.tsx",
+          "sha256": "bca7c5b20280a895f3744a1458536fac81ea2b0bd3da267d481e630fd59bb343"
+        },
+        {
+          "status": "??",
+          "path": "frontend/src/components/scan-battery.tsx",
+          "sha256": "291ca03b8da65d3918f10b0a03578ba5956c924fd7c0086f08dd2d2a876f49bd"
+        },
+        {
+          "status": "??",
+          "path": "frontend/src/lib/qr-scanner.ts",
+          "sha256": "e4277e0f682bab8bedb2c801d0adf6cf5977884ca5357017479d9acc071438a6"
+        },
+        {
+          "status": "??",
+          "path": "frontend/src/lib/wallet-adapter.ts",
+          "sha256": "937595e56ee079d5283eb4927d132c9daf6de15732356a988bcbcdc5cdf51733"
+        },
+        {
+          "status": "??",
+          "path": "frontend/tests/qr.test.tsx",
+          "sha256": "11c80940c4557ca08a0ad5a0552adbbc6eb3ad0da3d9ccd054d118fd1408fa02"
+        },
+        {
+          "status": "??",
+          "path": "frontend/tests/wallet-adapter.test.ts",
+          "sha256": "573bc0d3a955fbcbbb90e33bb082ec94707904b7a7ebc93d5c25fa7ddd597f61"
+        },
+        {
+          "status": "??",
+          "path": "frontend/tests/wallet-ui.test.tsx",
+          "sha256": "ad18335c2ab3c71ed88f6f2b7f4236cff85ce3c9a1a9cb907cab463ec25b37b8"
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Incomplete code is preserved, not declared validated.",
+    "Wallet/QR snapshot is archival and not merged.",
+    "Ignored secrets/builds/dependencies are excluded.",
+    "Canonical tag identifies the full frozen source; source inventories describe the pre-freeze worktrees."
+  ],
+  "sow_source": {
+    "name": "Byetery - Instawards SOW V3.1.md",
+    "version": "V3.1",
+    "prepared": "2026-10-06",
+    "sha256": "137944876890082754477089f312d8633995135377326eb199db0d6baa18f945",
+    "source_commit": null,
+    "frozen_source_path": "docs/instaward/source/Byetery-Instawards-SOW-V3.1.md"
+  },
+  "historical_baseline_commit": "252fff88d4c4abbb6986460c12f1766b1ddfb574",
+  "frozen_pre_sprint_ref": "pre-instaward-baseline-v1",
+  "frozen_commit": null,
+  "frozen_commit_resolution": "git rev-parse pre-instaward-baseline-v1^{commit}",
+  "freeze_state": "DEFINED CONTENT; tag created by commit procedure after checks",
+  "freeze_report": "docs/instaward/FREEZE-REPORT.md",
+  "frozen_source_reference": "Annotated tag is canonical; commit SHA resolved after tag creation."
+}

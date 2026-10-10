@@ -1,0 +1,385 @@
+diff --git a/README.md b/README.md
+index fdbc58d..0356036 100644
+--- a/README.md
++++ b/README.md
+@@ -89,0 +90,4 @@ La demo automatizada completa se ejecuta con `npm run demo:visual` después del
++
++## Wallet gráfica y QR (DEV / MOCK)
++
++Dashboard integra Freighter mediante `WalletAdapter` y verificación SEP-53 v2 en la API. El escáner se reutiliza en Dashboard, Collector y Recycler, con entrada manual. Ver [wallet](docs/WALLET.md) y [cámara/demo](docs/CAMERA-QR.md). No hay nuevas variables de entorno, conexión Stellar Testnet ni despliegue. `npm run demo:qr` añade comprobación automatizada del QR con cámara sintética; la prueba física y de extensión es independiente.
+diff --git a/backend/remote-tests/frontend-reads.test.ts b/backend/remote-tests/frontend-reads.test.ts
+index eafc406..497b87b 100644
+--- a/backend/remote-tests/frontend-reads.test.ts
++++ b/backend/remote-tests/frontend-reads.test.ts
+@@ -55,0 +56,9 @@ test("frontend read projections preserve privacy and backend authority", async (
++    await t.test("only enabled application plus mock operators see current request without user or wallet",async()=>{
++      for(const operator of [f.users.collector,f.users.recycler]){
++        const result=await f.call(operator,"GET","/api/batteries/"+id);
++        assert.equal(result.status,200);assert.equal(result.body.operatorRequest.requestId,returned.body.requestId);
++        assert.deepEqual(Object.keys(result.body.operatorRequest).sort(),["requestId","requestState","reservationState"]);
++        assert.ok(!JSON.stringify(result.body).includes(a.key.publicKey()));
++      }
++      for(const other of [a,b,admin,f.users.rogue])assert.equal((await f.call(other,"GET","/api/batteries/"+id)).body.operatorRequest,null);
++    });
+diff --git a/backend/remote-tests/http.test.ts b/backend/remote-tests/http.test.ts
+index 37c0e21..7a49c99 100644
+--- a/backend/remote-tests/http.test.ts
++++ b/backend/remote-tests/http.test.ts
+@@ -38 +38 @@ test('remote-dev HTTP integration (Supabase DEV + real loopback HTTP + durable M
+-      const message=Buffer.from(c.body.messageBase64,'base64'),signature=Buffer.from(a.key.sign(message)).toString('base64');
++      const message=Buffer.from(c.body.messageBase64,'base64'),signature=Buffer.from(a.key.signMessage(message)).toString('base64');
+@@ -40 +40 @@ test('remote-dev HTTP integration (Supabase DEV + real loopback HTTP + durable M
+-      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(b.key.sign(message)).toString('base64')})).status,422);
++      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(b.key.signMessage(message)).toString('base64')})).status,422);
+@@ -50,3 +50,3 @@ test('remote-dev HTTP integration (Supabase DEV + real loopback HTTP + durable M
+-      for(let i=0;i<5;i++)assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(b.key.sign(message)).toString('base64')})).status,422);
+-      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(a.key.sign(message)).toString('base64')})).status,409);
+-      const other=await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()});const payload={challengeId:other.body.challengeId,signature:Buffer.from(a.key.sign(Buffer.from(other.body.messageBase64,'base64'))).toString('base64')};
++      for(let i=0;i<5;i++)assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(b.key.signMessage(message)).toString('base64')})).status,422);
++      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(a.key.signMessage(message)).toString('base64')})).status,409);
++      const other=await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()});const payload={challengeId:other.body.challengeId,signature:Buffer.from(a.key.signMessage(Buffer.from(other.body.messageBase64,'base64'))).toString('base64')};
+@@ -55,0 +56,12 @@ test('remote-dev HTTP integration (Supabase DEV + real loopback HTTP + durable M
++    await t.test('new HTTP challenges are SEP53 only and reject downgrade, raw proofs and cross-challenge replay',async()=>{
++      assert.equal((await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey(),signingScheme:'RAW_ED25519_V1'})).status,400);
++      const c=await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()});
++      assert.equal(c.body.version,2);assert.equal(c.body.signingScheme,'SEP53_V2');
++      const bytes=Buffer.from(c.body.messageBase64,'base64');
++      const valid=Buffer.from(a.key.signMessage(bytes)).toString('base64');
++      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(a.key.sign(bytes)).toString('base64')})).status,422);
++      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:valid,signingScheme:'RAW_ED25519_V1'})).status,400);
++      const other=await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()});
++      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:other.body.challengeId,signature:valid})).status,422);
++      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:valid})).status,200);
++    });
+@@ -58 +70 @@ test('remote-dev HTTP integration (Supabase DEV + real loopback HTTP + durable M
+-      const r=await verifier.verify({id:randomUUID(),userId:a.id,networkId:f.deployment.networkId,address:a.key.publicKey(),domain:'byetery-dev',nonce:'00',message,expiresAt:new Date(0)},a.key.sign(message),new Date());assert.equal(r.verified,false);
++      const r=await verifier.verify({signingScheme:'SEP53_V2',id:randomUUID(),userId:a.id,networkId:f.deployment.networkId,address:a.key.publicKey(),domain:'byetery-dev',nonce:'00',message,expiresAt:new Date(0)},a.key.signMessage(message),new Date());assert.equal(r.verified,false);
+diff --git a/backend/src/application/dev-fixture.ts b/backend/src/application/dev-fixture.ts
+index 3e4025a..d0dad83 100644
+--- a/backend/src/application/dev-fixture.ts
++++ b/backend/src/application/dev-fixture.ts
+@@ -93 +93 @@ export async function fixture(faults: Faults = {}) {
+-      const signature=Buffer.from(user.key.sign(Buffer.from(c.body.messageBase64,'base64'))).toString('base64');
++      const signature=Buffer.from(user.key.signMessage(Buffer.from(c.body.messageBase64,'base64'))).toString('base64');
+diff --git a/backend/src/application/frontend-reads.ts b/backend/src/application/frontend-reads.ts
+index f589e96..64037fb 100644
+--- a/backend/src/application/frontend-reads.ts
++++ b/backend/src/application/frontend-reads.ts
+@@ -78,0 +79,11 @@ export async function batteryDetail(
++    // Operators receive only the active request ID/state, never its user or recipient.
++    // Membership AND enabled projected actor role are required; QR grants no role.
++    const operatorRequest=await one(db,
++      `select encode(r.request_id,'hex') as "requestId",r.reservation_state as "reservationState",c.state as "requestState"
++       from chain_private.batteries b
++       join app_private.return_requests r on r.deployment_id=b.deployment_id and r.request_id=b.request_id
++       join chain_private.return_requests c on c.deployment_id=r.deployment_id and c.request_id=r.request_id
++       where b.deployment_id=$1 and b.battery_id=$2 and c.state in ('OPEN','CONFIRMED')
++       and exists(select 1 from api_private.memberships m join chain_private.actor_roles a
++         on a.deployment_id=m.deployment_id and a.actor_address=m.actor_address and a.role=m.role
++         where m.deployment_id=$1 and m.user_id=$3 and m.enabled and a.enabled and m.role in ('COLLECTOR','RECYCLER'))`,[d,id,user]);
+@@ -81 +92 @@ export async function batteryDetail(
+-      body: { ...view, metadata, ownRequest: ownRequest ?? null },
++      body: { ...view, metadata, ownRequest: ownRequest ?? null, operatorRequest: operatorRequest ?? null },
+diff --git a/backend/src/application/repository.ts b/backend/src/application/repository.ts
+index a79c076..fa92c5a 100644
+--- a/backend/src/application/repository.ts
++++ b/backend/src/application/repository.ts
+@@ -15 +15,4 @@ export class Repository {
+-  constructor(config: Settings) { this.pool = new Pool(config.database); this.deploymentId = config.deploymentId; }
++  constructor(config: Settings) {
++    this.pool = new Pool(config.database); this.deploymentId = config.deploymentId;
++    this.pool.on('error', () => console.error('Database idle connection lost; pool will replace it.'));
++  }
+@@ -17,0 +21,3 @@ export class Repository {
++    let connectionError: Error | undefined;
++    const disconnected = (error: Error) => { connectionError = error; };
++    db.on('error', disconnected);
+@@ -20 +26 @@ export class Repository {
+-      const result = await work(db); await db.query('commit'); return result;
++      const result = await work(db); if (connectionError) throw connectionError; await db.query('commit'); return result;
+@@ -22 +28 @@ export class Repository {
+-    finally { db.release(); }
++    finally { db.release(Boolean(connectionError)); db.removeListener('error', disconnected); }
+diff --git a/backend/src/application/wallet.ts b/backend/src/application/wallet.ts
+index c83d87d..fffc229 100644
+--- a/backend/src/application/wallet.ts
++++ b/backend/src/application/wallet.ts
+@@ -2,0 +3 @@ import { Keypair } from '@stellar/stellar-sdk';
++import { walletMessage, WALLET_SIGNING_SCHEME } from '../wallet-message.ts';
+@@ -10 +11,6 @@ export class Ed25519WalletVerifier implements WalletVerifier {
+-    try { if(proof.length===64 && Keypair.fromPublicKey(challenge.address).verify(Buffer.from(challenge.message),Buffer.from(proof)))
++    try {
++      const key=Keypair.fromPublicKey(challenge.address);
++      const valid=proof.length===64 && (challenge.signingScheme==='SEP53_V2'
++        ? key.verifyMessage(challenge.message,proof)
++        : challenge.signingScheme==='RAW_ED25519_V1' && key.verify(challenge.message,proof));
++      if(valid)
+@@ -25,5 +31,4 @@ export class WalletService {
+-    const message=Buffer.from(JSON.stringify({domain:'byetery-dev',purpose:'LINK_WALLET',version:1,id,userId:user,
+-      network:'Testnet',networkId:config.networkId,address,nonce:nonce.toString('hex'),expiresAt:expires.toISOString()}));
+-    await db.query(`insert into api_private.wallet_challenges(id,deployment_id,user_id,network_id,address,nonce,purpose,message_bytes,created_at,expires_at)
+-      values($1,$2,$3,decode($4,'hex'),$5,$6,'LINK_WALLET',$7,$8,$9)`,[id,this.repo.deploymentId,user,config.networkId,address,nonce,message,now,expires]);
+-    return {status:201,body:{challengeId:id,address,network:'Testnet',purpose:'LINK_WALLET',messageBase64:message.toString('base64'),expiresAt:expires.toISOString(),source:'MOCK'}};
++    const message=Buffer.from(walletMessage({deploymentId:this.repo.deploymentId,id,userId:user,networkId:config.networkId,address,nonce:nonce.toString('hex'),expiresAt:expires.toISOString()}),'utf8');
++    await db.query(`insert into api_private.wallet_challenges(id,deployment_id,user_id,network_id,address,nonce,purpose,message_bytes,created_at,expires_at,signing_scheme)
++      values($1,$2,$3,decode($4,'hex'),$5,$6,'LINK_WALLET',$7,$8,$9,'SEP53_V2')`,[id,this.repo.deploymentId,user,config.networkId,address,nonce,message,now,expires]);
++    return {status:201,body:{challengeId:id,version:2,signingScheme:WALLET_SIGNING_SCHEME,address,network:'Testnet',purpose:'LINK_WALLET',messageBase64:message.toString('base64'),expiresAt:expires.toISOString(),source:'MOCK'}};
+@@ -36 +41 @@ export class WalletService {
+-    const challenge: WalletChallenge={id,userId:user,networkId:row.network_id.toString('hex'),address:row.address,
++    const challenge: WalletChallenge={signingScheme:row.signing_scheme,id,userId:user,networkId:row.network_id.toString('hex'),address:row.address,
+diff --git a/backend/src/wallet-verifier.ts b/backend/src/wallet-verifier.ts
+index 41a4d4d..a89801f 100644
+--- a/backend/src/wallet-verifier.ts
++++ b/backend/src/wallet-verifier.ts
+@@ -0,0 +1 @@
++import type { WalletSigningScheme } from './wallet-message.ts';
+@@ -3,0 +5 @@ export interface WalletChallenge {
++  signingScheme: WalletSigningScheme;
+diff --git a/docs/DEMO-SCOPE.md b/docs/DEMO-SCOPE.md
+index 4eecfed..46dc4b4 100644
+--- a/docs/DEMO-SCOPE.md
++++ b/docs/DEMO-SCOPE.md
+@@ -48,0 +49,4 @@ este texto es la referencia actual para nuevas presentaciones.
++
++## Wallet gráfica y cámara QR
++
++La wallet gráfica demuestra control criptográfico de una dirección Stellar mediante firma SEP-53. Las operaciones del ciclo de vida continúan ejecutándose mediante MockStellarService y no invocan todavía el contrato Soroban. El escáner solo identifica una batería y consulta información autenticada; no autoriza mutaciones. Ver [wallet](WALLET.md) y [cámara QR](CAMERA-QR.md). Los tests automatizados de proveedor/cámara no equivalen a aprobaciones reales en Freighter ni a lectura mediante cámara física.
+diff --git a/docs/HTTP-API.md b/docs/HTTP-API.md
+index f6ceb5a..a6401d8 100644
+--- a/docs/HTTP-API.md
++++ b/docs/HTTP-API.md
+@@ -230,0 +231,6 @@ de roles por HTTP ni nuevas mutaciones de negocio. Sin cambios de migración o R
++
++## Wallet v2 y consulta de operadores
++
++Los nuevos challenges usan exclusivamente `version: 2` / `signingScheme: SEP53_V2` y texto UTF-8 determinista. `/wallet/challenge` sigue aceptando solo `{address}`; `/wallet/verify` solo `{challengeId, signature}`. El esquema se obtiene de storage inmutable y no admite override del cliente. Los challenges legacy emitidos antes de la migración se verifican solo hasta su expiración/consumo. Ver [WALLET.md](WALLET.md).
++
++`GET /api/batteries/:batteryId` añade `operatorRequest` con ID/estado de solicitud activa únicamente para COLLECTOR/RECYCLER con membership y rol de actor habilitados; el resto recibe null. No expone usuario/recipient y no concede nueva autoridad de mutación.
+diff --git a/frontend/README.md b/frontend/README.md
+index 3495804..a580532 100644
+--- a/frontend/README.md
++++ b/frontend/README.md
+@@ -47 +47 @@ El navegador llama al mismo origen Next. `/auth/login`, `/auth/signup`, `/auth/l
+-Se añadieron, con autorización explícita, `GET /api/me` y una proyección ampliada de `GET /api/batteries/:id`. No se modificó ninguna operación del contrato ni de escritura del coordinador. El perfil solo devuelve wallets/solicitudes del usuario autenticado; la batería expone `type`, `manufacturer`, `batch` y la solicitud propia, nunca una wallet o claim ajenos.
++Se añadieron, con autorización explícita, `GET /api/me` y una proyección ampliada de `GET /api/batteries/:id`. No se modificó ninguna operación del contrato ni de escritura del coordinador. El perfil solo devuelve wallets/solicitudes del usuario autenticado; la batería expone `type`, `manufacturer`, `batch` y la solicitud propia. Solo operadores con membership y rol de actor habilitados reciben además `operatorRequest` (ID/estado actual); nunca una wallet ni identidad ajenas.
+@@ -53 +53 @@ Se añadieron, con autorización explícita, `GET /api/me` y una proyección amp
+-3. Como usuario, vincular una dirección G…: solicitar challenge, firmar externamente **los bytes decodificados** de `messageBase64`, pegar solo la firma Ed25519 Base64 y verificarla. No pegar claves privadas. El contrato/verificación siguen siendo los existentes.
++3. Como usuario, conectar Freighter en Dashboard, revisar el mensaje SEP-53 v2 y aprobar la firma. La API confirma la wallet. Para firma externa, firmar con SEP-53 el texto UTF-8 decodificado de `messageBase64` y pegar solo la firma; nunca claves privadas.
+@@ -60 +60 @@ Se añadieron, con autorización explícita, `GET /api/me` y una proyección amp
+-El QR contiene únicamente `/battery/BYE-...`; es un identificador/ruta local, sin claim, usuario, wallet ni autorización. Puede abrirse desde la interfaz. La captura por cámara y acceso desde un teléfono a este servidor loopback no están implementados; se admite entrada manual o lector externo como teclado.
++El QR contiene únicamente `/battery/BYE-...`; es un identificador/ruta local, sin claim, usuario, wallet ni autorización. Puede abrirse desde la interfaz. El escáner con cámara está disponible en Dashboard, Collector y Recycler, con fallback local jsQR y entrada manual. El servidor sigue limitado a loopback; no hay acceso desde un teléfono por LAN.
+@@ -75,2 +75,2 @@ Requiere Edge instalado y puerto 3000 libre. El script reutiliza el fixture DEV,
+-- El panel wallet admite firma externa real y una interfaz `WalletSigner` independiente. La conexión a una wallet gráfica concreta queda pendiente; no hay bypass de firma.
+-- No hay cámara, carga pública de fotografías, gestión HTTP de roles ni recompensas reales. Los manifiestos de prueba preservan UTF-8 exacto; SHA-256, XDR y revisiones los calcula y guarda el backend existente.
++- El panel wallet utiliza `WalletAdapter` y Freighter oficial, además de conservar firma externa SEP-53. La verificación real ocurre en la API; no hay bypass.
++- La cámara procesa QR localmente; no hay carga pública de fotografías, gestión HTTP de roles ni recompensas reales. Los manifiestos de prueba preservan UTF-8 exacto; SHA-256, XDR y revisiones los calcula y guarda el backend existente.
+@@ -92,0 +93,4 @@ Referencias consultadas: [Next.js instalación](https://nextjs.org/docs/app/gett
++
++## Wallet y QR
++
++Ver [protocolo y adaptador](../docs/WALLET.md), [cámara, permisos y demo](../docs/CAMERA-QR.md). `npm run demo:qr` prueba el pipeline de cámara con stream sintético y API/Supabase DEV reales; no sustituye la prueba física manual. No se añaden variables de entorno. Turbopack usa la raíz del monorepo para compartir exclusivamente el formateador puro de mensajes. Las pruebas se limitan a un worker en Windows para evitar contención al iniciar procesos.
+diff --git a/frontend/next.config.ts b/frontend/next.config.ts
+index 025d79a..4b3eb03 100644
+--- a/frontend/next.config.ts
++++ b/frontend/next.config.ts
+@@ -0,0 +1 @@
++import { resolve } from "node:path";
+@@ -2 +3,2 @@ import type { NextConfig } from "next";
+-const config: NextConfig = {
++const config: NextConfig = {
++  turbopack: { root: resolve(import.meta.dirname, "..") },
+@@ -15 +17 @@ const config: NextConfig = {
+-            value: "camera=(), microphone=(), geolocation=()",
++            value: "camera=(self), microphone=(), geolocation=()",
+diff --git a/frontend/package.json b/frontend/package.json
+index a7001d9..404d836 100644
+--- a/frontend/package.json
++++ b/frontend/package.json
+@@ -18,0 +19 @@
++    "@stellar/freighter-api": "6.0.1",
+@@ -20,0 +22 @@
++    "jsqr": "1.4.0",
+diff --git a/frontend/src/app/globals.css b/frontend/src/app/globals.css
+index 82bd704..ece4995 100644
+--- a/frontend/src/app/globals.css
++++ b/frontend/src/app/globals.css
+@@ -768,0 +769,2 @@ footer {
++
++.wallet-message{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.8rem;max-height:20rem;overflow:auto}.scanner video{width:100%;max-height:28rem;border-radius:1rem;background:#102b25}.scanner form{margin-top:1rem}
+diff --git a/frontend/src/components/dashboard.tsx b/frontend/src/components/dashboard.tsx
+index 63e58ec..9558b69 100644
+--- a/frontend/src/components/dashboard.tsx
++++ b/frontend/src/components/dashboard.tsx
+@@ -1,0 +2,2 @@
++import { GraphicalWallet, WalletAddress } from "./graphical-wallet";
++import { ScanBattery } from "./scan-battery";
+@@ -85,2 +87,2 @@ export function WalletLink({ signer }: { signer?: WalletSigner }) {
+-            Firma los bytes exactos del mensaje Base64, una vez decodificados.
+-            No firmes el texto Base64.
++            Firma con SEP-53 los bytes UTF-8 exactos del mensaje Base64, una vez
++            decodificados. No firmes el texto Base64.
+@@ -102,2 +104,2 @@ export function WalletLink({ signer }: { signer?: WalletSigner }) {
+-              solo la firma. La conexión a una wallet gráfica aún está
+-              pendiente. Nunca pegues tu clave privada.
++              solo la firma. Puedes usar la conexión gráfica de arriba. Nunca
++              pegues tu clave privada.
+@@ -172,0 +175 @@ export function Dashboard() {
++      <ScanBattery />
+@@ -237 +240 @@ export function Dashboard() {
+-              <code>{w.address}</code>
++              <WalletAddress address={w.address} />
+@@ -241 +244,5 @@ export function Dashboard() {
+-          <WalletLink />
++          <GraphicalWallet />
++          <details>
++            <summary>Firma externa / demo técnica</summary>
++            <WalletLink />
++          </details>
+diff --git a/frontend/src/components/operator.tsx b/frontend/src/components/operator.tsx
+index 9255884..3d91b8e 100644
+--- a/frontend/src/components/operator.tsx
++++ b/frontend/src/components/operator.tsx
+@@ -1,0 +2 @@
++import { ScanBattery } from "./scan-battery";
+@@ -13,0 +15,11 @@ export function Operator({ kind }: { kind: "COLLECTION" | "RECYCLING" }) {
++  async function scanned(value: string) {
++    setId(value);
++    setRid("");
++    setBattery(null);
++    const result = await request<Battery>(
++      "/api/batteries/" + encodeURIComponent(value),
++    );
++    setBattery(result);
++    setRid(result.operatorRequest?.requestId ?? "");
++    setError("");
++  }
+@@ -38,0 +51 @@ export function Operator({ kind }: { kind: "COLLECTION" | "RECYCLING" }) {
++      <ScanBattery onDetected={scanned} />
+@@ -87,0 +101 @@ export function Operator({ kind }: { kind: "COLLECTION" | "RECYCLING" }) {
++              battery?.batteryId !== id ||
+diff --git a/frontend/src/lib/client.ts b/frontend/src/lib/client.ts
+index 6d0871b..1621862 100644
+--- a/frontend/src/lib/client.ts
++++ b/frontend/src/lib/client.ts
+@@ -13,0 +14,5 @@ export function friendly(status: number, code = "") {
++  if (code === "ChallengeUnavailable")
++    return "El desafío caducó, ya fue consumido o agotó sus intentos. Solicita uno nuevo.";
++  if (code === "InvalidWalletProof")
++    return "La firma no corresponde al desafío o a la dirección indicada.";
++  if (code === "InvalidWallet") return "La dirección Stellar no es válida.";
+diff --git a/frontend/src/lib/types.ts b/frontend/src/lib/types.ts
+index 7111317..cde8118 100644
+--- a/frontend/src/lib/types.ts
++++ b/frontend/src/lib/types.ts
+@@ -22,0 +23 @@ export interface Battery {
++  operatorRequest?: OwnRequest | null;
+@@ -39,0 +41,4 @@ export interface Challenge {
++  version: 2;
++  signingScheme: "SEP53_V2";
++  network: "Testnet";
++  purpose: "LINK_WALLET";
+diff --git a/frontend/vitest.config.ts b/frontend/vitest.config.ts
+index 4d88593..440f0b4 100644
+--- a/frontend/vitest.config.ts
++++ b/frontend/vitest.config.ts
+@@ -6,0 +7,2 @@ export default defineConfig({
++    // Avoid Windows process-start contention; test isolation remains enabled.
++    maxWorkers: process.platform === "win32" ? 1 : undefined,
+diff --git a/package.json b/package.json
+index 2365d92..d229e37 100644
+--- a/package.json
++++ b/package.json
+@@ -1,17 +1,18 @@
+-{
+-  "name": "byetery-monorepo",
+-  "private": true,
+-  "scripts": {
+-    "demo": "npm --prefix backend run demo",
+-    "test:backend": "npm --prefix backend run verify",
+-    "test:python": "python -m unittest discover -s tools/python -p test_*.py -v",
+-    "verify": "pwsh -NoProfile -File scripts/verify.ps1",
+-    "api": "npm --prefix backend run api",
+-    "demo:api": "npm --prefix backend run demo:api",
+-    "test:http:dev": "npm --prefix backend run test:http:dev",
+-    "dev:setup": "npm --prefix backend run dev:setup --",
+-    "frontend": "npm --prefix frontend run dev",
+-    "verify:frontend": "npm --prefix frontend run verify",
+-    "demo:visual": "node --experimental-strip-types scripts/demo-visual.mts"
+-  }
+-}
++{
++  "name": "byetery-monorepo",
++  "private": true,
++  "scripts": {
++    "demo": "npm --prefix backend run demo",
++    "test:backend": "npm --prefix backend run verify",
++    "test:python": "python -m unittest discover -s tools/python -p test_*.py -v",
++    "verify": "pwsh -NoProfile -File scripts/verify.ps1",
++    "api": "npm --prefix backend run api",
++    "demo:api": "npm --prefix backend run demo:api",
++    "test:http:dev": "npm --prefix backend run test:http:dev",
++    "dev:setup": "npm --prefix backend run dev:setup --",
++    "frontend": "npm --prefix frontend run dev",
++    "verify:frontend": "npm --prefix frontend run verify",
++    "demo:visual": "node --experimental-strip-types scripts/demo-visual.mts",
++    "demo:qr": "node --experimental-strip-types scripts/demo-visual.mts --qr"
++  }
++}
+diff --git a/scripts/demo-visual.mts b/scripts/demo-visual.mts
+index f76e0c9..01de70e 100644
+--- a/scripts/demo-visual.mts
++++ b/scripts/demo-visual.mts
+@@ -19,0 +20,21 @@ const root = resolve(import.meta.dirname, "..");
++const cameraTest=process.argv.includes('--qr');
++/** Automated camera fixture: actual generated SVG -> in-memory canvas stream ->
++ * production video/jsQR pipeline. Never described as physical camera validation. */
++async function simulatedCamera(page:Page,svg:string) {
++  await page.evaluate(async markup=>{
++    const canvas=document.createElement('canvas');canvas.width=600;canvas.height=600;
++    const context=canvas.getContext('2d')!;context.fillStyle='white';context.fillRect(0,0,600,600);
++    const image=new Image();image.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(markup);
++    await image.decode();context.drawImage(image,50,50,500,500);
++    Object.defineProperty(window,'BarcodeDetector',{configurable:true,value:undefined});
++    Object.defineProperty(navigator.mediaDevices,'getUserMedia',{configurable:true,value:async()=>{
++      const stream=canvas.captureStream(8);
++      const frames=setInterval(()=>{if(stream.getTracks().every(t=>t.readyState==="ended")){clearInterval(frames);return;}context.drawImage(image,50,50,500,500);},125);
++      (window as typeof window&{__byeteryTestStream?:MediaStream}).__byeteryTestStream=stream;
++      return stream;
++    }});
++  },svg);
++}
++async function assertCameraStopped(page:Page){
++  assert.ok(await page.evaluate(()=>{const s=(window as typeof window&{__byeteryTestStream?:MediaStream}).__byeteryTestStream;return !!s&&s.getTracks().every(t=>t.readyState==='ended');}),'All synthetic camera tracks stopped');
++}
+@@ -108,0 +130,7 @@ try {
++  let qrSvg='';
++  if(cameraTest){await admin.goto('http://127.0.0.1:3000/battery/'+id);qrSvg=await admin.locator('.qr svg').evaluate(el=>new XMLSerializer().serializeToString(el));}
++
++  await a.getByRole('button',{name:'Conectar wallet',exact:true}).click();
++  await expect(a.getByText(/Freighter no está disponible/)).toBeVisible();
++  console.log('Official Freighter API loads; missing extension handled in isolated browser: PASS');
++  await a.getByText("Firma externa / demo técnica", {exact:true}).click();
+@@ -115 +143 @@ try {
+-    f.users.a.key.sign(Buffer.from(message, "base64")),
++    f.users.a.key.signMessage(Buffer.from(message, "base64")),
+@@ -122,2 +150,8 @@ try {
+-  await a.getByLabel("Consultar una batería").fill(id);
+-  await a.getByRole("button", { name: "Buscar batería →" }).click();
++  if(cameraTest){
++    await simulatedCamera(a,qrSvg);await a.getByRole('button',{name:'Escanear batería',exact:true}).click();
++    await expect(a).toHaveURL('http://127.0.0.1:3000/battery/'+id);await assertCameraStopped(a);
++    console.log('Generated QR -> jsQR camera pipeline -> exact battery: PASS (synthetic stream)');
++  }else{
++    await a.getByLabel("Consultar una batería").fill(id);
++    await a.getByRole("button", { name: "Buscar batería →" }).click();
++  }
+@@ -135,0 +170,5 @@ try {
++    if(cameraTest){
++      await simulatedCamera(page,qrSvg);await page.getByRole('button',{name:'Escanear batería',exact:true}).click();
++      await expect(page.getByLabel('Return Request ID')).toHaveValue(rid);await assertCameraStopped(page);
++      console.log(path+' QR lookup: PASS; explicit confirmation still required');
++    }else{
+@@ -138,0 +178 @@ try {
++    }
+@@ -196,0 +237 @@ try {
++  if(cameraTest)console.log('Wallet crypto: real SEP53 via Node test signer; graphical extension and physical camera: NOT exercised by this automated test');
