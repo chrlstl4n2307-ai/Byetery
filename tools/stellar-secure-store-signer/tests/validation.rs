@@ -137,7 +137,8 @@ fn request(t: Transaction) -> Request {
     }
 }
 fn body(t: &mut Transaction) -> &mut InvokeHostFunctionOp {
-    let OperationBody::InvokeHostFunction(b) = &mut t.operations[0].body else {
+    let OperationBody::InvokeHostFunction(b) = &mut t.operations.iter_mut().next().unwrap().body
+    else {
         panic!()
     };
     b
@@ -206,7 +207,7 @@ fn wrong_collector_rejected() {
     let HostFunction::InvokeContract(c) = &mut body(&mut t).host_function else {
         panic!()
     };
-    c.args[2] = ScVal::Address(addr(ADMIN));
+    *c.args.iter_mut().nth(2).unwrap() = ScVal::Address(addr(ADMIN));
     assert_eq!(validate(&request(t), NOW).err(), Some("WrongActor"));
 }
 #[test]
@@ -230,7 +231,9 @@ fn missing_service_auth_rejected() {
 #[test]
 fn wrong_auth_signer_rejected() {
     let mut t = tx("confirm_collection");
-    let SorobanCredentials::Address(c) = &mut body(&mut t).auth[1].credentials else {
+    let SorobanCredentials::Address(c) =
+        &mut body(&mut t).auth.iter_mut().nth(1).unwrap().credentials
+    else {
         panic!()
     };
     c.address = addr(ADMIN);
@@ -239,12 +242,17 @@ fn wrong_auth_signer_rejected() {
 #[test]
 fn auth_with_different_arguments_rejected() {
     let mut t = tx("pay_reward");
-    let SorobanAuthorizedFunction::ContractFn(c) =
-        &mut body(&mut t).auth[0].root_invocation.function
+    let SorobanAuthorizedFunction::ContractFn(c) = &mut body(&mut t)
+        .auth
+        .iter_mut()
+        .next()
+        .unwrap()
+        .root_invocation
+        .function
     else {
         panic!()
     };
-    c.args[0] = string("BYE-OTHER");
+    *c.args.iter_mut().next().unwrap() = string("BYE-OTHER");
     assert_eq!(
         validate(&request(t), NOW).err(),
         Some("AuthInvocationMismatch")
@@ -254,7 +262,13 @@ fn auth_with_different_arguments_rejected() {
 fn nested_authorization_rejected() {
     let mut t = tx("pay_reward");
     let root = body(&mut t).auth[0].root_invocation.clone();
-    body(&mut t).auth[0].root_invocation.sub_invocations = vec![root].try_into().unwrap();
+    body(&mut t)
+        .auth
+        .iter_mut()
+        .next()
+        .unwrap()
+        .root_invocation
+        .sub_invocations = vec![root].try_into().unwrap();
     assert_eq!(
         validate(&request(t), NOW).err(),
         Some("AuthInvocationMismatch")

@@ -1,0 +1,75 @@
+{
+  "taskId": "VOL-002",
+  "classification": "VOLUNTARY PRE-SPRINT DEVELOPMENT",
+  "date": "2026-10-11",
+  "timezone": "America/Santiago",
+  "capturedAtUtc": "2026-10-11T22:44:33.7639950Z",
+  "branch": "pre-sprint/voluntary-d1",
+  "parentBeforeCheckpoint": "30937e85622e8e11a8a04614f0ff6f241c532aa0",
+  "testedSource": "working tree; exact source hashes included",
+  "sourceHashes": [
+    {
+      "path": "scripts/verify-secure-store-signer.ps1",
+      "sha256": "877733356a4dd6dafd78fdec3230eded9e07b8f38ecc3e6ced911b125317fc9d"
+    },
+    {
+      "path": "tools/stellar-secure-store-signer/src/lib.rs",
+      "sha256": "8e34de6f809635491f2e1cdd21d2b9d10289d014efd0da0b4e2c91033ebc2147"
+    },
+    {
+      "path": "tools/stellar-secure-store-signer/src/main.rs",
+      "sha256": "df20875961fa70a909ef968a2699c2b0326d6de1bbd440286de939770215513a"
+    },
+    {
+      "path": "tools/stellar-secure-store-signer/tests/validation.rs",
+      "sha256": "9f0ec30b542f3eeac927d4346d7c5ff4041a33e4e9b4c0f2473ad1c5fcce40e7"
+    },
+    {
+      "path": "tools/stellar-secure-store-signer/build.rs",
+      "sha256": "fc278758bd02d2e390cd5c42f0e8416fc25dda892e761ce57be9012256ca39de"
+    },
+    {
+      "path": "tools/stellar-secure-store-signer/Cargo.lock",
+      "sha256": "e644894478477faea5cb630b824a1c3254b5e62796bf7881290104f72785786e"
+    },
+    {
+      "path": "backend/signing-tests/offline.test.ts",
+      "sha256": "06cd237267b7b34da3a3fc0f1fa78121eed83e4d5499ba00871977bc6f39f876"
+    },
+    {
+      "path": "backend/src/local-secure-store-signer.ts",
+      "sha256": "905601ec6c82bacc9b20ffea4e4d7c1fd9c9296831bfa9d2d2a6bac64e6ab50f"
+    }
+  ],
+  "binarySha256": "99ef0be4a0a78c97a71facb4fa2bddbe4d9681a67b2d6c76a1cf3acf0fe88729",
+  "build": "PASS",
+  "nativeTests": {
+    "failed": 0,
+    "passed": 18
+  },
+  "realOfflineTests": {
+    "dualAuthVariants": [
+      "V1",
+      "V2"
+    ],
+    "failed": 0,
+    "singleAuthMethods": 5,
+    "passed": 9
+  },
+  "secureStore": "PASS",
+  "privateKeysExported": false,
+  "signedMaterialStored": false,
+  "fmt": "PASS",
+  "clippy": "PASS",
+  "transactionsSubmitted": 0,
+  "networkAccess": "NONE during offline signing",
+  "contractModified": false,
+  "feeCapChanged": false,
+  "instawardCriteriaPass": 0,
+  "limits": [
+    "No on-chain/application authorization validation in this package.",
+    "No independent human custody claimed.",
+    "No production custody/security audit claimed.",
+    "No restoration, TTL extension or real broadcast authorized."
+  ]
+}
