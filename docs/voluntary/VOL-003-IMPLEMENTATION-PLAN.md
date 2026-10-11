@@ -1,9 +1,9 @@
 # VOL-003 — Minimal transaction-identity refactor plan
 
-Classification: VOLUNTARY PRE-SPRINT DEVELOPMENT / PLAN ONLY.
+Classification: VOLUNTARY PRE-SPRINT DEVELOPMENT / OWNER APPROVED, SLICES 1–4 ONLY.
 Date: 2026-10-11, America/Santiago. Branch: `pre-sprint/voluntary-d1`.
-Source inspected: frozen `450c21b151a0973064986327f09d55e4f36c43e0`.
-Implementation: NOT STARTED; owner review required before a refactor.
+Implementation starts at `6b5eb500126788da780664a045848544a27be894`, preserving VOL-001/002.
+Comparison boundary only: frozen `450c21b151a0973064986327f09d55e4f36c43e0`; never reset to it.
 Instaward start UNCONFIRMED; acceptance stays 0/23.
 
 ## Demonstrated mismatch, not a contract defect
@@ -115,6 +115,55 @@ before real dispatch. Read-only preflight repeats before later evidence runs.
 5. Integrate the real adapter only after signer and operational readiness,
    using separately approved Testnet execution. No UI/contract redesign.
 
-Reviewer decisions needed: approve this seam/storage plan; source-sequence
-coordination; precise expiry/no-result policy; restoration/fee-cap operational
-route. Nothing here executes SQL or starts a funded sprint.
+## Owner decisions and required clarifications — 2026-10-11
+
+A/B/C approved: separate durable Testnet identity path; exact signed envelope
+bytes plus SDK network-bound transaction hash committed before any broadcast;
+short SQL state transitions only, with RPC/simulation/signing/submission/polling
+outside SQL/advisory locks. Existing MOCK APIs and immutable transport stay intact.
+
+Required signing order: prepare → simulate → finalize resources/fees/time bounds
+→ attach signed Soroban authorizations → finalize body → SDK transaction hash
+→ source envelope signature → verify same body/hash → persist exact envelope/hash
+→ dispatch. The envelope signature is NOT in the transaction hash. Never replace
+the SDK signature-base/hash with JSON or base64-text hashing.
+
+MVP sequence policy: ONE unresolved identity per network + source account, across
+deployments. Durable claim has network, source, worker, generation, created_at and
+lease_until. Lease expiration alone does not free an unresolved envelope. No general
+sequence allocator; pooling is POST-INSTAWARD unless later approved.
+
+Private lifecycle: CLAIMED, PREPARING, SIGNED, READY, DISPATCH_INTENT,
+SUBMITTED_OR_UNKNOWN, CONFIRMED_SUCCESS, CONFIRMED_FAILED, EXPIRED_NOT_APPLIED,
+EXPIRED_UNRESOLVED, PROJECTED. Existing public MOCK state API stays unchanged.
+
+Always reconcile original logical operation/envelope/hash. SUCCESS retains
+confirmation evidence and projects idempotently. FAILED means confirmed on-chain
+failure. Valid NOT_FOUND stays unknown, without replacement. After expiry consult
+authoritative contract state: proven applied → project; proven not applied →
+EXPIRED_NOT_APPLIED; inconclusive → EXPIRED_UNRESOLVED. NOT_FOUND alone, especially
+for reward/value movement, is never proof of nonpayment. Another identity requires
+explicit reviewed resolution, even after expiry. No automatic rebroadcast: an
+explicit bounded decision can authorize only the identical envelope/hash while valid.
+
+Immutable identity includes deployment/logical operation, network/contract/source,
+sequence, exact signed bytes/hash, operation context hash, time/auth bounds, prepared
+ledger and creation time. Mutable dispatch/claim metadata and append-only observations
+remain separate. Observation, confirmation and later state-read ledgers are distinct.
+
+Local additive private migration only. FORCE RLS/base-deny, Foundation invariants,
+recipient immutability, request non-reuse and one successful reward remain. No
+SECURITY DEFINER. No envelopes in browser responses, logs, Notion or public Git
+fixtures; tests generate synthetic expired fixtures in memory.
+
+Implement slices 1–4 using fakes/local PostgreSQL only. No real RPC submission,
+restoration, TTL maintenance, deployment, Mainnet, fee-cap increase or contract edit.
+Real adapter integration waits for VOL-004 readiness and separate authorization.
+Keep VOL-002 helper unchanged; substantive signer changes require stopping/review.
+Small commits, no squash or automatic push. Update existing Notion structures only;
+official acceptance stays 0/23 and sprint remains NOT STARTED / UNCONFIRMED.
+
+Protocol references (Raven stellarDocs consulted first):
+- https://developers.stellar.org/docs/tools/cli/agent-cli/guides/build-and-submit-transactions#inspection-before-signing
+- https://developers.stellar.org/docs/data/apis/rpc/api-reference/methods/getTransaction
+- https://supabase.com/docs/guides/database/postgres/row-level-security
