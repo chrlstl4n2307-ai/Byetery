@@ -8,7 +8,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test": "node --experimental-strip-types --test --test-concurrency=1 tests/*.test.ts",
     "verify": "npm run typecheck && npm test",
     "demo": "node --experimental-strip-types src/demo.ts",
     "api": "node --experimental-strip-types src/application/server.ts",
