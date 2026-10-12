@@ -1,0 +1,10 @@
+{
+  "capturedAtUtc": "2026-10-11T23:44:47.006Z",
+  "targetLedgers": 1555200,
+  "approxDaysAtNetworkTargetCadence": 90,
+  "networkMaxTtl": 3110400,
+  "simulationLedger": 5147739,
+  "minResourceFee": "1043025805",
+  "restorePreambleFee": "87898278",
+  "error": null
+}

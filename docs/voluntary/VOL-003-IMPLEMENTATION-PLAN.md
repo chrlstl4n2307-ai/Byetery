@@ -163,6 +163,19 @@ Keep VOL-002 helper unchanged; substantive signer changes require stopping/revie
 Small commits, no squash or automatic push. Update existing Notion structures only;
 official acceptance stays 0/23 and sprint remains NOT STARTED / UNCONFIRMED.
 
+## Source-account safety — additional owner decision for future dispatch
+
+Prefer a dedicated Testnet source account for application transactions where practical.
+Application leases only coordinate cooperating Byetery workers; they do not prevent
+manual CLI, wallet or other external transactions on the account. A shared source
+requires an authoritative sequence read immediately before broadcast. Compare that
+account sequence with the preparation account sequence (SDK envelope sequence minus
+one). If they differ, DO NOT broadcast or automatically prepare a replacement:
+retain the original durable identity and mark reviewed resolution required.
+VOL-004 maintenance separately reads the actual source sequence immediately before
+each preparation, and checks it again before dispatch. No general allocator or
+production application adapter is introduced by recording this decision.
+
 Protocol references (Raven stellarDocs consulted first):
 - https://developers.stellar.org/docs/tools/cli/agent-cli/guides/build-and-submit-transactions#inspection-before-signing
 - https://developers.stellar.org/docs/data/apis/rpc/api-reference/methods/getTransaction

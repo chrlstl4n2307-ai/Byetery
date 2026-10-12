@@ -1,0 +1,296 @@
+{
+  "task": "VOL-004",
+  "classification": "VOLUNTARY PRE-SPRINT DEVELOPMENT",
+  "closureDate": "2026-10-12",
+  "timezone": "America/Santiago",
+  "capturedAtUtc": "2026-10-12T16:56:26.579Z",
+  "latestLedger": 5160119,
+  "source": {
+    "address": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+    "sequence": "20970242247229443",
+    "balanceStroops": "99017039163",
+    "observedLedger": 5160119,
+    "numSubEntries": 1
+  },
+  "allEightKnownEntriesLive": true,
+  "businessAndCodeValuesUnchanged": true,
+  "allFiveReadSimulationsBelowCap": true,
+  "fingerprints": {
+    "ledger": 5160119,
+    "values": {
+      "byetery_instance": "3a07fe1074c56e9cdc8730c9c80d4eda46dff09e9d468dae1a830bb638da2e14",
+      "collector_role": "cd2662154e6d76b2b2b92e70c0cac3ccf534f9b74eb5b89819ec509083d00a50",
+      "recycler_role": "cd2662154e6d76b2b2b92e70c0cac3ccf534f9b74eb5b89819ec509083d00a50",
+      "historical_battery": "224631e784dae8837114671fc77e8fafb62ec502e5eab07432b686a69c01db4e",
+      "historical_request": "1dbb6d1d0987db99eff9c7ba21805d8a67f633f47eb166d611bb296780e77c75",
+      "reward_sac_instance": "e1c1bd2353f43f00b1d4ee2b904730fb3998ce7d8bc8bf65b8d42b97ba44604d",
+      "reward_contract_balance": "8729386f8efe3bb53258d830e24c05d4c8c2e200db031277ea08cfbc7e2ea1c5",
+      "byetery_code": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+    }
+  },
+  "assessment": {
+    "taskId": "VOL-001",
+    "classification": "VOLUNTARY PRE-SPRINT DEVELOPMENT",
+    "date": "2026-10-11",
+    "timezone": "America/Santiago",
+    "capturedAtUtc": "2026-10-12T16:56:26.579Z",
+    "branch": "pre-sprint/voluntary-d1",
+    "frozenCommit": "450c21b151a0973064986327f09d55e4f36c43e0",
+    "network": "Stellar Testnet",
+    "rpc": "https://soroban-testnet.stellar.org",
+    "protocolVersion": 29,
+    "latestLedger": 5160119,
+    "latestLedgerHash": "a4fcb3dea792093abca4f657a36a5044ce483f73efae59c0770d094c82ebefcf",
+    "latestLedgerCloseTime": "1791824182",
+    "evaluatedSourceCommit": "ed0b773c4a6fb190ec8e6c0bf92e84863a03c04c",
+    "assessmentScriptSha256": "729d024ccfc0b21c3ad1fe4cab6055754b6b118034b2d5affc9d62291a65ed3e",
+    "rpcVersion": "29.0.0-b2b701685c79aee17fe4eb22dbd08a5dfd11594d",
+    "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+    "token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+    "inventory": [
+      {
+        "name": "byetery_instance",
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABQAAAAB",
+        "status": "LIVE",
+        "observedLedger": 5160119,
+        "liveUntilLedger": 6703017,
+        "remainingLedgers": 1542898,
+        "lastModifiedLedger": 5147800,
+        "value": null,
+        "deployedCodeSha256": null,
+        "deployedCodeSize": null
+      },
+      {
+        "name": "collector_role",
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAwAAAA8AAAAEUm9sZQAAABIAAAAAAAAAAHmAMk+8xjoP5WjJ/QR7Cq3fhINnx/PO/nFsQsQu93O6AAAAEAAAAAEAAAABAAAADwAAAAlDb2xsZWN0b3IAAAAAAAAB",
+        "status": "LIVE",
+        "observedLedger": 5160119,
+        "liveUntilLedger": 6703017,
+        "remainingLedgers": 1542898,
+        "lastModifiedLedger": 5147800,
+        "value": true,
+        "deployedCodeSha256": null,
+        "deployedCodeSize": null
+      },
+      {
+        "name": "recycler_role",
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAwAAAA8AAAAEUm9sZQAAABIAAAAAAAAAAFAKt47h0yflKivfDL1vuEi1hNgCVzIZxlpNosbaF1++AAAAEAAAAAEAAAABAAAADwAAAAhSZWN5Y2xlcgAAAAE=",
+        "status": "LIVE",
+        "observedLedger": 5160119,
+        "liveUntilLedger": 6703017,
+        "remainingLedgers": 1542898,
+        "lastModifiedLedger": 5147800,
+        "value": true,
+        "deployedCodeSha256": null,
+        "deployedCodeSize": null
+      },
+      {
+        "name": "historical_battery",
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHQmF0dGVyeQAAAAAOAAAAE0JZRS1UTi1EN0RCOTEwRUU4QkEAAAAAAQ==",
+        "status": "LIVE",
+        "observedLedger": 5160119,
+        "liveUntilLedger": 6703017,
+        "remainingLedgers": 1542898,
+        "lastModifiedLedger": 5147800,
+        "value": {
+          "collection_hash": "bd6f42412b5e1197096b5ec7e5426fee455db2ef8cedfd5ae6553ad66bb21da3",
+          "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+          "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+          "recycling_hash": "b857824e8dc74f3bfdb3b0eaf5193366474fe22f93b26f1d923822976f3f8906",
+          "registration_hash": "24d12cd5dd7550468d7ab03e13029da2d9bce6fe2b8b939eb8d3f80a3c6c5d87",
+          "request_id": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+          "reward_state": [
+            "Sent"
+          ],
+          "state": [
+            "Recycled"
+          ]
+        },
+        "deployedCodeSha256": null,
+        "deployedCodeSize": null
+      },
+      {
+        "name": "historical_request",
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHUmVxdWVzdAAAAAANAAAAIKrHCpVG+2GXI0vGXUZ+GdJOAIczunhdERFVr5DHz5hkAAAAAQ==",
+        "status": "LIVE",
+        "observedLedger": 5160119,
+        "liveUntilLedger": 6703017,
+        "remainingLedgers": 1542898,
+        "lastModifiedLedger": 5147800,
+        "value": {
+          "battery_id": "BYE-TN-D7DB910EE8BA",
+          "recipient": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+          "state": [
+            "Confirmed"
+          ]
+        },
+        "deployedCodeSha256": null,
+        "deployedCodeSize": null
+      },
+      {
+        "name": "reward_sac_instance",
+        "keyXdr": "AAAABgAAAAF1EORH0NSw6UWalEQNIVd3ZU9FgGEZgbpKk1IEDBDJjwAAABQAAAAB",
+        "status": "LIVE",
+        "observedLedger": 5160119,
+        "liveUntilLedger": 6703017,
+        "remainingLedgers": 1542898,
+        "lastModifiedLedger": 5147800,
+        "value": null,
+        "deployedCodeSha256": null,
+        "deployedCodeSize": null
+      },
+      {
+        "name": "reward_contract_balance",
+        "keyXdr": "AAAABgAAAAF1EORH0NSw6UWalEQNIVd3ZU9FgGEZgbpKk1IEDBDJjwAAABAAAAABAAAAAgAAAA8AAAAHQmFsYW5jZQAAAAASAAAAAdhreZsHfEOckHv6DbTTtYkyv+tzA7FTsvf3/lZ7C+omAAAAAQ==",
+        "status": "LIVE",
+        "observedLedger": 5160119,
+        "liveUntilLedger": 6703017,
+        "remainingLedgers": 1542898,
+        "lastModifiedLedger": 4882600,
+        "value": {
+          "amount": "900000000",
+          "authorized": true,
+          "clawback": false
+        },
+        "deployedCodeSha256": null,
+        "deployedCodeSize": null
+      },
+      {
+        "name": "byetery_code",
+        "keyXdr": "AAAAB8K8gLJtOhomWh1NGSO1A/ZVj918FIn4Gw3o9e4Y9s62",
+        "status": "LIVE",
+        "observedLedger": 5160119,
+        "liveUntilLedger": 6703017,
+        "remainingLedgers": 1542898,
+        "lastModifiedLedger": 5147800,
+        "value": null,
+        "deployedCodeSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+        "deployedCodeSize": 19242
+      }
+    ],
+    "simulations": [
+      {
+        "method": "get_config",
+        "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "ledger": 5160119,
+        "status": "SIMULATION_SUCCESS",
+        "error": null,
+        "minResourceFee": "14247",
+        "restorePreambleFee": null,
+        "restoreList": [],
+        "restoredFootprintKeys": [],
+        "transactionDataSha256": "42c14fe264aaee38e408c2f27ac98832a9bf35d7e83b89de86b401a4bee4a643",
+        "transactionDataExtension": "v0",
+        "values": [
+          {
+            "admin": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+            "reward_amount": "100000000",
+            "reward_token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+            "schema_version": 1,
+            "service": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+          }
+        ],
+        "transactionSubmitted": false
+      },
+      {
+        "method": "get_battery",
+        "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "ledger": 5160119,
+        "status": "SIMULATION_SUCCESS",
+        "error": null,
+        "minResourceFee": "16078",
+        "restorePreambleFee": null,
+        "restoreList": [],
+        "restoredFootprintKeys": [],
+        "transactionDataSha256": "e1a4870e00583fa60ac54d259a031b7146a1383c322db6c0d099550da3acebf4",
+        "transactionDataExtension": "v0",
+        "values": [
+          {
+            "collection_hash": "bd6f42412b5e1197096b5ec7e5426fee455db2ef8cedfd5ae6553ad66bb21da3",
+            "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+            "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+            "recycling_hash": "b857824e8dc74f3bfdb3b0eaf5193366474fe22f93b26f1d923822976f3f8906",
+            "registration_hash": "24d12cd5dd7550468d7ab03e13029da2d9bce6fe2b8b939eb8d3f80a3c6c5d87",
+            "request_id": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+            "reward_state": [
+              "Sent"
+            ],
+            "state": [
+              "Recycled"
+            ]
+          }
+        ],
+        "transactionSubmitted": false
+      },
+      {
+        "method": "get_request",
+        "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "ledger": 5160119,
+        "status": "SIMULATION_SUCCESS",
+        "error": null,
+        "minResourceFee": "14406",
+        "restorePreambleFee": null,
+        "restoreList": [],
+        "restoredFootprintKeys": [],
+        "transactionDataSha256": "32f5ea05f504882f7731437d2cd2c7aabac9d4b1149d406a6a53bae197ed9698",
+        "transactionDataExtension": "v0",
+        "values": [
+          {
+            "battery_id": "BYE-TN-D7DB910EE8BA",
+            "recipient": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+            "state": [
+              "Confirmed"
+            ]
+          }
+        ],
+        "transactionSubmitted": false
+      },
+      {
+        "method": "has_role",
+        "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "ledger": 5160119,
+        "status": "SIMULATION_SUCCESS",
+        "error": null,
+        "minResourceFee": "13749",
+        "restorePreambleFee": null,
+        "restoreList": [],
+        "restoredFootprintKeys": [],
+        "transactionDataSha256": "00600ca45f49134955d62eff7c6b45110717e3c1e89f90e3deb1baff8be10732",
+        "transactionDataExtension": "v0",
+        "values": [
+          true
+        ],
+        "transactionSubmitted": false
+      },
+      {
+        "method": "balance",
+        "contract": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+        "ledger": 5160119,
+        "status": "SIMULATION_SUCCESS",
+        "error": null,
+        "minResourceFee": "13048",
+        "restorePreambleFee": null,
+        "restoreList": [],
+        "restoredFootprintKeys": [],
+        "transactionDataSha256": "dc88efa4b7a31eb36462bbc706c2868a58a3432da1319c786083f9fa1903e4cc",
+        "transactionDataExtension": "v0",
+        "values": [
+          "900000000"
+        ],
+        "transactionSubmitted": false
+      }
+    ],
+    "signerFeeCapStroops": "50000000",
+    "transactionsSubmitted": 0,
+    "restoredEntries": 0,
+    "ttlExtensions": 0,
+    "signaturesCreated": 0,
+    "limits": [
+      "Scoped known entries only; not an exhaustive contract-storage inventory.",
+      "NOT_RETURNED_UNKNOWN is not proof of absence.",
+      "Simulated automatic restoration has no ledger effect.",
+      "Fees and TTLs are point-in-time observations, not production guarantees."
+    ]
+  },
+  "additionalTransactionsSubmitted": 0
+}
