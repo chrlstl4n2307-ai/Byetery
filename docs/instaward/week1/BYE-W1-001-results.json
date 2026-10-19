@@ -1,0 +1,1588 @@
+{
+  "task": "BYE-W1-001",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "date": "2026-10-19",
+  "timezone": "America/Santiago",
+  "capturedAtUtc": "2026-10-19T16:15:25.031Z",
+  "git": {
+    "branch": "instaward/d1-testnet-integration",
+    "head": "349ee3fd78104f3c249b3052b1cca402c9d99ff3",
+    "status": "?? scripts/bye-w1-001-readiness.mts\n?? scripts/bye-w1-001-readiness.test.mts\n?? tools/sync_obsidian.py",
+    "log": "349ee3f (HEAD -> instaward/d1-testnet-integration, tag: instaward-sprint-start-v1, origin/pre-sprint/voluntary-d1, origin/instaward/d1-testnet-integration, pre-sprint/voluntary-d1) chore(vol-004): restore and extend Testnet state readiness\ned0b773 test(vol-003): cover restart and reconciliation semantics\n17bfabd refactor(vol-003): split network work from transaction locks\n6b910ea db(vol-003): add private testnet transport storage\n5d6631b refactor(vol-003): add durable transaction identity types\n6b5eb50 docs(vol-003): propose durable transaction identity refactor\nf567278 test(vol-002): validate secure-store signer offline\n30937e8 research(vol-001): assess Testnet archival and TTL state\n4a1e6fd docs(vol): record voluntary development phase\n450c21b (tag: pre-instaward-baseline-v1, origin/codex/testnet-app-integration, codex/testnet-app-integration) chore(instaward): freeze pre-sprint baseline",
+    "sprintTag": "349ee3fd78104f3c249b3052b1cca402c9d99ff3",
+    "sprintTagObject": "8d87621b3c24fefaab4ea44771445007ba46e9a1",
+    "historicalTag": "450c21b151a0973064986327f09d55e4f36c43e0",
+    "historicalTagObject": "de9c9c284427aa339cb775a56ee5c3a27cb324fe"
+  },
+  "protectedSyncSha256": "48404b9431a9d955fc4af0b2eeaf9a59bb2fb0e9457eed73b4f2f66132a5e2da",
+  "network": "Stellar Testnet",
+  "rpc": "https://soroban-testnet.stellar.org",
+  "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+  "issuer": "GCHROKHXHL4L635J6Y6DWFFD5DDHABOAF4BP5TEUZDZQMW4XYS6DIDL7",
+  "signerCapStroops": "50000000",
+  "maintenanceTransactionsSubmitted": 0,
+  "businessTransactionsSubmitted": 0,
+  "rewardTransactionsSubmitted": 0,
+  "signaturesCreated": 0,
+  "productCodeChanged": false,
+  "contractModified": false,
+  "officialAcceptance": {
+    "D1": "0/12",
+    "D2": "0/6",
+    "D3": "0/5",
+    "total": "0/23"
+  },
+  "historicalComparison": {
+    "task": "VOL-004",
+    "classification": "VOLUNTARY PRE-SPRINT DEVELOPMENT",
+    "date": "2026-10-12",
+    "ledger": 5160119,
+    "path": "docs/voluntary/VOL-004-final-verification.json"
+  },
+  "readSimulations": [
+    {
+      "method": "get_config",
+      "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "ledger": 5280590,
+      "status": "SIMULATION_SUCCESS",
+      "error": null,
+      "minResourceFee": "7093",
+      "classicFeeAssumption": "10000",
+      "totalFeeAssumption": "17093",
+      "belowCap": true,
+      "restorePreamblePresent": false,
+      "restorePreambleFee": null,
+      "restoreList": [],
+      "resourceFee": "7093",
+      "resources": {
+        "footprint": {
+          "readOnly": [
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": "d86b799b077c439c907bfa0db4d3b58932bfeb7303b153b2f7f7fe567b0bea26"
+                },
+                "key": {
+                  "type": 20
+                },
+                "durability": 1
+              }
+            },
+            {
+              "type": 7,
+              "contractCode": {
+                "hash": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+              }
+            }
+          ],
+          "readWrite": []
+        },
+        "instructions": 605830,
+        "diskReadBytes": 0,
+        "writeBytes": 0
+      },
+      "cost": null,
+      "authorizationEntryCount": 0,
+      "authorizationEntries": [],
+      "values": [
+        {
+          "admin": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+          "reward_amount": "100000000",
+          "reward_token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+          "schema_version": 1,
+          "service": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+        }
+      ],
+      "stateChanges": [],
+      "signed": false,
+      "submitted": false,
+      "historicalVOL004Fee": "14247"
+    },
+    {
+      "method": "get_battery",
+      "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "ledger": 5280590,
+      "status": "SIMULATION_SUCCESS",
+      "error": null,
+      "minResourceFee": "8002",
+      "classicFeeAssumption": "10000",
+      "totalFeeAssumption": "18002",
+      "belowCap": true,
+      "restorePreamblePresent": false,
+      "restorePreambleFee": null,
+      "restoreList": [],
+      "resourceFee": "8002",
+      "resources": {
+        "footprint": {
+          "readOnly": [
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": "d86b799b077c439c907bfa0db4d3b58932bfeb7303b153b2f7f7fe567b0bea26"
+                },
+                "key": {
+                  "type": 16,
+                  "vec": [
+                    {
+                      "type": 15,
+                      "sym": {
+                        "bytes": "42617474657279"
+                      }
+                    },
+                    {
+                      "type": 14,
+                      "str": {
+                        "bytes": "4259452d544e2d443744423931304545384241"
+                      }
+                    }
+                  ]
+                },
+                "durability": 1
+              }
+            },
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": "d86b799b077c439c907bfa0db4d3b58932bfeb7303b153b2f7f7fe567b0bea26"
+                },
+                "key": {
+                  "type": 20
+                },
+                "durability": 1
+              }
+            },
+            {
+              "type": 7,
+              "contractCode": {
+                "hash": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+              }
+            }
+          ],
+          "readWrite": []
+        },
+        "instructions": 723555,
+        "diskReadBytes": 0,
+        "writeBytes": 0
+      },
+      "cost": null,
+      "authorizationEntryCount": 0,
+      "authorizationEntries": [],
+      "values": [
+        {
+          "collection_hash": "bd6f42412b5e1197096b5ec7e5426fee455db2ef8cedfd5ae6553ad66bb21da3",
+          "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+          "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+          "recycling_hash": "b857824e8dc74f3bfdb3b0eaf5193366474fe22f93b26f1d923822976f3f8906",
+          "registration_hash": "24d12cd5dd7550468d7ab03e13029da2d9bce6fe2b8b939eb8d3f80a3c6c5d87",
+          "request_id": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+          "reward_state": [
+            "Sent"
+          ],
+          "state": [
+            "Recycled"
+          ]
+        }
+      ],
+      "stateChanges": [],
+      "signed": false,
+      "submitted": false,
+      "historicalVOL004Fee": "16078"
+    },
+    {
+      "method": "get_request",
+      "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "ledger": 5280590,
+      "status": "SIMULATION_SUCCESS",
+      "error": null,
+      "minResourceFee": "7169",
+      "classicFeeAssumption": "10000",
+      "totalFeeAssumption": "17169",
+      "belowCap": true,
+      "restorePreamblePresent": false,
+      "restorePreambleFee": null,
+      "restoreList": [],
+      "resourceFee": "7169",
+      "resources": {
+        "footprint": {
+          "readOnly": [
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": "d86b799b077c439c907bfa0db4d3b58932bfeb7303b153b2f7f7fe567b0bea26"
+                },
+                "key": {
+                  "type": 16,
+                  "vec": [
+                    {
+                      "type": 15,
+                      "sym": {
+                        "bytes": "52657175657374"
+                      }
+                    },
+                    {
+                      "type": 13,
+                      "bytes": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864"
+                    }
+                  ]
+                },
+                "durability": 1
+              }
+            },
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": "d86b799b077c439c907bfa0db4d3b58932bfeb7303b153b2f7f7fe567b0bea26"
+                },
+                "key": {
+                  "type": 20
+                },
+                "durability": 1
+              }
+            },
+            {
+              "type": 7,
+              "contractCode": {
+                "hash": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+              }
+            }
+          ],
+          "readWrite": []
+        },
+        "instructions": 656413,
+        "diskReadBytes": 0,
+        "writeBytes": 0
+      },
+      "cost": null,
+      "authorizationEntryCount": 0,
+      "authorizationEntries": [],
+      "values": [
+        {
+          "battery_id": "BYE-TN-D7DB910EE8BA",
+          "recipient": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+          "state": [
+            "Confirmed"
+          ]
+        }
+      ],
+      "stateChanges": [],
+      "signed": false,
+      "submitted": false,
+      "historicalVOL004Fee": "14406"
+    },
+    {
+      "method": "has_role",
+      "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "ledger": 5280590,
+      "status": "SIMULATION_SUCCESS",
+      "error": null,
+      "minResourceFee": "6842",
+      "classicFeeAssumption": "10000",
+      "totalFeeAssumption": "16842",
+      "belowCap": true,
+      "restorePreamblePresent": false,
+      "restorePreambleFee": null,
+      "restoreList": [],
+      "resourceFee": "6842",
+      "resources": {
+        "footprint": {
+          "readOnly": [
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": "d86b799b077c439c907bfa0db4d3b58932bfeb7303b153b2f7f7fe567b0bea26"
+                },
+                "key": {
+                  "type": 16,
+                  "vec": [
+                    {
+                      "type": 15,
+                      "sym": {
+                        "bytes": "526f6c65"
+                      }
+                    },
+                    {
+                      "type": 18,
+                      "address": {
+                        "type": 0,
+                        "accountId": {
+                          "type": 0,
+                          "ed25519": "7980324fbcc63a0fe568c9fd047b0aaddf848367c7f3cefe716c42c42ef773ba"
+                        }
+                      }
+                    },
+                    {
+                      "type": 16,
+                      "vec": [
+                        {
+                          "type": 15,
+                          "sym": {
+                            "bytes": "436f6c6c6563746f72"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "durability": 1
+              }
+            },
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": "d86b799b077c439c907bfa0db4d3b58932bfeb7303b153b2f7f7fe567b0bea26"
+                },
+                "key": {
+                  "type": 20
+                },
+                "durability": 1
+              }
+            },
+            {
+              "type": 7,
+              "contractCode": {
+                "hash": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+              }
+            }
+          ],
+          "readWrite": []
+        },
+        "instructions": 632338,
+        "diskReadBytes": 0,
+        "writeBytes": 0
+      },
+      "cost": null,
+      "authorizationEntryCount": 0,
+      "authorizationEntries": [],
+      "values": [
+        true
+      ],
+      "stateChanges": [],
+      "signed": false,
+      "submitted": false,
+      "historicalVOL004Fee": "13749"
+    },
+    {
+      "method": "balance",
+      "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "ledger": 5280590,
+      "status": "SIMULATION_SUCCESS",
+      "error": null,
+      "minResourceFee": "6515",
+      "classicFeeAssumption": "10000",
+      "totalFeeAssumption": "16515",
+      "belowCap": true,
+      "restorePreamblePresent": false,
+      "restorePreambleFee": null,
+      "restoreList": [],
+      "resourceFee": "6515",
+      "resources": {
+        "footprint": {
+          "readOnly": [
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": "7510e447d0d4b0e9459a94440d215777654f4580611981ba4a9352040c10c98f"
+                },
+                "key": {
+                  "type": 16,
+                  "vec": [
+                    {
+                      "type": 15,
+                      "sym": {
+                        "bytes": "42616c616e6365"
+                      }
+                    },
+                    {
+                      "type": 18,
+                      "address": {
+                        "type": 1,
+                        "contractId": "d86b799b077c439c907bfa0db4d3b58932bfeb7303b153b2f7f7fe567b0bea26"
+                      }
+                    }
+                  ]
+                },
+                "durability": 1
+              }
+            },
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": "7510e447d0d4b0e9459a94440d215777654f4580611981ba4a9352040c10c98f"
+                },
+                "key": {
+                  "type": 20
+                },
+                "durability": 1
+              }
+            }
+          ],
+          "readWrite": []
+        },
+        "instructions": 184998,
+        "diskReadBytes": 0,
+        "writeBytes": 0
+      },
+      "cost": null,
+      "authorizationEntryCount": 0,
+      "authorizationEntries": [],
+      "values": [
+        "900000000"
+      ],
+      "stateChanges": [],
+      "signed": false,
+      "submitted": false,
+      "historicalVOL004Fee": "13048"
+    }
+  ],
+  "businessPreflights": [
+    {
+      "method": "register_battery",
+      "source": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+      "requiredActors": [
+        "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F"
+      ],
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        },
+        {
+          "name": "registration_hash",
+          "type": {
+            "type": 1006,
+            "bytesN": {
+              "n": 32
+            }
+          }
+        }
+      ],
+      "argumentXdrHashes": [
+        "0825c18dca4ef275b759199e61d06760f48824fd81e38918991596d5df44cd61",
+        "f40f84874e1ea153475f3233eac21383416b6b14c7af0d3560871fd21d72b9b4"
+      ],
+      "ledger": 5280590,
+      "status": "SIMULATION_SUCCESS",
+      "error": null,
+      "minResourceFee": "410723",
+      "classicFeeAssumption": "10000",
+      "totalFeeAssumption": "420723",
+      "belowCap": true,
+      "restorePreamblePresent": false,
+      "restorePreambleFee": null,
+      "restoreList": [],
+      "resourceFee": "410723",
+      "resources": {
+        "footprint": {
+          "readOnly": [
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": "d86b799b077c439c907bfa0db4d3b58932bfeb7303b153b2f7f7fe567b0bea26"
+                },
+                "key": {
+                  "type": 20
+                },
+                "durability": 1
+              }
+            },
+            {
+              "type": 7,
+              "contractCode": {
+                "hash": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+              }
+            }
+          ],
+          "readWrite": [
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": "d86b799b077c439c907bfa0db4d3b58932bfeb7303b153b2f7f7fe567b0bea26"
+                },
+                "key": {
+                  "type": 16,
+                  "vec": [
+                    {
+                      "type": 15,
+                      "sym": {
+                        "bytes": "42617474657279"
+                      }
+                    },
+                    {
+                      "type": 14,
+                      "str": {
+                        "bytes": "4259452d535052494e542d505245464c494748542d39333244453532373731"
+                      }
+                    }
+                  ]
+                },
+                "durability": 1
+              }
+            }
+          ]
+        },
+        "instructions": 819076,
+        "diskReadBytes": 0,
+        "writeBytes": 428
+      },
+      "cost": null,
+      "authorizationEntryCount": 1,
+      "authorizationEntries": [
+        {
+          "type": "sorobanCredentialsSourceAccount",
+          "address": null,
+          "function": "sorobanAuthorizedFunctionTypeContractFn",
+          "subInvocations": 0
+        }
+      ],
+      "values": [
+        {
+          "collection_hash": null,
+          "collector": null,
+          "recycler": null,
+          "recycling_hash": null,
+          "registration_hash": "256ff561f0c8688edfedb25eeed1ec4beccc9350069e01460d0f915ecf921100",
+          "request_id": null,
+          "reward_state": [
+            "NotEligible"
+          ],
+          "state": [
+            "Registered"
+          ]
+        }
+      ],
+      "stateChanges": [
+        {
+          "type": "created",
+          "keySha256": "21bcde3f4833f14b088e75420f20b3ccd9d4f4ff036457fd9513062b638dbb5f"
+        }
+      ],
+      "signed": false,
+      "submitted": false
+    },
+    {
+      "method": "open_return",
+      "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "requiredActors": [
+        "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+      ],
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        },
+        {
+          "name": "request_id",
+          "type": {
+            "type": 1006,
+            "bytesN": {
+              "n": 32
+            }
+          }
+        },
+        {
+          "name": "recipient",
+          "type": {
+            "type": 19
+          }
+        }
+      ],
+      "argumentXdrHashes": [
+        "0825c18dca4ef275b759199e61d06760f48824fd81e38918991596d5df44cd61",
+        "53e3fd6bd71ed85b2dc376a6bbf4b3eed70246e4012c077dea4c9553ee1ad5c4",
+        "4778a204ca2097b638650f154fd2aff79d76fcadfcd8cec9abf82caaf5a6f8bf"
+      ],
+      "ledger": 5280590,
+      "status": "SIMULATION_ERROR",
+      "error": "HostError: Error(Contract, #3)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #3)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #3)], data:[\"failing with contract error\", 3]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, open_return], data:[\"BYE-SPRINT-PREFLIGHT-932DE52771\", Bytes(6bb8384a0e9b27180e07b7c267dc917c1f969604f1917f148647252864ede0b3), GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ]\n",
+      "minResourceFee": null,
+      "classicFeeAssumption": "10000",
+      "totalFeeAssumption": null,
+      "belowCap": null,
+      "restorePreamblePresent": false,
+      "restorePreambleFee": null,
+      "restoreList": null,
+      "resourceFee": null,
+      "resources": null,
+      "cost": null,
+      "authorizationEntryCount": null,
+      "authorizationEntries": [],
+      "values": [],
+      "stateChanges": [],
+      "signed": false,
+      "submitted": false
+    },
+    {
+      "method": "confirm_collection",
+      "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "requiredActors": [
+        "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+        "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V"
+      ],
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        },
+        {
+          "name": "request_id",
+          "type": {
+            "type": 1006,
+            "bytesN": {
+              "n": 32
+            }
+          }
+        },
+        {
+          "name": "collector",
+          "type": {
+            "type": 19
+          }
+        },
+        {
+          "name": "evidence",
+          "type": {
+            "type": 2000,
+            "udt": {
+              "name": {
+                "bytes": "45766964656e6365"
+              }
+            }
+          }
+        }
+      ],
+      "argumentXdrHashes": [
+        "0825c18dca4ef275b759199e61d06760f48824fd81e38918991596d5df44cd61",
+        "53e3fd6bd71ed85b2dc376a6bbf4b3eed70246e4012c077dea4c9553ee1ad5c4",
+        "6eb729b649ee62b82ce2285e4185b226e516a8bec7fd1801bded657af5afdfb7",
+        "e2f16b5c09460bb93f1d2025a28d546865284dff4a59fb204f346c3bb2dcab8d"
+      ],
+      "ledger": 5280590,
+      "status": "SIMULATION_ERROR",
+      "error": "HostError: Error(Contract, #3)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #3)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #3)], data:[\"failing with contract error\", 3]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, confirm_collection], data:[\"BYE-SPRINT-PREFLIGHT-932DE52771\", Bytes(6bb8384a0e9b27180e07b7c267dc917c1f969604f1917f148647252864ede0b3), GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V, {battery_id: \"BYE-SPRINT-PREFLIGHT-932DE52771\", kind: [Collection], payload_hash: Bytes(2c3ef72c11cfbc375736036257de1b6748726e99c0c2a3a93c8bd1abbc79ad2f), request_id: Bytes(6bb8384a0e9b27180e07b7c267dc917c1f969604f1917f148647252864ede0b3), version: 1}]\n",
+      "minResourceFee": null,
+      "classicFeeAssumption": "10000",
+      "totalFeeAssumption": null,
+      "belowCap": null,
+      "restorePreamblePresent": false,
+      "restorePreambleFee": null,
+      "restoreList": null,
+      "resourceFee": null,
+      "resources": null,
+      "cost": null,
+      "authorizationEntryCount": null,
+      "authorizationEntries": [],
+      "values": [],
+      "stateChanges": [],
+      "signed": false,
+      "submitted": false
+    },
+    {
+      "method": "confirm_recycling",
+      "source": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+      "requiredActors": [
+        "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2"
+      ],
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        },
+        {
+          "name": "request_id",
+          "type": {
+            "type": 1006,
+            "bytesN": {
+              "n": 32
+            }
+          }
+        },
+        {
+          "name": "recycler",
+          "type": {
+            "type": 19
+          }
+        },
+        {
+          "name": "evidence",
+          "type": {
+            "type": 2000,
+            "udt": {
+              "name": {
+                "bytes": "45766964656e6365"
+              }
+            }
+          }
+        }
+      ],
+      "argumentXdrHashes": [
+        "0825c18dca4ef275b759199e61d06760f48824fd81e38918991596d5df44cd61",
+        "53e3fd6bd71ed85b2dc376a6bbf4b3eed70246e4012c077dea4c9553ee1ad5c4",
+        "2b00ecb18be540c5a17337979b637ae25cd545d502b537ab63fa47d7f1186eed",
+        "ba9de6244d37b0e123e228ee10d7304b1bddf561308d3725bf1db3fd09cb59ea"
+      ],
+      "ledger": 5280590,
+      "status": "SIMULATION_ERROR",
+      "error": "HostError: Error(Contract, #3)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #3)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #3)], data:[\"failing with contract error\", 3]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, confirm_recycling], data:[\"BYE-SPRINT-PREFLIGHT-932DE52771\", Bytes(6bb8384a0e9b27180e07b7c267dc917c1f969604f1917f148647252864ede0b3), GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2, {battery_id: \"BYE-SPRINT-PREFLIGHT-932DE52771\", kind: [Recycling], payload_hash: Bytes(2c3ef72c11cfbc375736036257de1b6748726e99c0c2a3a93c8bd1abbc79ad2f), request_id: Bytes(6bb8384a0e9b27180e07b7c267dc917c1f969604f1917f148647252864ede0b3), version: 1}]\n",
+      "minResourceFee": null,
+      "classicFeeAssumption": "10000",
+      "totalFeeAssumption": null,
+      "belowCap": null,
+      "restorePreamblePresent": false,
+      "restorePreambleFee": null,
+      "restoreList": null,
+      "resourceFee": null,
+      "resources": null,
+      "cost": null,
+      "authorizationEntryCount": null,
+      "authorizationEntries": [],
+      "values": [],
+      "stateChanges": [],
+      "signed": false,
+      "submitted": false
+    },
+    {
+      "method": "pay_reward",
+      "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "requiredActors": [
+        "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+      ],
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        }
+      ],
+      "argumentXdrHashes": [
+        "0825c18dca4ef275b759199e61d06760f48824fd81e38918991596d5df44cd61"
+      ],
+      "ledger": 5280591,
+      "status": "SIMULATION_ERROR",
+      "error": "HostError: Error(Contract, #3)\n\nEvent log (newest first):\n   0: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #3)], data:\"escalating error to VM trap from failed host function call: fail_with_error\"\n   1: [Diagnostic Event] contract:CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, topics:[error, Error(Contract, #3)], data:[\"failing with contract error\", 3]\n   2: [Diagnostic Event] topics:[fn_call, CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON, pay_reward], data:\"BYE-SPRINT-PREFLIGHT-932DE52771\"\n",
+      "minResourceFee": null,
+      "classicFeeAssumption": "10000",
+      "totalFeeAssumption": null,
+      "belowCap": null,
+      "restorePreamblePresent": false,
+      "restorePreambleFee": null,
+      "restoreList": null,
+      "resourceFee": null,
+      "resources": null,
+      "cost": null,
+      "authorizationEntryCount": null,
+      "authorizationEntries": [],
+      "values": [],
+      "stateChanges": [],
+      "signed": false,
+      "submitted": false
+    }
+  ],
+  "stopReasons": [],
+  "networkState": {
+    "id": "324e4fba7cf2c3be87afbf4f41637ada5b5543804ff2f404f10a2d35dbf686ae",
+    "protocolVersion": 29,
+    "sequence": 5280587,
+    "closeTime": "1792426522",
+    "passphrase": "Test SDF Network ; September 2015",
+    "protocol": 29,
+    "rpcVersion": "29.0.1-055dc9c7a9a9e038c6807a555c09bd94b85c9e2c",
+    "capturedAtUtc": "2026-10-19T16:15:38.709Z"
+  },
+  "networkSettings": {
+    "ledger": 5280590,
+    "entries": [
+      {
+        "configSettingID": 10,
+        "stateArchivalSettings": {
+          "maxEntryTtl": 3110400,
+          "minTemporaryTtl": 720,
+          "minPersistentTtl": 120960,
+          "persistentRentRateDenominator": "1215",
+          "tempRentRateDenominator": "2430",
+          "maxEntriesToArchive": 1000,
+          "liveSorobanStateSizeWindowSampleSize": 30,
+          "liveSorobanStateSizeWindowSamplePeriod": 64,
+          "evictionScanSize": 500000,
+          "startingEvictionScanLevel": 7
+        }
+      },
+      {
+        "configSettingID": 16,
+        "contractScpTiming": {
+          "ledgerTargetCloseTimeMilliseconds": 5000,
+          "nominationTimeoutInitialMilliseconds": 1000,
+          "nominationTimeoutIncrementMilliseconds": 1000,
+          "ballotTimeoutInitialMilliseconds": 1000,
+          "ballotTimeoutIncrementMilliseconds": 1000
+        }
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "name": "byetery_instance",
+      "status": "LIVE",
+      "observedLedger": 5280590,
+      "liveUntilLedger": 6703017,
+      "remainingLedgers": 1422427,
+      "lastModifiedLedger": 5147800,
+      "fingerprint": "3a07fe1074c56e9cdc8730c9c80d4eda46dff09e9d468dae1a830bb638da2e14",
+      "historicalFingerprint": "3a07fe1074c56e9cdc8730c9c80d4eda46dff09e9d468dae1a830bb638da2e14",
+      "unchanged": true,
+      "value": null
+    },
+    {
+      "name": "collector_role",
+      "status": "LIVE",
+      "observedLedger": 5280590,
+      "liveUntilLedger": 6703017,
+      "remainingLedgers": 1422427,
+      "lastModifiedLedger": 5147800,
+      "fingerprint": "cd2662154e6d76b2b2b92e70c0cac3ccf534f9b74eb5b89819ec509083d00a50",
+      "historicalFingerprint": "cd2662154e6d76b2b2b92e70c0cac3ccf534f9b74eb5b89819ec509083d00a50",
+      "unchanged": true,
+      "value": true
+    },
+    {
+      "name": "recycler_role",
+      "status": "LIVE",
+      "observedLedger": 5280590,
+      "liveUntilLedger": 6703017,
+      "remainingLedgers": 1422427,
+      "lastModifiedLedger": 5147800,
+      "fingerprint": "cd2662154e6d76b2b2b92e70c0cac3ccf534f9b74eb5b89819ec509083d00a50",
+      "historicalFingerprint": "cd2662154e6d76b2b2b92e70c0cac3ccf534f9b74eb5b89819ec509083d00a50",
+      "unchanged": true,
+      "value": true
+    },
+    {
+      "name": "historical_battery",
+      "status": "LIVE",
+      "observedLedger": 5280590,
+      "liveUntilLedger": 6703017,
+      "remainingLedgers": 1422427,
+      "lastModifiedLedger": 5147800,
+      "fingerprint": "224631e784dae8837114671fc77e8fafb62ec502e5eab07432b686a69c01db4e",
+      "historicalFingerprint": "224631e784dae8837114671fc77e8fafb62ec502e5eab07432b686a69c01db4e",
+      "unchanged": true,
+      "value": {
+        "collection_hash": "bd6f42412b5e1197096b5ec7e5426fee455db2ef8cedfd5ae6553ad66bb21da3",
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+        "recycling_hash": "b857824e8dc74f3bfdb3b0eaf5193366474fe22f93b26f1d923822976f3f8906",
+        "registration_hash": "24d12cd5dd7550468d7ab03e13029da2d9bce6fe2b8b939eb8d3f80a3c6c5d87",
+        "request_id": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+        "reward_state": [
+          "Sent"
+        ],
+        "state": [
+          "Recycled"
+        ]
+      }
+    },
+    {
+      "name": "historical_request",
+      "status": "LIVE",
+      "observedLedger": 5280590,
+      "liveUntilLedger": 6703017,
+      "remainingLedgers": 1422427,
+      "lastModifiedLedger": 5147800,
+      "fingerprint": "1dbb6d1d0987db99eff9c7ba21805d8a67f633f47eb166d611bb296780e77c75",
+      "historicalFingerprint": "1dbb6d1d0987db99eff9c7ba21805d8a67f633f47eb166d611bb296780e77c75",
+      "unchanged": true,
+      "value": {
+        "battery_id": "BYE-TN-D7DB910EE8BA",
+        "recipient": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+        "state": [
+          "Confirmed"
+        ]
+      }
+    },
+    {
+      "name": "reward_sac_instance",
+      "status": "LIVE",
+      "observedLedger": 5280590,
+      "liveUntilLedger": 6703017,
+      "remainingLedgers": 1422427,
+      "lastModifiedLedger": 5147800,
+      "fingerprint": "e1c1bd2353f43f00b1d4ee2b904730fb3998ce7d8bc8bf65b8d42b97ba44604d",
+      "historicalFingerprint": "e1c1bd2353f43f00b1d4ee2b904730fb3998ce7d8bc8bf65b8d42b97ba44604d",
+      "unchanged": true,
+      "value": null
+    },
+    {
+      "name": "reward_contract_balance",
+      "status": "LIVE",
+      "observedLedger": 5280590,
+      "liveUntilLedger": 6703017,
+      "remainingLedgers": 1422427,
+      "lastModifiedLedger": 4882600,
+      "fingerprint": "8729386f8efe3bb53258d830e24c05d4c8c2e200db031277ea08cfbc7e2ea1c5",
+      "historicalFingerprint": "8729386f8efe3bb53258d830e24c05d4c8c2e200db031277ea08cfbc7e2ea1c5",
+      "unchanged": true,
+      "value": {
+        "amount": "900000000",
+        "authorized": true,
+        "clawback": false
+      }
+    },
+    {
+      "name": "byetery_code",
+      "status": "LIVE",
+      "observedLedger": 5280590,
+      "liveUntilLedger": 6703017,
+      "remainingLedgers": 1422427,
+      "lastModifiedLedger": 5147800,
+      "fingerprint": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+      "historicalFingerprint": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+      "unchanged": true,
+      "value": null
+    }
+  ],
+  "fingerprints": {
+    "ledger": 5280590,
+    "values": {
+      "byetery_instance": "3a07fe1074c56e9cdc8730c9c80d4eda46dff09e9d468dae1a830bb638da2e14",
+      "collector_role": "cd2662154e6d76b2b2b92e70c0cac3ccf534f9b74eb5b89819ec509083d00a50",
+      "recycler_role": "cd2662154e6d76b2b2b92e70c0cac3ccf534f9b74eb5b89819ec509083d00a50",
+      "historical_battery": "224631e784dae8837114671fc77e8fafb62ec502e5eab07432b686a69c01db4e",
+      "historical_request": "1dbb6d1d0987db99eff9c7ba21805d8a67f633f47eb166d611bb296780e77c75",
+      "reward_sac_instance": "e1c1bd2353f43f00b1d4ee2b904730fb3998ce7d8bc8bf65b8d42b97ba44604d",
+      "reward_contract_balance": "8729386f8efe3bb53258d830e24c05d4c8c2e200db031277ea08cfbc7e2ea1c5",
+      "byetery_code": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+    }
+  },
+  "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "wasmMatches": true,
+  "assetIdentity": {
+    "code": "GREENTEST",
+    "issuer": "GCHROKHXHL4L635J6Y6DWFFD5DDHABOAF4BP5TEUZDZQMW4XYS6DIDL7",
+    "derivedSac": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+    "matches": true
+  },
+  "businessStateUnchanged": true,
+  "contractBalance": {
+    "observedLedger": 5280590,
+    "baseUnits": "900000000",
+    "decimals": 7,
+    "greentest": "90"
+  },
+  "config": {
+    "admin": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+    "reward_amount": "100000000",
+    "reward_token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+    "schema_version": 1,
+    "service": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+  },
+  "ttl": {
+    "deadline": "2026-11-13",
+    "bufferDays": 7,
+    "requiredThroughExclusive": "2026-11-21T00:00:00-03:00",
+    "cadenceMilliseconds": 5000,
+    "targetLedger": 5841283,
+    "earliestLiveUntil": 6703017,
+    "remainingLedgers": 1422430,
+    "adequate": true,
+    "estimatedLiveUntilUtc": "2027-01-09T23:51:12.000Z",
+    "estimateLimit": "Projection at on-chain target cadence, not a guarantee; actual cadence, resets and future settings can differ."
+  },
+  "accounts": [
+    {
+      "role": "admin",
+      "address": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+      "sequence": "20970216477425669",
+      "balanceStroops": "99953154529",
+      "observedLedger": 5280590,
+      "purpose": "Existing documented admin signer; source for corresponding methods where applicable",
+      "dedicated": false,
+      "externalManualUse": "UNCONFIRMED; SQL lease cannot fence external/manual Stellar submissions"
+    },
+    {
+      "role": "service",
+      "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "sequence": "20970220772392963",
+      "balanceStroops": "99999783304",
+      "observedLedger": 5280590,
+      "purpose": "Existing documented service signer; source for corresponding methods where applicable",
+      "dedicated": false,
+      "externalManualUse": "UNCONFIRMED; SQL lease cannot fence external/manual Stellar submissions"
+    },
+    {
+      "role": "collector",
+      "address": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+      "sequence": "20970225067360256",
+      "balanceStroops": "100000000000",
+      "observedLedger": 5280590,
+      "purpose": "Existing documented collector signer; source for corresponding methods where applicable",
+      "dedicated": false,
+      "externalManualUse": "UNCONFIRMED; SQL lease cannot fence external/manual Stellar submissions"
+    },
+    {
+      "role": "recycler",
+      "address": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+      "sequence": "20970233657294849",
+      "balanceStroops": "99999960266",
+      "observedLedger": 5280590,
+      "purpose": "Existing documented recycler signer; source for corresponding methods where applicable",
+      "dedicated": false,
+      "externalManualUse": "UNCONFIRMED; SQL lease cannot fence external/manual Stellar submissions"
+    },
+    {
+      "role": "recipient",
+      "address": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+      "sequence": "20970242247229443",
+      "balanceStroops": "99017039163",
+      "observedLedger": 5280590,
+      "purpose": "Historical recipient and VOL-004 maintenance payer; not configured app signer",
+      "dedicated": false,
+      "externalManualUse": "UNCONFIRMED; SQL lease cannot fence external/manual Stellar submissions"
+    }
+  ],
+  "sourceSafety": "Future dispatch rereads authoritative sequence immediately before broadcast. Drift from persisted envelope => NO BROADCAST / NO auto reprepare / reviewed resolution. This probe assumes no sequence reservation and sends nothing.",
+  "deployedAbi": [
+    {
+      "name": "has_role",
+      "parameters": [
+        {
+          "name": "actor",
+          "type": {
+            "type": 19
+          }
+        },
+        {
+          "name": "actor_role",
+          "type": {
+            "type": 2000,
+            "udt": {
+              "name": {
+                "bytes": "4163746f72526f6c65"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "set_role",
+      "parameters": [
+        {
+          "name": "actor",
+          "type": {
+            "type": 19
+          }
+        },
+        {
+          "name": "actor_role",
+          "type": {
+            "type": 2000,
+            "udt": {
+              "name": {
+                "bytes": "4163746f72526f6c65"
+              }
+            }
+          }
+        },
+        {
+          "name": "enabled",
+          "type": {
+            "type": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "get_config",
+      "parameters": []
+    },
+    {
+      "name": "pay_reward",
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        }
+      ]
+    },
+    {
+      "name": "get_battery",
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        }
+      ]
+    },
+    {
+      "name": "get_request",
+      "parameters": [
+        {
+          "name": "request_id",
+          "type": {
+            "type": 1006,
+            "bytesN": {
+              "n": 32
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "open_return",
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        },
+        {
+          "name": "request_id",
+          "type": {
+            "type": 1006,
+            "bytesN": {
+              "n": 32
+            }
+          }
+        },
+        {
+          "name": "recipient",
+          "type": {
+            "type": 19
+          }
+        }
+      ]
+    },
+    {
+      "name": "__constructor",
+      "parameters": [
+        {
+          "name": "admin",
+          "type": {
+            "type": 19
+          }
+        },
+        {
+          "name": "service",
+          "type": {
+            "type": 19
+          }
+        },
+        {
+          "name": "reward_token",
+          "type": {
+            "type": 19
+          }
+        },
+        {
+          "name": "reward_amount",
+          "type": {
+            "type": 11
+          }
+        }
+      ]
+    },
+    {
+      "name": "cancel_return",
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        },
+        {
+          "name": "request_id",
+          "type": {
+            "type": 1006,
+            "bytesN": {
+              "n": 32
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "register_battery",
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        },
+        {
+          "name": "registration_hash",
+          "type": {
+            "type": 1006,
+            "bytesN": {
+              "n": 32
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "confirm_recycling",
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        },
+        {
+          "name": "request_id",
+          "type": {
+            "type": 1006,
+            "bytesN": {
+              "n": 32
+            }
+          }
+        },
+        {
+          "name": "recycler",
+          "type": {
+            "type": 19
+          }
+        },
+        {
+          "name": "evidence",
+          "type": {
+            "type": 2000,
+            "udt": {
+              "name": {
+                "bytes": "45766964656e6365"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "confirm_collection",
+      "parameters": [
+        {
+          "name": "battery_id",
+          "type": {
+            "type": 16
+          }
+        },
+        {
+          "name": "request_id",
+          "type": {
+            "type": 1006,
+            "bytesN": {
+              "n": 32
+            }
+          }
+        },
+        {
+          "name": "collector",
+          "type": {
+            "type": 19
+          }
+        },
+        {
+          "name": "evidence",
+          "type": {
+            "type": 2000,
+            "udt": {
+              "name": {
+                "bytes": "45766964656e6365"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "syntheticIds": {
+    "batteryId": "BYE-SPRINT-PREFLIGHT-932DE52771",
+    "requestId": "6bb8384a0e9b27180e07b7c267dc917c1f969604f1917f148647252864ede0b3",
+    "registrationHash": "256ff561f0c8688edfedb25eeed1ec4beccc9350069e01460d0f915ecf921100",
+    "payloadHash": "2c3ef72c11cfbc375736036257de1b6748726e99c0c2a3a93c8bd1abbc79ad2f"
+  },
+  "syntheticStateAfter": {
+    "ledger": 5280591,
+    "returnedEntries": 0,
+    "note": "No simulation state persisted. Empty reply is not generally proof of nonexistence/permission to reuse IDs; IDs remain reserved as probe fixtures."
+  },
+  "afterFingerprints": {
+    "ledger": 5280591,
+    "values": {
+      "byetery_instance": "3a07fe1074c56e9cdc8730c9c80d4eda46dff09e9d468dae1a830bb638da2e14",
+      "collector_role": "cd2662154e6d76b2b2b92e70c0cac3ccf534f9b74eb5b89819ec509083d00a50",
+      "recycler_role": "cd2662154e6d76b2b2b92e70c0cac3ccf534f9b74eb5b89819ec509083d00a50",
+      "historical_battery": "224631e784dae8837114671fc77e8fafb62ec502e5eab07432b686a69c01db4e",
+      "historical_request": "1dbb6d1d0987db99eff9c7ba21805d8a67f633f47eb166d611bb296780e77c75",
+      "reward_sac_instance": "e1c1bd2353f43f00b1d4ee2b904730fb3998ce7d8bc8bf65b8d42b97ba44604d",
+      "reward_contract_balance": "8729386f8efe3bb53258d830e24c05d4c8c2e200db031277ea08cfbc7e2ea1c5",
+      "byetery_code": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+    }
+  },
+  "unchangedAfterPreflights": true,
+  "capDecision": "UNCHANGED 50000000; FULL ASSESSMENT PARTIAL, missing successful stateful preflights",
+  "overall": "PARTIAL",
+  "maintenanceRequired": false,
+  "limits": [
+    "Known eight-entry inventory, not all storage or all future D1 battery/request entries.",
+    "Simulations do not persist prior calls. Fresh fixture cannot traverse dependent states without separately authorized on-chain preparation or a clearly labeled local fork.",
+    "Error simulations provide no usable success fee/authorization list; never substitute zero or historical fees.",
+    "No real signing, signing-helper access or submit path. Native helper tests only; historical offline signing not replayed.",
+    "Recording-mode requirements are not proof of signed execution or independent human custodians.",
+    "No D1 acceptance review and no BYE-W1-002 implementation."
+  ],
+  "evidencePolicy": "Allowlisted public network identifiers/timing only; raw ledger metadata omitted because it can contain unrelated transactions. No signed envelopes, auth XDR or signatures retained.",
+  "checklist": [
+    {
+      "number": 1,
+      "check": "Sprint branch verified",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 2,
+      "check": "Sprint-start tag verified",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 3,
+      "check": "Historical baseline untouched",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 4,
+      "check": "No unexplained worktree changes",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 5,
+      "check": "Correct Stellar Testnet verified",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 6,
+      "check": "Latest ledger recorded",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 7,
+      "check": "Contract code live",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 8,
+      "check": "Contract instance live",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 9,
+      "check": "Collector role live",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 10,
+      "check": "Recycler role live",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 11,
+      "check": "Historical battery readable/live",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 12,
+      "check": "Historical request readable/live",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 13,
+      "check": "Reward SAC readable/live",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 14,
+      "check": "GREENTEST contract balance verified",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 15,
+      "check": "TTL covers sprint deadline + buffer",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 16,
+      "check": "WASM SHA256 matches",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 17,
+      "check": "Business-state fingerprints unchanged",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 18,
+      "check": "Relevant source account state recorded",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 19,
+      "check": "get_config simulation PASS",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 20,
+      "check": "get_battery simulation PASS",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 21,
+      "check": "get_request simulation PASS",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 22,
+      "check": "has_role simulation PASS",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 23,
+      "check": "balance simulation PASS",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "number": 24,
+      "check": "Five mutation preflights assessed",
+      "status": "PARTIAL",
+      "reason": "Five calls attempted against live Testnet. Register succeeds; four require predecessor state not persisted by simulation. Fees and RPC dual auth unavailable."
+    },
+    {
+      "number": 25,
+      "check": "Signer-cap/readiness decision documented",
+      "status": "PARTIAL",
+      "reason": "Decision is documented and cap unchanged. Full suitability cannot be established for all five normal operations with four success fees unavailable."
+    }
+  ],
+  "checklistSummary": {
+    "PASS": 23,
+    "PARTIAL": 2,
+    "BLOCKED": 0
+  },
+  "dualAuthorization": {
+    "staticRequiredActors": [
+      "SERVICE",
+      "COLLECTOR"
+    ],
+    "source": "contracts/byetery-contract/src/lib.rs:283-284",
+    "sourceActorAssumption": "SERVICE transaction source; COLLECTOR address authorization",
+    "observedSuccessfulRpcEntries": null,
+    "result": "PARTIAL: two require_auth calls verified in frozen code/ABI; fresh collection simulation failed before success auth output. No assertion of two observed RPC entries or human custody."
+  },
+  "capAssessment": {
+    "capStroops": "50000000",
+    "changed": false,
+    "successfulBusinessSimulations": 1,
+    "totalBusinessSimulations": 5,
+    "highestObservedMinResourceFee": "410723",
+    "highestObservedTotalWithClassic10000": "420723",
+    "method": "register_battery",
+    "allNormalOperationsBelowCap": null,
+    "decision": "UNCHANGED / PARTIAL; do not raise cap, do not infer unavailable fees from read calls or contract-error probes."
+  },
+  "maintenanceDecision": {
+    "requiredNow": false,
+    "basis": "All eight known entries live, unchanged, and TTL sufficient through whole 2026-11-20 buffer day. Do not repeat pre-sprint maintenance.",
+    "submitted": 0
+  },
+  "readinessBreakdown": {
+    "networkAndKnownState": "PASS",
+    "ttl": "PASS",
+    "integrity": "PASS",
+    "reads": "PASS",
+    "statefulMutationFeesAndDualAuth": "PARTIAL",
+    "overall": "PARTIAL"
+  },
+  "tests": {
+    "readinessGuards": "7/7 PASS",
+    "vol001ReadOnlyGuards": "5/5 PASS",
+    "vol004MaintenanceGuards": "4/4 PASS",
+    "focusedCombined": "16/16 PASS",
+    "signerNative": "18/18 PASS (no actual signing, Secure Store access or broadcast)",
+    "baselineSuites": "No repeat of expensive product suites: production/contract/helper sources unchanged. Activation baseline PASS earlier 2026-10-19 is historical support only.",
+    "gate": "git diff --check and secret audit required before evidence commit/push; results recorded in report/Notion closure."
+  },
+  "sources": {
+    "abi": "ABI decoded by installed SDK Spec.fromWasm from currently fetched deployed code; hash matches frozen WASM.",
+    "contract": "contracts/byetery-contract/src/lib.rs",
+    "priorVol004": "docs/voluntary/VOL-004-final-verification.json",
+    "officialSimulation": "https://developers.stellar.org/docs/data/apis/rpc/api-reference/methods/simulateTransaction",
+    "officialRestoration": "https://developers.stellar.org/docs/learn/fundamentals/contract-development/storage/state-archival#contract-data-automatic-restoration",
+    "raven": "stellarDocs.search_soroban_contract_docs; observed 2026-10-19T16:11:02.047Z; restoration confirmed, no deployment advice overriding invariants."
+  },
+  "remainingBlocker": "Fresh-ID successor states do not exist on-chain. Public simulateTransaction does not persist the previous simulation or document state-override input. Four methods return BatteryNotFound (#3); no success fee/dual-auth output. Owner-reviewed path for future authorized stateful fixtures required before claiming complete readiness.",
+  "minimalProposal": "No contract/cap change. In separately authorized BYE-W1-002 scope, define a fresh isolated fixture and obtain each predecessor state through explicitly approved lifecycle transactions, then simulate next operation and validate fees/auth before signing/sending. No such transaction is authorized or performed here. A local fork would need separate scope and cannot be labeled live-RPC readiness.",
+  "nextProposedTask": "BYE-W1-002 — Real TestnetStellarService Integration (NOT STARTED; resolve readiness scope limitation by owner review first)",
+  "finalEvidenceSourceHashes": {
+    "scripts/bye-w1-001-readiness.mts": "ca0f10e03ef7dec3915406328617920ad85a25fe8506db34e9980413355c1674",
+    "scripts/bye-w1-001-readiness.test.mts": "6069892c5e30fff4128c8161fbe365ac4bdeb2746683200feba3a39f82f505a4"
+  },
+  "sourceHashNote": "Hashes identify final published source/test files. The network-only allowlist serializer was tightened after initial capture; unsolicited public header/ledger metadata were removed offline, preserving all required observed values. No second RPC run was needed."
+}
