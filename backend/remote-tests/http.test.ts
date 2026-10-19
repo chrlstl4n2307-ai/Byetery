@@ -102,7 +102,8 @@ test('remote-dev HTTP integration (Supabase DEV + real loopback HTTP + durable M
     await t.test('new private tables have forced restrictive RLS and no browser grants',async()=>{
       await f.repo.transaction(async db=>{
         const tables=(await db.query(`select c.oid,c.relname,c.relrowsecurity,c.relforcerowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='api_private' and c.relkind='r'`)).rows;
-        assert.equal(tables.length,5);
+        assert.deepEqual(tables.map(r=>r.relname).sort(),['idempotency','memberships','mock_runtime','operation_transport','wallet_challenges',
+          'testnet_work','testnet_source_leases','testnet_envelopes','testnet_observations'].sort());
         for(const row of tables){assert.ok(row.relrowsecurity&&row.relforcerowsecurity);for(const role of ['anon','authenticated']){
           const privileges=(await db.query("select has_table_privilege($1,$2::oid,'SELECT,INSERT,UPDATE,DELETE') allowed",[role,row.oid])).rows[0];assert.equal(privileges.allowed,false);
         }}

@@ -46,7 +46,8 @@ export function api(auth: SupabaseAuth, coordinator: Coordinator): Server {
     }
     if(reply.body.error) {
       const code=(reply.body.error as {code:string}).code;
-      reply.body={source:coordinator.repo.mode,error:{code,message:reply.status>=500?'Service could not complete this request.':'Request rejected: '+code,requestId}};
+      reply.body={source:coordinator.repo.mode,...(typeof reply.body.operationId==='string'?{operationId:reply.body.operationId}:{}),
+        error:{code,message:reply.status>=500?'Service could not complete this request.':'Request rejected: '+code,requestId}};
     }
     res.writeHead(reply.status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
       'X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; frame-ancestors 'none'",'X-Request-Id':requestId});

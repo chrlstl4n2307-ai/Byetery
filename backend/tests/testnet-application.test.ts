@@ -66,6 +66,7 @@ test('real HTTP path queues authenticated Testnet operation and preserves it acr
     assert.equal((await call(false)).status,401);
     const response=await call(true);const firstBody=await response.json();assert.equal(response.status,503,JSON.stringify(firstBody));assert.equal(firstBody.source,'TESTNET');
     const rows=await f.db.query<{id:string}>("select id from app_private.stellar_operations where deployment_id=$1",[f.deploymentId]);assert.equal(rows.rows.length,1);
+    assert.equal(firstBody.operationId,rows.rows[0].id);
     await call(true);assert.equal((await f.db.query('select * from app_private.stellar_operations')).rows.length,1);
     assert.equal((await f.db.query('select * from api_private.mock_runtime')).rows.length,0);
     assert.equal((await f.db.query('select * from api_private.testnet_envelopes')).rows.length,0);
