@@ -93,3 +93,5 @@ La demo automatizada completa se ejecuta con `npm run demo:visual` después del 
 Selección explícita en servidor, MOCK preservado y contrato congelado. Ver
 [arquitectura, configuración y gates](docs/instaward/week1/BYE-W1-002-INTEGRATION.md).
 La implementación y los tests no equivalen a aceptación ni a un ciclo Testnet completo.
+El [informe de ejecución](docs/instaward/week1/BYE-W1-002-REPORT.md) documenta el
+único registro real autorizado y el preflight de devolución sin envío.

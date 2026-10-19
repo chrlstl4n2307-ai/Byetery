@@ -1,0 +1,186 @@
+{
+  "stage": "COMPLETE",
+  "classification": "OFFICIAL_INSTAWARD_SPRINT",
+  "task": "BYE-W1-002",
+  "candidate": {
+    "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+    "batteryId": "BYE-W1-002-64257020134D4A0F",
+    "requestId": "a9cbc044f514c00e246720b7380a375d0aa4a6e54ad55221a1e8704321261cc0",
+    "idempotencyKey": "96279fd5-7f6f-4e09-81da-8a8e8c37abaf",
+    "recipient": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+    "metadata": {
+      "classification": "OFFICIAL_INSTAWARD_SPRINT",
+      "task": "BYE-W1-002",
+      "fixture": true,
+      "evidenceNonce": "d428aa566f765db972d5dc1006f74f66",
+      "createdAt": "2026-10-19T17:03:44.658Z",
+      "type": "Sprint API registration fixture"
+    }
+  },
+  "gate": {
+    "observedAt": "2026-10-19T17:21:32.761Z",
+    "implementationHead": "339fec02e500ac765b8ce68bb8a019cd4bcf4ae4",
+    "source": "TESTNET",
+    "network": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+    "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+    "wasm": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+    "stateReady": true,
+    "latestLedger": 5281380,
+    "historicalBattery": {
+      "state": "RECYCLED",
+      "rewardState": "SENT",
+      "registrationHash": "24d12cd5dd7550468d7ab03e13029da2d9bce6fe2b8b939eb8d3f80a3c6c5d87",
+      "requestId": "aac70a9546fb6197234bc65d467e19d24e008733ba785d111155af90c7cf9864",
+      "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+      "collectionHash": "bd6f42412b5e1197096b5ec7e5426fee455db2ef8cedfd5ae6553ad66bb21da3",
+      "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+      "recyclingHash": "b857824e8dc74f3bfdb3b0eaf5193366474fe22f93b26f1d923822976f3f8906"
+    },
+    "rewardAmount": "100000000",
+    "contractTokenBalance": "900000000",
+    "feeCap": "50000000",
+    "sourceAccount": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+    "sourceSequence": "20970216477425669",
+    "sourceBalance": "99953154529",
+    "sourceAccountUse": "SHARED_OR_MANUAL_USAGE_UNCONFIRMED; treat as shared; final sequence recheck required",
+    "dedicatedSourceLimitation": "Current frozen ADMIN and signer allowlist require the existing admin source for registration.",
+    "freshBatteryId": "BYE-W1-002-64257020134D4A0F",
+    "freshRequestProbeId": "a9cbc044f514c00e246720b7380a375d0aa4a6e54ad55221a1e8704321261cc0",
+    "recipient": "GCOEEZR6CA4TU2WK7ZNAS6AJGHQH7NGYWKO7HZ3HQIF7EJATGLBNKOUZ",
+    "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+    "simulation": {
+      "resourceFee": "406952",
+      "totalFee": "416952",
+      "authRequirements": [
+        "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F"
+      ],
+      "sourceSequence": "20970216477425669",
+      "sourceBalance": "99953154529",
+      "ledger": 5281381
+    },
+    "requestProbePurpose": "SIMULATION_ONLY; no wallet verification or application return association claimed"
+  },
+  "implementationHead": "339fec02e500ac765b8ce68bb8a019cd4bcf4ae4",
+  "apiRequest": {
+    "method": "POST",
+    "path": "/api/batteries",
+    "idempotencyKey": "96279fd5-7f6f-4e09-81da-8a8e8c37abaf",
+    "body": {
+      "batteryId": "BYE-W1-002-64257020134D4A0F",
+      "metadata": {
+        "classification": "OFFICIAL_INSTAWARD_SPRINT",
+        "task": "BYE-W1-002",
+        "fixture": true,
+        "evidenceNonce": "d428aa566f765db972d5dc1006f74f66",
+        "createdAt": "2026-10-19T17:03:44.658Z",
+        "type": "Sprint API registration fixture"
+      }
+    }
+  },
+  "initialApiResponse": {
+    "batteryId": "BYE-W1-002-64257020134D4A0F",
+    "confirmedBatteryState": null,
+    "confirmedRewardState": null,
+    "pendingOperation": {
+      "id": "6868cdd0-f4e5-483b-aa80-18e26026dd5a",
+      "state": "UNKNOWN",
+      "command": "register_battery"
+    },
+    "lastAttempt": null,
+    "source": "TESTNET",
+    "operationId": "6868cdd0-f4e5-483b-aa80-18e26026dd5a",
+    "transactionHash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+    "transportState": "SUBMITTED_OR_UNKNOWN",
+    "confirmationLedger": null
+  },
+  "finalApiResponse": {
+    "batteryId": "BYE-W1-002-64257020134D4A0F",
+    "confirmedBatteryState": "REGISTERED",
+    "confirmedRewardState": "NOT_ELIGIBLE",
+    "pendingOperation": null,
+    "lastAttempt": null,
+    "source": "TESTNET",
+    "metadata": {
+      "type": "Sprint API registration fixture"
+    },
+    "ownRequest": null
+  },
+  "logicalOperationId": "6868cdd0-f4e5-483b-aa80-18e26026dd5a",
+  "transactionHash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+  "confirmationLedger": 5281390,
+  "applicationSimulation": {
+    "ledger": 5281386,
+    "totalFee": "416952",
+    "resourceFee": "406952",
+    "sourceBalance": "99953154529",
+    "classification": "SIMULATION",
+    "sourceSequence": "20970216477425669",
+    "authRequirements": [
+      "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F"
+    ]
+  },
+  "broadcast": {
+    "ledger": 5281388,
+    "status": "PENDING",
+    "sourceCheck": {
+      "ledger": 5281388,
+      "balance": "99953154529",
+      "sequence": "20970216477425669"
+    },
+    "classification": "UNKNOWN",
+    "transactionHash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27"
+  },
+  "durability": {
+    "persistedAt": "2026-10-19T17:22:05.403Z",
+    "dispatchIntentAt": "2026-10-19T17:22:09.815Z",
+    "persistedBeforeDispatch": true
+  },
+  "postState": {
+    "state": "REGISTERED",
+    "rewardState": "NOT_ELIGIBLE",
+    "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+    "requestId": null,
+    "collector": null,
+    "collectionHash": null,
+    "recycler": null,
+    "recyclingHash": null
+  },
+  "signedEnvelopePubliclyExposed": false,
+  "openReturnSimulation": {
+    "status": "SUCCESS",
+    "submitted": false,
+    "signed": false,
+    "resourceFee": "318479",
+    "totalFee": "328479",
+    "authRequirements": [
+      "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+    ],
+    "sourceSequence": "20970220772392963",
+    "sourceBalance": "99999783304",
+    "ledger": 5281397
+  },
+  "readOnlyPostVerification": {
+    "status": "SUCCESS",
+    "transactionHash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+    "confirmationLedger": 5281390,
+    "observedLedger": 5281414,
+    "confirmedAtEpoch": "1792430537",
+    "resultCode": "txSuccess",
+    "feeCharged": "350285",
+    "contractEventCount": 1,
+    "operations": 1,
+    "envelopes": 1,
+    "dispatchAttempts": 1,
+    "returnRequests": 0,
+    "rewardAttempts": 0,
+    "enabledFixtureMemberships": 0,
+    "fixtureAuthLinksRemaining": 0,
+    "privateEvidenceRetained": {
+      "result": true,
+      "resultMeta": true,
+      "sorobanResult": true,
+      "contractEvents": 1,
+      "observationLedger": 5281392
+    }
+  }
+}

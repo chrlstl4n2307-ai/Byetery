@@ -63,3 +63,17 @@ this review is not evidence they have already occurred. No remote business
 transaction is authorized merely by applying this migration. The live task
 remains limited to one fresh API-initiated register after every gate passes,
 followed only by an unsigned open_return simulation.
+
+## Post-application observation — 2026-10-19
+
+Supabase DEV migration `vol003_private_transport_bye_w1_002` succeeded. All four
+tables were read back with RLS enabled/forced, one restrictive policy each and
+anon/authenticated grants false. The live gate also verified zero SECURITY
+DEFINER functions in api_private. The complete existing remote HTTP suite passed
+43/43 after asserting the exact nine-table inventory, with all prior grant checks
+retained. No source migration was rewritten.
+
+The single fresh API registration was confirmed; immutable private evidence is
+retained. Postchecks found one operation/envelope/dispatch and zero real return
+requests or reward attempts. The fixture Auth link and enabled memberships are
+zero after cleanup. See BYE-W1-002-REPORT.md and BYE-W1-002-results.json.

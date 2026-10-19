@@ -2,7 +2,8 @@
 
 Classification: OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT.
 Observed: 2026-10-19, America/Santiago.
-Status: OWNER APPROVED — two-stage signer implementation in progress.
+Status: OWNER APPROVED — two-stage signer implemented; scoped validation recorded
+in [BYE-W1-002-REPORT.md](BYE-W1-002-REPORT.md).
 Starting HEAD: `869a43bda795a7c708ea8bc8b5991b217938906d`.
 Branch: `instaward/d1-testnet-integration`.
 
