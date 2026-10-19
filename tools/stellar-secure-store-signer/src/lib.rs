@@ -1,4 +1,5 @@
 //! Testnet-only local signer. No RPC, database, or transaction submit.
+pub mod phased;
 use serde::{Deserialize, Serialize};
 use soroban_cli::xdr::*;
 use std::time::{SystemTime, UNIX_EPOCH};

@@ -311,3 +311,72 @@ fn input_cannot_select_identity_or_supply_keys() {
     let v = serde_json::json!({"version":1,"network_passphrase":NETWORK,"transaction_xdr":"invalid","current_ledger":1,"signature_expiration_ledger":100,"identity":"arbitrary"});
     assert!(serde_json::from_value::<Request>(v).is_err());
 }
+
+fn phase(method: &str, phase: &str) -> phased::PhasedRequest {
+    let r = request(tx(method));
+    phased::PhasedRequest {
+        version: 2,
+        phase: phase.into(),
+        network_passphrase: r.network_passphrase,
+        transaction_xdr: r.transaction_xdr,
+        current_ledger: r.current_ledger,
+        signature_expiration_ledger: r.signature_expiration_ledger,
+        expected_hash: None,
+    }
+}
+#[test]
+fn phased_authorize_retains_all_original_method_guards() {
+    for m in [
+        "register_battery",
+        "open_return",
+        "cancel_return",
+        "confirm_collection",
+        "confirm_recycling",
+        "pay_reward",
+    ] {
+        assert_eq!(
+            phased::validate_phase(&phase(m, "authorize"), NOW)
+                .unwrap()
+                .method,
+            m
+        );
+    }
+}
+#[test]
+fn phased_envelope_requires_exact_network_bound_hash() {
+    let mut r = phase("register_battery", "sign_envelope");
+    assert_eq!(
+        phased::validate_phase(&r, NOW).err(),
+        Some("ExpectedHashMismatch")
+    );
+    r.expected_hash = Some(phased::hash_hex(
+        phased::transaction_hash(&tx("register_battery")).unwrap(),
+    ));
+    assert!(phased::validate_phase(&r, NOW).is_ok());
+    r.network_passphrase = "Mainnet".into();
+    assert_eq!(phased::validate_phase(&r, NOW).err(), Some("WrongNetwork"));
+}
+#[test]
+fn phased_collection_cannot_skip_address_signature() {
+    assert_eq!(
+        phased::validate_phase(&phase("confirm_collection", "sign_envelope"), NOW).err(),
+        Some("InvalidExpirationLedger")
+    );
+}
+#[test]
+fn phased_cannot_select_unsafe_phase_or_downgrade() {
+    let mut r = phase("pay_reward", "arbitrary");
+    assert_eq!(phased::validate_phase(&r, NOW).err(), Some("InvalidPhase"));
+    r.phase = "authorize".into();
+    r.version = 1;
+    assert_eq!(
+        phased::validate_phase(&r, NOW).err(),
+        Some("UnsupportedVersion")
+    );
+    r.version = 2;
+    r.expected_hash = Some("00".repeat(32));
+    assert_eq!(
+        phased::validate_phase(&r, NOW).err(),
+        Some("UnexpectedHash")
+    );
+}

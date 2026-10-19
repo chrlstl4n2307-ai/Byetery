@@ -61,3 +61,33 @@ test('helper has no RPC or submit call sites',async()=>{
   const lib=await readFile(new URL('../../tools/stellar-secure-store-signer/src/lib.rs',import.meta.url),'utf8');
   assert.ok(!/\.rpc_client\(|send_transaction|sendTransaction|reqwest::|TcpStream|Client::new/.test(lib));
 });
+
+for(const method of ['register_battery','open_return','cancel_return','confirm_recycling','pay_reward','confirm_collection'])
+  test(`v2 two-phase offline ${method}: SDK hash precedes source signature`,async()=>{
+    const input=prepared(method),authorized=await signer.authorize(input);
+    const tx=new Transaction(authorized.transactionXdr,Networks.TESTNET);
+    assert.equal(tx.signatures.length,0);
+    const hash=Buffer.from(tx.hash()).toString('hex');
+    const signed=await signer.signEnvelope({...input,transactionXdr:authorized.transactionXdr},hash);
+    const final=new Transaction(signed.transactionXdr,Networks.TESTNET);
+    assert.equal(final.signatures.length,1);assert.equal(Buffer.from(final.hash()).toString('hex'),hash);
+    const a=tx.toEnvelope(),b=final.toEnvelope();assert.equal(a.type,'envelopeTypeTx');assert.equal(b.type,'envelopeTypeTx');
+    if(a.type==='envelopeTypeTx'&&b.type==='envelopeTypeTx')assert.equal(a.v1.tx.toXDR('base64'),b.v1.tx.toXDR('base64'));
+  });
+test('v2 collection AddressV2 signs both domains separately',async()=>{
+  const input=prepared('confirm_collection',true),a=await signer.authorize(input);
+  const hash=Buffer.from(new Transaction(a.transactionXdr,Networks.TESTNET).hash()).toString('hex');
+  await signer.signEnvelope({...input,transactionXdr:a.transactionXdr},hash);
+});
+test('v2 wrong SDK hash rejects before child invocation',async()=>{
+  let calls=0;const s=new LocalSecureStoreSigner(async()=>{calls++;throw Error();});
+  await assert.rejects(s.signEnvelope(prepared('pay_reward'),'00'.repeat(32)),/ExpectedHashMismatch/);assert.equal(calls,0);
+});
+test('v2 helper itself refuses wrong hash and unsigned collection authorization',async()=>{
+  for(const method of ['register_battery','confirm_collection']){
+    const p=prepared(method),r=await run(JSON.stringify({version:2,phase:'sign_envelope',network_passphrase:Networks.TESTNET,
+      transaction_xdr:p.transactionXdr,current_ledger:1,signature_expiration_ledger:100,expected_hash:'00'.repeat(32)}));
+    assert.equal(r.exitCode,1);assert.equal(r.stderr,'');const out=JSON.parse(r.stdout);
+    assert.equal(out.code,method==='confirm_collection'?'InvalidExpirationLedger':'ExpectedHashMismatch');
+  }
+});

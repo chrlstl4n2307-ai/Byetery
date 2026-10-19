@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { Keypair, Networks, Transaction, xdr, Address, scValToNative } from '@stellar/stellar-sdk';
-import type { SigningRequest, SigningResult, StellarSigner } from './stellar-signer.ts';
+import type { SigningRequest, SigningResult, StellarSigner, PhasedStellarSigner } from './stellar-signer.ts';
 import { DomainError } from './domain.ts';
 
 export interface ProcessResult { exitCode: number|null; stdout: string; stderr: string }
@@ -41,31 +41,41 @@ export function signerProcess(binary: string, timeoutMs=30000): SignerProcess {
   });
 }
 
-export class LocalSecureStoreSigner implements StellarSigner {
+export class LocalSecureStoreSigner implements StellarSigner, PhasedStellarSigner {
   private readonly run: SignerProcess;
   constructor(run: SignerProcess) {this.run=run;}
-  async sign(request: SigningRequest): Promise<SigningResult> {
+  sign(request: SigningRequest): Promise<SigningResult> { return this.execute(request); }
+  authorize(request: SigningRequest): Promise<SigningResult> { return this.execute(request,'authorize'); }
+  async signEnvelope(request: SigningRequest, expectedHash: string): Promise<SigningResult> {
+    const tx=new Transaction(request.transactionXdr,Networks.TESTNET);
+    if(Buffer.from(tx.hash()).toString('hex')!==expectedHash)fail('ExpectedHashMismatch');
+    return this.execute(request,'sign_envelope',expectedHash);
+  }
+  private async execute(request: SigningRequest, phase?: 'authorize'|'sign_envelope', expectedHash?:string): Promise<SigningResult> {
     if(request.networkPassphrase!==Networks.TESTNET) fail('WrongNetwork');
     const expected=methods[request.method];
     if(!expected||!same(expected,request.expectedSigners)) fail('SignerNotAllowed');
     let unsigned: Transaction;
     try {unsigned=new Transaction(request.transactionXdr,Networks.TESTNET);}catch{fail('InvalidXdr');}
-    const input=JSON.stringify({version:1,network_passphrase:Networks.TESTNET,transaction_xdr:request.transactionXdr,
-      current_ledger:request.currentLedger,signature_expiration_ledger:request.expirationLedger});
+    const input=JSON.stringify({version:phase?2:1,network_passphrase:Networks.TESTNET,transaction_xdr:request.transactionXdr,
+      current_ledger:request.currentLedger,signature_expiration_ledger:request.expirationLedger,
+      ...(phase?{phase,expected_hash:expectedHash??null}:{})});
     let response: ProcessResult;
     try {response=await this.run(input);}catch(e){if(e instanceof DomainError)throw e;fail('SignerProcessFailed');}
     // Do not print or propagate helper output, even on error. Only stable codes leave here.
     if(response.exitCode!==0) fail('SignerProcessFailed');
     if(response.stderr.trim()) fail('SignerUnexpectedStderr');
     if(Buffer.byteLength(response.stdout)>LIMIT) fail('SignerOutputTooLarge');
-    let out: {status?:string;signed_xdr?:string;method?:string;signers?:string[]};
+    let out: {version?:number;status?:string;signed_xdr?:string;transaction_xdr?:string;method?:string;signers?:string[]};
     try{out=JSON.parse(response.stdout);}catch{fail('SignerInvalidOutput');}
-    if(out.status!=='signed'||out.method!==request.method||!Array.isArray(out.signers)||!same(out.signers,expected)||typeof out.signed_xdr!=='string')fail('SignerInvalidOutput');
+    const encoded=phase?out.transaction_xdr:out.signed_xdr;
+    if((phase&&out.version!==2)||out.status!==(phase==='authorize'?'authorized':'signed')||out.method!==request.method||!Array.isArray(out.signers)||!same(out.signers,expected)||typeof encoded!=='string')fail('SignerInvalidOutput');
     let signed: Transaction;
-    try{signed=new Transaction(out.signed_xdr,Networks.TESTNET);}catch{fail('SignerInvalidOutput');}
-    if(signed.signatures.length!==1||signed.source!==expected[0]||signed.operations.length!==1||unsigned.operations.length!==1)fail('SignerInvalidOutput');
+    try{signed=new Transaction(encoded,Networks.TESTNET);}catch{fail('SignerInvalidOutput');}
+    if(signed.signatures.length!==(phase==='authorize'?0:1)||unsigned.signatures.length!==0||signed.source!==expected[0]||signed.operations.length!==1||unsigned.operations.length!==1)fail('SignerInvalidOutput');
     const before=unsigned.toEnvelope(),after=signed.toEnvelope();
     if(before.type!=='envelopeTypeTx'||after.type!=='envelopeTypeTx')fail('SignerInvalidOutput');
+    if(phase==='sign_envelope'&&(!equalBytes(before.v1.tx.toXDR(),after.v1.tx.toXDR())||Buffer.from(signed.hash()).toString('hex')!==expectedHash))fail('SignerChangedTransaction');
     const bBody=before.v1.tx.operations[0].body,aBody=after.v1.tx.operations[0].body;
     if(bBody.type!=='invokeHostFunction'||aBody.type!=='invokeHostFunction')fail('SignerInvalidOutput');
     const beforeOp=bBody.invokeHostFunctionOp,afterOp=aBody.invokeHostFunctionOp;
@@ -77,8 +87,10 @@ export class LocalSecureStoreSigner implements StellarSigner {
     if(comparableOp.type!==24)fail('SignerInvalidOutput');
     comparableOp.invokeHostFunctionOp.auth=beforeOp.auth.map(a=>a.toXdrObject());
     if(!equalBytes(before.v1.tx.toXDR(),xdr.Transaction.fromXdrObject(comparable).toXDR()))fail('SignerChangedTransaction');
-    const sig=signed.signatures[0];
-    if(!Keypair.fromPublicKey(expected[0]).verify(signed.hash(),Buffer.from(sig.signature.toBytes())))fail('SignerInvalidSignature');
+    if(phase!=='authorize') {
+      const sig=signed.signatures[0];
+      if(!Keypair.fromPublicKey(expected[0]).verify(signed.hash(),Buffer.from(sig.signature.toBytes())))fail('SignerInvalidSignature');
+    }
     if(beforeOp.auth.length!==signedAuth.length)fail('SignerChangedAuthorization');
     for(let i=0;i<signedAuth.length;i++) {
       const b=beforeOp.auth[i],a=signedAuth[i];
@@ -100,6 +112,6 @@ export class LocalSecureStoreSigner implements StellarSigner {
         :xdr.HashIdPreimage.envelopeTypeSorobanAuthorization(new xdr.HashIdPreimageSorobanAuthorization(preimageFields));
       if(!key.verify(createHash('sha256').update(preimage.toXDR()).digest(),Buffer.from(proof.signature)))fail('SignerInvalidAuthSignature');
     }
-    return {transactionXdr:out.signed_xdr,signers:out.signers};
+    return {transactionXdr:encoded,signers:out.signers};
   }
 }

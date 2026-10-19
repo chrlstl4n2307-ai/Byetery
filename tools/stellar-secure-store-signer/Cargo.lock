@@ -592,8 +592,10 @@ checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
 name = "byetery-secure-store-signer"
 version = "0.1.0"
 dependencies = [
+ "ed25519-dalek 2.2.0",
  "serde",
  "serde_json",
+ "sha2 0.10.9",
  "soroban-cli",
  "soroban-spec-tools",
  "soroban-spec-typescript",
