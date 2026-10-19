@@ -4,30 +4,32 @@ import { finalizedBody, signedIdentity, type PreparedBody, type FinalizedBody,
 import { TransportStore, type Work, type Sql, type Claim } from './store.ts';
 
 /** VOL-003 ports have no RPC implementation and no production signer binding. */
-export interface FixtureTransport {
-  readonly scope: 'LOCAL_FAKE';
+export interface TransactionTransport {
+  readonly scope: 'LOCAL_FAKE'|'TESTNET';
   prepareAndSimulate(context: Work): Promise<PreparedBody>;
   attachSorobanAuthorization(body: PreparedBody, context: Work): Promise<PreparedBody>;
   signEnvelope(body: FinalizedBody, context: Work): Promise<string>;
-  submit(identity: TransactionIdentity): Promise<{ transactionHash: string }>;
+  submit(identity: TransactionIdentity): Promise<{ transactionHash: string;status?:string;ledger?:number }>;
   observe(identity: TransactionIdentity): Promise<Observation>;
   inspectExpiredEffect(identity: TransactionIdentity, context: Work): Promise<StateEvidence>;
   /** Evidence that submission/rebroadcast is still within trusted ledger/time validity. */
   validity(identity: TransactionIdentity): Promise<{ ledger: number; closeTime: string }>;
+  /** Immediately before broadcast, after committed dispatch intent. */
+  assertSourceSequence?(identity:TransactionIdentity):Promise<void|{sequence:string;balance:string;ledger:number}>;
 }
+export interface FixtureTransport extends TransactionTransport {readonly scope:'LOCAL_FAKE'}
 export interface ReviewedRetry { operationId: string; transactionHash: string; decisionId: string }
 export type SqlProjector = (db: Sql, work: Work) => Promise<void>;
 const resolved = (state: TransportState) => ['PROJECTED','CONFIRMED_FAILED','EXPIRED_NOT_APPLIED'].includes(state);
-export class LocalTransactionWorker {
-  readonly store: TransportStore; readonly transport: FixtureTransport; readonly project: SqlProjector;
-  constructor(store: TransportStore, transport: FixtureTransport, project: SqlProjector) {
-    ensure(transport.scope==='LOCAL_FAKE','LocalFixturesOnly');
+export class DurableTransactionWorker {
+  readonly store: TransportStore; readonly transport: TransactionTransport; readonly project: SqlProjector;
+  constructor(store: TransportStore, transport: TransactionTransport, project: SqlProjector) {
     this.store=store;this.transport=transport;this.project=project;
   }
   async run(id: string, worker: string): Promise<TransportState> {
     const existing=await this.store.work(id);
     if(resolved(existing.state))return existing.state;
-    const claim=await this.store.claim(id,worker);
+    const claim=await this.store.claim(id,worker,this.transport.scope==='TESTNET'?180000:30000);
     try {
       // Durable identity always wins, even after a restart with a coarse stale status.
       let identity=await this.store.identity(id);
@@ -35,6 +37,7 @@ export class LocalTransactionWorker {
         await this.store.preparing(claim);
         const context=await this.store.work(id);
         const prepared=await this.transport.prepareAndSimulate(context);
+        if(prepared.simulation)await this.store.prepared(claim,prepared.simulation);
         const authorized=await this.transport.attachSorobanAuthorization(prepared,context);
         const final=finalizedBody(context,authorized); // SDK hash before source signature.
         const signed=await this.transport.signEnvelope(final,context);
@@ -60,13 +63,21 @@ export class LocalTransactionWorker {
       && BigInt(validity.closeTime)>=BigInt(durable.minTime)
       && durable.authorizationExpirations.every(v=>v>validity.ledger)))return;
     await this.store.dispatchIntent(claim,reviewed,decisionId);
+    // Intentionally outside the submit catch: drift is a durable reviewed hold,
+    // not an RPC send timeout and never permission to replace the identity.
+    let sourceCheck:void|{sequence:string;balance:string;ledger:number};
+    try {sourceCheck=await this.transport.assertSourceSequence?.(durable);}
+    catch(error) {
+      await this.store.reviewRequired(claim,'SourceSequenceCheckFailed');
+      throw error;
+    }
     try {
       const reply=await this.transport.submit(durable);
       ensure(reply.transactionHash===durable.transactionHash,'SubmitIdentityMismatch');
-      await this.store.unknown(claim,'SUBMIT_RESPONSE');
+      await this.store.unknown(claim,'SUBMIT_RESPONSE',{...reply,sourceCheck:sourceCheck??null});
     } catch {
       // Raw RPC errors/envelopes never go to logs/evidence. Durable intent is ambiguous.
-      await this.store.unknown(claim,'RPC_OUTAGE');
+      await this.store.unknown(claim,'RPC_OUTAGE',{transactionHash:durable.transactionHash,sourceCheck:sourceCheck??null});
     }
   }
   private async reconcile(claim: Claim, identity: TransactionIdentity): Promise<void> {
@@ -110,5 +121,11 @@ export class LocalTransactionWorker {
       }
       return (await this.store.work(i.operationId)).state;
     } finally { await this.store.release(c); }
+  }
+}
+/** Preserve the fixture-only constructor used by all VOL-003 tests. */
+export class LocalTransactionWorker extends DurableTransactionWorker {
+  constructor(store:TransportStore,transport:FixtureTransport,project:SqlProjector){
+    ensure(transport.scope==='LOCAL_FAKE','LocalFixturesOnly');super(store,transport,project);
   }
 }

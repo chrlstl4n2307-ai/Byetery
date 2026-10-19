@@ -92,11 +92,26 @@ export class TransportStore {
         [c.networkId,c.sourceAccount,c.operationId,c.worker,c.generation]);
     });
   }
+  async reviewRequired(c:Claim,reason:string):Promise<void>{
+    await this.database.transaction(async db=>{
+      const w=await this.fence(db,c);
+      await this.evidence(db,w,'STATE_READ',{classification:'REVIEWED_RESOLUTION_REQUIRED',reason});
+    });
+  }
+  async requiresReview(id:string):Promise<boolean>{
+    return this.database.transaction(async db=>(await db.query(`select 1 from api_private.testnet_observations
+      where operation_id=$1 and evidence->>'classification'='REVIEWED_RESOLUTION_REQUIRED' limit 1`,[id])).rows.length>0);
+  }
   async preparing(c: Claim): Promise<void> {
     await this.database.transaction(async db => {
       const w=await this.fence(db,c);
       ensure(['CLAIMED','PREPARING'].includes(w.state),'InvalidPreparationState');
       await db.query("update api_private.testnet_work set state='PREPARING' where operation_id=$1",[c.operationId]);
+    });
+  }
+  async prepared(c:Claim,summary:NonNullable<import('./identity.ts').PreparedBody['simulation']>):Promise<void>{
+    await this.database.transaction(async db=>{const w=await this.fence(db,c);
+      await this.evidence(db,w,'STATE_READ',{classification:'SIMULATION',...summary},summary.ledger);
     });
   }
   async persist(c: Claim, i: TransactionIdentity): Promise<void> {
@@ -128,16 +143,18 @@ export class TransportStore {
       ensure((await db.query('select 1 from api_private.testnet_envelopes where operation_id=$1',[w.operationId])).rows[0],'IdentityNotDurable');
       await db.query("update api_private.testnet_work set state='DISPATCH_INTENT',dispatch_attempts=dispatch_attempts+1 where operation_id=$1",[w.operationId]);
       await db.query("update app_private.stellar_operations set state='SUBMITTED' where id=$1 and state='READY'",[w.operationId]);
+      if(w.command.kind==='pay_reward')await db.query("update app_private.reward_attempts set state='SUBMITTED' where operation_id=$1 and state='QUEUED'",[w.operationId]);
       await this.evidence(db,w,'DISPATCH_INTENT',{attempt:w.dispatchAttempts+1,reviewedSameHashRetry,decisionId});
     });
   }
-  async unknown(c: Claim, kind: 'SUBMIT_RESPONSE'|'RPC_OUTAGE'): Promise<void> {
+  async unknown(c: Claim, kind: 'SUBMIT_RESPONSE'|'RPC_OUTAGE',reply?:{transactionHash:string;status?:string;ledger?:number;sourceCheck?:{sequence:string;balance:string;ledger:number}|null}): Promise<void> {
     await this.database.transaction(async db => {
       const w=await this.fence(db,c);
       if(['CONFIRMED_SUCCESS','PROJECTED','CONFIRMED_FAILED','EXPIRED_NOT_APPLIED'].includes(w.state))return;
       await db.query("update api_private.testnet_work set state='SUBMITTED_OR_UNKNOWN' where operation_id=$1",[w.operationId]);
       await db.query("update app_private.stellar_operations set state='UNKNOWN' where id=$1 and state='SUBMITTED'",[w.operationId]);
-      await this.evidence(db,w,kind,{classification:'UNKNOWN'});
+      if(w.command.kind==='pay_reward')await db.query("update app_private.reward_attempts set state='UNKNOWN' where operation_id=$1 and state='SUBMITTED'",[w.operationId]);
+      await this.evidence(db,w,kind,{classification:'UNKNOWN',...(reply?{transactionHash:reply.transactionHash,status:reply.status??null,ledger:reply.ledger??null,sourceCheck:reply.sourceCheck??null}:{})});
     });
   }
   async observed(c: Claim, state: TransportState, kind: 'NOT_FOUND'|'SUCCESS'|'FAILED'|'STATE_READ', data: Confirmation|StateEvidence|Record<string,unknown>): Promise<void> {
@@ -150,6 +167,8 @@ export class TransportStore {
       if(state==='CONFIRMED_FAILED') {
         await db.query("update app_private.stellar_operations set state='REJECTED',error_code='ConfirmedChainFailure' where id=$1 and state in ('READY','SUBMITTED','UNKNOWN')",[w.operationId]);
         if(w.command.kind==='pay_reward')await db.query("update app_private.reward_attempts set state='FAILED',error_code='ConfirmedChainFailure' where operation_id=$1",[w.operationId]);
+        if(w.command.kind==='open_return')await db.query(`update app_private.return_requests set reservation_state='RELEASED'
+          where deployment_id=$1 and request_id=decode($2,'hex') and reservation_state='HELD'`,[w.deploymentId,w.command.requestId]);
       }
       await this.evidence(db,w,kind,data, 'observationLedger' in data ? Number(data.observationLedger):null,
         confirmation?.confirmationLedger??null,stateEvidence?.stateReadLedger??null);

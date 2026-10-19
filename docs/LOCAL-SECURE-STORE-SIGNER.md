@@ -1,5 +1,12 @@
 # Firmante local de desarrollo/Testnet
 
+Actualización de sprint 2026-10-19: el dueño aprobó dos fases versionadas del helper
+para autorizar Soroban antes del hash SDK y firmar el envelope después. La ruta v1
+se conserva. Ver [revisión aprobada](instaward/week1/BYE-W1-002-SIGNER-REVIEW.md) e
+[integración BYE-W1-002](instaward/week1/BYE-W1-002-INTEGRATION.md). Los resultados
+de ejecución y aceptación se registran aparte; los párrafos siguientes conservan
+la historia PRE-SPRINT y no describen el estado actual de esa nueva integración.
+
 Actualización 2026-10-11 / **VOLUNTARY PRE-SPRINT DEVELOPMENT**: build, 18 tests nativos, 9 tests reales offline (firmas simples y SERVICE + COLLECTOR V1/V2), fmt y Clippy PASS. [Informe VOL-002](voluntary/VOL-002-REPORT.md). El helper usa el driver LLVM/UCRT instalado solo en su workspace para resolver el enlace local. El resto del texto conserva el contexto histórico del 9 de octubre. No hay envío, claves exportadas, cambio del contrato/cap ni aceptación financiada; TestnetStellarService sigue pendiente.
 
 Estado al 2026-10-09: spike de biblioteca compilado; helper implementado; pruebas nativas y firma offline pendientes de terminar. No se presenta como integración Testnet validada.

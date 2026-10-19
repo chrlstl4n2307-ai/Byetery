@@ -45,7 +45,7 @@ export async function profile(
         wallets,
         requests: requests.slice(0, 100),
         hasMoreRequests: requests.length > 100,
-        source: "MOCK",
+        source: repo.mode,
       },
     };
   });

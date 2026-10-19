@@ -10,10 +10,12 @@ import { bid, bytes, canonical, object, rid, text, uuid } from './validation.ts'
 export interface Action { kind: 'register'|'return'|'cancel'|'collection'|'recycling'|'reward'|'challenge'|'verify'; resource?: string }
 /** Faults are injectable by server-side tests only. Never read from HTTP or env. */
 export interface Faults { hold?: (command: Command) => boolean; omitSigner?: (signer: string, command: Command) => boolean }
+export interface OperationProcessor { process(id:string):Promise<Reply> }
 const hash=(v: string|Buffer)=>createHash('sha256').update(v).digest();
 export class Coordinator {
   readonly repo: Repository; readonly wallets: WalletService; readonly faults: Faults;
-  constructor(repo: Repository, faults: Faults = {}, wallets = new WalletService(repo)) {this.repo=repo;this.faults=faults;this.wallets=wallets;}
+  readonly processor?:OperationProcessor;
+  constructor(repo: Repository, faults: Faults = {}, wallets = new WalletService(repo),processor?:OperationProcessor) {this.repo=repo;this.faults=faults;this.wallets=wallets;this.processor=processor;}
   async get(identity: Identity, batteryId: string): Promise<Reply> {
     return this.repo.transaction(async db=>{await this.repo.principal(db,identity);return {status:200,body:await this.repo.view(db,bid(batteryId))};});
   }
@@ -134,6 +136,8 @@ export class Coordinator {
     return this.finish(db,id,command,commandFailure(code));
   }
   async process(id: string): Promise<Reply> {
+    if(this.processor)return this.processor.process(id);
+    requireThat(this.repo.mode==='MOCK',503,'TestnetProcessorRequired');
     const submitted=await this.repo.transaction(async db=>{
       const d=this.repo.deploymentId; const op=await one(db,'select * from app_private.stellar_operations where deployment_id=$1 and id=$2',[d,id]);
       requireThat(op,404,'OperationNotFound'); const command=op.parameters as Command;

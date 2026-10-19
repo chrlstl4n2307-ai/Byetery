@@ -87,3 +87,9 @@ Instalación reproducible: `npm --prefix frontend ci`. Configurar solo las varia
 
 Ver [pantallas, seguridad y demo visual](frontend/README.md) y [validación frontend](docs/verification/FRONTEND-MVP.md).
 La demo automatizada completa se ejecuta con `npm run demo:visual` después del build del frontend.
+
+## Integración de aplicación Testnet — BYE-W1-002
+
+Selección explícita en servidor, MOCK preservado y contrato congelado. Ver
+[arquitectura, configuración y gates](docs/instaward/week1/BYE-W1-002-INTEGRATION.md).
+La implementación y los tests no equivalen a aceptación ni a un ciclo Testnet completo.

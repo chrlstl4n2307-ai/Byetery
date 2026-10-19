@@ -12,7 +12,8 @@ export async function one<T extends QueryResultRow = QueryResultRow>(db: Db, sql
 export class Repository {
   readonly pool: Pool;
   readonly deploymentId: string;
-  constructor(config: Settings) { this.pool = new Pool(config.database); this.deploymentId = config.deploymentId; }
+  readonly mode:'MOCK'|'TESTNET';
+  constructor(config: Settings) { this.pool = new Pool(config.database); this.deploymentId = config.deploymentId;this.mode=config.mode??'MOCK'; }
   async transaction<T>(work: (db: Db) => Promise<T>): Promise<T> {
     const db = await this.pool.connect();
     try { await db.query('begin'); await db.query("set local lock_timeout='15s'");
@@ -37,9 +38,9 @@ export class Repository {
   }
   async config(db: Db): Promise<Deployment> {
     const r = await one(db,'select * from chain_private.deployments where id=$1',[this.deploymentId]);
-    requireThat(r?.mode === 'MOCK',503,'MockDeploymentRequired');
+    requireThat(r?.mode === this.mode,503,this.mode==='MOCK'?'MockDeploymentRequired':'TestnetDeploymentRequired');
     requireThat(BigInt(r.reward_amount)===100000000n && r.network_id.toString('hex')===createHash('sha256').update('Test SDF Network ; September 2015').digest('hex'),503,'UnsupportedDevConfiguration');
-    return { deploymentId: r.id, mode:'MOCK', schemaVersion:1, networkId:r.network_id.toString('hex'),
+    return { deploymentId: r.id, mode:this.mode, schemaVersion:1, networkId:r.network_id.toString('hex'),
       contractAddress:r.contract_address, admin:r.admin, service:r.service, rewardToken:r.reward_token, rewardAmount:BigInt(r.reward_amount) };
   }
   async mock(db: Db): Promise<MockStellarService> {
@@ -57,9 +58,9 @@ export class Repository {
       and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN') order by created_at desc limit 1`,[this.deploymentId,batteryId]);
     const attempt = await one(db,`select state,attempt_number,error_code from app_private.reward_attempts where deployment_id=$1 and battery_id=$2 order by attempt_number desc limit 1`,[this.deploymentId,batteryId]);
     return { batteryId, confirmedBatteryState:battery?.state ?? null, confirmedRewardState:battery?.reward_state ?? null,
-      pendingOperation:pending ?? null, lastAttempt:attempt ?? null, source:'MOCK' };
+      pendingOperation:pending ?? null, lastAttempt:attempt ?? null, source:this.mode };
   }
-  async project(db: Db, mock: MockStellarService, command: Command, ledger: number): Promise<void> {
+  async project(db: Db, mock: Pick<MockStellarService,'getBattery'|'getReturnRequest'>, command: Command, ledger: number): Promise<void> {
     const d=this.deploymentId;
     if(command.kind==='set_role') {
       await db.query(`insert into chain_private.actor_roles values($1,$2,$3,$4,$5) on conflict(deployment_id,actor_address,role)

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { Address, Keypair, Networks, Transaction } from '@stellar/stellar-sdk';
-import { ensure, type Command, type Hash32 } from '../domain.ts';
+import { ensure, type Battery, type Command, type Hash32, type ReturnRequest } from '../domain.ts';
 
 export const NETWORK_ID = createHash('sha256').update(Networks.TESTNET).digest('hex');
 export const SIGNER_FEE_CAP = 50_000_000n;
@@ -15,7 +15,8 @@ export interface OperationContext {
   /** Expected invocation arguments in their exact, ordered XDR encoding. */
   argumentsXdr: readonly string[];
 }
-export interface PreparedBody { transactionXdr: string; preparedLedger: number }
+export interface PreparedBody { transactionXdr: string; preparedLedger: number;
+  simulation?:{resourceFee:string;totalFee:string;authRequirements:readonly string[];sourceSequence:string;sourceBalance:string;ledger:number} }
 /** Body AFTER signed Soroban auth is attached, BEFORE source envelope signature. */
 export interface FinalizedBody extends PreparedBody { transactionHash: Hash32 }
 export interface TransactionIdentity {
@@ -28,6 +29,8 @@ export interface Confirmation {
   transactionHash: Hash32; observationLedger: number; confirmationLedger: number;
   resultXdr: string; resultMetaXdr: string; events: readonly string[];
   sorobanResult: string | null; correlationId: string;
+  confirmedAt?: number;
+  facts?: {battery:Battery;request:ReturnRequest|null;stateReadLedger:number;reward?:{recipient:string;token:string;amount:string}};
 }
 export type Observation =
   | { status: 'SUCCESS' | 'FAILED'; confirmation: Confirmation }
