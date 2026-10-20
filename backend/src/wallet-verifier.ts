@@ -1,6 +1,8 @@
+import type { WalletSigningScheme } from './wallet-message.ts';
 import type { Address, Hash32 } from './domain.ts';
 
 export interface WalletChallenge {
+  signingScheme: WalletSigningScheme;
   id: string; userId: string; networkId: Hash32; address: Address;
   domain: string; nonce: string; message: Uint8Array; expiresAt: Date;
 }

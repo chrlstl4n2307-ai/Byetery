@@ -90,7 +90,7 @@ export async function fixture(faults: Faults = {}) {
     async function wallet(user: DevUser) {
       const c=await call(user,'POST','/api/wallet/challenge',{address:user.key.publicKey()});
       requireThat(c.status===201,500,'DevChallengeFailed');
-      const signature=Buffer.from(user.key.sign(Buffer.from(c.body.messageBase64,'base64'))).toString('base64');
+      const signature=Buffer.from(user.key.signMessage(Buffer.from(c.body.messageBase64,'base64'))).toString('base64');
       const v=await call(user,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature});
       requireThat(v.status===200,500,'DevWalletFailed');return v.body.walletLinkId as string;
     }

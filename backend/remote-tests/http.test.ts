@@ -35,9 +35,9 @@ test('remote-dev HTTP integration (Supabase DEV + real loopback HTTP + durable M
     await t.test('real Ed25519 challenge, owner binding, nonce consumption and idempotency',async()=>{
       const key=randomUUID();const c=await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()},key);assert.equal(c.status,201);
       assert.equal((await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()},key)).body.challengeId,c.body.challengeId);
-      const message=Buffer.from(c.body.messageBase64,'base64'),signature=Buffer.from(a.key.sign(message)).toString('base64');
+      const message=Buffer.from(c.body.messageBase64,'base64'),signature=Buffer.from(a.key.signMessage(message)).toString('base64');
       assert.equal((await call(b,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature})).status,404);
-      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(b.key.sign(message)).toString('base64')})).status,422);
+      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(b.key.signMessage(message)).toString('base64')})).status,422);
       const vk=randomUUID();assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature},vk)).status,200);
       assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature},vk)).status,200);
       assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature})).status,409);
@@ -47,15 +47,43 @@ test('remote-dev HTTP integration (Supabase DEV + real loopback HTTP + durable M
     await t.test('wallet nonce has a five-attempt limit and atomic single consumption',async()=>{
       const c=await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()});assert.equal(c.status,201);
       const message=Buffer.from(c.body.messageBase64,'base64');
-      for(let i=0;i<5;i++)assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(b.key.sign(message)).toString('base64')})).status,422);
-      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(a.key.sign(message)).toString('base64')})).status,409);
-      const other=await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()});const payload={challengeId:other.body.challengeId,signature:Buffer.from(a.key.sign(Buffer.from(other.body.messageBase64,'base64'))).toString('base64')};
+      for(let i=0;i<5;i++)assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(b.key.signMessage(message)).toString('base64')})).status,422);
+      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(a.key.signMessage(message)).toString('base64')})).status,409);
+      const other=await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()});const payload={challengeId:other.body.challengeId,signature:Buffer.from(a.key.signMessage(Buffer.from(other.body.messageBase64,'base64'))).toString('base64')};
       const pair=await Promise.all([call(a,'POST','/api/wallet/verify',payload),call(a,'POST','/api/wallet/verify',payload)]);
       assert.deepEqual(pair.map(r=>r.status).sort(),[200,409]);
+      const proofState=await f.repo.pool.query(`select attempts,consumed_at is not null consumed,
+        (select count(*)::int from app_private.wallet_links where deployment_id=$1 and user_id=$2 and address=$3 and revoked_at is null) links
+        from api_private.wallet_challenges where deployment_id=$1 and id=$4`,[f.deployment.deploymentId,a.businessId,a.key.publicKey(),other.body.challengeId]);
+      assert.deepEqual(proofState.rows,[{attempts:1,consumed:true,links:1}]);
+    });
+    await t.test('new HTTP challenges are SEP53 only and reject downgrade, raw proofs and cross-challenge replay',async()=>{
+      assert.equal((await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey(),signingScheme:'RAW_ED25519_V1'})).status,400);
+      const c=await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()});
+      assert.equal(c.body.version,2);assert.equal(c.body.signingScheme,'SEP53_V2');
+      const bytes=Buffer.from(c.body.messageBase64,'base64');
+      const valid=Buffer.from(a.key.signMessage(bytes)).toString('base64');
+      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:Buffer.from(a.key.sign(bytes)).toString('base64')})).status,422);
+      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:valid,signingScheme:'RAW_ED25519_V1'})).status,400);
+      const other=await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()});
+      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:other.body.challengeId,signature:valid})).status,422);
+      assert.equal((await call(a,'POST','/api/wallet/verify',{challengeId:c.body.challengeId,signature:valid})).status,200);
     });
     await t.test('Ed25519 verifier rejects an expired challenge',async()=>{
       const message=Buffer.from('expired');const verifier=new Ed25519WalletVerifier();
-      const r=await verifier.verify({id:randomUUID(),userId:a.id,networkId:f.deployment.networkId,address:a.key.publicKey(),domain:'byetery-dev',nonce:'00',message,expiresAt:new Date(0)},a.key.sign(message),new Date());assert.equal(r.verified,false);
+      const r=await verifier.verify({signingScheme:'SEP53_V2',id:randomUUID(),userId:a.id,networkId:f.deployment.networkId,address:a.key.publicKey(),domain:'byetery-dev',nonce:'00',message,expiresAt:new Date(0)},a.key.signMessage(message),new Date());assert.equal(r.verified,false);
+    });
+    await t.test('wallet context injection and malformed proofs do not consume a fresh challenge',async()=>{
+      const c=await call(a,'POST','/api/wallet/challenge',{address:a.key.publicKey()});assert.equal(c.status,201);
+      const message=Buffer.from(c.body.messageBase64,'base64');
+      const input={challengeId:c.body.challengeId,signature:Buffer.from(a.key.signMessage(message)).toString('base64')};
+      for(const extra of [{address:b.key.publicKey()},{deploymentId:randomUUID()},{userId:b.businessId},{version:1}])
+        assert.equal((await call(a,'POST','/api/wallet/verify',{...input,...extra})).status,400);
+      assert.equal((await call(a,'POST','/api/wallet/verify',{...input,signature:'bad'})).status,400);
+      const row=(await f.repo.pool.query('select attempts,consumed_at from api_private.wallet_challenges where id=$1',[c.body.challengeId])).rows[0];
+      assert.deepEqual(row,{attempts:0,consumed_at:null});
+      assert.equal((await call(a,'POST','/api/wallet/verify',{...input,signature:Buffer.from(a.key.signMessage(Buffer.concat([message,Buffer.from(' ')]))).toString('base64')})).status,422);
+      assert.equal((await call(a,'POST','/api/wallet/verify',input)).status,200);
     });
     await t.test('A creates return with CSPRNG request ID',async()=>{
       const r=await call(a,'POST',`/api/batteries/${id}/returns`,{});assert.equal(r.status,201);rid=r.body.requestId;assert.match(rid,/^[a-f0-9]{64}$/);assert.equal(r.body.confirmedBatteryState,'RETURNED');
