@@ -1,0 +1,82 @@
+{
+  "task": "BYE-W1-003A",
+  "classification": "OFFICIAL_INSTAWARD_SPRINT / FUNDED_SPRINT",
+  "observedAt": "2026-10-20T17:29:10.022Z",
+  "status": "PARTIAL_WAITING_OWNER_ACTION",
+  "startingHead": "a4ff5951ad1e4ba0934269c197c802605965618c",
+  "branch": "instaward/d1-testnet-integration",
+  "targetWallet": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+  "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+  "principalLabel": "BYETERY-INSTAWARD-USER-1",
+  "authPrincipal": true,
+  "membership": "ACTIVE",
+  "userCorrelationSha256": "3cfebf43405906a775e780f3a8015e1b6bbd3ab4c8d1761c1e462bb9fb6843fb",
+  "challenge": {
+    "issued": false,
+    "id": null,
+    "version": null,
+    "signingScheme": null,
+    "issuedAt": null,
+    "expiresAt": null,
+    "nonceHash": null,
+    "consumed": false
+  },
+  "wallet": {
+    "controlProven": false,
+    "linked": false,
+    "independentFinalReadback": "NOT_YET_APPLICABLE"
+  },
+  "implementation": {
+    "approvedSnapshot": "450c21b151a0973064986327f09d55e4f36c43e0",
+    "snapshotBase": "0a572af29b6d4df6c16feb0329ecc225948824f6",
+    "snapshotBranch": "codex/wallet-qr",
+    "activeApiIssuance": "SEP53_V2_ONLY",
+    "legacy": "STORED_UNEXPIRED_UNCONSUMED_ONLY",
+    "clientAlgorithmSelection": false,
+    "remoteDdlApplied": false,
+    "browserAdapter": "APPROVED_SNAPSHOT_MINIMUM_LOCAL_BRIDGE",
+    "privateKeyExported": false,
+    "signerUsed": false,
+    "contractModified": false,
+    "wasmModified": false
+  },
+  "tests": {
+    "focusedWallet": 23,
+    "backend": 129,
+    "originalFoundationPreserved": 50,
+    "httpSupabaseDev": 45,
+    "frontend": 33,
+    "sqlParity": 82,
+    "bridge": 5,
+    "rustNative": 20,
+    "repeatedRustFeature": 20,
+    "wasm": 1,
+    "python": 4,
+    "mockDemo": "PASS_SENT_10_GREEN_TEST",
+    "rootVerify": "PASS",
+    "toolTypeScript": "PASS"
+  },
+  "gates": {
+    "replay": "PASS_DETERMINISTIC_AND_HTTP",
+    "wrongWallet": "PASS",
+    "wrongUser": "PASS",
+    "expired": "PASS",
+    "wrongDeployment": "PASS_LOCAL_SQL",
+    "concurrentConsume": "PASS_REAL_POSTGRES_HTTP_ONE_CONSUMPTION_ONE_LINK"
+  },
+  "businessTransactions": 0,
+  "rewardTransactions": 0,
+  "maintenanceTransactions": 0,
+  "returnRequestsCreated": 0,
+  "acceptance": {
+    "D1": "0/12",
+    "D2": "0/6",
+    "D3": "0/5",
+    "changed": false
+  },
+  "byeW1003": "HISTORICAL_BLOCKED_NOT_RESUMED",
+  "publication": {
+    "evidenceCommit": "RESOLVED_IN_FINAL_HANDOFF",
+    "ownerProofNotClaimedUntilVerified": true
+  }
+}

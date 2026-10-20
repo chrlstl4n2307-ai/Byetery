@@ -1,0 +1,85 @@
+{
+  "task": "BYE-W1-003",
+  "classification": "OFFICIAL_INSTAWARD_SPRINT / FUNDED_SPRINT",
+  "status": "BLOCKED",
+  "reason": "No properly linked/validated recipient exists in the existing TESTNET application deployment",
+  "additionalSetupCompatibility": {
+    "activeBackend": "backend/src/application/wallet.ts issues JSON/version1 and verifies raw Ed25519 message bytes",
+    "approvedVersionedImplementation": "SEP53_V2 exists only in the preserved wallet/QR snapshot",
+    "newChallengeIssued": false,
+    "proposedMinimum": "Review and port the existing approved versioned wallet issuance/verifier and focused tests into the active backend before wallet setup; do not issue new legacy challenges",
+    "implemented": false
+  },
+  "git": {
+    "startingHead": "a4ff5951ad1e4ba0934269c197c802605965618c",
+    "endingHeadAtGate": "a4ff5951ad1e4ba0934269c197c802605965618c",
+    "branch": "instaward/d1-testnet-integration",
+    "evidencePublication": "UNCOMMITTED_WORKSPACE",
+    "newCommit": null,
+    "pushed": false
+  },
+  "readOnlyChain": {
+    "observedAt": "2026-10-19T21:40:41.337Z",
+    "network": "TESTNET",
+    "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+    "sac": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+    "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+    "ttlGate": "PASS_EXISTING_DEADLINE_AND_BUFFER_GUARD",
+    "readinessLedger": 5284487,
+    "batteryLedger": 5284490,
+    "batteryId": "BYE-W1-002-64257020134D4A0F",
+    "batteryState": "REGISTERED",
+    "rewardState": "NOT_ELIGIBLE",
+    "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+    "requestId": null,
+    "sourceObservationOnly": {
+      "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "sequence": "20970220772392963",
+      "balanceStroops": "99999783304",
+      "ledger": 5284490,
+      "externalUsage": "UNCONFIRMED_TREAT_AS_SHARED",
+      "preparation": false
+    }
+  },
+  "readOnlyApplication": {
+    "observedAt": "2026-10-19T21:39:22.282415Z",
+    "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+    "mode": "TESTNET",
+    "walletLinksTotal": 0,
+    "activeAuthWalletLinks": 0,
+    "consumedChallenges": 0,
+    "activeAuthMemberships": 0,
+    "returnRequestsTotal": 0,
+    "projectionMatchesChain": true,
+    "projectionConfirmationLedger": 5281390
+  },
+  "execution": {
+    "openReturn": "NOT_EXECUTED",
+    "collection": "NOT_EXECUTED",
+    "recipientSnapshotVerified": false,
+    "newRequestId": null,
+    "newBusinessIdentities": 0,
+    "broadcasts": 0,
+    "signerInstantiated": false,
+    "contractModified": false,
+    "databaseWritten": false,
+    "mockModified": false,
+    "signedMaterialPublished": false
+  },
+  "tests": {
+    "currentReadOnlyReadiness": "PASS",
+    "prerequisiteGate": "BLOCKED",
+    "newAuthNegativeTests": "NOT_RUN_STOP_GATE",
+    "liveApiIdempotency": "NOT_RUN_STOP_GATE",
+    "fullRegression": "NOT_RERUN_STOP_BEFORE_IMPLEMENTATION_AND_SIGNING"
+  },
+  "acceptance": {
+    "realApiOperationKindsConfirmed": 1,
+    "requiredApiOperationKinds": 5,
+    "D1": "0/12",
+    "D2": "0/6",
+    "D3": "0/5",
+    "BYE-W1-001": "PARTIAL",
+    "BYE-W1-004": "NOT_STARTED"
+  }
+}
