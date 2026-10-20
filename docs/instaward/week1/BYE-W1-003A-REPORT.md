@@ -1,8 +1,10 @@
 # BYETERY BYE-W1-003A SEP53_V2 WALLET LINK REPORT
 
 2026-10-20, America/Santiago. OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT.
-Current result: **PARTIAL — implementation verified; waiting for owner wallet
-connection/signature**. This checkpoint does not prove USER-1 wallet control.
+Final result: **PASS — owner signed in Freighter; USER-1 wallet linkage verified
+through independent authoritative Auth/membership/challenge/wallet readback**.
+The earlier owner-handoff checkpoint4bb78ad accurately recorded PARTIAL before
+the owner completed the interactive action; this follow-up adds new evidence.
 
 Starting HEAD: `a4ff5951ad1e4ba0934269c197c802605965618c`.
 Ending evidence HEAD: resolved in final handoff after committing this file.
@@ -41,7 +43,7 @@ through a real Supabase session. GET /api/me through the active API established
 the application principal and deployment-scoped USER membership. It is not a bare
 SQL wallet row, copied MOCK membership or an inferred personal email account.
 
-Independent database readback at2026-10-20T17:26:35.174447Z found:
+Initial database readback at2026-10-20T17:26:35.174447Z, before owner action, found:
 
 | Fact | Observed |
 | --- | --- |
@@ -58,17 +60,32 @@ QR or broader D2 scope was merged. Its Host/Origin/session/body/target allowlist
 expose no lifecycle route. The browser SDK is pinned to the snapshot's6.0.1 and
 installed as a local tool dependency; no system/global installation.
 
-Owner action: select USER-1 and Testnet in Freighter, click **Conectar USER-1 y
-solicitar desafío**, then review the exact message and personally approve
-**Firmar mensaje y verificar con Freighter**. New challenges last10minutes. The
-server cannot sign as USER-1. Do not send a seed, private key, password or signature
-to the assistant. The task stops at this interactive point until the owner acts.
+The owner reported completing the connection/signature in Chrome/Freighter.
+The page then displayed wallet verified; that UI/HTTP result was not used alone.
+An independent MCP SQL readback at2026-10-20T17:33:06.505615Z joined the exact
+deployment, application user, Auth principal/session, membership, wallet and
+challenge, including matching address/network and proof_reference.
 
-At this checkpoint, actual target challenge: **NOT ISSUED**, consumption: **NO**,
-control proven: **NO**, wallet linked: **NO**. The companion JSON is a sanitized
-progress projection; no HTTP200 alone is accepted as link success. After owner
-approval, independent joined Auth/membership/wallet/challenge readback is required
-before updating this report toPASS. Do not infer completion from tests or this page.
+| Final fact | Independently observed |
+| --- | --- |
+| USER-1 control proven / wallet linked | YES / YES |
+| Auth principal / current Auth session | present / valid |
+| Application user / USER membership | ACTIVE / ACTIVE |
+| Exact target wallet and deployment | matched |
+| Challenge | 83491a62-5e73-4cd5-8a77-f48698514290 |
+| Version / stored signing scheme | 2 / SEP53_V2 |
+| Issued | 2026-10-20T17:31:59.686Z |
+| Expires | 2026-10-20T17:41:59.686Z |
+| Consumed and link verified | 2026-10-20T17:32:31.934Z, before expiry |
+| Attempts / matching active links | 1 / 1 |
+| New return requests | 0 |
+| Existing business operations / envelopes | 1 / 1, unchanged |
+
+The owner signed using the wallet itself. The server had no USER-1 secret and no
+signing proxy. No complete challenge message, nonce, signature or credential is
+published. Public evidence records the challenge ID, timestamps, scheme, nonce
+hash and an opaque user-correlation hash. The companion JSON includes the sanitized
+independent final readback, not merely a successful HTTP status.
 
 ## Verification
 
@@ -112,8 +129,8 @@ Contract/WASM/deployment/GREENTEST/Stellar roles unchanged. MOCK preserved.
 WASM SHA: `c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6`.
 Historical tags and `tools/sync_obsidian.py` remain unchanged.
 
-BYE-W1-003 remains historically BLOCKED and is **STILL BLOCKED** until USER-1
-verification is independently confirmed. Its original local blocked report/JSON
+BYE-W1-003 remains historically BLOCKED; its recipient prerequisite is now
+**READY TO RESUME**, but the task has NOT been resumed. Its original blocked report/JSON
 are preserved byte-for-byte; publication does not rewrite their historical result.
 This task does not satisfy open_return, confirm_collection, D1.2 or the full D1
 lifecycle. Official acceptance unchanged: D1 0/12,D2 0/6,D3 0/5.

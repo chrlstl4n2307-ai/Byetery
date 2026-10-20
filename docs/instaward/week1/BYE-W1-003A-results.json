@@ -1,8 +1,8 @@
 {
   "task": "BYE-W1-003A",
   "classification": "OFFICIAL_INSTAWARD_SPRINT / FUNDED_SPRINT",
-  "observedAt": "2026-10-20T17:29:10.022Z",
-  "status": "PARTIAL_WAITING_OWNER_ACTION",
+  "observedAt": "2026-10-20T17:34:22.749Z",
+  "status": "PASS",
   "startingHead": "a4ff5951ad1e4ba0934269c197c802605965618c",
   "branch": "instaward/d1-testnet-integration",
   "targetWallet": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
@@ -12,19 +12,40 @@
   "membership": "ACTIVE",
   "userCorrelationSha256": "3cfebf43405906a775e780f3a8015e1b6bbd3ab4c8d1761c1e462bb9fb6843fb",
   "challenge": {
-    "issued": false,
-    "id": null,
-    "version": null,
-    "signingScheme": null,
-    "issuedAt": null,
-    "expiresAt": null,
-    "nonceHash": null,
-    "consumed": false
+    "issued": true,
+    "id": "83491a62-5e73-4cd5-8a77-f48698514290",
+    "version": 2,
+    "signingScheme": "SEP53_V2",
+    "issuedAt": "2026-10-20T17:31:59.686Z",
+    "expiresAt": "2026-10-20T17:41:59.686Z",
+    "nonceHash": "f0d27ff23bacead509eb03585df5b9ffe57e5d9878f5ccef88b27a1570fcf9d4",
+    "consumed": true
   },
   "wallet": {
-    "controlProven": false,
-    "linked": false,
-    "independentFinalReadback": "NOT_YET_APPLICABLE"
+    "controlProven": true,
+    "linked": true,
+    "independentFinalReadback": "PASS"
+  },
+  "authoritativeReadback": {
+    "observedAt": "2026-10-20T17:33:06.505615Z",
+    "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+    "address": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+    "userActive": true,
+    "authPrincipalPresent": true,
+    "validAuthSessionPresent": true,
+    "userMembershipActive": true,
+    "challengeId": "83491a62-5e73-4cd5-8a77-f48698514290",
+    "signingScheme": "SEP53_V2",
+    "issuedAt": "2026-10-20T17:31:59.686Z",
+    "expiresAt": "2026-10-20T17:41:59.686Z",
+    "consumedAt": "2026-10-20T17:32:31.934Z",
+    "attempts": 1,
+    "verifiedAt": "2026-10-20T17:32:31.934Z",
+    "walletActive": true,
+    "matchingActiveLinks": 1,
+    "returnRequests": 0,
+    "existingBusinessOperations": 1,
+    "existingEnvelopes": 1
   },
   "implementation": {
     "approvedSnapshot": "450c21b151a0973064986327f09d55e4f36c43e0",
@@ -74,7 +95,7 @@
     "D3": "0/5",
     "changed": false
   },
-  "byeW1003": "HISTORICAL_BLOCKED_NOT_RESUMED",
+  "byeW1003": "HISTORICAL_BLOCKED_RECIPIENT_READY_TO_RESUME_NOT_RESUMED",
   "publication": {
     "evidenceCommit": "RESOLVED_IN_FINAL_HANDOFF",
     "ownerProofNotClaimedUntilVerified": true
