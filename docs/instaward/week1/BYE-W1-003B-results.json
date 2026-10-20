@@ -1,0 +1,694 @@
+{
+  "task": "BYE-W1-003B",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "status": "PARTIAL",
+  "startingHead": "c237da5278e7532612e13e81f0d9eba535f22b74",
+  "implementationHead": "04dd6dafecf337f9351c7708296266bd853e4fe2",
+  "branch": "instaward/d1-testnet-integration",
+  "principal": "BYETERY-INSTAWARD-USER-1",
+  "collectorPrincipal": "BYETERY-INSTAWARD-COLLECTOR-1",
+  "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+  "batteryId": "BYE-W1-002-64257020134D4A0F",
+  "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+  "collectorSetup": {
+    "initialBlocker": "No application COLLECTOR membership",
+    "explicitOwnerException": true,
+    "applied": "Dedicated Auth test principal, COLLECTOR association plus standard base USER; no ADMIN/RECYCLER; on-chain roles unchanged"
+  },
+  "openReturn": {
+    "status": "PASS",
+    "apiInitiated": true,
+    "operationId": "dd1408b0-7cd5-4332-bdb0-6f61ae00cf86",
+    "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+    "transactionHash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+    "confirmationLedger": 5299532,
+    "actualFee": "267535",
+    "simulation": {
+      "ledger": 5299525,
+      "totalFee": "321513",
+      "resourceFee": "311513",
+      "sourceBalance": "99999783304",
+      "classification": "SIMULATION",
+      "sourceSequence": "20970220772392963",
+      "authRequirements": [
+        "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+      ]
+    },
+    "simulationDetails": {
+      "ledger": 5299525,
+      "resourceFee": "311513",
+      "restorePreamble": false,
+      "authEntryCount": 1,
+      "resources": {
+        "footprint": {
+          "readOnly": [
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": {
+                    "0": 216,
+                    "1": 107,
+                    "2": 121,
+                    "3": 155,
+                    "4": 7,
+                    "5": 124,
+                    "6": 67,
+                    "7": 156,
+                    "8": 144,
+                    "9": 123,
+                    "10": 250,
+                    "11": 13,
+                    "12": 180,
+                    "13": 211,
+                    "14": 181,
+                    "15": 137,
+                    "16": 50,
+                    "17": 191,
+                    "18": 235,
+                    "19": 115,
+                    "20": 3,
+                    "21": 177,
+                    "22": 83,
+                    "23": 178,
+                    "24": 247,
+                    "25": 247,
+                    "26": 254,
+                    "27": 86,
+                    "28": 123,
+                    "29": 11,
+                    "30": 234,
+                    "31": 38
+                  }
+                },
+                "key": {
+                  "type": 20
+                },
+                "durability": 1
+              }
+            },
+            {
+              "type": 7,
+              "contractCode": {
+                "hash": {
+                  "0": 194,
+                  "1": 188,
+                  "2": 128,
+                  "3": 178,
+                  "4": 109,
+                  "5": 58,
+                  "6": 26,
+                  "7": 38,
+                  "8": 90,
+                  "9": 29,
+                  "10": 77,
+                  "11": 25,
+                  "12": 35,
+                  "13": 181,
+                  "14": 3,
+                  "15": 246,
+                  "16": 85,
+                  "17": 143,
+                  "18": 221,
+                  "19": 124,
+                  "20": 20,
+                  "21": 137,
+                  "22": 248,
+                  "23": 27,
+                  "24": 13,
+                  "25": 232,
+                  "26": 245,
+                  "27": 238,
+                  "28": 24,
+                  "29": 246,
+                  "30": 206,
+                  "31": 182
+                }
+              }
+            }
+          ],
+          "readWrite": [
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": {
+                    "0": 216,
+                    "1": 107,
+                    "2": 121,
+                    "3": 155,
+                    "4": 7,
+                    "5": 124,
+                    "6": 67,
+                    "7": 156,
+                    "8": 144,
+                    "9": 123,
+                    "10": 250,
+                    "11": 13,
+                    "12": 180,
+                    "13": 211,
+                    "14": 181,
+                    "15": 137,
+                    "16": 50,
+                    "17": 191,
+                    "18": 235,
+                    "19": 115,
+                    "20": 3,
+                    "21": 177,
+                    "22": 83,
+                    "23": 178,
+                    "24": 247,
+                    "25": 247,
+                    "26": 254,
+                    "27": 86,
+                    "28": 123,
+                    "29": 11,
+                    "30": 234,
+                    "31": 38
+                  }
+                },
+                "key": {
+                  "type": 16,
+                  "vec": [
+                    {
+                      "type": 15,
+                      "sym": "Battery"
+                    },
+                    {
+                      "type": 14,
+                      "str": "BYE-W1-002-64257020134D4A0F"
+                    }
+                  ]
+                },
+                "durability": 1
+              }
+            },
+            {
+              "type": 6,
+              "contractData": {
+                "contract": {
+                  "type": 1,
+                  "contractId": {
+                    "0": 216,
+                    "1": 107,
+                    "2": 121,
+                    "3": 155,
+                    "4": 7,
+                    "5": 124,
+                    "6": 67,
+                    "7": 156,
+                    "8": 144,
+                    "9": 123,
+                    "10": 250,
+                    "11": 13,
+                    "12": 180,
+                    "13": 211,
+                    "14": 181,
+                    "15": 137,
+                    "16": 50,
+                    "17": 191,
+                    "18": 235,
+                    "19": 115,
+                    "20": 3,
+                    "21": 177,
+                    "22": 83,
+                    "23": 178,
+                    "24": 247,
+                    "25": 247,
+                    "26": 254,
+                    "27": 86,
+                    "28": 123,
+                    "29": 11,
+                    "30": 234,
+                    "31": 38
+                  }
+                },
+                "key": {
+                  "type": 16,
+                  "vec": [
+                    {
+                      "type": 15,
+                      "sym": "Request"
+                    },
+                    {
+                      "type": 13,
+                      "bytes": {
+                        "0": 93,
+                        "1": 72,
+                        "2": 100,
+                        "3": 58,
+                        "4": 137,
+                        "5": 21,
+                        "6": 65,
+                        "7": 62,
+                        "8": 216,
+                        "9": 137,
+                        "10": 221,
+                        "11": 106,
+                        "12": 163,
+                        "13": 248,
+                        "14": 48,
+                        "15": 77,
+                        "16": 16,
+                        "17": 168,
+                        "18": 194,
+                        "19": 81,
+                        "20": 227,
+                        "21": 132,
+                        "22": 245,
+                        "23": 40,
+                        "24": 171,
+                        "25": 84,
+                        "26": 97,
+                        "27": 214,
+                        "28": 228,
+                        "29": 200,
+                        "30": 215,
+                        "31": 140
+                      }
+                    }
+                  ]
+                },
+                "durability": 1
+              }
+            }
+          ]
+        },
+        "instructions": 962603,
+        "diskReadBytes": 0,
+        "writeBytes": 752
+      }
+    },
+    "preSign": {
+      "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "sequence": "20970220772392964",
+      "fee": "321513",
+      "auth": [
+        {
+          "credentialType": "sorobanCredentialsSourceAccount",
+          "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+          "expirationLedger": null,
+          "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+          "method": "open_return",
+          "argumentCount": 3,
+          "subInvocations": 0
+        }
+      ],
+      "expirationLedger": 5299585,
+      "currentLedger": 5299526
+    },
+    "durability": {
+      "persistedAt": "2026-10-20T18:33:59.572Z",
+      "dispatchIntentAt": "2026-10-20T18:34:02.982Z",
+      "persistedBeforeDispatch": true,
+      "sourceCheck": {
+        "ledger": 5299531,
+        "balance": "99999783304",
+        "sequence": "20970220772392963"
+      }
+    },
+    "events": [
+      {
+        "topics": [
+          "opened",
+          "BYE-W1-002-64257020134D4A0F"
+        ],
+        "data": {
+          "request_id": {
+            "0": 93,
+            "1": 72,
+            "2": 100,
+            "3": 58,
+            "4": 137,
+            "5": 21,
+            "6": 65,
+            "7": 62,
+            "8": 216,
+            "9": 137,
+            "10": 221,
+            "11": 106,
+            "12": 163,
+            "13": 248,
+            "14": 48,
+            "15": 77,
+            "16": 16,
+            "17": 168,
+            "18": 194,
+            "19": 81,
+            "20": 227,
+            "21": 132,
+            "22": 245,
+            "23": 40,
+            "24": 171,
+            "25": 84,
+            "26": 97,
+            "27": 214,
+            "28": 228,
+            "29": 200,
+            "30": 215,
+            "31": 140
+          }
+        }
+      }
+    ],
+    "sorobanReturn": {
+      "0": 93,
+      "1": 72,
+      "2": 100,
+      "3": 58,
+      "4": 137,
+      "5": 21,
+      "6": 65,
+      "7": 62,
+      "8": 216,
+      "9": 137,
+      "10": 221,
+      "11": 106,
+      "12": 163,
+      "13": 248,
+      "14": 48,
+      "15": 77,
+      "16": 16,
+      "17": 168,
+      "18": 194,
+      "19": 81,
+      "20": 227,
+      "21": 132,
+      "22": 245,
+      "23": 40,
+      "24": 171,
+      "25": 84,
+      "26": 97,
+      "27": 214,
+      "28": 228,
+      "29": 200,
+      "30": 215,
+      "31": 140
+    },
+    "postBattery": {
+      "ledger": 5299538,
+      "value": {
+        "state": "RETURNED",
+        "rewardState": "NOT_ELIGIBLE",
+        "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+        "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+        "collector": null,
+        "collectionHash": null,
+        "recycler": null,
+        "recyclingHash": null
+      }
+    },
+    "postRequest": {
+      "batteryId": "BYE-W1-002-64257020134D4A0F",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "state": "OPEN"
+    },
+    "recipientSnapshotMatched": true,
+    "duplicate": {
+      "status": "PASS",
+      "before": {
+        "requests": 1,
+        "operations": 2,
+        "identities": 2,
+        "dispatches": 2
+      },
+      "after": {
+        "requests": 1,
+        "operations": 2,
+        "identities": 2,
+        "dispatches": 2
+      },
+      "newBroadcasts": 0
+    },
+    "authCalls": 1,
+    "envelopeCalls": 1,
+    "broadcasts": 1,
+    "before": {
+      "requests": 0,
+      "operations": 1,
+      "identities": 1,
+      "dispatches": 1
+    },
+    "after": {
+      "requests": 1,
+      "operations": 2,
+      "identities": 2,
+      "dispatches": 2
+    }
+  },
+  "collection": {
+    "status": "BLOCKED",
+    "apiInitiated": true,
+    "logicalOperationId": "4fa3fbac-84e4-4845-8abd-fbdff757cbb4",
+    "simulation": {
+      "ledger": 5299559,
+      "totalFee": "1002362",
+      "resourceFee": "992362",
+      "sourceBalance": "99999515769",
+      "classification": "SIMULATION",
+      "sourceSequence": "20970220772392964",
+      "authRequirements": [
+        "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+        "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V"
+      ]
+    },
+    "evidence": {
+      "manifestUtf8": "{\"version\":1,\"task\":\"BYE-W1-003B\",\"fixture\":true,\"batteryId\":\"BYE-W1-002-64257020134D4A0F\",\"requestId\":\"5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c\",\"kind\":\"COLLECTION\",\"attestation\":\"Testnet application collection validation; no assertion of real physical battery handling\",\"nonce\":\"2caf89715ef70150e77dc5e30a667572\"}",
+      "payloadHash": "ef61932cb180ffbafac39eddffaed46dccb6e42366c7999913116d9eb8f73766",
+      "commitment": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef"
+    },
+    "durableState": {
+      "id": "4fa3fbac-84e4-4845-8abd-fbdff757cbb4",
+      "txHash": null,
+      "command": "confirm_collection",
+      "appState": "QUEUED",
+      "dispatches": 0,
+      "simulation": {
+        "ledger": 5299559,
+        "totalFee": "1002362",
+        "resourceFee": "992362",
+        "sourceBalance": "99999515769",
+        "classification": "SIMULATION",
+        "sourceSequence": "20970220772392964",
+        "authRequirements": [
+          "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+          "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V"
+        ]
+      },
+      "persistedAt": null,
+      "preparedLedger": null,
+      "transportState": "PREPARING",
+      "authExpirations": null,
+      "confirmationLedger": null
+    },
+    "error": "Unhandled PostgreSQL Client error: Connection terminated unexpectedly",
+    "exactFailureStage": "After committed positive simulation; before completion of pre-sign gates and write-before-helper journal gate",
+    "negativeMissingService": "NOT_RUN_IN_LIVE_ATTEMPT",
+    "negativeMissingCollector": "NOT_RUN_IN_LIVE_ATTEMPT",
+    "negativeWrongCollector": "NOT_RUN_IN_LIVE_ATTEMPT",
+    "negativeNoRoleCollector": "NOT_RUN_IN_LIVE_ATTEMPT",
+    "liveSignerReached": false,
+    "phase2Hash": null,
+    "signedIdentityPersisted": false,
+    "dispatches": 0,
+    "transactionHash": null,
+    "confirmationLedger": null,
+    "actualFee": null,
+    "duplicateTest": "NOT_RUN",
+    "automaticRetry": false,
+    "newPreparation": false,
+    "replacementIdentity": false,
+    "reviewRequiredBeforeResume": true
+  },
+  "independentDatabaseReadback": {
+    "battery": {
+      "state": "RETURNED",
+      "reward": "NOT_ELIGIBLE",
+      "batteryId": "BYE-W1-002-64257020134D4A0F",
+      "collector": null,
+      "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+      "collectionHash": null,
+      "confirmedLedger": 5299532
+    },
+    "request": {
+      "state": "OPEN",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+      "ownerMatches": true,
+      "walletLinkMatches": true,
+      "associationConfirmedAt": null
+    },
+    "observedAt": "2026-10-20T18:39:41.814307+00:00",
+    "operations": [
+      {
+        "id": "dd1408b0-7cd5-4332-bdb0-6f61ae00cf86",
+        "txHash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+        "command": "open_return",
+        "appState": "CONFIRMED",
+        "dispatches": 1,
+        "simulation": {
+          "ledger": 5299525,
+          "totalFee": "321513",
+          "resourceFee": "311513",
+          "sourceBalance": "99999783304",
+          "classification": "SIMULATION",
+          "sourceSequence": "20970220772392963",
+          "authRequirements": [
+            "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+          ]
+        },
+        "persistedAt": "2026-10-20T18:33:59.572255+00:00",
+        "preparedLedger": 5299525,
+        "transportState": "PROJECTED",
+        "authExpirations": [],
+        "confirmationLedger": "5299532"
+      },
+      {
+        "id": "4fa3fbac-84e4-4845-8abd-fbdff757cbb4",
+        "txHash": null,
+        "command": "confirm_collection",
+        "appState": "QUEUED",
+        "dispatches": 0,
+        "simulation": {
+          "ledger": 5299559,
+          "totalFee": "1002362",
+          "resourceFee": "992362",
+          "sourceBalance": "99999515769",
+          "classification": "SIMULATION",
+          "sourceSequence": "20970220772392964",
+          "authRequirements": [
+            "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+            "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V"
+          ]
+        },
+        "persistedAt": null,
+        "preparedLedger": null,
+        "transportState": "PREPARING",
+        "authExpirations": null,
+        "confirmationLedger": null
+      }
+    ]
+  },
+  "independentChainBeforeCollection": {
+    "mode": "return",
+    "observedAt": "2026-10-20T18:35:26.933Z",
+    "network": "TESTNET",
+    "ttl": "PASS",
+    "latestLedger": 5299547,
+    "battery": {
+      "ledger": 5299547,
+      "value": {
+        "state": "RETURNED",
+        "rewardState": "NOT_ELIGIBLE",
+        "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+        "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+        "collector": null,
+        "collectionHash": null,
+        "recycler": null,
+        "recyclingHash": null
+      }
+    },
+    "request": {
+      "batteryId": "BYE-W1-002-64257020134D4A0F",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "state": "OPEN"
+    },
+    "originalTransaction": {
+      "hash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+      "status": "SUCCESS",
+      "confirmationLedger": 5299532,
+      "actualFee": "267535"
+    }
+  },
+  "independentFinalChainReadback": {
+    "mode": "return",
+    "observedAt": "2026-10-20T18:39:50.307Z",
+    "network": "TESTNET",
+    "ttl": "PASS",
+    "latestLedger": 5299600,
+    "battery": {
+      "ledger": 5299600,
+      "value": {
+        "state": "RETURNED",
+        "rewardState": "NOT_ELIGIBLE",
+        "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+        "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+        "collector": null,
+        "collectionHash": null,
+        "recycler": null,
+        "recyclingHash": null
+      }
+    },
+    "request": {
+      "batteryId": "BYE-W1-002-64257020134D4A0F",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "state": "OPEN"
+    },
+    "source": {
+      "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "sequence": "20970220772392964",
+      "balance": "99999515769",
+      "ledger": 5299600
+    },
+    "originalTransaction": {
+      "hash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+      "status": "SUCCESS",
+      "confirmationLedger": 5299532,
+      "actualFee": "267535"
+    }
+  },
+  "tests": {
+    "head": "04dd6dafecf337f9351c7708296266bd853e4fe2",
+    "allPassed": true,
+    "contractNative": 20,
+    "sameContractTestsWithWasmFeature": 20,
+    "wasm": 1,
+    "rustfmt": "PASS",
+    "clippy": "PASS",
+    "backend": 132,
+    "foundationOriginal": 50,
+    "httpDev": 45,
+    "httpExecution": "serial; unchanged assertions; fresh namespaced MOCK fixtures",
+    "frontend": 33,
+    "frontendBuild": "PASS",
+    "localSqlRollback": 82,
+    "signerNative": 22,
+    "signerOffline": 18,
+    "walletAndSignerFocused": 32,
+    "operatorFocused": 3,
+    "python": 4,
+    "mockDemo": "SENT 10 GREEN-TEST",
+    "secretAudit": "PASS; 0 findings"
+  },
+  "verificationLimit": "Passing regression suites do not imply successful live collection; unhandled PostgreSQL disconnection is a real unresolved runtime failure.",
+  "wantedNewBroadcasts": 1,
+  "unwantedBroadcasts": 0,
+  "newLogicalOperations": 2,
+  "newSignedIdentities": 1,
+  "contractModified": false,
+  "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "schemaRlsGrantsModified": false,
+  "historicalReportsRewritten": false,
+  "protectedUtilityModified": false,
+  "mainnet": false,
+  "recyclingExecuted": false,
+  "rewardExecuted": false,
+  "d1RealConfirmedApiOperations": "2/5",
+  "d1Assessment": {
+    "D1.1": "SUPPORTED; registration and return confirmed",
+    "D1.2": "NOT YET SATISFIED; live dual-auth collection pending",
+    "D1.3": "SUPPORTED",
+    "D1.4": "SUPPORTED",
+    "D1.5": "SUPPORTED by live return replay only; collection replay missing",
+    "D1.7": "SUPPORTED by return durability only"
+  },
+  "officialAcceptance": {
+    "D1": "0/12",
+    "D2": "0/6",
+    "D3": "0/5",
+    "criteriaMarkedPass": 0
+  },
+  "nextStep": "Review PostgreSQL disconnection handling and resolve original collection operation only; BYE-W1-004 NOT STARTED"
+}

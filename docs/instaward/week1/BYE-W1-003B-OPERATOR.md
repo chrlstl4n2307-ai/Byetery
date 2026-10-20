@@ -6,6 +6,17 @@ general queue worker. Only the fixed sprint battery/deployment and open_return /
 confirm_collection are allowed. No recycling, reward, cancellation, registration,
 Mainnet, redeployment or on-chain role change is available.
 
+## Current execution stop — 2026-10-20
+
+Return succeeded, but collection operation
+`4fa3fbac-84e4-4845-8abd-fbdff757cbb4` stopped in PREPARING after a PostgreSQL
+connection termination killed the process. Independent inspection found no
+collection envelope/hash and zero dispatches. The local journal is intentionally
+left at COLLECTION_API_INTENT, which rejects automatic re-entry. Do not reset it,
+create another operation or run a general worker to bypass this stop. Resolve
+connection-error handling and review recovery of the original unsigned operation
+before any further signing. See [the partial report](BYE-W1-003B-REPORT.md).
+
 ## Owner-approved collector setup
 
 The initial gate found an existing on-chain Collector role but no application
