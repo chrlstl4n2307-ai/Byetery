@@ -1,0 +1,8 @@
+{
+  "name": "byetery-dev-wallet-link",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@stellar/freighter-api": "6.0.1"
+  }
+}

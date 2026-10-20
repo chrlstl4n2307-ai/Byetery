@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Byetery · USER-1 wallet linking</title>
+<link rel="stylesheet" href="/style.css">
+<main><p>BYE-W1-003A · DEV / TESTNET · SOLO VINCULACIÓN</p>
+<h1>Vincular USER-1 con Freighter</h1>
+<p>Esta página usa una cuenta Supabase Auth de prueba identificada como <strong>BYETERY-INSTAWARD-USER-1</strong>, con acceso USER al deployment TESTNET. La firma vinculará tu dirección a esa cuenta de prueba.</p>
+<p>Wallet autorizada:</p><code>GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS</code>
+<p>Selecciona esta cuenta y Testnet en Freighter. La clave permanece en tu wallet. Aquí solo firmas un mensaje SEP-53: no una transacción, devolución ni recompensa.</p>
+<button id="connect">Conectar USER-1 y solicitar desafío</button>
+<pre id="message" aria-label="Mensaje que se firmará"></pre>
+<button id="sign" disabled>Firmar mensaje y verificar con Freighter</button>
+<p id="status" role="status">Pendiente de tu conexión y aprobación.</p></main>
+<script src="/freighter.js"></script><script type="module" src="/browser.js"></script></html>
