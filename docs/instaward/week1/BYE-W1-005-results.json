@@ -1,0 +1,621 @@
+{
+  "schemaVersion": 1,
+  "task": "BYE-W1-005",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "date": "2026-10-21",
+  "result": "PARTIAL — D1.5 BLOCKED BY RETIRED PRINCIPAL",
+  "startingHead": "91e00286669fd504946db521a86fc78352c60967",
+  "testedImplementationHead": "59ed3540fcf7672507f48215b1bd916a8bc083c3",
+  "branch": "instaward/d1-testnet-integration",
+  "productionCodeChanged": false,
+  "D1.5": {
+    "status": "BLOCKED",
+    "mode": "AUTHORITATIVE CONTEXT RECOVERY + READ_ONLY LIVE TESTNET; REAL API REPLAY NOT RUN",
+    "registrationOperation": "6868cdd0-f4e5-483b-aa80-18e26026dd5a",
+    "historicalTransaction": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+    "context": {
+      "task": "BYE-W1-005",
+      "originalContextRecovered": true,
+      "normalizedBody": {
+        "batteryId": "BYE-W1-002-64257020134D4A0F",
+        "metadata": {
+          "classification": "OFFICIAL_INSTAWARD_SPRINT",
+          "createdAt": "2026-10-19T17:03:44.658Z",
+          "evidenceNonce": "d428aa566f765db972d5dc1006f74f66",
+          "fixture": true,
+          "task": "BYE-W1-002",
+          "type": "Sprint API registration fixture"
+        }
+      },
+      "storedIdempotencyKey": "96279fd5-7f6f-4e09-81da-8a8e8c37abaf",
+      "operationId": "6868cdd0-f4e5-483b-aa80-18e26026dd5a",
+      "transactionHash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+      "inputHashMatchesStored": true,
+      "registrationManifestHashMatches": true,
+      "storedCommandHashMatches": true,
+      "originalCacheStatus": 201,
+      "apiReplayExecuted": false,
+      "changedParameterRequestExecuted": false,
+      "reason": "Retired original principal DISABLED, auth_user_id NULL, Auth absent, ADMIN/USER memberships disabled; IdentityImmutable prohibits non-null rebind. No account/role/invariant change authorized.",
+      "newOperation": 0,
+      "newIdentity": 0,
+      "newSigning": 0,
+      "newDispatch": 0,
+      "newBroadcast": 0
+    },
+    "principal": {
+      "business_user_id": "dec4c6af-93b6-4e55-80ee-927c17d75217",
+      "auth_user_id": null,
+      "status": "DISABLED",
+      "auth_exists": false,
+      "memberships": [
+        {
+          "role": "ADMIN",
+          "enabled": false,
+          "actor_address": null
+        },
+        {
+          "role": "USER",
+          "enabled": false,
+          "actor_address": null
+        }
+      ],
+      "operations": 1,
+      "cached_requests": 1
+    },
+    "storedCacheResponse": {
+      "source": "TESTNET",
+      "batteryId": "BYE-W1-002-64257020134D4A0F",
+      "lastAttempt": null,
+      "operationId": "6868cdd0-f4e5-483b-aa80-18e26026dd5a",
+      "transportState": "PROJECTED",
+      "transactionHash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+      "pendingOperation": null,
+      "confirmationLedger": 5281390,
+      "confirmedRewardState": "NOT_ELIGIBLE",
+      "confirmedBatteryState": "REGISTERED"
+    },
+    "storedInputHash": "18cfdc535b7de7f718107234ff5550c71cddb767d91b69063fd928af5428acf3",
+    "registrationCommitment": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+    "blockedReason": "Original business principal is DISABLED, Auth identity deleted/auth_user_id NULL, ADMIN and USER memberships disabled. IdentityImmutable rejects any non-null Auth rebind. Same endpoint cannot authenticate that historical principal; a different user does not share its cache namespace.",
+    "changedParameterSameKeyRequest": "NOT RUN",
+    "apiReplayExecuted": false,
+    "databaseNoAdditionalEffectReadback": "PASS; SELECT snapshots only, not a replay assertion",
+    "apiReplayAssertions": "NOT RUN",
+    "chainBefore": {
+      "task": "BYE-W1-005",
+      "evidenceMode": "READ_ONLY_LIVE_TESTNET",
+      "phase": "before",
+      "stage": "reward",
+      "status": "PASS",
+      "observedAt": "2026-10-21T20:44:06.072Z",
+      "network": "TESTNET",
+      "hash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+      "confirmationLedger": 5315915,
+      "actualFee": "10057",
+      "readinessLedger": 5318371,
+      "battery": {
+        "ledger": 5318371,
+        "value": {
+          "state": "RECYCLED",
+          "rewardState": "SENT",
+          "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+          "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+          "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+          "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+          "recyclingHash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451"
+        }
+      },
+      "request": {
+        "batteryId": "BYE-W1-002-64257020134D4A0F",
+        "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+        "state": "CONFIRMED"
+      },
+      "recipientBalance": "100000000",
+      "contractBalance": "800000000",
+      "source": {
+        "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+        "sequence": "20970220772392966",
+        "balance": "99999436265",
+        "ledger": 5318371
+      },
+      "signatures": 0,
+      "broadcasts": 0
+    },
+    "chainAfter": {
+      "task": "BYE-W1-005",
+      "evidenceMode": "READ_ONLY_LIVE_TESTNET",
+      "phase": "after",
+      "stage": "reward",
+      "status": "PASS",
+      "observedAt": "2026-10-21T20:50:56.253Z",
+      "network": "TESTNET",
+      "hash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+      "confirmationLedger": 5315915,
+      "actualFee": "10057",
+      "readinessLedger": 5318453,
+      "battery": {
+        "ledger": 5318453,
+        "value": {
+          "state": "RECYCLED",
+          "rewardState": "SENT",
+          "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+          "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+          "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+          "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+          "recyclingHash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451"
+        }
+      },
+      "request": {
+        "batteryId": "BYE-W1-002-64257020134D4A0F",
+        "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+        "state": "CONFIRMED"
+      },
+      "recipientBalance": "100000000",
+      "contractBalance": "800000000",
+      "source": {
+        "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+        "sequence": "20970220772392966",
+        "balance": "99999436265",
+        "ledger": 5318453
+      },
+      "signatures": 0,
+      "broadcasts": 0
+    },
+    "sqlBefore": {
+      "observed_at": "2026-10-21 20:42:19.285359+00",
+      "manifest_utf8": "{\"batteryId\":\"BYE-W1-002-64257020134D4A0F\",\"metadata\":{\"classification\":\"OFFICIAL_INSTAWARD_SPRINT\",\"createdAt\":\"2026-10-19T17:03:44.658Z\",\"evidenceNonce\":\"d428aa566f765db972d5dc1006f74f66\",\"fixture\":true,\"task\":\"BYE-W1-002\",\"type\":\"Sprint API registration fixture\"},\"version\":1}",
+      "payload_hash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+      "metadata": {
+        "task": "BYE-W1-002",
+        "type": "Sprint API registration fixture",
+        "fixture": true,
+        "createdAt": "2026-10-19T17:03:44.658Z",
+        "evidenceNonce": "d428aa566f765db972d5dc1006f74f66",
+        "classification": "OFFICIAL_INSTAWARD_SPRINT"
+      },
+      "lifecycle_operations": 5,
+      "registration_identities": 1,
+      "registration_dispatches": 1,
+      "state": "RECYCLED",
+      "reward_state": "SENT",
+      "registration_hash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665"
+    },
+    "sqlAfter": {
+      "observed_at": "2026-10-21 20:50:46.957866+00",
+      "state": "RECYCLED",
+      "reward_state": "SENT",
+      "user_status": "DISABLED",
+      "auth_user_id": null,
+      "transaction_hash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+      "confirmation_ledger": "5281390",
+      "lifecycle_operations": 5,
+      "registration_identities": 1,
+      "registration_dispatches": 1
+    },
+    "newLiveEffects": 0,
+    "ownerDecisionRequired": "No account/role restore, trigger bypass or new registration authorized. Separately review availability of a consistent pre-cleanup Auth+SQL backup in an isolated recovery environment; availability and criterion sufficiency unproven. If absent, owner must decide a separately scoped evidence/recovery approach without falsely certifying this replay."
+  },
+  "D1.7": {
+    "status": "READY FOR VALIDATION",
+    "mode": "CONTROLLED_INTEGRATION_NOT_LIVE_TESTNET",
+    "cases": [
+      {
+        "task": "BYE-W1-005",
+        "observedAt": "2026-10-21T20:45:33.139Z",
+        "evidenceMode": "CONTROLLED_INTEGRATION_NOT_LIVE_TESTNET",
+        "lostResponse": false,
+        "before": {
+          "operationId": "b2d7868a-f849-489f-9e8e-bb7b53c2d9eb",
+          "identityId": "b2d7868a-f849-489f-9e8e-bb7b53c2d9eb",
+          "identityIdDefinition": "testnet_envelopes primary key = operation_id",
+          "network": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+          "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+          "method": "register_battery",
+          "source": "GA2UYBBIJEEDKQKLB3ZDQZUKGV5GBEH6FUHJB5X5KYEFGQ2NKC3ZDOEP",
+          "sequence": "1",
+          "hash": "69ebb1f488677984edc6652e4759f3b5f11ba122dd5d8ee34bf7cb4cfb3462ca",
+          "envelopeSha256": "340959dff4c4a80ed9202ae9633416c4f02044ae9cbff1b612c4a88e2f6c2af5",
+          "state": "READY",
+          "dispatches": 0,
+          "operations": 1,
+          "identities": 1
+        },
+        "preSubmit": {
+          "mode": "CONTROLLED_AUTHORITY",
+          "ledger": 11,
+          "battery": null,
+          "effects": 0
+        },
+        "afterRestart": {
+          "operationId": "b2d7868a-f849-489f-9e8e-bb7b53c2d9eb",
+          "identityId": "b2d7868a-f849-489f-9e8e-bb7b53c2d9eb",
+          "identityIdDefinition": "testnet_envelopes primary key = operation_id",
+          "network": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+          "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+          "method": "register_battery",
+          "source": "GA2UYBBIJEEDKQKLB3ZDQZUKGV5GBEH6FUHJB5X5KYEFGQ2NKC3ZDOEP",
+          "sequence": "1",
+          "hash": "69ebb1f488677984edc6652e4759f3b5f11ba122dd5d8ee34bf7cb4cfb3462ca",
+          "envelopeSha256": "340959dff4c4a80ed9202ae9633416c4f02044ae9cbff1b612c4a88e2f6c2af5",
+          "state": "READY",
+          "dispatches": 0,
+          "operations": 1,
+          "identities": 1
+        },
+        "after": {
+          "operationId": "b2d7868a-f849-489f-9e8e-bb7b53c2d9eb",
+          "identityId": "b2d7868a-f849-489f-9e8e-bb7b53c2d9eb",
+          "identityIdDefinition": "testnet_envelopes primary key = operation_id",
+          "network": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+          "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+          "method": "register_battery",
+          "source": "GA2UYBBIJEEDKQKLB3ZDQZUKGV5GBEH6FUHJB5X5KYEFGQ2NKC3ZDOEP",
+          "sequence": "1",
+          "hash": "69ebb1f488677984edc6652e4759f3b5f11ba122dd5d8ee34bf7cb4cfb3462ca",
+          "envelopeSha256": "340959dff4c4a80ed9202ae9633416c4f02044ae9cbff1b612c4a88e2f6c2af5",
+          "state": "PROJECTED",
+          "dispatches": 1,
+          "operations": 1,
+          "identities": 1
+        },
+        "finalAuthority": {
+          "mode": "CONTROLLED_AUTHORITY",
+          "ledger": 12,
+          "battery": {
+            "state": "REGISTERED",
+            "recycler": null,
+            "collector": null,
+            "requestId": null,
+            "rewardState": "NOT_ELIGIBLE",
+            "recyclingHash": null,
+            "collectionHash": null,
+            "registrationHash": "63b257dd399453700d329da9ecbe65962b220ff12810f3d9e9f12822d613046c"
+          },
+          "effects": 1
+        },
+        "trace": [
+          {
+            "phase": "prepare",
+            "hash": null
+          },
+          {
+            "phase": "sign",
+            "hash": null
+          },
+          {
+            "phase": "lookup",
+            "hash": "69ebb1f488677984edc6652e4759f3b5f11ba122dd5d8ee34bf7cb4cfb3462ca"
+          },
+          {
+            "phase": "final-source-check",
+            "hash": "69ebb1f488677984edc6652e4759f3b5f11ba122dd5d8ee34bf7cb4cfb3462ca"
+          },
+          {
+            "phase": "submit",
+            "hash": "69ebb1f488677984edc6652e4759f3b5f11ba122dd5d8ee34bf7cb4cfb3462ca"
+          },
+          {
+            "phase": "lookup",
+            "hash": "69ebb1f488677984edc6652e4759f3b5f11ba122dd5d8ee34bf7cb4cfb3462ca"
+          }
+        ],
+        "observations": [
+          {
+            "kind": "NOT_FOUND",
+            "evidence": {
+              "status": "NOT_FOUND",
+              "correlationId": "BYE-W1-005-CONTROLLED",
+              "ledgerCloseTime": "1100",
+              "observationLedger": 11
+            }
+          },
+          {
+            "kind": "DISPATCH_INTENT",
+            "evidence": {
+              "attempt": 1,
+              "decisionId": "BYE-W1-005-CONTROLLED-REVIEW",
+              "reviewedSameHashRetry": true
+            }
+          },
+          {
+            "kind": "SUBMIT_RESPONSE",
+            "evidence": {
+              "ledger": null,
+              "status": null,
+              "sourceCheck": {
+                "ledger": 11,
+                "balance": "100000000",
+                "sequence": "0"
+              },
+              "classification": "UNKNOWN",
+              "transactionHash": "69ebb1f488677984edc6652e4759f3b5f11ba122dd5d8ee34bf7cb4cfb3462ca"
+            }
+          },
+          {
+            "kind": "SUCCESS",
+            "evidence": {
+              "facts": {
+                "battery": {
+                  "state": "REGISTERED",
+                  "recycler": null,
+                  "collector": null,
+                  "requestId": null,
+                  "rewardState": "NOT_ELIGIBLE",
+                  "recyclingHash": null,
+                  "collectionHash": null,
+                  "registrationHash": "63b257dd399453700d329da9ecbe65962b220ff12810f3d9e9f12822d613046c"
+                },
+                "request": null,
+                "stateReadLedger": 15
+              },
+              "events": [],
+              "resultXdr": "CONTROLLED_RESULT_NOT_NETWORK",
+              "correlationId": "BYE-W1-005-CONTROLLED",
+              "resultMetaXdr": "CONTROLLED_META_NOT_NETWORK",
+              "sorobanResult": null,
+              "transactionHash": "69ebb1f488677984edc6652e4759f3b5f11ba122dd5d8ee34bf7cb4cfb3462ca",
+              "observationLedger": 15,
+              "confirmationLedger": 12
+            }
+          },
+          {
+            "kind": "PROJECTION",
+            "evidence": {
+              "applied": true
+            }
+          }
+        ],
+        "prepareCount": 1,
+        "signCount": 1,
+        "firstDispatchCount": 1,
+        "restartBoundary": "Closed and reopened both on-disk PGlite databases; new Repository/pool/TestnetStellarService/worker/transport; restart key public-only",
+        "sourceSelection": "Fixture source injected at durable service queue; production source allowlists/simulation/helper not exercised",
+        "reviewedEntryPoint": "Existing DurableTransactionWorker.retrySameHash; NOT_FOUND precedes reviewed first dispatch; reviewedSameHashRetry flag retained truthfully",
+        "liveRpcCalls": 0,
+        "liveBroadcasts": 0,
+        "secureStoreCalls": 0,
+        "rawSignedEnvelopePublished": false
+      },
+      {
+        "task": "BYE-W1-005",
+        "observedAt": "2026-10-21T20:45:38.873Z",
+        "evidenceMode": "CONTROLLED_INTEGRATION_NOT_LIVE_TESTNET",
+        "lostResponse": true,
+        "before": {
+          "operationId": "8ba73bf7-7612-42e7-983b-ee0013ad01c2",
+          "identityId": "8ba73bf7-7612-42e7-983b-ee0013ad01c2",
+          "identityIdDefinition": "testnet_envelopes primary key = operation_id",
+          "network": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+          "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+          "method": "register_battery",
+          "source": "GBTA6DPJJMNHR65Q5EEAOJX4SXIX2EDSGUQI4ZLCIPX7SUB6FYITRYOS",
+          "sequence": "1",
+          "hash": "c8970e39f72d1e71020c65f0df9ea0d71568f31ec7b8551c97530477afd4097d",
+          "envelopeSha256": "48f1f4fcbf9d907a9d1a9e50e098d0aee7a7a16d6e6aad5a9ca0825c3ffb5cff",
+          "state": "READY",
+          "dispatches": 0,
+          "operations": 1,
+          "identities": 1
+        },
+        "preSubmit": {
+          "mode": "CONTROLLED_AUTHORITY",
+          "ledger": 11,
+          "battery": null,
+          "effects": 0
+        },
+        "afterRestart": {
+          "operationId": "8ba73bf7-7612-42e7-983b-ee0013ad01c2",
+          "identityId": "8ba73bf7-7612-42e7-983b-ee0013ad01c2",
+          "identityIdDefinition": "testnet_envelopes primary key = operation_id",
+          "network": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+          "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+          "method": "register_battery",
+          "source": "GBTA6DPJJMNHR65Q5EEAOJX4SXIX2EDSGUQI4ZLCIPX7SUB6FYITRYOS",
+          "sequence": "1",
+          "hash": "c8970e39f72d1e71020c65f0df9ea0d71568f31ec7b8551c97530477afd4097d",
+          "envelopeSha256": "48f1f4fcbf9d907a9d1a9e50e098d0aee7a7a16d6e6aad5a9ca0825c3ffb5cff",
+          "state": "READY",
+          "dispatches": 0,
+          "operations": 1,
+          "identities": 1
+        },
+        "after": {
+          "operationId": "8ba73bf7-7612-42e7-983b-ee0013ad01c2",
+          "identityId": "8ba73bf7-7612-42e7-983b-ee0013ad01c2",
+          "identityIdDefinition": "testnet_envelopes primary key = operation_id",
+          "network": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+          "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+          "method": "register_battery",
+          "source": "GBTA6DPJJMNHR65Q5EEAOJX4SXIX2EDSGUQI4ZLCIPX7SUB6FYITRYOS",
+          "sequence": "1",
+          "hash": "c8970e39f72d1e71020c65f0df9ea0d71568f31ec7b8551c97530477afd4097d",
+          "envelopeSha256": "48f1f4fcbf9d907a9d1a9e50e098d0aee7a7a16d6e6aad5a9ca0825c3ffb5cff",
+          "state": "PROJECTED",
+          "dispatches": 1,
+          "operations": 1,
+          "identities": 1
+        },
+        "finalAuthority": {
+          "mode": "CONTROLLED_AUTHORITY",
+          "ledger": 12,
+          "battery": {
+            "state": "REGISTERED",
+            "recycler": null,
+            "collector": null,
+            "requestId": null,
+            "rewardState": "NOT_ELIGIBLE",
+            "recyclingHash": null,
+            "collectionHash": null,
+            "registrationHash": "63b257dd399453700d329da9ecbe65962b220ff12810f3d9e9f12822d613046c"
+          },
+          "effects": 1
+        },
+        "trace": [
+          {
+            "phase": "prepare",
+            "hash": null
+          },
+          {
+            "phase": "sign",
+            "hash": null
+          },
+          {
+            "phase": "lookup",
+            "hash": "c8970e39f72d1e71020c65f0df9ea0d71568f31ec7b8551c97530477afd4097d"
+          },
+          {
+            "phase": "final-source-check",
+            "hash": "c8970e39f72d1e71020c65f0df9ea0d71568f31ec7b8551c97530477afd4097d"
+          },
+          {
+            "phase": "submit",
+            "hash": "c8970e39f72d1e71020c65f0df9ea0d71568f31ec7b8551c97530477afd4097d"
+          },
+          {
+            "phase": "lookup",
+            "hash": "c8970e39f72d1e71020c65f0df9ea0d71568f31ec7b8551c97530477afd4097d"
+          }
+        ],
+        "observations": [
+          {
+            "kind": "NOT_FOUND",
+            "evidence": {
+              "status": "NOT_FOUND",
+              "correlationId": "BYE-W1-005-CONTROLLED",
+              "ledgerCloseTime": "1100",
+              "observationLedger": 11
+            }
+          },
+          {
+            "kind": "DISPATCH_INTENT",
+            "evidence": {
+              "attempt": 1,
+              "decisionId": "BYE-W1-005-CONTROLLED-REVIEW",
+              "reviewedSameHashRetry": true
+            }
+          },
+          {
+            "kind": "RPC_OUTAGE",
+            "evidence": {
+              "ledger": null,
+              "status": null,
+              "sourceCheck": {
+                "ledger": 11,
+                "balance": "100000000",
+                "sequence": "0"
+              },
+              "classification": "UNKNOWN",
+              "transactionHash": "c8970e39f72d1e71020c65f0df9ea0d71568f31ec7b8551c97530477afd4097d"
+            }
+          },
+          {
+            "kind": "SUCCESS",
+            "evidence": {
+              "facts": {
+                "battery": {
+                  "state": "REGISTERED",
+                  "recycler": null,
+                  "collector": null,
+                  "requestId": null,
+                  "rewardState": "NOT_ELIGIBLE",
+                  "recyclingHash": null,
+                  "collectionHash": null,
+                  "registrationHash": "63b257dd399453700d329da9ecbe65962b220ff12810f3d9e9f12822d613046c"
+                },
+                "request": null,
+                "stateReadLedger": 15
+              },
+              "events": [],
+              "resultXdr": "CONTROLLED_RESULT_NOT_NETWORK",
+              "correlationId": "BYE-W1-005-CONTROLLED",
+              "resultMetaXdr": "CONTROLLED_META_NOT_NETWORK",
+              "sorobanResult": null,
+              "transactionHash": "c8970e39f72d1e71020c65f0df9ea0d71568f31ec7b8551c97530477afd4097d",
+              "observationLedger": 15,
+              "confirmationLedger": 12
+            }
+          },
+          {
+            "kind": "PROJECTION",
+            "evidence": {
+              "applied": true
+            }
+          }
+        ],
+        "prepareCount": 1,
+        "signCount": 1,
+        "firstDispatchCount": 1,
+        "restartBoundary": "Closed and reopened both on-disk PGlite databases; new Repository/pool/TestnetStellarService/worker/transport; restart key public-only",
+        "sourceSelection": "Fixture source injected at durable service queue; production source allowlists/simulation/helper not exercised",
+        "reviewedEntryPoint": "Existing DurableTransactionWorker.retrySameHash; NOT_FOUND precedes reviewed first dispatch; reviewedSameHashRetry flag retained truthfully",
+        "liveRpcCalls": 0,
+        "liveBroadcasts": 0,
+        "secureStoreCalls": 0,
+        "rawSignedEnvelopePublished": false
+      }
+    ],
+    "codeChange": "Tests only; existing retrySameHash entrypoint used, normal unreviewed READY processing still denied.",
+    "authorityBoundary": "Independent on-disk controlled ledger with exact SDK network-bound identity verification. It supports only one registration fixture, does not execute Soroban, and is not live Testnet evidence.",
+    "restartBoundary": "Both application and controlled-authority PGlite resources closed/reopened. New repository/pool/service/worker/transport. Restart uses public-only key, so prepare/sign cannot recur.",
+    "externalBoundary": "Actual Coordinator, Repository, SQL migrations/constraints, TransportStore, DurableTransactionWorker and TestnetStellarService processing/projection. Fixture source is queued explicitly and controlled transport replaces real RPC/simulation/signer; production allowlists not exercised or changed.",
+    "reviewSemantics": "Existing retrySameHash first reconciles READY original hash. NOT_FOUND conservatively records SUBMITTED_OR_UNKNOWN, then explicit review permits attempt1. Stored reviewedSameHashRetry=true is disclosed; dispatch count0→1 proves this was first dispatch, not a prior send.",
+    "noNewLiveTransactionRequired": true,
+    "officialOwnerDecision": "PENDING"
+  },
+  "readiness": {
+    "ready": 11,
+    "supported": 0,
+    "notYetSatisfied": 0,
+    "blocked": 1,
+    "officialPass": 0,
+    "D1": "INCOMPLETE",
+    "D2": "0/6",
+    "D3": "0/5"
+  },
+  "verification": {
+    "allPassed": true,
+    "verifiedAt": "2026-10-21T20:58:42.193191+00:00",
+    "startingHead": "91e00286669fd504946db521a86fc78352c60967",
+    "newTestSha256": "c2eab6440bc3fb3387be2c73cda1969bdf7114027d52a473b85382d6c6f9b675",
+    "focused": 3,
+    "backend": 146,
+    "foundation": 50,
+    "nativeRust": 20,
+    "repeatedRustFeature": 20,
+    "wasm": 1,
+    "releaseFmtClippy": "PASS",
+    "httpDev": 45,
+    "sqlParity": 82,
+    "sqlCleanup": "ROLLBACK",
+    "frontend": 33,
+    "frontendTypesLintBuild": "PASS",
+    "frontendMaxWorkers": 1,
+    "helperNative": 22,
+    "helperOffline": 18,
+    "helperFmtClippy": "PASS",
+    "SEP53_V2": "PASS within backend/HTTP",
+    "postgresRecovery": "PASS within backend",
+    "onDiskRestart": "PASS within backend",
+    "python": 4,
+    "mockDemo": "SENT 10; no Soroban execution"
+  },
+  "invariants": {
+    "newTestnetBattery": false,
+    "newTestnetLifecycle": false,
+    "newLiveReward": false,
+    "newLiveBusinessEffect": false,
+    "liveSigning": 0,
+    "liveBroadcasts": 0,
+    "roleChanges": false,
+    "authAccountsCreatedForReplay": false,
+    "contractModified": false,
+    "schemaRlsModified": false,
+    "mainnet": false,
+    "protectedSyncModified": false
+  },
+  "historicalEvidence": "BYE-W1-002/003/003A/003B/003C/004 not rewritten; historical004 matrix preserved below current005 matrix.",
+  "publicEvidence": "Allowlisted snapshots/trace only; no envelope/signature/seed/JWT/password/credential."
+}

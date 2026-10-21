@@ -1,4 +1,31 @@
-# D1 acceptance review matrix — BYE-W1-004
+# D1 acceptance review matrix — current BYE-W1-005
+
+OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT · 2026-10-21. **11 READY FOR VALIDATION / 0 SUPPORTED / 0 NOT YET SATISFIED / 1 BLOCKED. Official D1 PASS remains0/12; D2 0/6; D3 0/5. D1 technical state INCOMPLETE.**
+
+Source acceptance wording is unchanged. [BYE-W1-005 report](BYE-W1-005-REPORT.md), [machine results](BYE-W1-005-results.json) and [controlled trace](D1-GAP-CLOSURE-TRACE.json). Tested implementation `59ed3540fcf7672507f48215b1bd916a8bc083c3`; unchanged production at starting91e00286669fd504946db521a86fc78352c60967. No new live transaction.
+
+| Criterion | Current status | Current evidence / gap | Owner decision |
+| --- | --- | --- | --- |
+| D1.1 | READY FOR VALIDATION | Existing004 evidence below, unchanged. | PENDING; no official PASS |
+| D1.2 | READY FOR VALIDATION | Existing004 evidence below, unchanged. | PENDING; no official PASS |
+| D1.3 | READY FOR VALIDATION | Existing004 evidence below, unchanged. | PENDING; no official PASS |
+| D1.4 | READY FOR VALIDATION | Existing004 evidence below, unchanged. | PENDING; no official PASS |
+| D1.5 | BLOCKED | Original context/hash recovered, but original principal retired: DISABLED, Auth NULL/deleted, memberships disabled. Real identical/conflict requests NOT RUN; IdentityImmutable prevents rebind. No substitute identity or new registration. | PENDING; no official PASS |
+| D1.6 | READY FOR VALIDATION | Existing004 evidence below, unchanged. | PENDING; no official PASS |
+| D1.7 | READY FOR VALIDATION | New controlled on-disk integration: identity COMMIT/readback, interruption before intent/send, authority effects0, both DBs close/reopen, same operation/identity/hash, explicit existing reviewed same-hash first dispatch1, final authority effects1 and SQL projection. Also lost-response variant. Not live Soroban or OS-process-kill evidence. | PENDING; no official PASS |
+| D1.8 | READY FOR VALIDATION | Existing004 evidence below, unchanged. | PENDING; no official PASS |
+| D1.9 | READY FOR VALIDATION | Existing004 evidence below, unchanged. | PENDING; no official PASS |
+| D1.10 | READY FOR VALIDATION | Existing004 evidence below, unchanged. | PENDING; no official PASS |
+| D1.11 | READY FOR VALIDATION | Existing004 evidence below, unchanged. | PENDING; no official PASS |
+| D1.12 | READY FOR VALIDATION | Existing004 evidence below, unchanged. | PENDING; no official PASS |
+
+D1.5 cannot advance solely because local cache tests pass. A new user would have a different user-scoped idempotency key namespace. No Auth/role/schema/trigger change was made. The controlled D1.7 authority is an explicit equivalent state read authorized by005, not a relabeling of an already successful live transaction.
+
+## Historical BYE-W1-004 assessment — preserved
+
+The following10 READY/2 SUPPORTED assessment was correct at004. It is superseded by current005 readiness above, not rewritten as a historical success.
+
+### Original BYE-W1-004 review
 
 OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT · 2026-10-21. Readiness is not official acceptance. Source criteria remain unchanged in [ACCEPTANCE-CRITERIA.md](../ACCEPTANCE-CRITERIA.md).
 
