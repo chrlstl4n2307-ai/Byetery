@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {EventEmitter} from 'node:events';
 import { randomUUID,createHash } from 'node:crypto';
 import type { Pool,PoolClient } from 'pg';
 import { localDb } from './testnet-fixtures.ts';
@@ -25,12 +26,12 @@ async function appFixture(){
   await db.query(`insert into chain_private.deployments(id,mode,network_id,contract_address,wasm_hash,schema_version,admin,service,reward_token,reward_amount)
     values($1,'TESTNET',decode($2,'hex'),$3,decode($4,'hex'),1,$5,$6,$7,100000000)`,[deploymentId,NETWORK_ID,CONTRACT,WASM,ACTORS.admin,ACTORS.service,TOKEN]);
   await db.query("insert into api_private.memberships(deployment_id,user_id,role) values($1,$2,'ADMIN')",[deploymentId,admin]);
-  const pool={connect:async()=>({query:async(s:string,p?:unknown[])=>{
+  const pool=Object.assign(new EventEmitter(),{connect:async()=>Object.assign(new EventEmitter(),{query:async(s:string,p?:unknown[])=>{
     // PGlite lacks pg's binary parameter encoding for custom bytea domains.
     const sql=s.replace(/\$(\d+)\b/g,(v,n)=>p?.[Number(n)-1] instanceof Uint8Array?`decode(${v},'hex')`:v);
     const result=await db.query<Record<string,unknown>>(sql,p?.map(v=>v instanceof Uint8Array?Buffer.from(v).toString('hex'):v));
     return {...result,rows:result.rows.map(row=>Object.fromEntries(Object.entries(row).map(([k,v])=>[k,v instanceof Uint8Array?Buffer.from(v):v])))};
-  },release:()=>{}})} as unknown as Pool;
+  },release:()=>{}})}) as unknown as Pool;
   const repo=Object.assign(Object.create(Repository.prototype) as Repository,{pool,deploymentId,mode:'TESTNET' as const});
   return {db,repo,admin,user,session,deploymentId};
 }

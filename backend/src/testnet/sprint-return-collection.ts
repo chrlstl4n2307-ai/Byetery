@@ -53,7 +53,7 @@ export function collectionAuthNegatives(tx:Transaction,c:Command){
  const wrongCollector=rejected(()=>validateAuth(tx,{...c,collector:RECIPIENT}));
  return {missingService,missingCollector,wrongCollector,broadcasts:0};
 }
-async function login(config:Settings,authId:string,label:string){
+export async function login(config:Settings,authId:string,label:string){
  const a=await authRequest(config,'/admin/users/'+authId,'GET');
  ensure((a.id??a.user?.id)===authId,'AuthIdentityMismatch');const u=a.user??a;
  ensure(u.user_metadata?.display_name===label&&u.user_metadata?.fixture===true&&typeof u.email==='string','FixtureIdentityMismatch');
@@ -65,7 +65,7 @@ async function login(config:Settings,authId:string,label:string){
  const identity=await new SupabaseAuth(config).validate('Bearer '+session.access_token);ensure(identity.authUserId===authId,'AuthIdentityMismatch');
  return session.access_token as string;
 }
-async function validateState(repo:Repository,transport:TestnetTransport,expected:string){
+export async function validateState(repo:Repository,transport:TestnetTransport,expected:string){
  ensure(sha(await readFile(path.join(root,'contracts/byetery-contract/target/wasm32v1-none/release/byetery_contract.wasm')))===WASM,'WasmMismatch');
  const ready=await transport.readiness(),chain=await transport.battery(BATTERY);
  ensure(chain.value?.state===expected&&chain.value.rewardState==='NOT_ELIGIBLE','UnexpectedBatteryState');
@@ -81,7 +81,7 @@ async function validateState(repo:Repository,transport:TestnetTransport,expected
   and w.address=$4 and w.revoked_at is null and c.consumed_at is not null and c.signing_scheme='SEP53_V2'`,[DEPLOYMENT,BUSINESS_USER,USER,RECIPIENT]);
  ensure(wallet.rows.length===1,'VerifiedRecipientRequired');return {ready,chain,walletLinkId:wallet.rows[0].id as string};
 }
-async function counts(repo:Repository){return (await repo.pool.query(`select
+export async function counts(repo:Repository){return (await repo.pool.query(`select
  (select count(*)::int from app_private.return_requests where deployment_id=$1) requests,
  (select count(*)::int from app_private.stellar_operations where deployment_id=$1) operations,
  (select count(*)::int from api_private.testnet_envelopes where deployment_id=$1) identities,

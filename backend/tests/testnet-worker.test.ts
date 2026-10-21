@@ -23,7 +23,9 @@ test('VOL-003 commit failure prevents broadcast and persisted identity exists be
   assert.equal(await f.store.identity(f.op),null);assert.equal((await f.store.work(f.op)).state,'PREPARING');
   const submit=f.transport.submit.bind(f.transport);
   f.transport.submit=async i=>{const saved=await f.store.identity(f.op);assert.ok(saved);assert.deepEqual(saved.envelopeBytes,i.envelopeBytes);assert.equal((await f.store.work(f.op)).state,'DISPATCH_INTENT');return submit(i);};
-  await f.worker.run(f.op,'worker');assert.equal(f.transport.submitted.length,1);
+  await assert.rejects(f.worker.run(f.op,'worker'),/ExplicitUnsignedResumeRequired/);
+  await f.worker.resumeUnsigned({operationId:f.op,contextHash:(await f.store.work(f.op)).contextHash,decisionId:'review-original-unsigned-fixture'},'worker');
+  assert.equal(f.transport.submitted.length,1);
 });
 test('VOL-003 same source single-flight spans different deployments and unresolved expiry',async()=>{
   const f=await harness(db);await f.worker.run(f.op,'first');f.transport.closeTime='1301';

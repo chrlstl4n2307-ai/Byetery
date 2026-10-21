@@ -4,6 +4,7 @@ import {Account,Address,Contract,Networks,Operation,TransactionBuilder,xdr} from
 import {authorizationSummary,collectionAuthNegatives} from '../src/testnet/sprint-return-collection.ts';
 import {ACTORS,CONTRACT,invocation} from '../src/testnet/abi.ts';
 import type {Command} from '../src/domain.ts';
+import {assertNoRoleSimulationError} from '../src/testnet/sprint-collection-recovery.ts';
 function fixture(){
  const command:Command={kind:'confirm_collection',batteryId:'BYE-W1-003B-OFFLINE',requestId:'21'.repeat(32),collector:ACTORS.collector,
   evidence:{version:1,batteryId:'BYE-W1-003B-OFFLINE',requestId:'21'.repeat(32),kind:'COLLECTION',payloadHash:'22'.repeat(32)}};
@@ -18,6 +19,12 @@ function fixture(){
   .addOperation(Operation.invokeHostFunction({func,auth:entries})).setTimebounds(0,1000).build();
  return {command,auth,build};
 }
+
+test('recovery no-role proof requires the frozen contract role error, not an RPC or unrelated failure',()=>{
+ assert.doesNotThrow(()=>assertNoRoleSimulationError('HostError: Error(Contract, #9)'));
+ for(const error of [undefined,'RPC unavailable','HostError: Error(Contract, #3)','Error(Budget, ExceededLimit)'])
+  assert.throws(()=>assertNoRoleSimulationError(error),/NoRoleNegativeNotProven/);
+});
 test('operator validates negative collection authorizations without changing original bytes',()=>{
  const f=fixture(),tx=f.build(f.auth),before=tx.toXDR();
  assert.deepEqual(collectionAuthNegatives(tx,f.command),{missingService:'PASS',missingCollector:'PASS',wrongCollector:'PASS',broadcasts:0});

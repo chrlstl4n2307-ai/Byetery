@@ -16,7 +16,7 @@ const stateOrder=['REGISTERED','RETURNED','COLLECTED','RECYCLED'];
 const key=(tag:string,arg:xdr.ScVal)=>xdr.LedgerKey.contractData(new xdr.LedgerKeyContractData({
   contract:new Address(CONTRACT).toScAddress(),durability:xdr.ContractDataDurability.persistent,
   key:xdr.ScVal.scvVec([xdr.ScVal.scvSymbol(tag),arg])}));
-export interface ContextGuard {validate(work:Work):Promise<void>;validateFacts?(work:Work,battery:Battery,request:ReturnRequest|null):Promise<void>}
+export interface ContextGuard {validate(work:Work):Promise<void>;validateFacts?(work:Work,battery:Battery,request:ReturnRequest|null):Promise<void>;connectionGuard?():()=>void}
 
 /** Checks the simulation's exact invocation tree before any signer is launched. */
 export function validateAuth(tx:Transaction,command:Command){
@@ -152,10 +152,12 @@ export class TestnetTransport implements TransactionTransport {
       networkPassphrase:Networks.TESTNET,currentLedger:l.sequence,expirationLedger:body.preparedLedger+60};
   }
   async attachSorobanAuthorization(body:PreparedBody,w:Work){
-    const r=await this.signer.authorize(await this.signingRequest(body,w));return {...body,transactionXdr:r.transactionXdr};
+    const healthy=this.guard.connectionGuard?.()??(()=>{}),request=await this.signingRequest(body,w);healthy();
+    const r=await this.signer.authorize(request);return {...body,transactionXdr:r.transactionXdr};
   }
   async signEnvelope(body:FinalizedBody,w:Work){
-    const r=await this.signer.signEnvelope(await this.signingRequest(body,w),body.transactionHash);return r.transactionXdr;
+    const healthy=this.guard.connectionGuard?.()??(()=>{}),request=await this.signingRequest(body,w);healthy();
+    const r=await this.signer.signEnvelope(request,body.transactionHash);return r.transactionXdr;
   }
   async validity(_i:TransactionIdentity){await this.rpc.network();const l=await this.rpc.latest();return {ledger:l.sequence,closeTime:l.closeTime};}
   async assertSourceSequence(i:TransactionIdentity){const a=await this.rpc.account(i.sourceAccount);

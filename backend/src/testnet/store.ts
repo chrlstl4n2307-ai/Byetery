@@ -1,22 +1,17 @@
 import type { Pool } from 'pg';
 import { ensure, type Command } from '../domain.ts';
 import { NETWORK_ID, type OperationContext, type TransportState, type TransactionIdentity, type Confirmation, type StateEvidence } from './identity.ts';
+import {databaseHealth,databaseTransaction} from '../application/database.ts';
 
 export interface Sql { query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<{ rows: T[] }> }
-export interface TransportDatabase { transaction<T>(work: (db: Sql) => Promise<T>): Promise<T> }
+export interface TransportDatabase { transaction<T>(work: (db: Sql) => Promise<T>): Promise<T>;connectionGuard?():()=>void }
 /** Own short transactions; no deployment-wide advisory lock or network callbacks. */
 export class PgTransportDatabase implements TransportDatabase {
   readonly pool: Pool;
-  constructor(pool: Pool) { this.pool = pool; }
+  constructor(pool: Pool) { this.pool = pool;databaseHealth(pool); }
+  connectionGuard(){return databaseHealth(this.pool).guard();}
   async transaction<T>(work: (db: Sql) => Promise<T>): Promise<T> {
-    const client = await this.pool.connect();
-    const db: Sql = { query: async <R>(sql: string, params?: unknown[]) => ({ rows: (await client.query(sql, params)).rows as R[] }) };
-    try {
-      await client.query('begin');
-      await client.query("set local lock_timeout='5s'");
-      const result = await work(db); await client.query('commit'); return result;
-    } catch (error) { await client.query('rollback').catch(() => {}); throw error; }
-    finally { client.release(); }
+    return databaseTransaction(this.pool,client=>work({query:async <R>(sql:string,params?:unknown[])=>({rows:(await client.query(sql,params)).rows as R[]})}),'5s');
   }
 }
 export interface Work extends OperationContext {
@@ -112,6 +107,22 @@ export class TransportStore {
   async prepared(c:Claim,summary:NonNullable<import('./identity.ts').PreparedBody['simulation']>):Promise<void>{
     await this.database.transaction(async db=>{const w=await this.fence(db,c);
       await this.evidence(db,w,'STATE_READ',{classification:'SIMULATION',...summary},summary.ledger);
+    });
+  }
+  async unsignedInterrupted(c:Claim):Promise<void>{
+    await this.database.transaction(async db=>{
+      const w=await this.fence(db,c);
+      if(w.state!=='PREPARING'||w.dispatchAttempts!==0)return;
+      if((await db.query('select 1 from api_private.testnet_envelopes where operation_id=$1',[w.operationId])).rows.length)return;
+      await this.evidence(db,w,'STATE_READ',{classification:'UNSIGNED_PREPARATION_INTERRUPTED',reason:'DatabaseConnectionInterrupted',explicitResumeRequired:true});
+    });
+  }
+  async reviewedUnsignedResume(c:Claim,contextHash:string,decisionId:string):Promise<void>{
+    await this.database.transaction(async db=>{
+      const w=await this.fence(db,c);
+      ensure(w.state==='PREPARING'&&w.dispatchAttempts===0&&w.contextHash===contextHash&&decisionId.trim().length>0,'UnsignedRecoveryMismatch');
+      ensure(!(await db.query('select 1 from api_private.testnet_envelopes where operation_id=$1',[w.operationId])).rows.length,'SignedIdentityExists');
+      await this.evidence(db,w,'STATE_READ',{classification:'REVIEWED_UNSIGNED_RESUME',decisionId,contextHash,generation:c.generation});
     });
   }
   async persist(c: Claim, i: TransactionIdentity): Promise<void> {

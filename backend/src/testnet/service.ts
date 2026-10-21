@@ -11,7 +11,8 @@ import { TestnetRpc } from './rpc.ts';
 import { ACTORS, CONTRACT, TOKEN, WASM, invocation } from './abi.ts';
 import { TestnetTransport, type ContextGuard } from './transport.ts';
 import { PgTransportDatabase, TransportStore, type Work } from './store.ts';
-import { DurableTransactionWorker } from './worker.ts';
+import { DurableTransactionWorker,type ReviewedUnsignedResume } from './worker.ts';
+import {databaseHealth} from '../application/database.ts';
 import { string } from './abi.ts';
 import { Address, xdr } from '@stellar/stellar-sdk';
 
@@ -20,6 +21,7 @@ const hash=(c:unknown)=>createHash('sha256').update(canonical(c)).digest('hex');
 export class PersistedContextGuard implements ContextGuard {
   readonly repo:Repository;
   constructor(repo:Repository){this.repo=repo;}
+  connectionGuard(){return databaseHealth(this.repo.pool).guard();}
   async validateFacts(w:Work,b:Battery,r:ReturnRequest|null){
     if(w.command.kind==='register_battery'||w.command.kind==='set_role')return;
     await this.repo.transaction(async db=>{
@@ -109,12 +111,20 @@ export class TestnetStellarService implements StellarService,OperationProcessor 
     return {status:'UNKNOWN'};
   }
   async process(id:string):Promise<Reply>{
+    return this.processReviewed(id);
+  }
+  /** Server-operator only. No HTTP parameter can select this recovery path. */
+  async resumeUnsigned(review:ReviewedUnsignedResume):Promise<Reply>{
+    return this.processReviewed(review.operationId,review);
+  }
+  private async processReviewed(id:string,unsignedReview?:ReviewedUnsignedResume):Promise<Reply>{
     const op=await this.repo.transaction(db=>one(db,'select parameters,state from app_private.stellar_operations where deployment_id=$1 and id=$2',[this.repo.deploymentId,id]));
     ensure(op,'OperationNotFound');
     try{
       const existing=await this.store.database.transaction(async db=>(await db.query('select 1 from api_private.testnet_work where operation_id=$1',[id])).rows.length>0);
-      if(!existing)await this.prepare(this.repo.deploymentId,op.parameters as Command);
-      await this.worker.run(id,'byetery-testnet-api');
+      if(!existing){ensure(!unsignedReview,'OriginalWorkRequired');await this.prepare(this.repo.deploymentId,op.parameters as Command);}
+      if(unsignedReview)await this.worker.resumeUnsigned(unsignedReview,'byetery-reviewed-unsigned-recovery');
+      else await this.worker.run(id,'byetery-testnet-api');
     }catch(error){
       if(error instanceof DomainError){return {status:503,body:{source:'TESTNET',operationId:id,error:{code:error.code}}};}
       // Durable state survives unexpected SQL/process/RPC errors; never substitute MOCK.

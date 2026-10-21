@@ -1,4 +1,4 @@
-import { randomUUID, randomBytes } from 'node:crypto';
+import { randomUUID, randomBytes,createHash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 import { Account, Contract, Keypair, Networks, StrKey, Transaction, TransactionBuilder, nativeToScVal, xdr } from '@stellar/stellar-sdk';
@@ -7,6 +7,9 @@ import type { Command } from '../src/domain.ts';
 import { TransportStore, type TransportDatabase, type Sql, type Work } from '../src/testnet/store.ts';
 import { LocalTransactionWorker, type FixtureTransport } from '../src/testnet/worker.ts';
 import { NETWORK_ID, type TransactionIdentity, type PreparedBody, type Observation, type StateEvidence, type FinalizedBody } from '../src/testnet/identity.ts';
+import {evidenceCommitment} from '../src/evidence.ts';
+import {evidenceValue} from '../src/testnet/abi.ts';
+import {Address} from '@stellar/stellar-sdk';
 
 export async function localDb(location?:string) {
   const db=new PGlite(location);
@@ -47,7 +50,7 @@ export class FakeTransport implements FixtureTransport {
   }
   async inspectExpiredEffect():Promise<StateEvidence>{this.outside();return {outcome:this.effect,stateReadLedger:this.ledger+1,evidence:'synthetic-authoritative-state',correlationId:'local-state-fixture'};}
 }
-export async function harness(db:PGlite, reward=false, sourceKey?:Keypair) {
+export async function harness(db:PGlite, reward=false, sourceKey?:Keypair,collection=false) {
   const d=randomUUID(),op=randomUUID(),u=randomUUID(),w=randomUUID();
   const battery='BYE-'+randomUUID().replaceAll('-','').slice(0,20).toUpperCase();
   const key=sourceKey??Keypair.random();let inTransaction=0,projectionCount=0,projectionFails=false;
@@ -58,19 +61,27 @@ export async function harness(db:PGlite, reward=false, sourceKey?:Keypair) {
   await db.query('insert into auth.users values($1)',[u]);
   await db.query('insert into app_private.users(id,auth_user_id) values($1,$1)',[u]);
   await db.query('insert into app_private.battery_records(deployment_id,battery_id,created_by) values($1,$2,$3)',[d,battery,u]);
-  if(reward){
+  if(reward||collection){
     await db.query(`insert into app_private.wallet_links(id,deployment_id,network_id,user_id,address,proof_reference,verified_at) values($1,$2,decode($3,'hex'),$4,$5,'synthetic-proof',now())`,[w,d,NETWORK_ID,u,recipient]);
     await db.query(`insert into app_private.return_requests(deployment_id,request_id,battery_id,user_id,wallet_link_id,recipient_snapshot,reservation_state) values($1,decode($2,'hex'),$3,$4,$5,$6,'HELD')`,[d,h(10),battery,u,w,recipient]);
     await db.transaction(async tx=>{
-      await tx.query(`insert into chain_private.return_requests(deployment_id,request_id,battery_id,recipient,state,confirmed_ledger) values($1,decode($2,'hex'),$3,$4,'CONFIRMED',1)`,[d,h(10),battery,recipient]);
-      await tx.query(`insert into chain_private.batteries(deployment_id,battery_id,state,registration_hash,request_id,collector,collection_hash,recycler,recycling_hash,reward_state,confirmed_ledger)
+      await tx.query(`insert into chain_private.return_requests(deployment_id,request_id,battery_id,recipient,state,confirmed_ledger) values($1,decode($2,'hex'),$3,$4,$5,1)`,[d,h(10),battery,recipient,collection?'OPEN':'CONFIRMED']);
+      if(collection)await tx.query(`insert into chain_private.batteries(deployment_id,battery_id,state,registration_hash,request_id,reward_state,confirmed_ledger)
+        values($1,$2,'RETURNED',decode($3,'hex'),decode($4,'hex'),'NOT_ELIGIBLE',1)`,[d,battery,h(1),h(10)]);
+      else await tx.query(`insert into chain_private.batteries(deployment_id,battery_id,state,registration_hash,request_id,collector,collection_hash,recycler,recycling_hash,reward_state,confirmed_ledger)
         values($1,$2,'RECYCLED',decode($3,'hex'),decode($4,'hex'),$5,decode($3,'hex'),$6,decode($3,'hex'),'PENDING',1)`,[d,battery,h(1),h(10),collector,recycler]);
-      await tx.query("update app_private.return_requests set reservation_state='CONSUMED',association_confirmed_at=now() where deployment_id=$1",[d]);
+      if(!collection)await tx.query("update app_private.return_requests set reservation_state='CONSUMED',association_confirmed_at=now() where deployment_id=$1",[d]);
     });
   }
-  const command:Command=reward?{kind:'pay_reward',batteryId:battery}:{kind:'register_battery',batteryId:battery,registrationHash:h(1)};
-  await db.query(`insert into app_private.stellar_operations(id,deployment_id,principal,idempotency_key,command,battery_id,parameters,parameters_hash)
-    values($1::uuid,$2,'fixture',$1::text,$3,$4,$5,decode($6,'hex'))`,[op,d,command.kind,battery,JSON.stringify(command),h(1)]);
+  const raw=Buffer.from(JSON.stringify({fixture:true,batteryId:battery,requestId:h(10),kind:'COLLECTION'}));
+  const payloadHash=createHash('sha256').update(raw).digest('hex');
+  const ev={version:1 as const,batteryId:battery,requestId:h(10),kind:'COLLECTION' as const,payloadHash};
+  const commitment=evidenceCommitment({...config,deploymentId:d,contractAddress},ev);
+  if(collection)await db.query(`insert into app_private.evidence_versions(deployment_id,battery_id,request_id,kind,revision,format_version,manifest_bytes,payload_hash,commitment,object_path,created_by)
+    values($1,$2,decode($3,'hex'),'COLLECTION',1,1,decode($4,'hex'),decode($5,'hex'),decode($6,'hex'),'fixture-only',$7)`,[d,battery,h(10),raw.toString('hex'),payloadHash,commitment,u]);
+  const command:Command=collection?{kind:'confirm_collection',batteryId:battery,requestId:h(10),collector,evidence:ev}:reward?{kind:'pay_reward',batteryId:battery}:{kind:'register_battery',batteryId:battery,registrationHash:h(1)};
+  await db.query(`insert into app_private.stellar_operations(id,deployment_id,principal,idempotency_key,command,battery_id,parameters,parameters_hash,request_id)
+    values($1::uuid,$2,'fixture',$1::text,$3,$4,$5,decode($6,'hex'),decode($7,'hex'))`,[op,d,command.kind,battery,JSON.stringify(command),h(1),collection?h(10):null]);
   if(reward)await db.query(`insert into app_private.reward_attempts(deployment_id,battery_id,request_id,operation_id,attempt_number) values($1,$2,decode($3,'hex'),$4,1)`,[d,battery,h(10),op]);
   const adapter:TransportDatabase={transaction: async work=>db.transaction(async tx=>{
     inTransaction++;
@@ -78,7 +89,7 @@ export async function harness(db:PGlite, reward=false, sourceKey?:Keypair) {
     try{return await work(sql);}finally{inTransaction--;}
   })};
   const store=new TransportStore(adapter);
-  const args=[nativeToScVal(battery,{type:'string'}),...reward?[]:[nativeToScVal(Buffer.from(h(1),'hex'),{type:'bytes'})]].map(a=>a.toXDR('base64'));
+  const args=[nativeToScVal(battery,{type:'string'}),...collection?[nativeToScVal(Buffer.from(h(10),'hex'),{type:'bytes'}),new Address(collector).toScVal(),evidenceValue(ev)]:reward?[]:[nativeToScVal(Buffer.from(h(1),'hex'),{type:'bytes'})]].map(a=>a.toXDR('base64'));
   await store.queue(d,op,key.publicKey(),args);
   const transport=new FakeTransport(key,()=>{if(inTransaction)throw Error('External work inside SQL transaction');});
   const project=async(sql:Sql,work:Work)=>{
@@ -86,6 +97,11 @@ export async function harness(db:PGlite, reward=false, sourceKey?:Keypair) {
     if(reward){
       await sql.query("update chain_private.batteries set reward_state='SENT',confirmed_ledger=$3 where deployment_id=$1 and battery_id=$2",[d,battery,work.confirmation?.confirmationLedger??work.stateEvidence!.stateReadLedger]);
       await sql.query("update app_private.reward_attempts set state='SUCCEEDED' where operation_id=$1",[op]);
+    }
+    if(collection){
+      await sql.query("update chain_private.return_requests set state='CONFIRMED',confirmed_ledger=12 where deployment_id=$1",[d]);
+      await sql.query(`update chain_private.batteries set state='COLLECTED',collector=$3,collection_hash=decode($4,'hex'),confirmed_ledger=12 where deployment_id=$1 and battery_id=$2`,[d,battery,collector,commitment]);
+      await sql.query("update app_private.return_requests set reservation_state='CONSUMED',association_confirmed_at=now() where deployment_id=$1",[d]);
     }
     projectionCount++;
   };

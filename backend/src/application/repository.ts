@@ -5,6 +5,7 @@ import type { Identity } from './auth.ts';
 import type { Deployment, Command } from '../domain.ts';
 import { MockStellarService } from '../mock-stellar-service.ts';
 import { requireThat } from './errors.ts';
+import {databaseHealth,databaseTransaction} from './database.ts';
 export type Db = PoolClient;
 export async function one<T extends QueryResultRow = QueryResultRow>(db: Db, sql: string, params: unknown[] = []): Promise<T | undefined> {
   return (await db.query<T>(sql, params)).rows[0];
@@ -13,14 +14,9 @@ export class Repository {
   readonly pool: Pool;
   readonly deploymentId: string;
   readonly mode:'MOCK'|'TESTNET';
-  constructor(config: Settings) { this.pool = new Pool(config.database); this.deploymentId = config.deploymentId;this.mode=config.mode??'MOCK'; }
+  constructor(config: Settings) { this.pool = new Pool(config.database);databaseHealth(this.pool); this.deploymentId = config.deploymentId;this.mode=config.mode??'MOCK'; }
   async transaction<T>(work: (db: Db) => Promise<T>): Promise<T> {
-    const db = await this.pool.connect();
-    try { await db.query('begin'); await db.query("set local lock_timeout='15s'");
-      await db.query('select pg_advisory_xact_lock(hashtextextended($1,0))',[this.deploymentId]);
-      const result = await work(db); await db.query('commit'); return result;
-    } catch (error) { await db.query('rollback').catch(()=>{}); throw error; }
-    finally { db.release(); }
+    return databaseTransaction(this.pool,work,'15s',this.deploymentId);
   }
   async principal(db: Db, identity: Identity): Promise<string> {
     const session = await one(db, `select 1 from auth.sessions where id=$1 and user_id=$2
