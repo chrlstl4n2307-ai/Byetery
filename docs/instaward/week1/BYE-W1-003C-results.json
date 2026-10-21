@@ -1,0 +1,473 @@
+{
+  "task": "BYE-W1-003C",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "status": "PASS",
+  "investigationDate": "2026-10-20",
+  "liveRecoveryDate": "2026-10-21",
+  "timezone": "America/Santiago",
+  "startingHead": "65478adb8d251b8bbee26be31b02d3c4f523b8ce",
+  "implementationHead": "fbeb66d86e59429023a7e23d4edaec3797b7f134",
+  "evidenceCommitResolution": "git log -1 --format=%H -- docs/instaward/week1/BYE-W1-003C-results.json",
+  "branch": "instaward/d1-testnet-integration",
+  "originalOperationId": "4fa3fbac-84e4-4845-8abd-fbdff757cbb4",
+  "newLogicalCollectionOperationCreated": false,
+  "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+  "network": "STELLAR_TESTNET",
+  "networkId": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+  "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "forensicBeforeCodeChanges": {
+    "lease": {
+      "worker": "byetery-testnet-api",
+      "expired": true,
+      "createdAt": "2026-10-20T18:33:30.431532+00:00",
+      "generation": 3,
+      "leaseUntil": "2026-10-20T18:39:09.566019+00:00",
+      "operationId": "4fa3fbac-84e4-4845-8abd-fbdff757cbb4"
+    },
+    "battery": {
+      "state": "RETURNED",
+      "reward": "NOT_ELIGIBLE",
+      "collector": null,
+      "collectionHash": null
+    },
+    "request": {
+      "state": "OPEN",
+      "snapshot": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS"
+    },
+    "evidence": [
+      {
+        "version": 1,
+        "revision": 1,
+        "commitment": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+        "bytesLength": 339,
+        "finalizedAt": "2026-10-20T18:36:01.914038+00:00",
+        "payloadHash": "ef61932cb180ffbafac39eddffaed46dccb6e42366c7999913116d9eb8f73766",
+        "actualBytesHash": "ef61932cb180ffbafac39eddffaed46dccb6e42366c7999913116d9eb8f73766"
+      }
+    ],
+    "operation": {
+      "id": "4fa3fbac-84e4-4845-8abd-fbdff757cbb4",
+      "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "txHash": null,
+      "command": {
+        "kind": "confirm_collection",
+        "evidence": {
+          "kind": "COLLECTION",
+          "version": 1,
+          "batteryId": "BYE-W1-002-64257020134D4A0F",
+          "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "payloadHash": "ef61932cb180ffbafac39eddffaed46dccb6e42366c7999913116d9eb8f73766"
+        },
+        "batteryId": "BYE-W1-002-64257020134D4A0F",
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c"
+      },
+      "createdAt": "2026-10-20T18:36:01.914038+00:00",
+      "errorCode": null,
+      "updatedAt": null,
+      "dispatches": 0,
+      "contextHash": "5b61120b98b79d6276bcf7054dcc0c515b5b2a9f8b43538c57e961f19c3402f8",
+      "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "updatedAtNote": "No updated_at column in existing schema; observation timestamps retained",
+      "preparedLedger": null,
+      "transportState": "PREPARING",
+      "applicationState": "QUEUED",
+      "transportCreatedAt": "2026-10-20T18:36:07.580997+00:00"
+    },
+    "observedAt": "2026-10-20T18:54:01.78461+00:00",
+    "observations": [
+      {
+        "at": "2026-10-20T18:36:26.527734+00:00",
+        "kind": "STATE_READ",
+        "evidence": {
+          "ledger": 5299559,
+          "totalFee": "1002362",
+          "resourceFee": "992362",
+          "sourceBalance": "99999515769",
+          "classification": "SIMULATION",
+          "sourceSequence": "20970220772392964",
+          "authRequirements": [
+            "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+            "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V"
+          ]
+        },
+        "observationLedger": 5299559
+      }
+    ],
+    "envelopeCount": 0,
+    "identityCount": 0,
+    "observationCount": 1
+  },
+  "rootCause": {
+    "provenDefect": "Unhandled pg Client error event while checked out, outside query Promise catch; missing lifetime Client and repository pool background handlers.",
+    "socketTerminationTrigger": "UNPROVEN; no evidence establishing pooler timeout, concurrency, network incident or reuse as trigger.",
+    "classification": "UNSIGNED_PREPARATION_INTERRUPTED"
+  },
+  "recoveryFix": {
+    "boundedEventHandling": "PASS",
+    "faultInjection": "PASS",
+    "reconnectAutoSign": false,
+    "reconnectAutoSend": false,
+    "explicitServerOnlyReview": true,
+    "sameOperationRecovered": true,
+    "immutableEvidencePreserved": true,
+    "lostCommitAckDoesNotDispatch": "PASS",
+    "noDatabaseRetry": true,
+    "noSchemaMigrationRlsChange": true
+  },
+  "batteryId": "BYE-W1-002-64257020134D4A0F",
+  "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+  "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+  "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+  "collectorPrincipal": "BYETERY-INSTAWARD-COLLECTOR-1",
+  "collectorRole": true,
+  "collectorMembership": true,
+  "evidence": {
+    "schema": "BYETERY_EVIDENCE_V1",
+    "revision": 1,
+    "bytesLength": 339,
+    "manifestHash": "ef61932cb180ffbafac39eddffaed46dccb6e42366c7999913116d9eb8f73766",
+    "payloadHash": "ef61932cb180ffbafac39eddffaed46dccb6e42366c7999913116d9eb8f73766",
+    "canonicalCommitment": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+    "reusedOriginalBytes": true,
+    "originalManifestReference": "BYE-W1-003B-results.json (original immutable synthetic COLLECTION manifest)",
+    "physicalWorldClaim": "Synthetic test attestation, no assertion of real physical handling."
+  },
+  "preparation": {
+    "ledger": 5314088,
+    "resourceFee": "1042263",
+    "restorePreamble": false,
+    "authEntryCount": 2,
+    "resources": {
+      "instructions": 1831308,
+      "diskReadBytes": 144,
+      "writeBytes": 916,
+      "readOnlyEntries": 4,
+      "readWriteEntries": 3
+    },
+    "classicFee": "10000",
+    "totalFee": "1052263",
+    "feeCap": "50000000",
+    "belowCap": true
+  },
+  "preSign": {
+    "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+    "sequence": "20970220772392965",
+    "fee": "1052263",
+    "classicFee": "10000",
+    "auth": [
+      {
+        "credentialType": "sorobanCredentialsAddress",
+        "address": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "expirationLedger": 0,
+        "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "method": "confirm_collection",
+        "argumentCount": 4,
+        "subInvocations": 0
+      },
+      {
+        "credentialType": "sorobanCredentialsSourceAccount",
+        "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+        "expirationLedger": null,
+        "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "method": "confirm_collection",
+        "argumentCount": 4,
+        "subInvocations": 0
+      }
+    ],
+    "currentLedger": 5314089,
+    "expirationLedger": 5314148,
+    "timeBounds": {
+      "minTime": "0",
+      "maxTime": "1792594207"
+    }
+  },
+  "authorizedAuthSummary": [
+    {
+      "credentialType": "sorobanCredentialsAddress",
+      "address": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+      "expirationLedger": 5314148,
+      "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+      "method": "confirm_collection",
+      "argumentCount": 4,
+      "subInvocations": 0
+    },
+    {
+      "credentialType": "sorobanCredentialsSourceAccount",
+      "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "expirationLedger": null,
+      "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+      "method": "confirm_collection",
+      "argumentCount": 4,
+      "subInvocations": 0
+    }
+  ],
+  "negativeAuth": {
+    "missingService": "PASS",
+    "missingCollector": "PASS",
+    "wrongCollector": "PASS",
+    "broadcasts": 0,
+    "noRoleCollector": "PASS_UNSIGNED_RPC_SIMULATION",
+    "noRoleContractError": "RoleNotGranted (#9)",
+    "missingServiceMode": "deterministic guard on actual fresh auth requirements",
+    "missingCollectorMode": "deterministic guard on actual fresh auth requirements",
+    "wrongCollectorMode": "deterministic guard on actual fresh auth requirements",
+    "noRoleMode": "unsigned live RPC; frozen contract RoleNotGranted #9; chain unchanged"
+  },
+  "sourceBefore": {
+    "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+    "sequence": "20970220772392964",
+    "balance": "99999515769",
+    "ledger": 5314081,
+    "externalUse": "UNCONFIRMED; treat as shared"
+  },
+  "identity": {
+    "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+    "sequence": "20970220772392965",
+    "preparedLedger": 5314088,
+    "authorizationExpirations": [
+      5314148
+    ],
+    "minTime": "0",
+    "maxTime": "1792594207"
+  },
+  "twoPhaseHelper": {
+    "status": "PASS",
+    "authorizationPhaseCalls": 1,
+    "sourceEnvelopePhaseCalls": 1,
+    "hashBodyVerification": "PASS",
+    "sdkHash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+    "exportedKeys": false,
+    "helperBroadcasts": 0
+  },
+  "durability": {
+    "persistedAt": "2026-10-21T14:47:36.823Z",
+    "dispatchIntentAt": "2026-10-21T14:47:40.492Z",
+    "persistedBeforeSend": true,
+    "sourceCheck": {
+      "ledger": 5314095,
+      "balance": "99999515769",
+      "sequence": "20970220772392964"
+    }
+  },
+  "signedIdentityCount": 1,
+  "transaction": {
+    "hash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+    "status": "SUCCESS",
+    "confirmationLedger": 5314096,
+    "actualChargedFee": "69447",
+    "feeUnit": "stroops",
+    "broadcasts": 1,
+    "additionalBroadcasts": 0,
+    "events": [
+      {
+        "topics": [
+          "collected",
+          "BYE-W1-002-64257020134D4A0F"
+        ],
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+        "collectionCommitment": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef"
+      }
+    ],
+    "sorobanReturn": [
+      "Collected"
+    ]
+  },
+  "initialApiResponse": {
+    "status": 202,
+    "body": {
+      "batteryId": "BYE-W1-002-64257020134D4A0F",
+      "confirmedBatteryState": "RETURNED",
+      "confirmedRewardState": "NOT_ELIGIBLE",
+      "pendingOperation": {
+        "id": "4fa3fbac-84e4-4845-8abd-fbdff757cbb4",
+        "state": "UNKNOWN",
+        "command": "confirm_collection"
+      },
+      "lastAttempt": null,
+      "source": "TESTNET",
+      "operationId": "4fa3fbac-84e4-4845-8abd-fbdff757cbb4",
+      "transactionHash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+      "transportState": "SUBMITTED_OR_UNKNOWN",
+      "confirmationLedger": null,
+      "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c"
+    }
+  },
+  "postBattery": {
+    "ledger": 5314104,
+    "value": {
+      "state": "COLLECTED",
+      "rewardState": "NOT_ELIGIBLE",
+      "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+      "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+      "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+      "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+      "recycler": null,
+      "recyclingHash": null
+    }
+  },
+  "postRequest": {
+    "batteryId": "BYE-W1-002-64257020134D4A0F",
+    "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+    "state": "CONFIRMED"
+  },
+  "sqlProjection": {
+    "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+    "hash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+    "state": "CONFIRMED",
+    "recipient_snapshot": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+    "association_confirmed_at": "2026-10-21T14:48:06.484Z"
+  },
+  "independentRpcRead": {
+    "observedAt": "2026-10-21T14:49:27.297Z",
+    "network": "TESTNET",
+    "transactionHash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+    "status": "SUCCESS",
+    "confirmationLedger": 5314096,
+    "actualFee": "69447",
+    "readinessLedger": 5314115,
+    "readiness": "PASS",
+    "battery": {
+      "ledger": 5314115,
+      "value": {
+        "state": "COLLECTED",
+        "rewardState": "NOT_ELIGIBLE",
+        "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+        "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+        "recycler": null,
+        "recyclingHash": null
+      }
+    },
+    "request": {
+      "batteryId": "BYE-W1-002-64257020134D4A0F",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "state": "CONFIRMED"
+    },
+    "source": {
+      "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "sequence": "20970220772392965",
+      "balance": "99999446322",
+      "ledger": 5314115
+    }
+  },
+  "independentSupabaseRead": {
+    "reward": "NOT_ELIGIBLE",
+    "battery": "COLLECTED",
+    "request": "CONFIRMED",
+    "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+    "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+    "commitment": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+    "dispatches": 1,
+    "observedAt": "2026-10-21T14:48:25.217053+00:00",
+    "operationId": "4fa3fbac-84e4-4845-8abd-fbdff757cbb4",
+    "manifestHash": "ef61932cb180ffbafac39eddffaed46dccb6e42366c7999913116d9eb8f73766",
+    "identityCount": 1,
+    "transportState": "PROJECTED",
+    "transactionHash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+    "applicationState": "CONFIRMED",
+    "evidenceRevisions": 1,
+    "confirmationLedger": 5314096
+  },
+  "duplicateApiReplay": {
+    "status": "PASS",
+    "before": {
+      "requests": 1,
+      "operations": 3,
+      "identities": 3,
+      "dispatches": 3
+    },
+    "after": {
+      "requests": 1,
+      "operations": 3,
+      "identities": 3,
+      "dispatches": 3
+    }
+  },
+  "d1": {
+    "realConfirmedApiOperationKinds": 3,
+    "requiredApiOperationKinds": 5,
+    "D1.1": "SUPPORTED — 3/5; full criterion incomplete",
+    "D1.2": "Collection subset READY FOR VALIDATION; all-method criterion incomplete",
+    "D1.3": "SUPPORTED / strengthened",
+    "D1.4": "SUPPORTED / strengthened",
+    "D1.5": "Collection replay subset READY FOR VALIDATION; broader criterion remains owner-reviewed",
+    "D1.7": "SUPPORTED / strengthened; unsigned live interruption is not every signed-before-submit scenario",
+    "officialAcceptance": {
+      "D1": "0/12",
+      "D2": "0/6",
+      "D3": "0/5",
+      "automaticPass": false
+    }
+  },
+  "tests": {
+    "head": "fbeb66d86e59429023a7e23d4edaec3797b7f134",
+    "allPassed": true,
+    "verifiedAt": "2026-10-21T14:46:15.6783707Z",
+    "root": "PASS",
+    "backend": 138,
+    "foundation": 50,
+    "rustNative": 20,
+    "rustFeatureRepeat": 20,
+    "wasm": 1,
+    "rustfmt": "PASS",
+    "clippy": "PASS",
+    "python": 4,
+    "frontend": 33,
+    "frontendBuild": "PASS",
+    "sqlParity": 82,
+    "httpDev": 45,
+    "signerNative": 22,
+    "signerOffline": 18,
+    "focused": 28,
+    "secretFindings": 0
+  },
+  "verificationLimitations": [
+    "First frontend sandbox run: Vitest worker timeout. Second sandbox run: temporary-file ENOENT. Unchanged full suite passed outside isolation; no assertion or protection weakened.",
+    "HTTP DEV45, SQL82 and signer22/offline18 completed Oct20. Final root/backend138 and frontend33/type/lint/build verified Oct21. Final pure negative-error classifier does not change HTTP/SQL/helper behavior.",
+    "Focused28 overlap backend138, not additional unique tests. Original Foundation50 unchanged. Same20 Rust tests repeat under wasm-tests, plus1 distinct WASM constructor."
+  ],
+  "notion": {
+    "updatedAndReadBack": true,
+    "supportingTask": "https://app.notion.com/p/400a46fdfb1881f88921e79df756b331",
+    "status": "READY FOR VALIDATION",
+    "officialPassCount": 0,
+    "structures": [
+      "BYE-W1-003C — PostgreSQL Recovery + Resume Original Collection",
+      "📓 Development Log",
+      "📝 Changelog",
+      "🧪 Tests & Evidence",
+      "🔗 Stellar Transactions",
+      "⚠️ Decisions & Risks"
+    ]
+  },
+  "closure": {
+    "obsidian": "Final evidence commit is mirrored and context refreshed after commit; see final execution report for observed sync result.",
+    "git": "Evidence commit and branch push are verified after this artifact is committed; resolve immutable evidence commit with evidenceCommitResolution.",
+    "protectedUntracked": "tools/sync_obsidian.py",
+    "protectedSha256": "48404b9431a9d955fc4af0b2eeaf9a59bb2fb0e9457eed73b4f2f66132a5e2da"
+  },
+  "unchanged": [
+    "Frozen Soroban contract and deployment",
+    "Cargo.lock and checkpoint WASM",
+    "Remote schema, migrations, RLS and roles",
+    "Fee cap and helper allowlists",
+    "Historical BYE-W1-003 BLOCKED, 003A PASS, 003B PARTIAL",
+    "Historical baseline and sprint-start tags"
+  ],
+  "scope": {
+    "newBattery": false,
+    "newReturn": false,
+    "newLogicalCollection": false,
+    "recycling": false,
+    "reward": false,
+    "mainnet": false,
+    "mainMerged": false,
+    "nextProposedTask": "BYE-W1-004 — Recycling + Reward + D1 completion testing",
+    "nextTaskStarted": false
+  }
+}
