@@ -1,0 +1,720 @@
+{
+  "schemaVersion": 1,
+  "task": "BYE-W1-004",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "date": "2026-10-21",
+  "technicalResult": "PASS",
+  "d1TechnicalState": "INCOMPLETE: 10 ready, 2 supported; owner review pending",
+  "officialAcceptance": {
+    "D1": "0/12",
+    "D2": "0/6",
+    "D3": "0/5"
+  },
+  "startingHead": "1779a45251d818afaa5ab8fe2a297d1abc04f2ea",
+  "testedImplementationHead": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8",
+  "branch": "instaward/d1-testnet-integration",
+  "network": "TESTNET",
+  "networkId": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+  "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+  "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "batteryId": "BYE-W1-002-64257020134D4A0F",
+  "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+  "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+  "initialLifecycle": "COLLECTED / CONFIRMED / NOT_ELIGIBLE",
+  "finalLifecycle": "RECYCLED / CONFIRMED / SENT",
+  "recyclerPrerequisite": {
+    "label": "BYETERY-INSTAWARD-RECYCLER-1",
+    "actor": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+    "onChainRole": true,
+    "appPrincipal": "ACTIVE; Auth verified independently",
+    "deploymentMembership": "RECYCLER + ordinary USER base only",
+    "creation": "Separate explicit owner authorization; no on-chain role change"
+  },
+  "trustline": {
+    "ownerCreated": true,
+    "transactionHash": "8bacfbb284ad3ce0f6fdb68e6f6a2bcd2b80bdc2056df424033f7d9593efb344",
+    "ledger": 5315668,
+    "independentVerificationLedger": 5315749,
+    "flags": 1,
+    "limitBaseUnits": "9223372036854775807"
+  },
+  "evidence": {
+    "kind": "RECYCLING",
+    "revision": 1,
+    "domain": "BYETERY_EVIDENCE_V1",
+    "manifestUtf8": "{\"version\":1,\"task\":\"BYE-W1-004\",\"fixture\":true,\"batteryId\":\"BYE-W1-002-64257020134D4A0F\",\"requestId\":\"5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c\",\"kind\":\"RECYCLING\",\"attestation\":\"Synthetic Testnet demonstration evidence; NOT proof of physical recycling, custody, environmental benefit, regulatory compliance or material recovery.\",\"nonce\":\"65778288c2d675aebdea390256eceafc\"}",
+    "payloadSha256": "50250c13774ca250b35bd4f6dbdf315a2963c17591f28471bea334f95cc13e6c",
+    "canonicalCommitment": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451",
+    "algorithm": "Existing canonical evidence.ts ScVal tuple XDR SHA-256; matches frozen Rust",
+    "synthetic": true
+  },
+  "recycling": {
+    "kind": "confirm_recycling",
+    "operationId": "3ddd9ac8-cfdd-4129-8a4a-8c8f9015145c",
+    "transactionHash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+    "confirmationLedger": 5315874,
+    "actualFee": "49047",
+    "simulation": {
+      "ledger": 5315868,
+      "resourceFee": "60222",
+      "restorePreamble": false,
+      "authEntries": 1,
+      "resources": {
+        "instructions": 1181825,
+        "diskReadBytes": 0,
+        "writeBytes": 604,
+        "readOnlyEntries": 4,
+        "readWriteEntries": 1
+      }
+    },
+    "identity": {
+      "source": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+      "sequence": "20970233657294850",
+      "preparedLedger": 5315868,
+      "authorizationExpirations": [],
+      "timeBounds": {
+        "min": "0",
+        "max": "1792603107"
+      }
+    },
+    "durability": {
+      "persistedAt": "2026-10-21T17:15:48.785Z",
+      "dispatchIntentAt": "2026-10-21T17:15:52.112Z",
+      "sourceCheck": {
+        "ledger": 5315873,
+        "balance": "99999960266",
+        "sequence": "20970233657294849"
+      },
+      "persistedBeforeSend": true
+    },
+    "authorizedAuth": [
+      {
+        "credentialType": "sorobanCredentialsSourceAccount",
+        "address": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+        "expirationLedger": null,
+        "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "method": "confirm_recycling",
+        "argumentCount": 4,
+        "subInvocations": 0
+      }
+    ],
+    "initialApi": {
+      "status": 200,
+      "body": {
+        "batteryId": "BYE-W1-002-64257020134D4A0F",
+        "confirmedBatteryState": "RECYCLED",
+        "confirmedRewardState": "PENDING",
+        "pendingOperation": null,
+        "lastAttempt": null,
+        "source": "TESTNET",
+        "operationId": "3ddd9ac8-cfdd-4129-8a4a-8c8f9015145c",
+        "transactionHash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+        "transportState": "PROJECTED",
+        "confirmationLedger": 5315874,
+        "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c"
+      }
+    },
+    "postBattery": {
+      "ledger": 5315878,
+      "value": {
+        "state": "RECYCLED",
+        "rewardState": "PENDING",
+        "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+        "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+        "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+        "recyclingHash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451"
+      }
+    },
+    "postRequest": {
+      "batteryId": "BYE-W1-002-64257020134D4A0F",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "state": "CONFIRMED"
+    },
+    "sqlProjection": {
+      "state": "RECYCLED",
+      "reward_state": "PENDING",
+      "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+      "recycling_hash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451",
+      "collection_hash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+      "request_state": "CONFIRMED",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "recipient_snapshot": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "association_confirmed_at": "2026-10-21T14:48:06.484Z",
+      "wasm": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+    },
+    "sorobanReturn": {
+      "battery_state": [
+        "Recycled"
+      ],
+      "reward_state": [
+        "Pending"
+      ]
+    },
+    "duplicate": {
+      "status": "PASS",
+      "before": {
+        "requests": 1,
+        "operations": 4,
+        "identities": 4,
+        "dispatches": 4
+      },
+      "after": {
+        "requests": 1,
+        "operations": 4,
+        "identities": 4,
+        "dispatches": 4
+      },
+      "additionalIdentities": 0,
+      "additionalBroadcasts": 0,
+      "additionalReward": null
+    },
+    "authCalls": 1,
+    "envelopeCalls": 1,
+    "broadcasts": 1,
+    "events": [
+      {
+        "topics": [
+          "recycled",
+          "BYE-W1-002-64257020134D4A0F"
+        ],
+        "data": {
+          "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+          "recycling_hash": {
+            "0": 183,
+            "1": 98,
+            "2": 45,
+            "3": 205,
+            "4": 190,
+            "5": 182,
+            "6": 89,
+            "7": 143,
+            "8": 233,
+            "9": 95,
+            "10": 124,
+            "11": 21,
+            "12": 241,
+            "13": 83,
+            "14": 179,
+            "15": 21,
+            "16": 164,
+            "17": 185,
+            "18": 50,
+            "19": 155,
+            "20": 201,
+            "21": 156,
+            "22": 56,
+            "23": 41,
+            "24": 206,
+            "25": 171,
+            "26": 209,
+            "27": 189,
+            "28": 16,
+            "29": 183,
+            "30": 84,
+            "31": 81
+          },
+          "request_id": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "reward_state": [
+            "Pending"
+          ]
+        }
+      }
+    ],
+    "sdkHashMatches": true,
+    "feeCapStroops": "50000000",
+    "helperBodyVerification": "PASS",
+    "negativeGuards": {
+      "wrongApplicationPrincipal": "PASS_HTTP_403",
+      "invalidBroadcasts": 0,
+      "missingRecycler": "PASS",
+      "wrongRecycler": "PASS",
+      "noRoleRecycler": "PASS_UNSIGNED_RPC_RoleNotGranted_9"
+    }
+  },
+  "reward": {
+    "kind": "pay_reward",
+    "operationId": "f90927f6-2a66-4bb9-ae3b-5b0565d1fb7c",
+    "transactionHash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+    "confirmationLedger": 5315915,
+    "actualFee": "10057",
+    "simulation": {
+      "ledger": 5315908,
+      "resourceFee": "15049",
+      "restorePreamble": false,
+      "authEntries": 1,
+      "resources": {
+        "instructions": 1268274,
+        "diskReadBytes": 124,
+        "writeBytes": 948,
+        "readOnlyEntries": 4,
+        "readWriteEntries": 3
+      }
+    },
+    "identity": {
+      "source": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "sequence": "20970220772392966",
+      "preparedLedger": 5315908,
+      "authorizationExpirations": [],
+      "timeBounds": {
+        "min": "0",
+        "max": "1792603307"
+      }
+    },
+    "durability": {
+      "persistedAt": "2026-10-21T17:19:02.604Z",
+      "dispatchIntentAt": "2026-10-21T17:19:17.460Z",
+      "sourceCheck": {
+        "ledger": 5315914,
+        "balance": "99999446322",
+        "sequence": "20970220772392965"
+      },
+      "persistedBeforeSend": true
+    },
+    "authorizedAuth": [
+      {
+        "credentialType": "sorobanCredentialsSourceAccount",
+        "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+        "expirationLedger": null,
+        "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "method": "pay_reward",
+        "argumentCount": 1,
+        "subInvocations": 0
+      }
+    ],
+    "initialApi": {
+      "status": 200,
+      "body": {
+        "batteryId": "BYE-W1-002-64257020134D4A0F",
+        "confirmedBatteryState": "RECYCLED",
+        "confirmedRewardState": "SENT",
+        "pendingOperation": null,
+        "lastAttempt": {
+          "state": "SUCCEEDED",
+          "attempt_number": 1,
+          "error_code": null
+        },
+        "source": "TESTNET",
+        "operationId": "f90927f6-2a66-4bb9-ae3b-5b0565d1fb7c",
+        "transactionHash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+        "transportState": "PROJECTED",
+        "confirmationLedger": 5315915,
+        "reward": {
+          "state": "SENT",
+          "token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+          "amount": "100000000",
+          "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS"
+        }
+      }
+    },
+    "postBattery": {
+      "ledger": 5315919,
+      "value": {
+        "state": "RECYCLED",
+        "rewardState": "SENT",
+        "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+        "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+        "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+        "recyclingHash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451"
+      }
+    },
+    "postRequest": {
+      "batteryId": "BYE-W1-002-64257020134D4A0F",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "state": "CONFIRMED"
+    },
+    "sqlProjection": {
+      "state": "RECYCLED",
+      "reward_state": "SENT",
+      "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+      "recycling_hash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451",
+      "collection_hash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+      "request_state": "CONFIRMED",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "recipient_snapshot": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "association_confirmed_at": "2026-10-21T14:48:06.484Z",
+      "wasm": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+    },
+    "sorobanReturn": {
+      "amount": "100000000",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "reward_state": [
+        "Sent"
+      ],
+      "token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G"
+    },
+    "duplicate": {
+      "status": "PASS",
+      "before": {
+        "requests": 1,
+        "operations": 5,
+        "identities": 5,
+        "dispatches": 5
+      },
+      "after": {
+        "requests": 1,
+        "operations": 5,
+        "identities": 5,
+        "dispatches": 5
+      },
+      "additionalIdentities": 0,
+      "additionalBroadcasts": 0,
+      "additionalReward": "0"
+    },
+    "authCalls": 1,
+    "envelopeCalls": 1,
+    "broadcasts": 1,
+    "events": [
+      {
+        "topics": [
+          "transfer",
+          "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+          "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+          "GREENTEST:GCHROKHXHL4L635J6Y6DWFFD5DDHABOAF4BP5TEUZDZQMW4XYS6DIDL7"
+        ],
+        "data": "100000000"
+      },
+      {
+        "topics": [
+          "paid",
+          "BYE-W1-002-64257020134D4A0F"
+        ],
+        "data": {
+          "amount": "100000000",
+          "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+          "request_id": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G"
+        }
+      }
+    ],
+    "sdkHashMatches": true,
+    "feeCapStroops": "50000000",
+    "helperBodyVerification": "PASS",
+    "amountBaseUnits": "100000000",
+    "assetCode": "GREENTEST",
+    "issuer": "GCHROKHXHL4L635J6Y6DWFFD5DDHABOAF4BP5TEUZDZQMW4XYS6DIDL7",
+    "sac": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+    "before": {
+      "ledger": 5315902,
+      "recipientAcceptance": "PASS",
+      "recipientBalance": "0",
+      "contractBalance": "900000000",
+      "limit": "9223372036854775807",
+      "flags": 1,
+      "buyingLiabilities": "0"
+    },
+    "after": {
+      "ledger": 5315919,
+      "recipientAcceptance": "PASS",
+      "recipientBalance": "100000000",
+      "contractBalance": "800000000",
+      "limit": "9223372036854775807",
+      "flags": 1,
+      "buyingLiabilities": "0"
+    },
+    "recipientDelta": "100000000"
+  },
+  "independentReads": {
+    "recycling-independent-rpc": {
+      "stage": "recycling",
+      "status": "PASS",
+      "observedAt": "2026-10-21T17:17:03.732Z",
+      "network": "TESTNET",
+      "hash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+      "confirmationLedger": 5315874,
+      "actualFee": "49047",
+      "readinessLedger": 5315886,
+      "battery": {
+        "ledger": 5315886,
+        "value": {
+          "state": "RECYCLED",
+          "rewardState": "PENDING",
+          "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+          "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+          "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+          "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+          "recyclingHash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451"
+        }
+      },
+      "request": {
+        "batteryId": "BYE-W1-002-64257020134D4A0F",
+        "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+        "state": "CONFIRMED"
+      },
+      "recipientBalance": "0",
+      "contractBalance": "900000000",
+      "source": {
+        "address": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+        "sequence": "20970233657294850",
+        "balance": "99999911219",
+        "ledger": 5315887
+      },
+      "signatures": 0,
+      "broadcasts": 0
+    },
+    "recycling-independent-sql": {
+      "observed_at": "2026-10-21 17:16:33.71234+00",
+      "state": "RECYCLED",
+      "reward_state": "PENDING",
+      "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+      "recycling_hash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451",
+      "request_state": "CONFIRMED",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "recipient_snapshot": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "operation_id": "3ddd9ac8-cfdd-4129-8a4a-8c8f9015145c",
+      "application_state": "CONFIRMED",
+      "transport_state": "PROJECTED",
+      "dispatch_attempts": 1,
+      "hash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+      "confirmation_ledger": "5315874",
+      "identities": 1
+    },
+    "reward-independent-rpc": {
+      "stage": "reward",
+      "status": "PASS",
+      "observedAt": "2026-10-21T17:20:44.746Z",
+      "network": "TESTNET",
+      "hash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+      "confirmationLedger": 5315915,
+      "actualFee": "10057",
+      "readinessLedger": 5315930,
+      "battery": {
+        "ledger": 5315931,
+        "value": {
+          "state": "RECYCLED",
+          "rewardState": "SENT",
+          "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+          "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+          "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+          "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+          "recyclingHash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451"
+        }
+      },
+      "request": {
+        "batteryId": "BYE-W1-002-64257020134D4A0F",
+        "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+        "state": "CONFIRMED"
+      },
+      "recipientBalance": "100000000",
+      "contractBalance": "800000000",
+      "source": {
+        "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+        "sequence": "20970220772392966",
+        "balance": "99999436265",
+        "ledger": 5315931
+      },
+      "signatures": 0,
+      "broadcasts": 0
+    },
+    "reward-independent-sql": {
+      "observed_at": "2026-10-21 17:20:31.053871+00",
+      "state": "RECYCLED",
+      "reward_state": "SENT",
+      "request_state": "CONFIRMED",
+      "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "recipient_snapshot": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "operation_id": "f90927f6-2a66-4bb9-ae3b-5b0565d1fb7c",
+      "application_state": "CONFIRMED",
+      "transport_state": "PROJECTED",
+      "dispatch_attempts": 1,
+      "hash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+      "confirmation_ledger": "5315915",
+      "reward_attempt_state": "SUCCEEDED",
+      "attempt_number": 1,
+      "identities": 1
+    },
+    "closure-reward-independent-rpc": {
+      "stage": "reward",
+      "status": "PASS",
+      "observedAt": "2026-10-21T20:09:15.626Z",
+      "network": "TESTNET",
+      "hash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+      "confirmationLedger": 5315915,
+      "actualFee": "10057",
+      "readinessLedger": 5317953,
+      "battery": {
+        "ledger": 5317953,
+        "value": {
+          "state": "RECYCLED",
+          "rewardState": "SENT",
+          "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+          "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+          "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+          "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+          "recyclingHash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451"
+        }
+      },
+      "request": {
+        "batteryId": "BYE-W1-002-64257020134D4A0F",
+        "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+        "state": "CONFIRMED"
+      },
+      "recipientBalance": "100000000",
+      "contractBalance": "800000000",
+      "source": {
+        "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+        "sequence": "20970220772392966",
+        "balance": "99999436265",
+        "ledger": 5317953
+      },
+      "signatures": 0,
+      "broadcasts": 0
+    }
+  },
+  "verification": {
+    "head": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8",
+    "allPassed": true,
+    "verifiedAt": "2026-10-21T17:14:43.3668269Z",
+    "rustNative": 20,
+    "rustFeatureRepeat": 20,
+    "wasm": 1,
+    "release": "PASS",
+    "rustfmt": "PASS",
+    "clippy": "PASS",
+    "backend": 143,
+    "foundation": 50,
+    "focused": 39,
+    "httpDev": 45,
+    "sqlParity": 82,
+    "frontend": 33,
+    "frontendTypesLintBuild": "PASS",
+    "signerNative": 22,
+    "signerOffline": 18,
+    "signerFmtClippy": "PASS",
+    "python": 4,
+    "mockDemo": "SENT 10",
+    "secretFindings": 0,
+    "frontendWorkers": 1
+  },
+  "criteria": [
+    {
+      "criterion": "D1.1",
+      "status": "READY FOR VALIDATION",
+      "evidence": "Five real authenticated API operation kinds confirmed on one sprint lifecycle; each correlation is in BYE-W1-004-traceability.json. Registration002, return003B, collection003C, recycling/reward004.",
+      "remainingGapOrLimit": "Owner reviews five API/chain results; no automatic acceptance.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    },
+    {
+      "criterion": "D1.2",
+      "status": "READY FOR VALIDATION",
+      "evidence": "Frozen Rust authorization tests; backend/HTTP negatives;003C dual SERVICE+COLLECTOR positive and missing-either/wrong-actor guards;004 recycler guards and unsigned no-role RPC RoleNotGranted#9; service-only reward positive.",
+      "remainingGapOrLimit": "Negative signatures are deterministic tests/unsigned simulation, not deliberately invalid live broadcasts. Review coverage per operation.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    },
+    {
+      "criterion": "D1.3",
+      "status": "READY FOR VALIDATION",
+      "evidence": "testnet-worker.test.ts confirmed-failure/no-projection, hash mismatch and UNKNOWN cases; sprint-recycling-reward.test.ts combined lost-response/outage recovery; independent RPC and SQL004 post-state.",
+      "remainingGapOrLimit": "Faults are controlled adapter fixtures, not injected into the successful live payment.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    },
+    {
+      "criterion": "D1.4",
+      "status": "READY FOR VALIDATION",
+      "evidence": "BYE-W1-004-traceability.json: five operation IDs, network, contract, source/sequence, persisted identity hash, dispatch timestamp, confirmation ledger and PROJECTED state.",
+      "remainingGapOrLimit": "Export intentionally omits signed envelopes/signatures; chain result is independently corroborated in each task report.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    },
+    {
+      "criterion": "D1.5",
+      "status": "SUPPORTED",
+      "evidence": "Real API replay for return003B, collection003C, recycling/reward004: same operation and zero added identities/broadcasts. Registration identical/changed-parameter conflict covered by remote-tests/http.test.ts (Supabase DEV with MOCK).",
+      "remainingGapOrLimit": "No explicit real-Testnet registration cache-replay transcript in002. Owner must accept controlled coverage or authorize a separately bounded cache-only check. No registration invoked in004.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    },
+    {
+      "criterion": "D1.6",
+      "status": "READY FOR VALIDATION",
+      "evidence": "Reward receipt, transfer/paid events, recipient0→100000000, contract900000000→800000000; same-key live replay adds0. Rust/mock/HTTP reject early/double reward and recipient/amount overrides. Reproduction commands and tested commit below.",
+      "remainingGapOrLimit": "Re-run deterministic tests, never repeat live reward. Technical asset only; no monetary/environmental claim.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    },
+    {
+      "criterion": "D1.7",
+      "status": "SUPPORTED",
+      "evidence": "All five live identities persisted before dispatch. testnet-worker.test.ts restart-after-intent fixture retains exact identity and sends0; postgres-recovery.test.ts fences lost COMMIT acknowledgement/READY.003C separates unsigned interruption from durable identity.",
+      "remainingGapOrLimit": "Conservative recovery may stop for reviewed resolution before first dispatch. No end-to-end reviewed READY first-dispatch recovery transcript or live injected pre-submit crash/chain-read pair. Full criterion requires owner review of this gap; no new transaction authorized.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    },
+    {
+      "criterion": "D1.8",
+      "status": "READY FOR VALIDATION",
+      "evidence": "sprint-recycling-reward.test.ts: send exactly once, lose response, retain original identity, later same-hash SUCCESS and one projection; existing worker tests reinforce UNKNOWN behavior.",
+      "remainingGapOrLimit": "Controlled transport fixture; no extra Testnet lifecycle.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    },
+    {
+      "criterion": "D1.9",
+      "status": "READY FOR VALIDATION",
+      "evidence": "Combined004 fixture plus testnet-worker.test.ts RPC outage test: uncertainty retained, no second send, same-hash recovery projects once. PostgreSQL recovery tests separately cover database interruption.",
+      "remainingGapOrLimit": "RPC outage is simulated; PostgreSQL disconnect root cause in003B remains unproven.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    },
+    {
+      "criterion": "D1.10",
+      "status": "READY FOR VALIDATION",
+      "evidence": "testnet-restart.test.ts closes actual on-disk PGlite, reopens it with a new store/worker and reconciles original envelope/hash; prepare/sign/send each remain1. Combined004 worker reconstruction also passes.",
+      "remainingGapOrLimit": "Database reopen/worker restart in one test process, not an OS process-kill or live Testnet fault injection.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    },
+    {
+      "criterion": "D1.11",
+      "status": "READY FOR VALIDATION",
+      "evidence": "testnet-worker.test.ts lost response/NOT_FOUND/expiry state proofs; combined004 fixture retains original network-bound hash through NOT_FOUND and outage, no replacement, later SUCCESS.",
+      "remainingGapOrLimit": "Expired/unresolved can require reviewed resolution; no automatic replacement or invented success.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    },
+    {
+      "criterion": "D1.12",
+      "status": "READY FOR VALIDATION",
+      "evidence": "Frozen contracts/byetery-contract/src/test.rs revoked_collector_is_rejected_even_with_both_signatures; deterministic role revoke fixture rejects with unchanged state;004 unsigned no-role recycler RPC probe returns exact error9.",
+      "remainingGapOrLimit": "Local contract fixture freshly rerun; no live sprint actor revoked and no set_role transaction in004.",
+      "ownerDecision": "PENDING",
+      "commit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+    }
+  ],
+  "newBusinessOperations": 2,
+  "newIdentities": 2,
+  "newBusinessBroadcasts": 2,
+  "invalidBroadcasts": 0,
+  "additionalRewardOnReplay": "0",
+  "extraBattery": false,
+  "extraLifecycle": false,
+  "mainnet": false,
+  "contractModified": false,
+  "schemaOrRlsChanged": false,
+  "helperModified": false,
+  "historicalResults": {
+    "BYE-W1-003": "BLOCKED",
+    "BYE-W1-003A": "PASS",
+    "BYE-W1-003B": "PARTIAL",
+    "BYE-W1-003C": "technical PASS"
+  },
+  "limitations": [
+    "Synthetic evidence does not establish physical recycling/custody/material recovery/environmental benefit/compliance.",
+    "Same Windows host custody is not independent human multi-party custody.",
+    "Source shared/manual usage unconfirmed; lease cannot protect external transactions; final sequence check mandatory.",
+    "Frontend general environment remains DEV/MOCK; these real operations used authenticated API.",
+    "Testnet reset, TTL and RPC history retention can limit future reproduction.",
+    "D1.5 and D1.7 remain SUPPORTED; no automatic owner acceptance; D2/D3 not started."
+  ],
+  "evidenceCommit": "Resolve the documentation commit containing this file via git log; no circular self-hash."
+}
