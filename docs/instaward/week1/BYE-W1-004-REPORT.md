@@ -87,7 +87,7 @@ Commands used:
 
 ```powershell
 npm run verify
-node --experimental-strip-types --test --test-concurrency=1 backend/tests/testnet-worker.test.ts backend/tests/testnet-restart.test.ts backend/tests/postgres-recovery.test.ts backend/tests/sprint-recycling-reward.test.ts
+node --experimental-strip-types --test --test-concurrency=1 backend/tests/testnet-worker.test.ts backend/tests/testnet-real-boundaries.test.ts backend/tests/postgres-recovery.test.ts backend/tests/sprint-recycling-reward.test.ts
 node --experimental-strip-types --test --test-concurrency=1 backend/remote-tests/*.test.ts
 node scripts/test-foundation-parity.mjs
 npm --prefix frontend run typecheck
@@ -99,6 +99,8 @@ node --experimental-strip-types --test backend/signing-tests/offline.test.ts
 ```
 
 HTTP requires already-authorized Supabase DEV environment loaded privately; helper offline tests are explicitly opt-in by invoking the separate signing-tests suite, see helper test source/operator. Never publish .env or credentials. Root verify includes Rust/backend/Python/MOCK; The 82 SQL parity checks are a separate rollback-only command, not added to the backend count. MOCK demo never executes Soroban. No tool installed or global protection changed.
+
+The focused command above is the 39-test subset. The separate on-disk restart test (`backend/tests/testnet-restart.test.ts`) passed within the full 143-test backend suite run by `npm run verify`.
 
 Initial parallel frontend test workers timed out under severe memory pressure. Sequential rerun with existing maxWorkers1 passed unchanged assertions; types/lint/build also passed. No timeout enlargement, skipped assertion or security bypass. Full results captured privately before live execution at17:14:43UTC. No functional changes after that validation.
 
