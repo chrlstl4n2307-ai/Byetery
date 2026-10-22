@@ -1,3 +1,38 @@
+# D1 OWNER ACCEPTANCE — 2026-10-22
+
+OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT. **D1 12/12 PASS — OWNER ACCEPTED.** Technical readiness: **12/12**. D2 **0/6 PASS**; D3 **0/5 PASS**; TOTAL **12/23 PASS**. This is internal Byetery project-owner acceptance only; it does not assert final approval, acceptance or payment by Stellar, SDF or Instawards.
+
+Owner **Christian Medina** explicitly approved **“APPROVE ALL 12 D1 ACCEPT RECOMMENDATIONS”** and authorized Stage 2 on 2026-10-22 at evidence checkpoint `a6542e3f40cdd0a55f2068478467695d70229e59`. This is a new current acceptance decision; historical readiness and task outcomes below remain verbatim.
+
+[Owner review and dated BYE-W1-007 addendum](D1-OWNER-ACCEPTANCE-REVIEW.md) · [Final acceptance report](D1-OWNER-ACCEPTANCE-FINAL.md) · [Machine record](D1-OWNER-ACCEPTANCE-FINAL.json).
+
+| Criterion | Technical readiness | Owner decision | Official project status | Evidence / reference | Acceptance review |
+| --- | --- | --- | --- | --- | --- |
+| D1.1 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | Las cinco operaciones tienen API, operación, hash, ledger y SUCCESS correlacionados. Full source references and caveats in owner review / final JSON. | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+| D1.2 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | The only missing wrong-actor open_return case is now explicitly proven on native and frozen WASM implementations. [BYE-W1-007](BYE-W1-007-REPORT.md): explicit wrong actor, unchanged state and identical-argument SERVICE positive control; original HOLD retained. | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+| D1.3 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | UNKNOWN y fallo no proyectan éxito; se confirma el hash original antes de proyectar. Full source references and caveats in owner review / final JSON. | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+| D1.4 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | Correlación completa de las seis operaciones D1 enviadas, con ledger y resultado. Full source references and caveats in owner review / final JSON. | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+| D1.5 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | A/B/C reales: mismo ID/hash en replay y409 por un único cambio, sin efectos adicionales. [BYE-W1-006](BYE-W1-006-REPORT.md). | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+| D1.6 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | Pago exacto0→10, contrato90→80, replay sin segundo efecto y manifiesto reproducible. Full source references and caveats in owner review / final JSON. | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+| D1.7 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | Identidad durable, interrupción antes del envío, dos DB reabiertas y primer efecto único revisado. [BYE-W1-005 controlled evidence](D1-GAP-CLOSURE-TRACE.json). | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+| D1.8 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | Envío único con respuesta perdida, UNKNOWN y reconciliación del hash persistido. Full source references and caveats in owner review / final JSON. | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+| D1.9 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | La caída conserva incertidumbre e identidad; la recuperación proyecta una vez sin otro envío. Full source references and caveats in owner review / final JSON. | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+| D1.10 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | DB close/reopen y worker nuevo retienen el mismo envelope/hash en UNKNOWN sin reenvío. Full source references and caveats in owner review / final JSON. | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+| D1.11 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | NOT_FOUND conserva incertidumbre; cualquier retry revisado reutiliza exactamente los bytes/hash. Full source references and caveats in owner review / final JSON. | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+| D1.12 | READY FOR VALIDATION | OWNER ACCEPTED — 2026-10-22 | PASS | Rol revocadofalse y rechazo; snapshot conserva Returned/Open/NotEligible sin atestaciones nuevas. Full source references and caveats in owner review / final JSON. | [D1-OWNER-ACCEPTANCE-REVIEW.md](D1-OWNER-ACCEPTANCE-REVIEW.md) |
+
+Notion readback: all **12 existing D1 criterion records PASS**; no duplicate criterion. [D1 OWNER ACCEPTANCE REVIEW](https://app.notion.com/p/401a46fdfb1881f6944cf536428344df?pvs=204) is a Review in the existing Project Plan with Status PASS, Development Phase INSTAWARD SPRINT and Sprint Scope FUNDED SPRINT. D2/D3 records are unchanged and NOT STARTED.
+
+Limits remain explicit: controlled restart/outage/fault fixtures are not relabeled as live Soroban failures or OS process kills; D1.12 retains MEDIUM confidence and its paired historical snapshot basis. No new blockchain activity or production change. The original Stage 1 D1.2 HOLD was correct when issued; BYE-W1-007 supplies later HOLD → ACCEPT evidence.
+
+**STOP. Next proposed task only: D2 KICKOFF — CONNECTED WEB MVP & VERIFICATION INTERFACE.** D2/D3 execution is not authorized by this acceptance.
+
+## Historical readiness assessments — preserved verbatim
+
+The complete pre-acceptance matrix below is retained as history; its former “current” headings and 0/12 counts describe their respective dates, not the new owner decision above.
+
+---
+
 # D1 acceptance review matrix — current BYE-W1-006
 
 OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT. **12 READY FOR VALIDATION /0 SUPPORTED /0 NOT YET SATISFIED /0 BLOCKED. Official D1 PASS0/12; D20/6; D30/5.**
