@@ -721,6 +721,18 @@ footer {
   font-size: 0.8rem;
   color: var(--muted);
 }
+.state-lane + .state-lane {
+  margin-top: 26px;
+  padding-top: 24px;
+  border-top: 2px solid var(--line);
+}
+.state-lane > h2 {
+  font-size: 1rem;
+  margin-bottom: 16px;
+}
+.transaction-lane code {
+  overflow-wrap: anywhere;
+}
 .technical-details summary {
   cursor: pointer;
 }

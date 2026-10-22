@@ -7,6 +7,7 @@ import { useSession } from "./session";
 import { physicalLabel, rewardLabel } from "@/lib/labels";
 import { SearchBattery, useMutation } from "./battery";
 import { useWebRuntime } from "./web-runtime";
+import { transactionPresentation } from "@/lib/state-lanes";
 export function WalletLink({ signer }: { signer?: WalletSigner }) {
   const { source, readOnly } = useWebRuntime();
   const { refresh } = useSession();
@@ -204,7 +205,10 @@ export function Dashboard() {
       <div className="dashboard-grid">
         <section className="card">
           <h2>Mis devoluciones</h2>
-          <p>Los estados físicos y las recompensas se muestran por separado.</p>
+          <p>
+            El ciclo atestado, la transacción Stellar y la recompensa se
+            muestran por separado.
+          </p>
           {!profile?.requests.length ? (
             <div className="empty">
               <span>↗</span>
@@ -234,11 +238,13 @@ export function Dashboard() {
                         : " · 10 GREENTEST de Testnet"
                       : ""}
                   </p>
-                  {r.pendingOperation && (
-                    <p className="notice">
-                      {r.pendingOperation.state} · Operación pendiente
-                    </p>
-                  )}
+                  <p>
+                    Transacción Stellar:{" "}
+                    <b>{transactionPresentation(r.pendingOperation).label}</b>
+                    {r.pendingOperation
+                      ? ` · ${r.pendingOperation.state}`
+                      : " · Sin recibo terminal en esta proyección"}
+                  </p>
                 </article>
               ))}
             </div>

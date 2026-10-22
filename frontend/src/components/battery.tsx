@@ -14,6 +14,7 @@ import type { Battery, BatteryState } from "@/lib/types";
 import { useSession } from "./session";
 import { physicalLabel, rewardLabel } from "@/lib/labels";
 import { useWebRuntime } from "./web-runtime";
+import { TransactionLane } from "./transaction-lane";
 export const stages: {
   state: BatteryState;
   label: string;
@@ -39,7 +40,7 @@ export const stages: {
 export function Timeline({ state }: { state: BatteryState | null }) {
   const current = stages.findIndex((s) => s.state === state);
   return (
-    <ol className="timeline" aria-label="Estado físico confirmado">
+    <ol className="timeline" aria-label="Estado de ciclo confirmado">
       {stages.map((s, i) => (
         <li
           key={s.state}
@@ -99,77 +100,90 @@ export function StateSummary({ battery }: { battery: Battery }) {
     battery.confirmedRewardState === "SENT";
   return (
     <>
-      <div className="status-line">
-        <span className="pill">
-          {physicalLabel(battery.confirmedBatteryState).toLocaleUpperCase("es")}
-        </span>
-        <span className="caption">
-          {battery.confirmedBatteryState
-            ? "Confirmado"
-            : "Pendiente de confirmación"}{" "}
-          ·{" "}
-          {battery.source === "MOCK"
-            ? "Entorno de demostración"
-            : "Stellar Testnet · Atestación autorizada"}
-        </span>
-      </div>
-      <Timeline state={battery.confirmedBatteryState} />
-      {battery.pendingOperation && (
-        <p className="notice" role="status">
-          {battery.pendingOperation.state === "UNKNOWN"
-            ? "Resultado incierto"
-            : "Operación pendiente"}
-          . El estado físico confirmado no ha cambiado.
-        </p>
-      )}
-      {battery.lastAttempt?.state === "FAILED" && (
-        <p className="notice error">
-          Intento fallido · El último intento de recompensa fue rechazado. El
-          estado físico se conserva.
-        </p>
-      )}
-      <div className={completed ? "reward reward-complete" : "reward"}>
-        <span className="reward-icon" aria-hidden="true">
-          {completed ? "↻" : "✳"}
-        </span>
-        <div>
-          <small>
+      <section className="state-lane" aria-label="Estado de ciclo y atestación">
+        <h2>Estado de ciclo / atestación</h2>
+        <div className="status-line">
+          <span className="pill">
+            {physicalLabel(battery.confirmedBatteryState).toLocaleUpperCase(
+              "es",
+            )}
+          </span>
+          <span className="caption">
+            {battery.confirmedBatteryState
+              ? "Confirmado"
+              : "Pendiente de confirmación"}{" "}
+            ·{" "}
             {battery.source === "MOCK"
-              ? "RECOMPENSA SIMULADA"
-              : "RECOMPENSA TESTNET"}
-          </small>
-          {completed && (
-            <>
-              <h2>Ciclo completado</h2>
-              <p>
-                Se registró la atestación autorizada de reciclaje. No acredita
-                por sí sola el proceso físico ni una certificación ambiental.
-              </p>
-              <p className="reward-amount">
-                +10{" "}
-                <span>
-                  {battery.source === "MOCK" ? "GREEN-TEST" : "GREENTEST"}
-                </span>
-              </p>
-            </>
-          )}
-          <h3>{rewardLabel(battery.confirmedRewardState)}</h3>
-          <p>
-            {completed
-              ? "Recompensa enviada ✓"
-              : battery.confirmedRewardState === "PENDING"
-                ? "Lista para procesar tras el reciclaje confirmado"
-                : "Disponible después del reciclaje confirmado"}
-          </p>
+              ? "Entorno de demostración"
+              : "Stellar Testnet · Atestación autorizada"}
+          </span>
         </div>
-      </div>
+        <Timeline state={battery.confirmedBatteryState} />
+        {battery.confirmedBatteryState === "RECYCLED" && (
+          <p className="caption">
+            RECYCLED es una authorized lifecycle attestation: una atestación
+            autorizada del ciclo, no una certificación física o ambiental
+            independiente.
+          </p>
+        )}
+      </section>
+      <TransactionLane operation={battery.pendingOperation} />
+      <section className="state-lane" aria-label="Estado de recompensa">
+        <h2>Estado de recompensa</h2>
+        {battery.lastAttempt?.state === "FAILED" && (
+          <p className="notice error">
+            Intento fallido · El último intento de recompensa fue rechazado. El
+            estado físico se conserva.
+          </p>
+        )}
+        <div className={completed ? "reward reward-complete" : "reward"}>
+          <span className="reward-icon" aria-hidden="true">
+            {completed ? "↻" : "✳"}
+          </span>
+          <div>
+            <small>
+              {battery.source === "MOCK"
+                ? "RECOMPENSA SIMULADA"
+                : "RECOMPENSA TESTNET"}
+            </small>
+            {completed && (
+              <>
+                <h2>Ciclo completado</h2>
+                <p>
+                  Se registró la atestación autorizada de reciclaje. No acredita
+                  por sí sola el proceso físico ni una certificación ambiental.
+                </p>
+                <p className="reward-amount">
+                  +10{" "}
+                  <span>
+                    {battery.source === "MOCK" ? "GREEN-TEST" : "GREENTEST"}
+                  </span>
+                </p>
+              </>
+            )}
+            <h3>{rewardLabel(battery.confirmedRewardState)}</h3>
+            <code>{battery.confirmedRewardState ?? "Sin confirmar"}</code>
+            <p>
+              {completed
+                ? "Recompensa enviada ✓"
+                : battery.confirmedRewardState === "PENDING"
+                  ? "Lista para procesar tras el reciclaje confirmado"
+                  : "Disponible después del reciclaje confirmado"}
+            </p>
+          </div>
+        </div>
+        {battery.lastAttempt && (
+          <p className="caption">
+            Último intento de recompensa: {battery.lastAttempt.state}. Un
+            intento no sustituye al estado de recompensa confirmado.
+          </p>
+        )}
+      </section>
       <details className="technical-details">
         <summary>Detalles técnicos</summary>
         <dl>
           <dt>Estado físico</dt>
           <dd>{battery.confirmedBatteryState ?? "Sin confirmar"}</dd>
-          <dt>Estado de recompensa</dt>
-          <dd>{battery.confirmedRewardState ?? "Sin confirmar"}</dd>
           <dt>Origen blockchain</dt>
           <dd>
             {battery.source} ·{" "}
@@ -337,7 +351,8 @@ export function BatteryView({ id }: { id: string }) {
                 Solicitar devolución
               </button>
             )}
-            {!readOnly && battery.confirmedBatteryState === "REGISTERED" &&
+            {!readOnly &&
+              battery.confirmedBatteryState === "REGISTERED" &&
               !profile?.wallets.length && (
                 <Link href="/dashboard">
                   Vincula una wallet verificada para continuar
