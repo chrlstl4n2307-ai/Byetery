@@ -1,0 +1,1984 @@
+{
+  "schemaVersion": 1,
+  "review": "D1 OWNER ACCEPTANCE REVIEW",
+  "stage": 1,
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "owner": "Christian Medina",
+  "date": "2026-10-22",
+  "timezone": "America/Santiago",
+  "startingHead": "0778ab75000ee1822465045f916eb3a4a0def3dc",
+  "reviewedEvidenceCommit": "0778ab75000ee1822465045f916eb3a4a0def3dc",
+  "reviewCommit": null,
+  "reviewCommitReason": "Stage1 packet remains uncommitted; Git commit/push are specified in Stage2 after owner decision.",
+  "branch": "instaward/d1-testnet-integration",
+  "authority": {
+    "path": "docs/instaward/ACCEPTANCE-CRITERIA.md",
+    "sha256": "8f426310c6336013d9c9683460ce5edc35c56f8bcb57f6eaafb563e96ff827c7",
+    "matchesFrozenBaseline": true
+  },
+  "criteria": [
+    {
+      "criterion": "D1.1",
+      "frozen": {
+        "description": "Five API operations",
+        "test": "Execute all five named methods with fresh IDs.",
+        "expectedResult": "Each succeeds with its authorized actor and confirmed Testnet result.",
+        "requiredEvidence": "API transcript; five operation/result links."
+      },
+      "evidenceMode": "REAL API + LIVE TESTNET",
+      "evidenceReviewed": [
+        "BYE-W1-002-results.json",
+        "BYE-W1-003B-results.json",
+        "BYE-W1-003C-results.json",
+        "BYE-W1-004-results.json",
+        "BYE-W1-004-traceability.json"
+      ],
+      "actualEvidence": "Registro002, devolución003B, colección003C y reciclaje/pago004 ejecutados por la API autenticada. Los cinco hashes/ledgers coinciden con RPC actual SUCCESS/txSuccess y seis registros SQL (cinco del ciclo más fixture006), cada uno CONFIRMED/PROJECTED, identidad1 y dispatch1. Batería y request se crearon frescos para ese ciclo.",
+      "gapAnalysis": "Sin brecha identificada para los cinco métodos y sus resultados requeridos.",
+      "caveats": "Un único ciclo sintético demuestra los cinco métodos D1, no los tres ciclos D3 ni tratamiento físico.003 y003B conservan sus resultados históricos BLOCKED/PARTIAL.",
+      "recommendation": "ACCEPT",
+      "confidence": "HIGH",
+      "reason": "Las cinco operaciones tienen API, operación, hash, ledger y SUCCESS correlacionados.",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    },
+    {
+      "criterion": "D1.2",
+      "frozen": {
+        "description": "Authorization",
+        "test": "Attempt each restricted operation with an incorrect actor; test collection missing either required authorization.",
+        "expectedResult": "All unauthorized attempts rejected; SERVICE + COLLECTOR succeeds.",
+        "requiredEvidence": "Negative-test report; positive collection hash and auth detail."
+      },
+      "evidenceMode": "MIXED: LIVE POSITIVE + DETERMINISTIC / UNSIGNED NEGATIVES",
+      "evidenceReviewed": [
+        "BYE-W1-003C-results.json#negativeAuth",
+        "BYE-W1-004-results.json#recycling.negatives",
+        "../ACCEPTANCE-CRITERIA.md",
+        "../../../contracts/byetery-contract/src/test.rs",
+        "../../../backend/remote-tests/http.test.ts",
+        "../../../tools/stellar-secure-store-signer/tests/validation.rs"
+      ],
+      "actualEvidence": "Positivos reales: ADMIN registro; SERVICE devolución; SERVICE+COLLECTOR simultáneos colección; RECYCLER reciclaje; SERVICE pago. Negativos: USER no ADMIN rechazado por HTTP; usuario no collector/recycler rechazado; wrong/missing collector y missing service en guards; no-role collector/recycler en simulación unsigned con RoleNotGranted9; wrong source en helper para pay_reward y falta SERVICE en Rust. Para open_return, user_actions_require_service_and_auth_is_bound_to_arguments prueba auth vacía y autorización de argumentos/recipient distintos, pero no presenta un actor incorrecto explícito.",
+      "gapAnalysis": "HOLD: la prueba congelada exige intentar cada operación restringida con actor incorrecto. No se localizó un caso explícito de open_return en el corpus revisado. Para cerrar: aportar una referencia existente verificable o autorizar por separado un caso determinista de ese método/actor, con rechazo y estado intacto. No se añade ni ejecuta aquí.",
+      "caveats": "No se exige ni se ejecutó un envío inválido firmado en Testnet. Ausencia de autorización y alteración de argumentos son controles útiles, pero no se renombran como el caso exacto de actor incorrecto por operación. Esto es una brecha de evidencia, no una vulnerabilidad demostrada.",
+      "recommendation": "HOLD",
+      "confidence": "HIGH",
+      "reason": "Falta evidencia explícita del caso de actor incorrecto de open_return requerido por «each».",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    },
+    {
+      "criterion": "D1.3",
+      "frozen": {
+        "description": "Confirmation",
+        "test": "Delay, lose or fail the RPC response before observing success.",
+        "expectedResult": "Application remains unconfirmed until SUCCESS is verified; a failed transaction never appears confirmed.",
+        "requiredEvidence": "State assertions; RPC/result capture."
+      },
+      "evidenceMode": "MIXED: LIVE CONFIRMATIONS + CONTROLLED INTEGRATION",
+      "evidenceReviewed": [
+        "BYE-W1-002-results.json#initialApiResponse",
+        "BYE-W1-003C-results.json#initialApiResponse",
+        "BYE-W1-006-results.json#trace.requestA",
+        "../../../backend/tests/testnet-worker.test.ts",
+        "../../../backend/tests/sprint-recycling-reward.test.ts"
+      ],
+      "actualEvidence": "Las respuestas iniciales pendientes002/003C/006 conservan el hash y el estado previo. SUCCESS/RPC precede la proyección real; SQL y cadena actuales coinciden. Los fixtures de respuesta perdida/NOT_FOUND/outage mantienen projectionCount0; restaurar SUCCESS produce una proyección. El fixture confirmed failure es terminal y projectionCount0; hash de confirmación incorrecto no proyecta ni reemplaza.",
+      "gapAnalysis": "La evidencia cubre demora, pérdida, fallo y confirmación posterior sin exigir una nueva transacción fallida live.",
+      "caveats": "Inyección de respuesta perdida/fallo/outage controlada, no fallo intencional del pago live. La revisión no reejecuta tests ni infiere confirmación a partir de HTTP202.",
+      "recommendation": "ACCEPT",
+      "confidence": "HIGH",
+      "reason": "UNKNOWN y fallo no proyectan éxito; se confirma el hash original antes de proyectar.",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    },
+    {
+      "criterion": "D1.4",
+      "frozen": {
+        "description": "Traceability",
+        "test": "Inspect every submitted operation.",
+        "expectedResult": "Operation ID, network, contract and transaction hash correlate; confirmed records include ledger/result.",
+        "requiredEvidence": "Persisted operation export with sanitized fields."
+      },
+      "evidenceMode": "MIXED: PERSISTED SQL + LIVE TESTNET",
+      "evidenceReviewed": [
+        "BYE-W1-004-traceability.json",
+        "D1-IDEMPOTENCY-TRACE.json",
+        "BYE-W1-002-results.json",
+        "BYE-W1-003B-results.json",
+        "BYE-W1-003C-results.json",
+        "BYE-W1-004-results.json",
+        "BYE-W1-006-results.json"
+      ],
+      "actualEvidence": "Export original y SELECT independiente actual: operation ID, network ID, contrato, source, sequence, transaction hash, ledger de confirmación, CONFIRMED/PROJECTED e identidad/dispatch correlacionan6/6. RPC confirma cada hash y ledger. El despliegue tiene exactamente6 operaciones/6 identidades/6 dispatches; no hay otras operaciones enviadas omitidas en este deployment.",
+      "gapAnalysis": "No falta un campo requerido de correlación ni se requiere publicar material firmado.",
+      "caveats": "Envelopes firmados, firmas y claves se omiten deliberadamente. La última confirmed_ledger de una fila de batería/request no sustituye al ledger original guardado por operación.",
+      "recommendation": "ACCEPT",
+      "confidence": "HIGH",
+      "reason": "Correlación completa de las seis operaciones D1 enviadas, con ledger y resultado.",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    },
+    {
+      "criterion": "D1.5",
+      "frozen": {
+        "description": "Idempotency",
+        "test": "Repeat an identical request; reuse its idempotency key with changed parameters.",
+        "expectedResult": "Identical request returns the same logical operation; changed parameters rejected. One valid effect per intended transition.",
+        "requiredEvidence": "API/database assertions and chain-state reads."
+      },
+      "evidenceMode": "REAL API + LIVE TESTNET + SQL",
+      "evidenceReviewed": [
+        "BYE-W1-006-REPORT.md",
+        "BYE-W1-006-results.json",
+        "D1-IDEMPOTENCY-TRACE.json",
+        "../../../backend/validation/registration-idempotency.ts",
+        "../../../backend/tests/d1-registration-idempotency.test.ts"
+      ],
+      "actualEvidence": "Fixture BYE-D1-IDEMP-F6C52ED496D5C6F41B. A:53db4b43-7654-479a-b4aa-00d6d47ad171, txc1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b, SUCCESS5322924. B mismo principal/deployment/endpoint/key/body devuelve201 con mismo ID/hash; C cambia solo metadata.caseLabel y da409 IdempotencyConflict. CountsA=B=C:processor1/authorize1/envelope1/broadcast1. SQL después de cada llamada y lectura de cadena conservan una operación/identidad/dispatch/efecto, cero returns/rewards. Secuencia avanza solo1 en A y no cambia B/C; cache conserva input_hash original.",
+      "gapAnalysis": "La evidencia live006 cierra el hueco que005 documentó correctamente como BLOCKED; no se usa el test local como sustituto de A/B/C.",
+      "caveats": "A inicial202 y B final201 reflejan reconciliación del mismo hash, no otra operación. Authorize+envelope son dos fases de UNA identidad. Fixture exclusivamente D1.5, nunca D3; el principal histórico retirado no se reactivó.",
+      "recommendation": "ACCEPT",
+      "confidence": "HIGH",
+      "reason": "A/B/C reales: mismo ID/hash en replay y409 por un único cambio, sin efectos adicionales.",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    },
+    {
+      "criterion": "D1.6",
+      "frozen": {
+        "description": "Reward guard and reproducibility",
+        "test": "Request a second reward; rerun tests at the recorded commit.",
+        "expectedResult": "No second successful payment or additional reward balance change. Exact commit and commands reproduce expected results.",
+        "requiredEvidence": "Reward result/balances; test manifest."
+      },
+      "evidenceMode": "MIXED: REAL PAYMENT + DETERMINISTIC GUARDS + VERIFIED MANIFEST",
+      "evidenceReviewed": [
+        "BYE-W1-004-results.json#reward",
+        "BYE-W1-004-REPORT.md",
+        "BYE-W1-006-results.json#verification",
+        "../../../contracts/byetery-contract/src/test.rs",
+        "../../../backend/tests/testnet-reward-evidence.test.ts"
+      ],
+      "actualEvidence": "Pago d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02 SUCCESS5315915: receipt/transfer/paid con recipient USER-1 y100000000 base units. Lecturas contemporáneas0→100000000 y900000000→800000000; replay misma key200 con0 nuevas identidades/envíos/cambios de saldo. Nueva solicitud de segunda recompensa se rechaza en Rust/mock/HTTP. Lectura actual RPC/Horizon confirma10 y contrato80; SQL un reward_attempt SUCCEEDED #1. Manifiesto006 identifica commit aa4f0af382d1b4da6a88403149efd76f791594b2, comandos y SHA de fuentes. Hashes de fuentes coinciden con ese Git commit y árbol productivo/tests es idéntico al checkpoint revisado.",
+      "gapAnalysis": "Guard contra segundo pago y reproducibilidad están soportados por evidencias diferenciadas, no por un nuevo reward ni una afirmación de ejecución actual.",
+      "caveats": "La lectura actual no reconstruye por sí sola el delta histórico: ese delta proviene de004. La regresión no se rerun durante Stage1; se revisan resultados ya ejecutados y su identidad de código. Algunas suites históricas usan Secure Store offline; repetirlas ahora violaría esta revisión sin firma. MOCK no ejecuta Soroban.",
+      "recommendation": "ACCEPT",
+      "confidence": "HIGH",
+      "reason": "Pago exacto0→10, contrato90→80, replay sin segundo efecto y manifiesto reproducible.",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    },
+    {
+      "criterion": "D1.7",
+      "frozen": {
+        "description": "A - Before submit",
+        "test": "Interrupt after transaction identity is durable but before broadcast. Restart and resume by logical operation ID.",
+        "expectedResult": "No pre-submit chain effect; recovery retains one logical operation and at most one valid intended effect.",
+        "requiredEvidence": "Before/after durable record; submit trace; chain read."
+      },
+      "evidenceMode": "CONTROLLED INTEGRATION — NOT LIVE SOROBAN",
+      "evidenceReviewed": [
+        "BYE-W1-005-REPORT.md",
+        "BYE-W1-005-results.json#D1.7",
+        "D1-GAP-CLOSURE-TRACE.json",
+        "../../../backend/tests/d1-before-submit.test.ts"
+      ],
+      "actualEvidence": "Casos b2d7868a-f849-489f-9e8e-bb7b53c2d9eb y8ba73bf7-7612-42e7-983b-ee0013ad01c2: identidad COMMIT/readback en READY, dispatch0 y autoridad independiente efecto0 antes de la interrupción. Se cierran/reabren appDB y authorityDB en disco; nuevo Repository/pool/service/worker/transport. Snapshot antes=afterRestart: mismo ID/identity/hash/envelopeSHA. Reinicio con key solo pública, prepare/sign prohibidos. Resume por ID y decisión explícita retrySameHash; lookupNOT_FOUND antes del primer dispatch revisado1, efecto final1 y proyección SQL. Prepare/sign1 total; callbacks RPC real/Secure Store0.",
+      "gapAnalysis": "Cumple la secuencia exacta y el modelo de evidencia controlado expresamente permitido por el encargo; no se inventa requisito de fault injection live.",
+      "caveats": "Autoridad/transport controlados, PGlite en disco y source de fixture inyectada; no ejecuta Soroban, no verifica allí allowlists de producción ni mata el proceso OS. reviewedSameHashRetry=true se conserva aunque dispatch0→1 es el primer envío. Unreviewed READY sigue rechazado.",
+      "recommendation": "ACCEPT",
+      "confidence": "HIGH",
+      "reason": "Identidad durable, interrupción antes del envío, dos DB reabiertas y primer efecto único revisado.",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    },
+    {
+      "criterion": "D1.8",
+      "frozen": {
+        "description": "B - Lost response",
+        "test": "Broadcast, then suppress the submit response.",
+        "expectedResult": "Mark unresolved; look up the persisted hash. Confirm if SUCCESS is found; no blind replacement transaction.",
+        "requiredEvidence": "Lost-response fixture; original hash/result; state transition log."
+      },
+      "evidenceMode": "CONTROLLED INTEGRATION + DETERMINISTIC TEST",
+      "evidenceReviewed": [
+        "../../../backend/tests/sprint-recycling-reward.test.ts",
+        "../../../backend/tests/testnet-worker.test.ts",
+        "D1-GAP-CLOSURE-TRACE.json#cases[1]",
+        "BYE-W1-004-results.json#verification"
+      ],
+      "actualEvidence": "Fixture combinado: loseSubmit=true → SUBMITTED_OR_UNKNOWN; worker reconstruido conserva hash y no proyecta conNOT_FOUND. Tras outage/restauración y SUCCESS se proyecta una vez. Assertions prepare1/sign1/submitted1/dispatch1, bytes idénticos y todas las búsquedas por hash original.005 variante respuesta perdida aporta además efecto en autoridad persistente antes de perder respuesta y estado final único.",
+      "gapAnalysis": "Se demuestra uncertainty→lookup original→confirmación única sin reemplazo ciego.",
+      "caveats": "Se suprime respuesta en transporte controlado. No hubo nuevo broadcast, firma ni pérdida inducida en Testnet durante la revisión.",
+      "recommendation": "ACCEPT",
+      "confidence": "HIGH",
+      "reason": "Envío único con respuesta perdida, UNKNOWN y reconciliación del hash persistido.",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    },
+    {
+      "criterion": "D1.9",
+      "frozen": {
+        "description": "C - RPC outage",
+        "test": "Make RPC temporarily unavailable, then restore it.",
+        "expectedResult": "Preserve operation and uncertainty; fail visibly without false confirmation. Resume reconciliation when reachable.",
+        "requiredEvidence": "Outage/recovery assertions; sanitized errors."
+      },
+      "evidenceMode": "CONTROLLED INTEGRATION + DETERMINISTIC TEST",
+      "evidenceReviewed": [
+        "../../../backend/tests/sprint-recycling-reward.test.ts",
+        "../../../backend/tests/testnet-worker.test.ts",
+        "../../../backend/tests/testnet-application.test.ts",
+        "BYE-W1-004-results.json#verification"
+      ],
+      "actualEvidence": "Outage en observe conserva SUBMITTED_OR_UNKNOWN, proyección0 y los bytes/hash originales. Restablecer transporte con SUCCESS recupera PROJECTED, proyección1 y submitted1. Test HTTP local de TestnetStellarService frente a RPC unavailable preserva operación y sourceTESTNET, rechaza sin signer y sin fallbackMOCK. Errores RPC se sanitizan.",
+      "gapAnalysis": "Outage/recovery y error visible están cubiertos sin debilitar el criterio ni exigir fallos live adicionales.",
+      "caveats": "Indisponibilidad RPC simulada; la desconexión PostgreSQL003B es otro incidente y su causa de socket sigue no probada. No se exige ni afirma una caída live del RPC durante el pago.",
+      "recommendation": "ACCEPT",
+      "confidence": "HIGH",
+      "reason": "La caída conserva incertidumbre e identidad; la recuperación proyecta una vez sin otro envío.",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    },
+    {
+      "criterion": "D1.10",
+      "frozen": {
+        "description": "D - Restart",
+        "test": "Restart with durable SUBMITTED or UNKNOWN operation.",
+        "expectedResult": "Recover the same operation and hash; reconcile without losing or duplicating its effect.",
+        "requiredEvidence": "Restart test and record comparison."
+      },
+      "evidenceMode": "CONTROLLED ON-DISK RESTART + DETERMINISTIC TEST",
+      "evidenceReviewed": [
+        "../../../backend/tests/testnet-restart.test.ts",
+        "../../../backend/tests/testnet-worker.test.ts",
+        "../../../backend/tests/d1-before-submit.test.ts",
+        "BYE-W1-004-REPORT.md#regression-at-tested-implementation-commit"
+      ],
+      "actualEvidence": "testnet-restart cierra realmente PGlite en disco tras loseSubmit y reabre otro objetoDB; nuevo TransportStore/worker concilia la identidad byte a byte original y llegaPROJECTED sin resubmit: prepare1/sign1/submitted1, todas las observaciones mismohash.005 añade reconstrucción completa Repository/service/worker/transport y ambas DB. El test de restart está incluido en backend143/146/148 registrados.",
+      "gapAnalysis": "El criterio no impone un kill de sistema operativo; el límite probado conserva estado e identidad durable.",
+      "caveats": "Reconstrucción y reapertura de recursos en un proceso de pruebas, no OS-process-kill, reinicio de Windows ni failover PostgreSQL multinodo. Ese límite no se transforma en una prueba inexistente.",
+      "recommendation": "ACCEPT",
+      "confidence": "HIGH",
+      "reason": "DB close/reopen y worker nuevo retienen el mismo envelope/hash en UNKNOWN sin reenvío.",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    },
+    {
+      "criterion": "D1.11",
+      "frozen": {
+        "description": "E - Unresolved lookup",
+        "test": "Return NOT_FOUND/unknown after an uncertain submission.",
+        "expectedResult": "Remain unresolved; no automatic replacement envelope. Any permitted rebroadcast uses the same signed transaction identity and is recorded.",
+        "requiredEvidence": "Reconciliation trace; envelope/hash identity; state read."
+      },
+      "evidenceMode": "CONTROLLED INTEGRATION + DETERMINISTIC TEST",
+      "evidenceReviewed": [
+        "../../../backend/tests/testnet-worker.test.ts",
+        "../../../backend/tests/testnet-real-boundaries.test.ts",
+        "../../../backend/src/testnet/worker.ts",
+        "../../../backend/src/testnet/transport.ts",
+        "BYE-W1-004-results.json#criteria"
+      ],
+      "actualEvidence": "Respuesta perdida + NOT_FOUND válido conservaUNKNOWN y sin nueva preparación/firma/envío automático. Fixtures expiry distinguen APPLIED/NOT_APPLIED/UNRESOLVED con lectura de estado, nunca conviertenNOT_FOUND solo en fracaso. retrySameHash exige decisionId/hash original, primero reconcilia y si se permite persiste otro intento con el mismo envelope byte a byte, límite acotado. Drift de source tras intent queda en reviewed hold y envío0; nueva recompensa no se permite por expiración.",
+      "gapAnalysis": "Identidad/trace/estado y límite de revisión están cubiertos; no se exige recuperar automáticamente casos cuyo resultado siga incierto.",
+      "caveats": "Reintentos revisados y expiración se probaron con transporte controlado. La revisión actual no reenvía nada. Estado/read-verified effect y receipt son tipos de evidencia distintos; pago requiere receipt y transferencia real.",
+      "recommendation": "ACCEPT",
+      "confidence": "HIGH",
+      "reason": "NOT_FOUND conserva incertidumbre; cualquier retry revisado reutiliza exactamente los bytes/hash.",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    },
+    {
+      "criterion": "D1.12",
+      "frozen": {
+        "description": "F - Revoked role",
+        "test": "Disable an existing collector/recycler role in an isolated authorized test fixture, then attempt its restricted operation.",
+        "expectedResult": "Revoked actor rejected; no lifecycle advancement or reward. Restore test configuration where applicable.",
+        "requiredEvidence": "Role-state fixture; rejection and unchanged-state assertions."
+      },
+      "evidenceMode": "DETERMINISTIC FROZEN CONTRACT + SNAPSHOT; UNSIGNED LIVE SUPPORT",
+      "evidenceReviewed": [
+        "../../../contracts/byetery-contract/src/test.rs#revoked_collector_is_rejected_even_with_both_signatures",
+        "../../../contracts/byetery-contract/test_snapshots/test/revoked_collector_is_rejected_even_with_both_signatures.1.json",
+        "../../../backend/tests/mock.test.ts",
+        "BYE-W1-003C-results.json#negativeAuth",
+        "BYE-W1-004-results.json#recycling.negatives"
+      ],
+      "actualEvidence": "Fixture Rust concede Collector y lo desactiva antes de intentar confirm_collection con ambas autorizaciones; assert devuelve RoleNotGranted. El snapshot histórico congelado de ESE test tiene Role=false, Battery Returned/NotEligible, requestOpen y collector/collectionHash/recycler/recyclingHash nulos. Lectura/asserts de esos campos en esta revisión confirma ausencia de avance/reward. Test Rust recycler también revoca rol y rechaza; mock repite revocación/rechazo.003C/004 unsigned no-role probes apoyan semántica error9 y cadena intacta.",
+      "gapAnalysis": "Fixture de rol+rechazo y estado conservado son observables en artefactos originales; el gate permite fixture aislado y no exige revocación live.",
+      "caveats": "El unit de collector assert explícitamente el error; la comprobación de estado aquí proviene de su snapshot histórico emparejado, no de atribuirle asserts inexistentes. Probes sin rol no se renombran como revocación live. No se revocó/restauró ningún rol real; no set_role nuevo.",
+      "recommendation": "ACCEPT",
+      "confidence": "MEDIUM",
+      "reason": "Rol revocadofalse y rechazo; snapshot conserva Returned/Open/NotEligible sin atestaciones nuevas.",
+      "ownerDecision": "PENDING",
+      "officialStatus": "READY FOR VALIDATION"
+    }
+  ],
+  "summary": {
+    "recommendedAccept": 11,
+    "recommendedHold": 1,
+    "officialPass": {
+      "D1": "0/12",
+      "D2": "0/6",
+      "D3": "0/5",
+      "total": "0/23"
+    },
+    "matrixReadinessNotChanged": "12/12 READY FOR VALIDATION"
+  },
+  "chainRead": {
+    "review": "D1 OWNER ACCEPTANCE REVIEW STAGE1",
+    "mode": "READ_ONLY_NO_SIGNER",
+    "observedAt": "2026-10-22T03:37:43.300Z",
+    "network": "TESTNET",
+    "latestLedger": 5323333,
+    "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+    "token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+    "receipts": [
+      {
+        "method": "register_battery",
+        "hash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+        "ledger": 5281390,
+        "rpcStatus": "SUCCESS",
+        "observationLedger": 5323333,
+        "resultCode": "txSuccess",
+        "actualFee": "350285",
+        "confirmedLedger": 5281390,
+        "verification": "PASS"
+      },
+      {
+        "method": "open_return",
+        "hash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+        "ledger": 5299532,
+        "rpcStatus": "SUCCESS",
+        "observationLedger": 5323333,
+        "resultCode": "txSuccess",
+        "actualFee": "267535",
+        "confirmedLedger": 5299532,
+        "verification": "PASS"
+      },
+      {
+        "method": "confirm_collection",
+        "hash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+        "ledger": 5314096,
+        "rpcStatus": "SUCCESS",
+        "observationLedger": 5323334,
+        "resultCode": "txSuccess",
+        "actualFee": "69447",
+        "confirmedLedger": 5314096,
+        "verification": "PASS"
+      },
+      {
+        "method": "confirm_recycling",
+        "hash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+        "ledger": 5315874,
+        "rpcStatus": "SUCCESS",
+        "observationLedger": 5323334,
+        "resultCode": "txSuccess",
+        "actualFee": "49047",
+        "confirmedLedger": 5315874,
+        "verification": "PASS"
+      },
+      {
+        "method": "pay_reward",
+        "hash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+        "ledger": 5315915,
+        "rpcStatus": "SUCCESS",
+        "observationLedger": 5323334,
+        "resultCode": "txSuccess",
+        "actualFee": "10057",
+        "confirmedLedger": 5315915,
+        "verification": "PASS"
+      },
+      {
+        "method": "register_battery_D1.5_ONLY",
+        "hash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+        "ledger": 5322924,
+        "rpcStatus": "SUCCESS",
+        "observationLedger": 5323334,
+        "resultCode": "txSuccess",
+        "actualFee": "382529",
+        "confirmedLedger": 5322924,
+        "verification": "PASS"
+      }
+    ],
+    "state": {
+      "primaryBattery": {
+        "available": true,
+        "data": {
+          "ledger": 5323334,
+          "value": {
+            "state": "RECYCLED",
+            "rewardState": "SENT",
+            "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+            "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+            "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+            "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+            "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+            "recyclingHash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451"
+          }
+        }
+      },
+      "idempotencyFixture": {
+        "available": true,
+        "data": {
+          "ledger": 5323334,
+          "value": {
+            "state": "REGISTERED",
+            "rewardState": "NOT_ELIGIBLE",
+            "registrationHash": "3df6932e53d69e18c8bf27b26349d2592d71f0c653f319a9bd1b9fcf2e06f909",
+            "requestId": null,
+            "collector": null,
+            "collectionHash": null,
+            "recycler": null,
+            "recyclingHash": null
+          }
+        }
+      },
+      "primaryRequest": {
+        "available": true,
+        "data": {
+          "batteryId": "BYE-W1-002-64257020134D4A0F",
+          "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+          "state": "CONFIRMED"
+        }
+      },
+      "recipientBalance": {
+        "available": true,
+        "data": {
+          "value": "100000000",
+          "ledger": 5323334
+        }
+      },
+      "contractBalance": {
+        "available": true,
+        "data": {
+          "value": "800000000",
+          "ledger": 5323334
+        }
+      }
+    },
+    "horizonRecipient": {
+      "available": true,
+      "account": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "lastModifiedLedger": 5315668,
+      "asset": [
+        {
+          "code": "GREENTEST",
+          "issuer": "GCHROKHXHL4L635J6Y6DWFFD5DDHABOAF4BP5TEUZDZQMW4XYS6DIDL7",
+          "balance": "10.0000000",
+          "limit": "922337203685.4775807",
+          "authorized": true
+        }
+      ]
+    },
+    "newTransactions": 0,
+    "newBatteries": 0,
+    "newRewards": 0,
+    "signing": 0,
+    "broadcasts": 0
+  },
+  "sqlRead": {
+    "mode": "INDEPENDENT_READ_ONLY_SUPABASE_MCP_SELECT",
+    "observedAt": "2026-10-22 03:41:51 UTC",
+    "projectRef": "aemxuqnnwfclzrwwiqfd",
+    "operations": [
+      {
+        "operation_id": "6868cdd0-f4e5-483b-aa80-18e26026dd5a",
+        "command": "register_battery",
+        "battery_id": "BYE-W1-002-64257020134D4A0F",
+        "application_state": "CONFIRMED",
+        "transport_state": "PROJECTED",
+        "dispatch_attempts": 1,
+        "source_account": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+        "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+        "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "sequence": "20970216477425670",
+        "transaction_hash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+        "confirmation_ledger": 5281390,
+        "identity_count": 1
+      },
+      {
+        "operation_id": "dd1408b0-7cd5-4332-bdb0-6f61ae00cf86",
+        "command": "open_return",
+        "battery_id": "BYE-W1-002-64257020134D4A0F",
+        "application_state": "CONFIRMED",
+        "transport_state": "PROJECTED",
+        "dispatch_attempts": 1,
+        "source_account": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+        "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+        "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "sequence": "20970220772392964",
+        "transaction_hash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+        "confirmation_ledger": 5299532,
+        "identity_count": 1
+      },
+      {
+        "operation_id": "4fa3fbac-84e4-4845-8abd-fbdff757cbb4",
+        "command": "confirm_collection",
+        "battery_id": "BYE-W1-002-64257020134D4A0F",
+        "application_state": "CONFIRMED",
+        "transport_state": "PROJECTED",
+        "dispatch_attempts": 1,
+        "source_account": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+        "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+        "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "sequence": "20970220772392965",
+        "transaction_hash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+        "confirmation_ledger": 5314096,
+        "identity_count": 1
+      },
+      {
+        "operation_id": "3ddd9ac8-cfdd-4129-8a4a-8c8f9015145c",
+        "command": "confirm_recycling",
+        "battery_id": "BYE-W1-002-64257020134D4A0F",
+        "application_state": "CONFIRMED",
+        "transport_state": "PROJECTED",
+        "dispatch_attempts": 1,
+        "source_account": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+        "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+        "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "sequence": "20970233657294850",
+        "transaction_hash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+        "confirmation_ledger": 5315874,
+        "identity_count": 1
+      },
+      {
+        "operation_id": "f90927f6-2a66-4bb9-ae3b-5b0565d1fb7c",
+        "command": "pay_reward",
+        "battery_id": "BYE-W1-002-64257020134D4A0F",
+        "application_state": "CONFIRMED",
+        "transport_state": "PROJECTED",
+        "dispatch_attempts": 1,
+        "source_account": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+        "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+        "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "sequence": "20970220772392966",
+        "transaction_hash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+        "confirmation_ledger": 5315915,
+        "identity_count": 1
+      },
+      {
+        "operation_id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+        "command": "register_battery",
+        "battery_id": "BYE-D1-IDEMP-F6C52ED496D5C6F41B",
+        "application_state": "CONFIRMED",
+        "transport_state": "PROJECTED",
+        "dispatch_attempts": 1,
+        "source_account": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+        "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+        "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "sequence": "20970216477425671",
+        "transaction_hash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+        "confirmation_ledger": 5322924,
+        "identity_count": 1
+      }
+    ],
+    "state": {
+      "requests": [
+        {
+          "state": "CONFIRMED",
+          "recipient": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+          "battery_id": "BYE-W1-002-64257020134D4A0F",
+          "request_id": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "confirmed_ledger": 5315874
+        }
+      ],
+      "batteries": [
+        {
+          "state": "REGISTERED",
+          "recycler": null,
+          "collector": null,
+          "battery_id": "BYE-D1-IDEMP-F6C52ED496D5C6F41B",
+          "request_id": null,
+          "reward_state": "NOT_ELIGIBLE",
+          "confirmed_ledger": 5322924,
+          "registration_hash": "3df6932e53d69e18c8bf27b26349d2592d71f0c653f319a9bd1b9fcf2e06f909"
+        },
+        {
+          "state": "RECYCLED",
+          "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+          "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+          "battery_id": "BYE-W1-002-64257020134D4A0F",
+          "request_id": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "reward_state": "SENT",
+          "confirmed_ledger": 5315915,
+          "registration_hash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665"
+        }
+      ],
+      "dispatches": 6,
+      "fixture_cache": [
+        {
+          "status": 201,
+          "input_hash": "52c985a7a20e09f42d85f393edb5408365d7a113260b5efa831705e7f8099f33",
+          "response_tx": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+          "operation_id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+          "response_operation": "53db4b43-7654-479a-b4aa-00d6d47ad171"
+        }
+      ],
+      "identity_count": 6,
+      "operation_count": 6,
+      "reward_attempts": [
+        {
+          "state": "SUCCEEDED",
+          "battery_id": "BYE-W1-002-64257020134D4A0F",
+          "operation_id": "f90927f6-2a66-4bb9-ae3b-5b0565d1fb7c",
+          "attempt_number": 1
+        }
+      ]
+    },
+    "mutations": 0
+  },
+  "publicEvidenceVerification": {
+    "authentication": "NONE",
+    "reviewedCommit": "0778ab75000ee1822465045f916eb3a4a0def3dc",
+    "publicCommit": "PASS",
+    "publicEvidenceFiles": 29,
+    "allHashesMatch": true,
+    "files": [
+      {
+        "path": "docs/instaward/ACCEPTANCE-CRITERIA.md",
+        "sha256": "8f426310c6336013d9c9683460ce5edc35c56f8bcb57f6eaafb563e96ff827c7",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-DATABASE-REVIEW.md",
+        "sha256": "232b71764b772aa91d737a4e167742e2564f0e0755aadc9197719e645406bf7a",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-INTEGRATION.md",
+        "sha256": "e52bdbbe9731adedf73bf1e4ed4d72d4691ac5dc28c139806dd17e3a66479344",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-REPORT.md",
+        "sha256": "0587f064eb879efcf2b4472817afb9d548752db6476cc2196dc93f9b458ec736",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-results.json",
+        "sha256": "97fce0f39f1e3acaead5a6d89075f1496de95e486ad62df0ead648580e54df17",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-SIGNER-REVIEW.md",
+        "sha256": "38c74a05a5eb1ab1e6886280527645eb9f1fbda1b58002c6aaa2aac45cd38db5",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-TEST-MATRIX.md",
+        "sha256": "98cda1af55ae76cb159975b146f0ea8810965b92d4397461ad94b22dbd73d6a7",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003-REPORT.md",
+        "sha256": "7b0d75938c77ed6fc9376950835383c2a1532d7e628dea2966cb5fd115943e1c",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003-results.json",
+        "sha256": "7509291f0bd375668426a5a97f042e9b62693b87119e98d87d7ac1468fbc856d",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003A-COMPATIBILITY.md",
+        "sha256": "cf6127c9e6f39cd29f65def049c158787919e7c180952276fc33132ac8f0a5d8",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003A-REPORT.md",
+        "sha256": "3f9052a4f2749d02d56d4e8acf160d9540ccdc3f99334c4e96354b9908f478d2",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003A-results.json",
+        "sha256": "c2542374a931fa44337f8b3d91dd66352f8a69f7d357d0fc8578a65bba6be3b9",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003B-OPERATOR.md",
+        "sha256": "c33163634c0b43d643a98f731f4642f53a27577c0239957e502d4cc0701e523d",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003B-REPORT.md",
+        "sha256": "d90ddbef45fbc5037b1cce5a6ddd29469febd8f082b1ce1f77453976991db399",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003B-results.json",
+        "sha256": "2dc8a3d75d67f1e3e73c5fa4c01d6e1f0ba7508e26783e225154fb7f94df27bd",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003C-RECOVERY.md",
+        "sha256": "bdab795c8f0c568f5070cf06c4f4d2e953ba36e04f451f583d8c62b5b9d1aef0",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003C-REPORT.md",
+        "sha256": "76b22a8c29ef7763e8b3850567f24e39724eb4224d8ec27bc02fd725eac40c16",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003C-results.json",
+        "sha256": "d0f393d9720e651355e1303a11e268d57f0ef31781853277cf77aaaed6404a97",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-004-OPERATOR.md",
+        "sha256": "824a59769db9bc984e50cf6a7caa52c751b9cc67a9221f2087926c3b2e52d7b5",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-004-REPORT.md",
+        "sha256": "05645b03958f1346b74168b0c58a8bb00224e02860850b4be146af842769f32d",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-004-results.json",
+        "sha256": "6adee5b17989240d363463390eb3a913bb8d35f7be515e222c5c6163c61c3958",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-004-traceability.json",
+        "sha256": "68fac54a8972b532f1e4914fb5de0597aae585f7443a813e1d3e54f34396fa4c",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-005-REPORT.md",
+        "sha256": "5ea8044a97aa78515015d521cb87ba19e90890276301d836f3e9e7ef977dec05",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-005-results.json",
+        "sha256": "be02d4b641e62fbc20677606b1564db4280d2e9458089d0a425ac71377d43df9",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-006-REPORT.md",
+        "sha256": "41a8a22e4617a4268d8cf3eb9051123873a1272ff4d7e219ecc437163063b99c",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-006-results.json",
+        "sha256": "48411cd73d0924773c141d0b75286b5db633cdc27708bc86f8010f463b087497",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/D1-ACCEPTANCE-MATRIX.md",
+        "sha256": "46c3a3005cbc5f59931efc4ec057bae07fff171719822faca18a2eba0ecd081f",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/D1-GAP-CLOSURE-TRACE.json",
+        "sha256": "b3968fc30c3191a4f7b7c58dc04e39f8d08b51073f5bef8bb9027e92668a9d88",
+        "publicBytesMatch": true
+      },
+      {
+        "path": "docs/instaward/week1/D1-IDEMPOTENCY-TRACE.json",
+        "sha256": "cb02beba1f750d9cf75414d72cccadf64c767d732cdc36a2d458e66e333598c9",
+        "publicBytesMatch": true
+      }
+    ]
+  },
+  "artifactInspection": {
+    "reviewedHead": "0778ab75000ee1822465045f916eb3a4a0def3dc",
+    "frozenCriteriaUnchanged": true,
+    "inventory": [
+      {
+        "path": "docs/instaward/ACCEPTANCE-CRITERIA.md",
+        "sha256": "8f426310c6336013d9c9683460ce5edc35c56f8bcb57f6eaafb563e96ff827c7",
+        "bytes": 8735,
+        "lines": 44,
+        "lastCommit": "450c21b151a0973064986327f09d55e4f36c43e0",
+        "headings": [
+          "# Acceptance criteria — SOW V3.1",
+          "## Formal freeze reference"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-DATABASE-REVIEW.md",
+        "sha256": "232b71764b772aa91d737a4e167742e2564f0e0755aadc9197719e645406bf7a",
+        "bytes": 4507,
+        "lines": 79,
+        "lastCommit": "a4ff5951ad1e4ba0934269c197c802605965618c",
+        "headings": [
+          "# BYE-W1-002 — Private transport migration review",
+          "## Scope reviewed before remote application",
+          "## Protection and behavior",
+          "## Local evidence before application",
+          "## Rollback and operational expectations",
+          "## Post-application observation — 2026-10-19"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-INTEGRATION.md",
+        "sha256": "e52bdbbe9731adedf73bf1e4ed4d72d4691ac5dc28c139806dd17e3a66479344",
+        "bytes": 9527,
+        "lines": 163,
+        "lastCommit": "1a41303b7debd9575579533ceb90af568b6df2c1",
+        "headings": [
+          "# BYE-W1-002 — Real Testnet application integration",
+          "## Selection and boundary",
+          "## Environment",
+          "## Existing endpoints",
+          "## Preparation, signing and durability",
+          "## Reconciliation and authoritative predicates",
+          "## Database",
+          "## Bounded sprint validation command"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-REPORT.md",
+        "sha256": "0587f064eb879efcf2b4472817afb9d548752db6476cc2196dc93f9b458ec736",
+        "bytes": 10440,
+        "lines": 190,
+        "lastCommit": "a4ff5951ad1e4ba0934269c197c802605965618c",
+        "headings": [
+          "# BYETERY BYE-W1-002 REAL TESTNET SERVICE REPORT",
+          "## Git and immutable boundaries",
+          "## Implementation assessment",
+          "## Final verification",
+          "## FIRST LIVE REGISTER",
+          "## OPEN_RETURN FOLLOW-UP SIMULATION",
+          "## Database and cleanup",
+          "## Acceptance and remaining work"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-results.json",
+        "sha256": "97fce0f39f1e3acaead5a6d89075f1496de95e486ad62df0ead648580e54df17",
+        "bytes": 6901,
+        "lines": 186,
+        "lastCommit": "a4ff5951ad1e4ba0934269c197c802605965618c",
+        "topLevelKeys": [
+          "stage",
+          "classification",
+          "task",
+          "candidate",
+          "gate",
+          "implementationHead",
+          "apiRequest",
+          "initialApiResponse",
+          "finalApiResponse",
+          "logicalOperationId",
+          "transactionHash",
+          "confirmationLedger",
+          "applicationSimulation",
+          "broadcast",
+          "durability",
+          "postState",
+          "signedEnvelopePubliclyExposed",
+          "openReturnSimulation",
+          "readOnlyPostVerification"
+        ],
+        "declaredResult": {
+          "task": "BYE-W1-002"
+        }
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-SIGNER-REVIEW.md",
+        "sha256": "38c74a05a5eb1ab1e6886280527645eb9f1fbda1b58002c6aaa2aac45cd38db5",
+        "bytes": 7530,
+        "lines": 129,
+        "lastCommit": "a4ff5951ad1e4ba0934269c197c802605965618c",
+        "headings": [
+          "# BYE-W1-002 — Signing boundary review",
+          "## Finding",
+          "## Official protocol reference, consulted through Stellar Raven first",
+          "## Minimum change approved by owner",
+          "## Verification performed at the initial review stop",
+          "## Delivery status at the initial review stop (historical)"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-002-TEST-MATRIX.md",
+        "sha256": "98cda1af55ae76cb159975b146f0ea8810965b92d4397461ad94b22dbd73d6a7",
+        "bytes": 3758,
+        "lines": 52,
+        "lastCommit": "339fec02e500ac765b8ce68bb8a019cd4bcf4ae4",
+        "headings": [
+          "# BYE-W1-002 — Deterministic boundary coverage"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003-REPORT.md",
+        "sha256": "7b0d75938c77ed6fc9376950835383c2a1532d7e628dea2966cb5fd115943e1c",
+        "bytes": 7606,
+        "lines": 140,
+        "lastCommit": "4bb78ad97f1865e965a90a98f7cfcb79c18bddb9",
+        "headings": [
+          "# BYETERY BYE-W1-003 LIVE RETURN + COLLECTION REPORT",
+          "## Git and scope",
+          "## Read-only state verification",
+          "## Blocking application prerequisite",
+          "## Execution and tests",
+          "## D1 assessment and stopping point"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003-results.json",
+        "sha256": "7509291f0bd375668426a5a97f042e9b62693b87119e98d87d7ac1468fbc856d",
+        "bytes": 3246,
+        "lines": 85,
+        "lastCommit": "4bb78ad97f1865e965a90a98f7cfcb79c18bddb9",
+        "topLevelKeys": [
+          "task",
+          "classification",
+          "status",
+          "reason",
+          "additionalSetupCompatibility",
+          "git",
+          "readOnlyChain",
+          "readOnlyApplication",
+          "execution",
+          "tests",
+          "acceptance"
+        ],
+        "declaredResult": {
+          "task": "BYE-W1-003",
+          "status": "BLOCKED"
+        }
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003A-COMPATIBILITY.md",
+        "sha256": "cf6127c9e6f39cd29f65def049c158787919e7c180952276fc33132ac8f0a5d8",
+        "bytes": 5088,
+        "lines": 86,
+        "lastCommit": "c4bda35383be3a567f726e0fe453c17d07910b6f",
+        "headings": [
+          "# BYE-W1-003A — Compatibility review before implementation",
+          "## Exact approved source",
+          "## Behavior comparison and proposed minimum port",
+          "## Verification and owner boundary"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003A-REPORT.md",
+        "sha256": "3f9052a4f2749d02d56d4e8acf160d9540ccdc3f99334c4e96354b9908f478d2",
+        "bytes": 8060,
+        "lines": 141,
+        "lastCommit": "c237da5278e7532612e13e81f0d9eba535f22b74",
+        "headings": [
+          "# BYETERY BYE-W1-003A SEP53_V2 WALLET LINK REPORT",
+          "## Implementation and provenance",
+          "## Authenticated principal and interactive handoff",
+          "## Verification",
+          "## Preserved boundaries and remaining work"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003A-results.json",
+        "sha256": "c2542374a931fa44337f8b3d91dd66352f8a69f7d357d0fc8578a65bba6be3b9",
+        "bytes": 3399,
+        "lines": 103,
+        "lastCommit": "c237da5278e7532612e13e81f0d9eba535f22b74",
+        "topLevelKeys": [
+          "task",
+          "classification",
+          "observedAt",
+          "status",
+          "startingHead",
+          "branch",
+          "targetWallet",
+          "deploymentId",
+          "principalLabel",
+          "authPrincipal",
+          "membership",
+          "userCorrelationSha256",
+          "challenge",
+          "wallet",
+          "authoritativeReadback",
+          "implementation",
+          "tests",
+          "gates",
+          "businessTransactions",
+          "rewardTransactions",
+          "maintenanceTransactions",
+          "returnRequestsCreated",
+          "acceptance",
+          "byeW1003",
+          "publication"
+        ],
+        "declaredResult": {
+          "task": "BYE-W1-003A",
+          "status": "PASS",
+          "startingHead": "a4ff5951ad1e4ba0934269c197c802605965618c"
+        }
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003B-OPERATOR.md",
+        "sha256": "c33163634c0b43d643a98f731f4642f53a27577c0239957e502d4cc0701e523d",
+        "bytes": 5757,
+        "lines": 92,
+        "lastCommit": "65478adb8d251b8bbee26be31b02d3c4f523b8ce",
+        "headings": [
+          "# BYE-W1-003B bounded operator",
+          "## Current execution stop — 2026-10-20",
+          "## Owner-approved collector setup",
+          "## Execution and recovery",
+          "## Collection negative evidence"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003B-REPORT.md",
+        "sha256": "d90ddbef45fbc5037b1cce5a6ddd29469febd8f082b1ce1f77453976991db399",
+        "bytes": 11398,
+        "lines": 173,
+        "lastCommit": "65478adb8d251b8bbee26be31b02d3c4f523b8ce",
+        "headings": [
+          "# BYETERY BYE-W1-003B LIVE RETURN + DUAL-AUTH COLLECTION REPORT",
+          "## Checkpoint and scope",
+          "## Prerequisites and scoped owner decision",
+          "## OPEN_RETURN — PASS",
+          "## CONFIRM_COLLECTION — BLOCKED",
+          "## Safety stop and minimal proposed resolution",
+          "## Regression verification and honest limits",
+          "## D1 assessment and history"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003B-results.json",
+        "sha256": "2dc8a3d75d67f1e3e73c5fa4c01d6e1f0ba7508e26783e225154fb7f94df27bd",
+        "bytes": 22125,
+        "lines": 694,
+        "lastCommit": "65478adb8d251b8bbee26be31b02d3c4f523b8ce",
+        "topLevelKeys": [
+          "task",
+          "classification",
+          "status",
+          "startingHead",
+          "implementationHead",
+          "branch",
+          "principal",
+          "collectorPrincipal",
+          "recipient",
+          "batteryId",
+          "deploymentId",
+          "collectorSetup",
+          "openReturn",
+          "collection",
+          "independentDatabaseReadback",
+          "independentChainBeforeCollection",
+          "independentFinalChainReadback",
+          "tests",
+          "verificationLimit",
+          "wantedNewBroadcasts",
+          "unwantedBroadcasts",
+          "newLogicalOperations",
+          "newSignedIdentities",
+          "contractModified",
+          "wasmSha256",
+          "schemaRlsGrantsModified",
+          "historicalReportsRewritten",
+          "protectedUtilityModified",
+          "mainnet",
+          "recyclingExecuted",
+          "rewardExecuted",
+          "d1RealConfirmedApiOperations",
+          "d1Assessment",
+          "officialAcceptance",
+          "nextStep"
+        ],
+        "declaredResult": {
+          "task": "BYE-W1-003B",
+          "status": "PARTIAL",
+          "startingHead": "c237da5278e7532612e13e81f0d9eba535f22b74"
+        }
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003C-RECOVERY.md",
+        "sha256": "bdab795c8f0c568f5070cf06c4f4d2e953ba36e04f451f583d8c62b5b9d1aef0",
+        "bytes": 8156,
+        "lines": 127,
+        "lastCommit": "fbeb66d86e59429023a7e23d4edaec3797b7f134",
+        "headings": [
+          "# BYE-W1-003C — PostgreSQL failure boundary and reviewed recovery",
+          "## Forensic result before code changes",
+          "## Narrowest defensible root cause",
+          "## Bounded fix",
+          "## Explicit same-operation recovery",
+          "## Deterministic coverage"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003C-REPORT.md",
+        "sha256": "76b22a8c29ef7763e8b3850567f24e39724eb4224d8ec27bc02fd725eac40c16",
+        "bytes": 11969,
+        "lines": 185,
+        "lastCommit": "1779a45251d818afaa5ab8fe2a297d1abc04f2ea",
+        "headings": [
+          "# BYETERY — BYE-W1-003C PostgreSQL Recovery + Collection Report",
+          "## Git boundary and original operation",
+          "## Forensics and narrow root cause",
+          "## Bounded recovery fix and fault injection",
+          "## Fresh collection preflight and negative authorization",
+          "## Signing, durability, source safety and confirmed transaction",
+          "## Independent post-state and idempotency",
+          "## Regression and limitations",
+          "## D1 impact, history and external closure"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-003C-results.json",
+        "sha256": "d0f393d9720e651355e1303a11e268d57f0ef31781853277cf77aaaed6404a97",
+        "bytes": 18458,
+        "lines": 473,
+        "lastCommit": "1779a45251d818afaa5ab8fe2a297d1abc04f2ea",
+        "topLevelKeys": [
+          "task",
+          "classification",
+          "status",
+          "investigationDate",
+          "liveRecoveryDate",
+          "timezone",
+          "startingHead",
+          "implementationHead",
+          "evidenceCommitResolution",
+          "branch",
+          "originalOperationId",
+          "newLogicalCollectionOperationCreated",
+          "deploymentId",
+          "network",
+          "networkId",
+          "contract",
+          "wasmSha256",
+          "forensicBeforeCodeChanges",
+          "rootCause",
+          "recoveryFix",
+          "batteryId",
+          "requestId",
+          "recipient",
+          "collector",
+          "collectorPrincipal",
+          "collectorRole",
+          "collectorMembership",
+          "evidence",
+          "preparation",
+          "preSign",
+          "authorizedAuthSummary",
+          "negativeAuth",
+          "sourceBefore",
+          "identity",
+          "twoPhaseHelper",
+          "durability",
+          "signedIdentityCount",
+          "transaction",
+          "initialApiResponse",
+          "postBattery",
+          "postRequest",
+          "sqlProjection",
+          "independentRpcRead",
+          "independentSupabaseRead",
+          "duplicateApiReplay",
+          "d1",
+          "tests",
+          "verificationLimitations",
+          "notion",
+          "closure",
+          "unchanged",
+          "scope"
+        ],
+        "declaredResult": {
+          "task": "BYE-W1-003C",
+          "status": "PASS",
+          "startingHead": "65478adb8d251b8bbee26be31b02d3c4f523b8ce"
+        }
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-004-OPERATOR.md",
+        "sha256": "824a59769db9bc984e50cf6a7caa52c751b9cc67a9221f2087926c3b2e52d7b5",
+        "bytes": 5128,
+        "lines": 80,
+        "lastCommit": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8",
+        "headings": [
+          "# BYE-W1-004 — bounded recycling and reward operator",
+          "## Invocation and gates",
+          "## Local verification and limits"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-004-REPORT.md",
+        "sha256": "05645b03958f1346b74168b0c58a8bb00224e02860850b4be146af842769f32d",
+        "bytes": 12231,
+        "lines": 113,
+        "lastCommit": "91e00286669fd504946db521a86fc78352c60967",
+        "headings": [
+          "# BYETERY BYE-W1-004 — Recycling + Reward + D1 Completion Report",
+          "## Scope and verified initial state",
+          "## Prerequisites and owner actions",
+          "## Real API execution",
+          "## Evidence and negative authorization",
+          "## Atomic reward and independent verification",
+          "## D1 evidence review",
+          "## Regression at tested implementation commit",
+          "## Handoff and limits"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-004-results.json",
+        "sha256": "6adee5b17989240d363463390eb3a913bb8d35f7be515e222c5c6163c61c3958",
+        "bytes": 30282,
+        "lines": 720,
+        "lastCommit": "6beb7dc4771d62a16867f86067fe3081140a23ea",
+        "topLevelKeys": [
+          "schemaVersion",
+          "task",
+          "classification",
+          "date",
+          "technicalResult",
+          "d1TechnicalState",
+          "officialAcceptance",
+          "startingHead",
+          "testedImplementationHead",
+          "branch",
+          "network",
+          "networkId",
+          "deploymentId",
+          "contract",
+          "wasmSha256",
+          "batteryId",
+          "requestId",
+          "recipient",
+          "initialLifecycle",
+          "finalLifecycle",
+          "recyclerPrerequisite",
+          "trustline",
+          "evidence",
+          "recycling",
+          "reward",
+          "independentReads",
+          "verification",
+          "criteria",
+          "newBusinessOperations",
+          "newIdentities",
+          "newBusinessBroadcasts",
+          "invalidBroadcasts",
+          "additionalRewardOnReplay",
+          "extraBattery",
+          "extraLifecycle",
+          "mainnet",
+          "contractModified",
+          "schemaOrRlsChanged",
+          "helperModified",
+          "historicalResults",
+          "limitations",
+          "evidenceCommit"
+        ],
+        "declaredResult": {
+          "task": "BYE-W1-004",
+          "startingHead": "1779a45251d818afaa5ab8fe2a297d1abc04f2ea",
+          "testedImplementationHead": "5e4766e0dc175e61ff78e4b951b4b2fa28864bd8"
+        }
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-004-traceability.json",
+        "sha256": "68fac54a8972b532f1e4914fb5de0597aae585f7443a813e1d3e54f34396fa4c",
+        "bytes": 5131,
+        "lines": 102,
+        "lastCommit": "6beb7dc4771d62a16867f86067fe3081140a23ea",
+        "topLevelKeys": [
+          "queryMode",
+          "observedOn",
+          "rows",
+          "scope"
+        ],
+        "declaredResult": {}
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-005-REPORT.md",
+        "sha256": "5ea8044a97aa78515015d521cb87ba19e90890276301d836f3e9e7ef977dec05",
+        "bytes": 11411,
+        "lines": 85,
+        "lastCommit": "da9bfa972c14c51f92d9c0278b78ee3dddfc2164",
+        "headings": [
+          "# BYETERY BYE-W1-005 — D1 Gap Closure Report",
+          "## Inventory before any API replay",
+          "## D1.5 — original context recovered, real replay stopped",
+          "## D1.7 — exact controlled before-submit recovery",
+          "## Live lifecycle remains unchanged",
+          "## Verification",
+          "## Readiness, invariants and handoff"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-005-results.json",
+        "sha256": "be02d4b641e62fbc20677606b1564db4280d2e9458089d0a425ac71377d43df9",
+        "bytes": 26684,
+        "lines": 621,
+        "lastCommit": "da9bfa972c14c51f92d9c0278b78ee3dddfc2164",
+        "topLevelKeys": [
+          "schemaVersion",
+          "task",
+          "classification",
+          "date",
+          "result",
+          "startingHead",
+          "testedImplementationHead",
+          "branch",
+          "productionCodeChanged",
+          "D1.5",
+          "D1.7",
+          "readiness",
+          "verification",
+          "invariants",
+          "historicalEvidence",
+          "publicEvidence"
+        ],
+        "declaredResult": {
+          "task": "BYE-W1-005",
+          "result": "PARTIAL — D1.5 BLOCKED BY RETIRED PRINCIPAL",
+          "startingHead": "91e00286669fd504946db521a86fc78352c60967",
+          "testedImplementationHead": "59ed3540fcf7672507f48215b1bd916a8bc083c3"
+        }
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-006-REPORT.md",
+        "sha256": "41a8a22e4617a4268d8cf3eb9051123873a1272ff4d7e219ecc437163063b99c",
+        "bytes": 10387,
+        "lines": 64,
+        "lastCommit": "0778ab75000ee1822465045f916eb3a4a0def3dc",
+        "headings": [
+          "# BYETERY BYE-W1-006 — D1.5 LIVE IDEMPOTENCY CLOSURE REPORT",
+          "## Fixture and separately approved application principal",
+          "## Request A — original real registration",
+          "## Request B — identical real API replay",
+          "## Request C — same key, one changed safe business parameter",
+          "## Source sequence and independent state accounting",
+          "## Regression and reproducibility",
+          "## D1 decision and publication"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/BYE-W1-006-results.json",
+        "sha256": "48411cd73d0924773c141d0b75286b5db633cdc27708bc86f8010f463b087497",
+        "bytes": 24535,
+        "lines": 651,
+        "lastCommit": "0778ab75000ee1822465045f916eb3a4a0def3dc",
+        "topLevelKeys": [
+          "schemaVersion",
+          "task",
+          "classification",
+          "result",
+          "startingHead",
+          "testedImplementationHead",
+          "branch",
+          "productionCodeChanged",
+          "fixture",
+          "principalSetup",
+          "trace",
+          "verification",
+          "readiness",
+          "invariants",
+          "nextTaskProposal",
+          "evidenceBoundary",
+          "independentChecks"
+        ],
+        "declaredResult": {
+          "task": "BYE-W1-006",
+          "result": "PASS TECHNICAL; OWNER ACCEPTANCE PENDING",
+          "startingHead": "da9bfa972c14c51f92d9c0278b78ee3dddfc2164",
+          "testedImplementationHead": "aa4f0af382d1b4da6a88403149efd76f791594b2"
+        }
+      },
+      {
+        "path": "docs/instaward/week1/D1-ACCEPTANCE-MATRIX.md",
+        "sha256": "46c3a3005cbc5f59931efc4ec057bae07fff171719822faca18a2eba0ecd081f",
+        "bytes": 12281,
+        "lines": 84,
+        "lastCommit": "0778ab75000ee1822465045f916eb3a4a0def3dc",
+        "headings": [
+          "# D1 acceptance review matrix — current BYE-W1-006",
+          "## Historical BYE-W1-005 assessment — preserved",
+          "# D1 acceptance review matrix — current BYE-W1-005",
+          "## Historical BYE-W1-004 assessment — preserved",
+          "### Original BYE-W1-004 review",
+          "## Transactions and reproducibility"
+        ]
+      },
+      {
+        "path": "docs/instaward/week1/D1-GAP-CLOSURE-TRACE.json",
+        "sha256": "b3968fc30c3191a4f7b7c58dc04e39f8d08b51073f5bef8bb9027e92668a9d88",
+        "bytes": 13893,
+        "lines": 360,
+        "lastCommit": "da9bfa972c14c51f92d9c0278b78ee3dddfc2164",
+        "topLevelKeys": [
+          "task",
+          "evidenceMode",
+          "cases"
+        ],
+        "declaredResult": {
+          "task": "BYE-W1-005",
+          "evidenceMode": "CONTROLLED_INTEGRATION_NOT_LIVE_TESTNET"
+        }
+      },
+      {
+        "path": "docs/instaward/week1/D1-IDEMPOTENCY-TRACE.json",
+        "sha256": "cb02beba1f750d9cf75414d72cccadf64c767d732cdc36a2d458e66e333598c9",
+        "bytes": 19384,
+        "lines": 524,
+        "lastCommit": "0778ab75000ee1822465045f916eb3a4a0def3dc",
+        "topLevelKeys": [
+          "task",
+          "evidenceMode",
+          "trace",
+          "independentChecks"
+        ],
+        "declaredResult": {
+          "task": "BYE-W1-006",
+          "evidenceMode": "LIVE_TESTNET_REAL_AUTHENTICATED_HTTP"
+        }
+      }
+    ],
+    "revokedFixtureSnapshot": {
+      "path": "contracts/byetery-contract/test_snapshots/test/revoked_collector_is_rejected_even_with_both_signatures.1.json",
+      "sha256": "860124f63b18b58b5b85b3ace04c6a07a11ebe1803707b0971d26414e1c1b509",
+      "observedState": {
+        "Battery": {
+          "collection_hash": null,
+          "collector": null,
+          "recycler": null,
+          "recycling_hash": null,
+          "registration_hash": "0303030303030303030303030303030303030303030303030303030303030303",
+          "request_id": "0707070707070707070707070707070707070707070707070707070707070707",
+          "reward_state": [
+            "NotEligible"
+          ],
+          "state": [
+            "Returned"
+          ]
+        },
+        "Request": {
+          "battery_id": "BYE-000001",
+          "recipient": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
+          "state": [
+            "Open"
+          ]
+        },
+        "Role": false
+      },
+      "assertions": "PASS; read-only inspection of the historical frozen snapshot, no test rerun/signing"
+    },
+    "controlled005Assertions": "PASS",
+    "live006ArtifactAssertions": "PASS",
+    "verificationSourceHashes": "PASS",
+    "productionTreeEquivalentToVerifiedImplementation": true
+  },
+  "sourceInventory": [
+    {
+      "path": "backend/remote-tests/http.test.ts",
+      "sha256": "0443aa2e97ba3e38c8306ddf7dc4348a636008d7e1586f66bac4e168fd0e7aac"
+    },
+    {
+      "path": "backend/src/application/coordinator.ts",
+      "sha256": "148457ea10daa56cca0698c1a2dd3d04d1eec5208077b13f2a2224189b486c23"
+    },
+    {
+      "path": "backend/src/application/http.ts",
+      "sha256": "52f8e41f396e8905cf2c7a004ab5cc7e120b82d436ad1c41fe5d816f30c8ba0c"
+    },
+    {
+      "path": "backend/src/testnet/abi.ts",
+      "sha256": "d736bd4f980b452bf10e18ecb2ba650f230afc05818b46611b6f083c3b6f895d"
+    },
+    {
+      "path": "backend/src/testnet/service.ts",
+      "sha256": "7ee1a54faec8a62034a0d8a0412fabf547c389dfc8c137a6150a1e01b0f3d1ad"
+    },
+    {
+      "path": "backend/src/testnet/transport.ts",
+      "sha256": "a0f1588afd9274bf8ec36d2eed852e2439ecda694bd2e68f0ef68a537e10fa64"
+    },
+    {
+      "path": "backend/src/testnet/worker.ts",
+      "sha256": "0b86f4cf9a5b496fcf0963b0d1ea728100fe7ac67b14c75d964d2cd2678a5a26"
+    },
+    {
+      "path": "backend/tests/d1-before-submit.test.ts",
+      "sha256": "c2eab6440bc3fb3387be2c73cda1969bdf7114027d52a473b85382d6c6f9b675"
+    },
+    {
+      "path": "backend/tests/d1-registration-idempotency.test.ts",
+      "sha256": "2326b5f3aaf3703dd13017d84670a1babbf95030a5a9e58d80e00e0c2386208e"
+    },
+    {
+      "path": "backend/tests/fixtures.ts",
+      "sha256": "3f33367f27d4d6ae6f27f78ef5b7d642befa4f918459bdd77b41acb4cd7036f4"
+    },
+    {
+      "path": "backend/tests/mock.test.ts",
+      "sha256": "98aa8c1a5c07582d56e0c6af31b8c9c656d9637d28c780dbde1d670bc1d9c5e6"
+    },
+    {
+      "path": "backend/tests/sprint-recycling-reward.test.ts",
+      "sha256": "a38b7dd44d03a1d037c94970d7a42928e8c98df33ad7d768143aaeecdf6b4bfd"
+    },
+    {
+      "path": "backend/tests/testnet-application.test.ts",
+      "sha256": "085bbbd7422b28a33424047fa779d6aae3e24e8508600454518c6b7eb57a87e1"
+    },
+    {
+      "path": "backend/tests/testnet-real-boundaries.test.ts",
+      "sha256": "3ef51cc4e8481844d823cf2101f0b21642d0ca5fe3c439ab573e0ae62b88ffbb"
+    },
+    {
+      "path": "backend/tests/testnet-restart.test.ts",
+      "sha256": "f25ca7106218ecededae850642e559e254194be25c7cd4333295d16b501d5895"
+    },
+    {
+      "path": "backend/tests/testnet-reward-evidence.test.ts",
+      "sha256": "829601bb111e8c030be4b2b5701280a78c854a37b4d6cc90e52f0fcb3cfd1d97"
+    },
+    {
+      "path": "backend/tests/testnet-worker.test.ts",
+      "sha256": "b1dbb2ac1f42bab35185f71cafbdf6d238a3e960b6aff383db0f43e282824282"
+    },
+    {
+      "path": "backend/validation/registration-idempotency.ts",
+      "sha256": "dd7f315b0b993f0918201f9970ab931f8f5e033bc1a1395d6b9b4dcaab9399fd"
+    },
+    {
+      "path": "contracts/byetery-contract/src/lib.rs",
+      "sha256": "4be0f127ed23fcbb83e8d646cca0d37f1ce412e5f084b40016fa2981f1db6141"
+    },
+    {
+      "path": "contracts/byetery-contract/src/test.rs",
+      "sha256": "ed1285ee520d9ffbeb775b5d27087c97ff92d7942fc365a980c2ec0bffaa127f"
+    },
+    {
+      "path": "contracts/byetery-contract/test_snapshots/test/revoked_collector_is_rejected_even_with_both_signatures.1.json",
+      "sha256": "860124f63b18b58b5b85b3ace04c6a07a11ebe1803707b0971d26414e1c1b509"
+    },
+    {
+      "path": "tools/stellar-secure-store-signer/tests/validation.rs",
+      "sha256": "15e5b5de5946c0e93073cc76dd6135770052f8d578cf69ceb0b008b7d3e159f1"
+    }
+  ],
+  "regressionEvidenceReviewedNotRerun": {
+    "allPassed": true,
+    "verifiedAt": "2026-10-22T03:02:08.976102+00:00",
+    "head": "aa4f0af382d1b4da6a88403149efd76f791594b2",
+    "startingHead": "da9bfa972c14c51f92d9c0278b78ee3dddfc2164",
+    "sources": {
+      "backend/validation/registration-idempotency.ts": "dd7f315b0b993f0918201f9970ab931f8f5e033bc1a1395d6b9b4dcaab9399fd",
+      "backend/tests/d1-registration-idempotency.test.ts": "2326b5f3aaf3703dd13017d84670a1babbf95030a5a9e58d80e00e0c2386208e"
+    },
+    "focused": 2,
+    "backend": 148,
+    "foundation": 50,
+    "D1.7": 3,
+    "nativeRust": 20,
+    "repeatedRustFeature": 20,
+    "wasm": 1,
+    "releaseFmtClippy": "PASS",
+    "httpDev": 45,
+    "sqlParity": 82,
+    "sqlCleanup": "ROLLBACK",
+    "frontend": 33,
+    "frontendTypesLintBuild": "PASS",
+    "frontendMaxWorkers": 1,
+    "helperNative": 22,
+    "helperOffline": 18,
+    "helperFmtClippy": "PASS",
+    "SEP53_V2": "PASS within backend and HTTP",
+    "postgresRecovery": "PASS within backend",
+    "onDiskRestart": "PASS within backend",
+    "python": 4,
+    "mockDemo": "SENT10; does not execute Soroban",
+    "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+    "commands": {
+      "focused": "node --experimental-strip-types --test backend/tests/d1-registration-idempotency.test.ts",
+      "root": "npm run verify",
+      "httpDev": "node --experimental-strip-types --test --test-concurrency=1 backend/remote-tests/*.test.ts",
+      "sql": "node scripts/test-foundation-parity.mjs",
+      "frontend": [
+        "npm --prefix frontend run typecheck",
+        "npm --prefix frontend run lint",
+        "npm --prefix frontend run test -- --maxWorkers=1",
+        "npm --prefix frontend run build"
+      ],
+      "helper": [
+        "pwsh -NoProfile -File scripts/verify-secure-store-signer.ps1 -Action test",
+        "pwsh -NoProfile -File scripts/verify-secure-store-signer.ps1 -Action fmt",
+        "pwsh -NoProfile -File scripts/verify-secure-store-signer.ps1 -Action clippy",
+        "node --experimental-strip-types --test backend/signing-tests/offline.test.ts"
+      ],
+      "liveOperator": "node --experimental-strip-types backend/validation/registration-idempotency.ts --execute"
+    }
+  },
+  "invariants": {
+    "newTestnetTransactions": 0,
+    "newBatteries": 0,
+    "newLifecycles": 0,
+    "newRewards": 0,
+    "newSigning": 0,
+    "newBroadcasts": 0,
+    "secureStoreAccess": 0,
+    "newAuthUsers": 0,
+    "newMemberships": 0,
+    "onChainRoleChanges": 0,
+    "contractChanges": 0,
+    "wasmChanges": 0,
+    "productionChanges": 0,
+    "schemaRlsChanges": 0,
+    "mainnet": false,
+    "historicalResultsRewritten": false,
+    "protectedSyncModified": false,
+    "notionMutations": 0,
+    "obsidianMutations": 0,
+    "officialPassMutations": 0,
+    "commitCreated": false,
+    "pushPerformed": false,
+    "mainMerged": false,
+    "tagsMoved": false
+  },
+  "ownerApprovalRequired": true,
+  "D2Started": false,
+  "D3Started": false,
+  "originalReviewScope": "All original top-level facts, summary, criteria and invariants below describe the initial Stage 1 review before BYE-W1-007.",
+  "currentStage1Review": {
+    "asOfUtc": "2026-10-22T04:12:40.989798+00:00",
+    "addendum": "BYE-W1-007 — D1.2 EVIDENCE CLOSURE",
+    "testedImplementationCommit": "686b792ec813ad13655a6ac7d2e1d7df38d592ac",
+    "criteria": [
+      {
+        "criterion": "D1.1",
+        "frozen": {
+          "description": "Five API operations",
+          "test": "Execute all five named methods with fresh IDs.",
+          "expectedResult": "Each succeeds with its authorized actor and confirmed Testnet result.",
+          "requiredEvidence": "API transcript; five operation/result links."
+        },
+        "evidenceMode": "REAL API + LIVE TESTNET",
+        "evidenceReviewed": [
+          "BYE-W1-002-results.json",
+          "BYE-W1-003B-results.json",
+          "BYE-W1-003C-results.json",
+          "BYE-W1-004-results.json",
+          "BYE-W1-004-traceability.json"
+        ],
+        "actualEvidence": "Registro002, devolución003B, colección003C y reciclaje/pago004 ejecutados por la API autenticada. Los cinco hashes/ledgers coinciden con RPC actual SUCCESS/txSuccess y seis registros SQL (cinco del ciclo más fixture006), cada uno CONFIRMED/PROJECTED, identidad1 y dispatch1. Batería y request se crearon frescos para ese ciclo.",
+        "gapAnalysis": "Sin brecha identificada para los cinco métodos y sus resultados requeridos.",
+        "caveats": "Un único ciclo sintético demuestra los cinco métodos D1, no los tres ciclos D3 ni tratamiento físico.003 y003B conservan sus resultados históricos BLOCKED/PARTIAL.",
+        "recommendation": "ACCEPT",
+        "confidence": "HIGH",
+        "reason": "Las cinco operaciones tienen API, operación, hash, ledger y SUCCESS correlacionados.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      },
+      {
+        "criterion": "D1.2",
+        "frozen": {
+          "description": "Authorization",
+          "test": "Attempt each restricted operation with an incorrect actor; test collection missing either required authorization.",
+          "expectedResult": "All unauthorized attempts rejected; SERVICE + COLLECTOR succeeds.",
+          "requiredEvidence": "Negative-test report; positive collection hash and auth detail."
+        },
+        "evidenceMode": "MIXED: EXISTING LIVE POSITIVE + DETERMINISTIC HOST/WASM NEGATIVES",
+        "evidenceReviewed": [
+          "BYE-W1-003C-results.json#negativeAuth",
+          "BYE-W1-004-results.json#recycling.negatives",
+          "../ACCEPTANCE-CRITERIA.md",
+          "../../../contracts/byetery-contract/src/test.rs",
+          "../../../backend/remote-tests/http.test.ts",
+          "../../../tools/stellar-secure-store-signer/tests/validation.rs",
+          "BYE-W1-007-REPORT.md",
+          "BYE-W1-007-results.json",
+          "../../../contracts/byetery-contract/tests/open_return_auth.rs"
+        ],
+        "actualEvidence": "Positivos reales: ADMIN registro; SERVICE devolución; SERVICE+COLLECTOR simultáneos colección; RECYCLER reciclaje; SERVICE pago. Negativos: USER no ADMIN rechazado por HTTP; usuario no collector/recycler rechazado; wrong/missing collector y missing service en guards; no-role collector/recycler en simulación unsigned con RoleNotGranted9; wrong source en helper para pay_reward y falta SERVICE en Rust. Para open_return, user_actions_require_service_and_auth_is_bound_to_arguments prueba auth vacía y autorización de argumentos/recipient distintos, pero no presenta un actor incorrecto explícito. New BYE-W1-007 evidence: BYE-W1-007 service=Contract(CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4) wrong_actor=Contract(CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM) battery=String(BYE-W1-007-AUTH) request=BytesN<32>(7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7) recipient=Contract(CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M) rejected=Err(Ok(Error(Context, InvalidAction))); wrong_actor: REGISTERED/NOT_ELIGIBLE/request=None/events=0/balances=UNCHANGED; service: RETURNED/OPEN/NOT_ELIGIBLE/events=1/balances=UNCHANGED",
+        "gapAnalysis": "Closed by BYE-W1-007 explicit wrong-actor open_return rejection, unchanged state and identical-argument SERVICE positive control.",
+        "caveats": "Deterministic isolated host/WASM test, not a live invalid signed transaction. Original pre-007 evidence gap was valid and is preserved in the original criteria array.",
+        "recommendation": "ACCEPT",
+        "confidence": "HIGH",
+        "reason": "The only missing wrong-actor open_return case is now explicitly proven on native and frozen WASM implementations.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      },
+      {
+        "criterion": "D1.3",
+        "frozen": {
+          "description": "Confirmation",
+          "test": "Delay, lose or fail the RPC response before observing success.",
+          "expectedResult": "Application remains unconfirmed until SUCCESS is verified; a failed transaction never appears confirmed.",
+          "requiredEvidence": "State assertions; RPC/result capture."
+        },
+        "evidenceMode": "MIXED: LIVE CONFIRMATIONS + CONTROLLED INTEGRATION",
+        "evidenceReviewed": [
+          "BYE-W1-002-results.json#initialApiResponse",
+          "BYE-W1-003C-results.json#initialApiResponse",
+          "BYE-W1-006-results.json#trace.requestA",
+          "../../../backend/tests/testnet-worker.test.ts",
+          "../../../backend/tests/sprint-recycling-reward.test.ts"
+        ],
+        "actualEvidence": "Las respuestas iniciales pendientes002/003C/006 conservan el hash y el estado previo. SUCCESS/RPC precede la proyección real; SQL y cadena actuales coinciden. Los fixtures de respuesta perdida/NOT_FOUND/outage mantienen projectionCount0; restaurar SUCCESS produce una proyección. El fixture confirmed failure es terminal y projectionCount0; hash de confirmación incorrecto no proyecta ni reemplaza.",
+        "gapAnalysis": "La evidencia cubre demora, pérdida, fallo y confirmación posterior sin exigir una nueva transacción fallida live.",
+        "caveats": "Inyección de respuesta perdida/fallo/outage controlada, no fallo intencional del pago live. La revisión no reejecuta tests ni infiere confirmación a partir de HTTP202.",
+        "recommendation": "ACCEPT",
+        "confidence": "HIGH",
+        "reason": "UNKNOWN y fallo no proyectan éxito; se confirma el hash original antes de proyectar.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      },
+      {
+        "criterion": "D1.4",
+        "frozen": {
+          "description": "Traceability",
+          "test": "Inspect every submitted operation.",
+          "expectedResult": "Operation ID, network, contract and transaction hash correlate; confirmed records include ledger/result.",
+          "requiredEvidence": "Persisted operation export with sanitized fields."
+        },
+        "evidenceMode": "MIXED: PERSISTED SQL + LIVE TESTNET",
+        "evidenceReviewed": [
+          "BYE-W1-004-traceability.json",
+          "D1-IDEMPOTENCY-TRACE.json",
+          "BYE-W1-002-results.json",
+          "BYE-W1-003B-results.json",
+          "BYE-W1-003C-results.json",
+          "BYE-W1-004-results.json",
+          "BYE-W1-006-results.json"
+        ],
+        "actualEvidence": "Export original y SELECT independiente actual: operation ID, network ID, contrato, source, sequence, transaction hash, ledger de confirmación, CONFIRMED/PROJECTED e identidad/dispatch correlacionan6/6. RPC confirma cada hash y ledger. El despliegue tiene exactamente6 operaciones/6 identidades/6 dispatches; no hay otras operaciones enviadas omitidas en este deployment.",
+        "gapAnalysis": "No falta un campo requerido de correlación ni se requiere publicar material firmado.",
+        "caveats": "Envelopes firmados, firmas y claves se omiten deliberadamente. La última confirmed_ledger de una fila de batería/request no sustituye al ledger original guardado por operación.",
+        "recommendation": "ACCEPT",
+        "confidence": "HIGH",
+        "reason": "Correlación completa de las seis operaciones D1 enviadas, con ledger y resultado.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      },
+      {
+        "criterion": "D1.5",
+        "frozen": {
+          "description": "Idempotency",
+          "test": "Repeat an identical request; reuse its idempotency key with changed parameters.",
+          "expectedResult": "Identical request returns the same logical operation; changed parameters rejected. One valid effect per intended transition.",
+          "requiredEvidence": "API/database assertions and chain-state reads."
+        },
+        "evidenceMode": "REAL API + LIVE TESTNET + SQL",
+        "evidenceReviewed": [
+          "BYE-W1-006-REPORT.md",
+          "BYE-W1-006-results.json",
+          "D1-IDEMPOTENCY-TRACE.json",
+          "../../../backend/validation/registration-idempotency.ts",
+          "../../../backend/tests/d1-registration-idempotency.test.ts"
+        ],
+        "actualEvidence": "Fixture BYE-D1-IDEMP-F6C52ED496D5C6F41B. A:53db4b43-7654-479a-b4aa-00d6d47ad171, txc1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b, SUCCESS5322924. B mismo principal/deployment/endpoint/key/body devuelve201 con mismo ID/hash; C cambia solo metadata.caseLabel y da409 IdempotencyConflict. CountsA=B=C:processor1/authorize1/envelope1/broadcast1. SQL después de cada llamada y lectura de cadena conservan una operación/identidad/dispatch/efecto, cero returns/rewards. Secuencia avanza solo1 en A y no cambia B/C; cache conserva input_hash original.",
+        "gapAnalysis": "La evidencia live006 cierra el hueco que005 documentó correctamente como BLOCKED; no se usa el test local como sustituto de A/B/C.",
+        "caveats": "A inicial202 y B final201 reflejan reconciliación del mismo hash, no otra operación. Authorize+envelope son dos fases de UNA identidad. Fixture exclusivamente D1.5, nunca D3; el principal histórico retirado no se reactivó.",
+        "recommendation": "ACCEPT",
+        "confidence": "HIGH",
+        "reason": "A/B/C reales: mismo ID/hash en replay y409 por un único cambio, sin efectos adicionales.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      },
+      {
+        "criterion": "D1.6",
+        "frozen": {
+          "description": "Reward guard and reproducibility",
+          "test": "Request a second reward; rerun tests at the recorded commit.",
+          "expectedResult": "No second successful payment or additional reward balance change. Exact commit and commands reproduce expected results.",
+          "requiredEvidence": "Reward result/balances; test manifest."
+        },
+        "evidenceMode": "MIXED: REAL PAYMENT + DETERMINISTIC GUARDS + VERIFIED MANIFEST",
+        "evidenceReviewed": [
+          "BYE-W1-004-results.json#reward",
+          "BYE-W1-004-REPORT.md",
+          "BYE-W1-006-results.json#verification",
+          "../../../contracts/byetery-contract/src/test.rs",
+          "../../../backend/tests/testnet-reward-evidence.test.ts"
+        ],
+        "actualEvidence": "Pago d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02 SUCCESS5315915: receipt/transfer/paid con recipient USER-1 y100000000 base units. Lecturas contemporáneas0→100000000 y900000000→800000000; replay misma key200 con0 nuevas identidades/envíos/cambios de saldo. Nueva solicitud de segunda recompensa se rechaza en Rust/mock/HTTP. Lectura actual RPC/Horizon confirma10 y contrato80; SQL un reward_attempt SUCCEEDED #1. Manifiesto006 identifica commit aa4f0af382d1b4da6a88403149efd76f791594b2, comandos y SHA de fuentes. Hashes de fuentes coinciden con ese Git commit y árbol productivo/tests es idéntico al checkpoint revisado.",
+        "gapAnalysis": "Guard contra segundo pago y reproducibilidad están soportados por evidencias diferenciadas, no por un nuevo reward ni una afirmación de ejecución actual.",
+        "caveats": "La lectura actual no reconstruye por sí sola el delta histórico: ese delta proviene de004. La regresión no se rerun durante Stage1; se revisan resultados ya ejecutados y su identidad de código. Algunas suites históricas usan Secure Store offline; repetirlas ahora violaría esta revisión sin firma. MOCK no ejecuta Soroban.",
+        "recommendation": "ACCEPT",
+        "confidence": "HIGH",
+        "reason": "Pago exacto0→10, contrato90→80, replay sin segundo efecto y manifiesto reproducible.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      },
+      {
+        "criterion": "D1.7",
+        "frozen": {
+          "description": "A - Before submit",
+          "test": "Interrupt after transaction identity is durable but before broadcast. Restart and resume by logical operation ID.",
+          "expectedResult": "No pre-submit chain effect; recovery retains one logical operation and at most one valid intended effect.",
+          "requiredEvidence": "Before/after durable record; submit trace; chain read."
+        },
+        "evidenceMode": "CONTROLLED INTEGRATION — NOT LIVE SOROBAN",
+        "evidenceReviewed": [
+          "BYE-W1-005-REPORT.md",
+          "BYE-W1-005-results.json#D1.7",
+          "D1-GAP-CLOSURE-TRACE.json",
+          "../../../backend/tests/d1-before-submit.test.ts"
+        ],
+        "actualEvidence": "Casos b2d7868a-f849-489f-9e8e-bb7b53c2d9eb y8ba73bf7-7612-42e7-983b-ee0013ad01c2: identidad COMMIT/readback en READY, dispatch0 y autoridad independiente efecto0 antes de la interrupción. Se cierran/reabren appDB y authorityDB en disco; nuevo Repository/pool/service/worker/transport. Snapshot antes=afterRestart: mismo ID/identity/hash/envelopeSHA. Reinicio con key solo pública, prepare/sign prohibidos. Resume por ID y decisión explícita retrySameHash; lookupNOT_FOUND antes del primer dispatch revisado1, efecto final1 y proyección SQL. Prepare/sign1 total; callbacks RPC real/Secure Store0.",
+        "gapAnalysis": "Cumple la secuencia exacta y el modelo de evidencia controlado expresamente permitido por el encargo; no se inventa requisito de fault injection live.",
+        "caveats": "Autoridad/transport controlados, PGlite en disco y source de fixture inyectada; no ejecuta Soroban, no verifica allí allowlists de producción ni mata el proceso OS. reviewedSameHashRetry=true se conserva aunque dispatch0→1 es el primer envío. Unreviewed READY sigue rechazado.",
+        "recommendation": "ACCEPT",
+        "confidence": "HIGH",
+        "reason": "Identidad durable, interrupción antes del envío, dos DB reabiertas y primer efecto único revisado.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      },
+      {
+        "criterion": "D1.8",
+        "frozen": {
+          "description": "B - Lost response",
+          "test": "Broadcast, then suppress the submit response.",
+          "expectedResult": "Mark unresolved; look up the persisted hash. Confirm if SUCCESS is found; no blind replacement transaction.",
+          "requiredEvidence": "Lost-response fixture; original hash/result; state transition log."
+        },
+        "evidenceMode": "CONTROLLED INTEGRATION + DETERMINISTIC TEST",
+        "evidenceReviewed": [
+          "../../../backend/tests/sprint-recycling-reward.test.ts",
+          "../../../backend/tests/testnet-worker.test.ts",
+          "D1-GAP-CLOSURE-TRACE.json#cases[1]",
+          "BYE-W1-004-results.json#verification"
+        ],
+        "actualEvidence": "Fixture combinado: loseSubmit=true → SUBMITTED_OR_UNKNOWN; worker reconstruido conserva hash y no proyecta conNOT_FOUND. Tras outage/restauración y SUCCESS se proyecta una vez. Assertions prepare1/sign1/submitted1/dispatch1, bytes idénticos y todas las búsquedas por hash original.005 variante respuesta perdida aporta además efecto en autoridad persistente antes de perder respuesta y estado final único.",
+        "gapAnalysis": "Se demuestra uncertainty→lookup original→confirmación única sin reemplazo ciego.",
+        "caveats": "Se suprime respuesta en transporte controlado. No hubo nuevo broadcast, firma ni pérdida inducida en Testnet durante la revisión.",
+        "recommendation": "ACCEPT",
+        "confidence": "HIGH",
+        "reason": "Envío único con respuesta perdida, UNKNOWN y reconciliación del hash persistido.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      },
+      {
+        "criterion": "D1.9",
+        "frozen": {
+          "description": "C - RPC outage",
+          "test": "Make RPC temporarily unavailable, then restore it.",
+          "expectedResult": "Preserve operation and uncertainty; fail visibly without false confirmation. Resume reconciliation when reachable.",
+          "requiredEvidence": "Outage/recovery assertions; sanitized errors."
+        },
+        "evidenceMode": "CONTROLLED INTEGRATION + DETERMINISTIC TEST",
+        "evidenceReviewed": [
+          "../../../backend/tests/sprint-recycling-reward.test.ts",
+          "../../../backend/tests/testnet-worker.test.ts",
+          "../../../backend/tests/testnet-application.test.ts",
+          "BYE-W1-004-results.json#verification"
+        ],
+        "actualEvidence": "Outage en observe conserva SUBMITTED_OR_UNKNOWN, proyección0 y los bytes/hash originales. Restablecer transporte con SUCCESS recupera PROJECTED, proyección1 y submitted1. Test HTTP local de TestnetStellarService frente a RPC unavailable preserva operación y sourceTESTNET, rechaza sin signer y sin fallbackMOCK. Errores RPC se sanitizan.",
+        "gapAnalysis": "Outage/recovery y error visible están cubiertos sin debilitar el criterio ni exigir fallos live adicionales.",
+        "caveats": "Indisponibilidad RPC simulada; la desconexión PostgreSQL003B es otro incidente y su causa de socket sigue no probada. No se exige ni afirma una caída live del RPC durante el pago.",
+        "recommendation": "ACCEPT",
+        "confidence": "HIGH",
+        "reason": "La caída conserva incertidumbre e identidad; la recuperación proyecta una vez sin otro envío.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      },
+      {
+        "criterion": "D1.10",
+        "frozen": {
+          "description": "D - Restart",
+          "test": "Restart with durable SUBMITTED or UNKNOWN operation.",
+          "expectedResult": "Recover the same operation and hash; reconcile without losing or duplicating its effect.",
+          "requiredEvidence": "Restart test and record comparison."
+        },
+        "evidenceMode": "CONTROLLED ON-DISK RESTART + DETERMINISTIC TEST",
+        "evidenceReviewed": [
+          "../../../backend/tests/testnet-restart.test.ts",
+          "../../../backend/tests/testnet-worker.test.ts",
+          "../../../backend/tests/d1-before-submit.test.ts",
+          "BYE-W1-004-REPORT.md#regression-at-tested-implementation-commit"
+        ],
+        "actualEvidence": "testnet-restart cierra realmente PGlite en disco tras loseSubmit y reabre otro objetoDB; nuevo TransportStore/worker concilia la identidad byte a byte original y llegaPROJECTED sin resubmit: prepare1/sign1/submitted1, todas las observaciones mismohash.005 añade reconstrucción completa Repository/service/worker/transport y ambas DB. El test de restart está incluido en backend143/146/148 registrados.",
+        "gapAnalysis": "El criterio no impone un kill de sistema operativo; el límite probado conserva estado e identidad durable.",
+        "caveats": "Reconstrucción y reapertura de recursos en un proceso de pruebas, no OS-process-kill, reinicio de Windows ni failover PostgreSQL multinodo. Ese límite no se transforma en una prueba inexistente.",
+        "recommendation": "ACCEPT",
+        "confidence": "HIGH",
+        "reason": "DB close/reopen y worker nuevo retienen el mismo envelope/hash en UNKNOWN sin reenvío.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      },
+      {
+        "criterion": "D1.11",
+        "frozen": {
+          "description": "E - Unresolved lookup",
+          "test": "Return NOT_FOUND/unknown after an uncertain submission.",
+          "expectedResult": "Remain unresolved; no automatic replacement envelope. Any permitted rebroadcast uses the same signed transaction identity and is recorded.",
+          "requiredEvidence": "Reconciliation trace; envelope/hash identity; state read."
+        },
+        "evidenceMode": "CONTROLLED INTEGRATION + DETERMINISTIC TEST",
+        "evidenceReviewed": [
+          "../../../backend/tests/testnet-worker.test.ts",
+          "../../../backend/tests/testnet-real-boundaries.test.ts",
+          "../../../backend/src/testnet/worker.ts",
+          "../../../backend/src/testnet/transport.ts",
+          "BYE-W1-004-results.json#criteria"
+        ],
+        "actualEvidence": "Respuesta perdida + NOT_FOUND válido conservaUNKNOWN y sin nueva preparación/firma/envío automático. Fixtures expiry distinguen APPLIED/NOT_APPLIED/UNRESOLVED con lectura de estado, nunca conviertenNOT_FOUND solo en fracaso. retrySameHash exige decisionId/hash original, primero reconcilia y si se permite persiste otro intento con el mismo envelope byte a byte, límite acotado. Drift de source tras intent queda en reviewed hold y envío0; nueva recompensa no se permite por expiración.",
+        "gapAnalysis": "Identidad/trace/estado y límite de revisión están cubiertos; no se exige recuperar automáticamente casos cuyo resultado siga incierto.",
+        "caveats": "Reintentos revisados y expiración se probaron con transporte controlado. La revisión actual no reenvía nada. Estado/read-verified effect y receipt son tipos de evidencia distintos; pago requiere receipt y transferencia real.",
+        "recommendation": "ACCEPT",
+        "confidence": "HIGH",
+        "reason": "NOT_FOUND conserva incertidumbre; cualquier retry revisado reutiliza exactamente los bytes/hash.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      },
+      {
+        "criterion": "D1.12",
+        "frozen": {
+          "description": "F - Revoked role",
+          "test": "Disable an existing collector/recycler role in an isolated authorized test fixture, then attempt its restricted operation.",
+          "expectedResult": "Revoked actor rejected; no lifecycle advancement or reward. Restore test configuration where applicable.",
+          "requiredEvidence": "Role-state fixture; rejection and unchanged-state assertions."
+        },
+        "evidenceMode": "DETERMINISTIC FROZEN CONTRACT + SNAPSHOT; UNSIGNED LIVE SUPPORT",
+        "evidenceReviewed": [
+          "../../../contracts/byetery-contract/src/test.rs#revoked_collector_is_rejected_even_with_both_signatures",
+          "../../../contracts/byetery-contract/test_snapshots/test/revoked_collector_is_rejected_even_with_both_signatures.1.json",
+          "../../../backend/tests/mock.test.ts",
+          "BYE-W1-003C-results.json#negativeAuth",
+          "BYE-W1-004-results.json#recycling.negatives"
+        ],
+        "actualEvidence": "Fixture Rust concede Collector y lo desactiva antes de intentar confirm_collection con ambas autorizaciones; assert devuelve RoleNotGranted. El snapshot histórico congelado de ESE test tiene Role=false, Battery Returned/NotEligible, requestOpen y collector/collectionHash/recycler/recyclingHash nulos. Lectura/asserts de esos campos en esta revisión confirma ausencia de avance/reward. Test Rust recycler también revoca rol y rechaza; mock repite revocación/rechazo.003C/004 unsigned no-role probes apoyan semántica error9 y cadena intacta.",
+        "gapAnalysis": "Fixture de rol+rechazo y estado conservado son observables en artefactos originales; el gate permite fixture aislado y no exige revocación live.",
+        "caveats": "El unit de collector assert explícitamente el error; la comprobación de estado aquí proviene de su snapshot histórico emparejado, no de atribuirle asserts inexistentes. Probes sin rol no se renombran como revocación live. No se revocó/restauró ningún rol real; no set_role nuevo.",
+        "recommendation": "ACCEPT",
+        "confidence": "MEDIUM",
+        "reason": "Rol revocadofalse y rechazo; snapshot conserva Returned/Open/NotEligible sin atestaciones nuevas.",
+        "ownerDecision": "PENDING",
+        "officialStatus": "READY FOR VALIDATION"
+      }
+    ],
+    "summary": {
+      "recommendedAccept": 12,
+      "recommendedHold": 0,
+      "officialPass": {
+        "D1": "0/12",
+        "D2": "0/6",
+        "D3": "0/5",
+        "total": "0/23"
+      },
+      "matrixReadinessNotChanged": "12/12 READY FOR VALIDATION"
+    },
+    "ownerDecision": "PENDING",
+    "ownerApprovalRequired": true,
+    "officialPassMutations": 0,
+    "stage2Executed": false,
+    "D2Started": false,
+    "D3Started": false
+  },
+  "addenda": [
+    {
+      "date": "2026-10-22",
+      "task": "BYE-W1-007",
+      "originalHoldCorrectAtTheTime": true,
+      "criterion": "D1.2",
+      "previousRecommendation": "HOLD",
+      "currentRecommendation": "ACCEPT",
+      "report": "BYE-W1-007-REPORT.md",
+      "results": "BYE-W1-007-results.json",
+      "originalPacketSha256": "c637866f2b729914c566b43f5ae5200703393f483c467d21cb6737ff166e23b2",
+      "originalMarkdownSha256": "b7c710914c9eb0d22e5fca68256a3019294e1839aa76ecd8f7ecbaf1d15acdd3",
+      "officialPassUnchanged": true
+    }
+  ]
+}

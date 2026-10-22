@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "task": "BYE-W1-007",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "result": "PASS technical",
+  "completedAtUtc": "2026-10-22T04:12:40.989798+00:00",
+  "startingHead": "0778ab75000ee1822465045f916eb3a4a0def3dc",
+  "branch": "instaward/d1-testnet-integration",
+  "testedImplementationCommit": "686b792ec813ad13655a6ac7d2e1d7df38d592ac",
+  "evidenceCommit": "Enclosing documentation commit; resolved from Git, not embedded circularly.",
+  "test": {
+    "name": "open_return_rejects_wrong_actor_and_accepts_service_with_identical_arguments",
+    "path": "contracts/byetery-contract/tests/open_return_auth.rs",
+    "sha256": "17405a5f28da9a52e729f3b68df559e25856a4240b20ca2cf86acd1488e3ef01",
+    "mode": "DETERMINISTIC ISOLATED HOST; native and actual frozen release WASM",
+    "configService": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+    "wrongActor": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM",
+    "different": true,
+    "batteryId": "BYE-W1-007-AUTH",
+    "requestIdHex": "0707070707070707070707070707070707070707070707070707070707070707",
+    "recipient": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
+    "requestIdScope": "Fresh isolated Env; fixed test bytes only, no production issuance change.",
+    "argumentsValid": true,
+    "identicalArgumentsAcrossControls": true,
+    "negativeAuthorizedActors": [
+      "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
+    ],
+    "blanketAuthDuringInvocation": false,
+    "rejection": "Err(Ok(Error(Context, InvalidAction)))",
+    "underlyingHostSemantics": "Auth/InvalidAction narrowed by host try_call to Context/InvalidAction; not RoleNotGranted.",
+    "negativeBefore": {
+      "battery": "REGISTERED",
+      "requestId": null,
+      "reward": "NOT_ELIGIBLE",
+      "request": null
+    },
+    "negativeAfter": {
+      "battery": "REGISTERED",
+      "requestId": null,
+      "reward": "NOT_ELIGIBLE",
+      "request": null
+    },
+    "fullBatteryEqualityAsserted": true,
+    "successfulContractEventsAfterRejection": 0,
+    "recipientAndContractBalancesUnchanged": true,
+    "positiveAuthorizedActors": [
+      "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+    ],
+    "positiveResult": "Ok(Ok(request_id))",
+    "positiveState": {
+      "battery": "RETURNED",
+      "request": "OPEN",
+      "reward": "NOT_ELIGIBLE"
+    },
+    "positiveAuthTreeExactAssertion": true,
+    "positiveReturnOpenedEvents": 1,
+    "stdoutEvidence": "BYE-W1-007 service=Contract(CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4) wrong_actor=Contract(CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM) battery=String(BYE-W1-007-AUTH) request=BytesN<32>(7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7) recipient=Contract(CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M) rejected=Err(Ok(Error(Context, InvalidAction))); wrong_actor: REGISTERED/NOT_ELIGIBLE/request=None/events=0/balances=UNCHANGED; service: RETURNED/OPEN/NOT_ELIGIBLE/events=1/balances=UNCHANGED"
+  },
+  "regression": {
+    "rootCommand": "npm run verify",
+    "rootExitCode": 0,
+    "focusedExisting": {
+      "name": "test::user_actions_require_service_and_auth_is_bound_to_arguments",
+      "passed": 1
+    },
+    "focusedNew": {
+      "name": "open_return_rejects_wrong_actor_and_accepts_service_with_identical_arguments",
+      "passed": 1
+    },
+    "nativeOriginal": 20,
+    "nativeNewIntegration": 1,
+    "wasmOriginal": 20,
+    "wasmNewIntegration": 1,
+    "wasmConstructorIntegration": 1,
+    "release": "PASS wasm32v1-none",
+    "rustfmt": "PASS --all --check",
+    "clippy": "PASS --locked --all-targets --features wasm-tests -- -D warnings",
+    "backend": {
+      "passed": 148,
+      "failed": 0,
+      "typeScript": "PASS",
+      "foundationOriginal50Preserved": true
+    },
+    "python": {
+      "passed": 4,
+      "failed": 0
+    },
+    "mockDemo": "SENT 10 GREEN-TEST; does not execute Soroban",
+    "standaloneSigningSuitesExecuted": false,
+    "remoteHttpSqlTestsExecuted": false,
+    "logSha256": "08428b2f75bd8b8d7c2c2fd55e06377df0273c4c386f606fd1b611597d254b19"
+  },
+  "intermediateFailurePreserved": {
+    "firstRootRun": "FAILED: frozen src/test.rs hash guard and two loopback EACCES tests; 145/148 backend passed.",
+    "resolution": "Relocated only the new test to independent integration file. Restored src/test.rs byte-for-byte. Unchanged root verification rerun outside isolation for localhost HTTP tests. No Windows protection changed, no guard/test weakened.",
+    "firstRunLogSha256": "61afaee00cbe854b7e8d30b1aa81beb830a7c918385bc32bba3cd9bb24e7fad2"
+  },
+  "frozenFilesSha256": {
+    "backend/tests/checkpoint.test.ts": "5a17c9f13d108befcb50e25f357557dbe0bd593486b0d02d5a16d1f6c38363d1",
+    "contracts/byetery-contract/.gitignore": "3222c615cc599e6349deaa484c95690a10d1997e2ec7b3a051694c26e3ad8f84",
+    "contracts/byetery-contract/Cargo.lock": "04f709c7cb5d1b043cb5d32d310f2640144563a8f056470e95fe84dc3ebeabb9",
+    "contracts/byetery-contract/Cargo.toml": "6a04c700c43d73990b1da8b9bb27d69a0153fef0f36a3d4f66b3395ae2da5f51",
+    "contracts/byetery-contract/README.md": "e74e40831c2362477a8901a2cf67d39ad3d6d155c82d7d85148aa0d770e40f61",
+    "contracts/byetery-contract/TESTING.md": "171396a7be3b38d54389dd4236bd5866b76c1395b09f041e2b2ed9b315341bd0",
+    "contracts/byetery-contract/rust-toolchain.toml": "3096eb89f5b6c2a60f48ec98754c896b8b0491c65ae2cc2b30f697f24bef8dd0",
+    "contracts/byetery-contract/scripts/cargo-local.ps1": "73a3ac4e5e7ee819c3fd99e99d3dbaddc0e6f06fc6e8e8ca1e0b922cda18d650",
+    "contracts/byetery-contract/scripts/verify.ps1": "2d9d83cdd614f0ddbd97f67018de5205501fe0295a1319f13369fb701c06ddc6",
+    "contracts/byetery-contract/src/events.rs": "c823675a220ec86e75d8091ccca0a5505ad103f4747f3d3207b482b1dc7f030e",
+    "contracts/byetery-contract/src/lib.rs": "4be0f127ed23fcbb83e8d646cca0d37f1ce412e5f084b40016fa2981f1db6141",
+    "contracts/byetery-contract/src/test.rs": "ed1285ee520d9ffbeb775b5d27087c97ff92d7942fc365a980c2ec0bffaa127f",
+    "contracts/byetery-contract/src/types.rs": "df13bf53a19c0dcc8d9ead0f1c4cf985ae479474d4a5300386b48d82bc580bad",
+    "contracts/byetery-contract/tests/wasm.rs": "761a72128c56ae416650eb377487db6c8528d322c1b774417022d284944e5530"
+  },
+  "productionWasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "auditBeforeDocumentation": {
+    "files": 422,
+    "historicalBlobs": 427,
+    "stagedFiles": 0,
+    "findings": []
+  },
+  "review": {
+    "previousD12": "HOLD",
+    "currentD12": "ACCEPT",
+    "recommendedAccept": 12,
+    "recommendedHold": 0,
+    "officialPass": {
+      "D1": "0/12",
+      "D2": "0/6",
+      "D3": "0/5",
+      "total": "0/23"
+    },
+    "technicalMatrix": "12/12 READY FOR VALIDATION",
+    "ownerDecision": "PENDING",
+    "stage2Executed": false
+  },
+  "invariants": {
+    "newLiveTransactions": 0,
+    "newApplicationOrSecureStoreSignatures": 0,
+    "broadcasts": 0,
+    "secureStoreAccess": 0,
+    "newTestnetFixtures": 0,
+    "newUsersMembershipsRoles": 0,
+    "productionContractChanges": 0,
+    "frozenOriginalTestsChanged": 0,
+    "wasmChanges": 0,
+    "cargoDependencyChanges": 0,
+    "schemaRlsChanges": 0,
+    "notionMutations": 0,
+    "officialPassMutations": 0,
+    "protectedSyncModified": false,
+    "mainMerged": false,
+    "tagsMoved": false,
+    "mainnet": false,
+    "D2Started": false,
+    "D3Started": false
+  },
+  "references": {
+    "raven": "stellarDocs.search_soroban_contract_docs; observed 2026-10-22T03:59:16.911Z",
+    "officialAuthorizationTesting": "https://developers.stellar.org/docs/build/guides/auth/contract-authorization#test",
+    "localPinnedHost": "soroban-env-host 27.0.1 src/auth.rs require_auth_enforcing and src/host.rs try_call",
+    "sourceTrustBoundary": "contracts/byetery-contract/src/lib.rs open_return: config(&e).service.require_auth()"
+  }
+}
