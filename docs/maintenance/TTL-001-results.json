@@ -1,0 +1,409 @@
+{
+  "task": "TTL-001",
+  "classification": "TESTNET MAINTENANCE — OUTSIDE D2/D3",
+  "result": "TTL-001: PASS — TESTNET MAINTENANCE",
+  "observedAt": "2026-10-22T14:35:46.110Z",
+  "payer": "GAYLTPD7QCN5BZMK4K3BRAIVKHZX3UQYYKADRFOMJNXOUW3VQ3ZHAE6D",
+  "funding": {
+    "publicKey": "GAYLTPD7QCN5BZMK4K3BRAIVKHZX3UQYYKADRFOMJNXOUW3VQ3ZHAE6D",
+    "fundingStatus": "FUNDED_VERIFIED",
+    "timestamp": "2026-10-22T14:24:53.208Z"
+  },
+  "sourceBefore": {
+    "sequence": "22896904446672896",
+    "balance": "100000000000",
+    "ledger": 5331228,
+    "exclusiveUse": "New dedicated TTL-001 payer; no Byetery/manual reuse. Application lease does not protect external submissions.",
+    "sequenceProvenance": "Authoritative final RPC account read immediately before dispatch; corroborated by funding observation and signer gate."
+  },
+  "sourceAfter": {
+    "sequence": "22896904446672897",
+    "balanceStroops": "99995703393",
+    "ledger": 5331231
+  },
+  "construction": {
+    "buildLedger": 5331228,
+    "extendTo": 512054,
+    "target": 5843282,
+    "formula": "5843282 - buildLedger"
+  },
+  "simulation": {
+    "latestLedger": 5331228,
+    "minResourceFee": "4945484",
+    "auth": 0,
+    "restore": 0,
+    "readOnly": 3,
+    "readWrite": 0,
+    "operation": "ExtendFootprintTTL",
+    "operationCount": 1,
+    "invokeHostFunction": 0,
+    "transactionDataSha256": "869819181f2fb5f5c9c26ae2a3a5aa6c2c50db12002d83334d583c84f3e9f976",
+    "feeReferenceDifferenceStroops": "194981"
+  },
+  "preSignVerification": {
+    "kind": "TTL-001 PRE-SIGN VERIFIED",
+    "network": "Stellar Testnet",
+    "networkBinding": "Fixed Testnet signature domain; network is not encoded inside envelope XDR",
+    "operationCount": 1,
+    "operation": "ExtendFootprintTTL",
+    "source": "GAYLTPD7QCN5BZMK4K3BRAIVKHZX3UQYYKADRFOMJNXOUW3VQ3ZHAE6D",
+    "sequence": "22896904446672897",
+    "buildLedger": 5331228,
+    "currentLedger": 5331230,
+    "extendTo": 512054,
+    "formula": "extendTo = 5843282 - buildLedger; application ledger >= buildLedger ensures post TTL >= 5843282",
+    "targetMinimum": 5843282,
+    "readOnly": [
+      {
+        "ledgerKeyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHQmF0dGVyeQAAAAAOAAAAH0JZRS1EMS1JREVNUC1GNkM1MkVENDk2RDVDNkY0MUIAAAAAAQ==",
+        "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "key": [
+          "Battery",
+          "BYE-D1-IDEMP-F6C52ED496D5C6F41B"
+        ]
+      },
+      {
+        "ledgerKeyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHQmF0dGVyeQAAAAAOAAAAG0JZRS1XMS0wMDItNjQyNTcwMjAxMzRENEEwRgAAAAAB",
+        "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "key": [
+          "Battery",
+          "BYE-W1-002-64257020134D4A0F"
+        ]
+      },
+      {
+        "ledgerKeyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHUmVxdWVzdAAAAAANAAAAIF1IZDqJFUE+2IndaqP4ME0QqMJR44T1KKtUYdbkyNeMAAAAAQ==",
+        "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "key": [
+          "Request",
+          {
+            "0": 93,
+            "1": 72,
+            "2": 100,
+            "3": 58,
+            "4": 137,
+            "5": 21,
+            "6": 65,
+            "7": 62,
+            "8": 216,
+            "9": 137,
+            "10": 221,
+            "11": 106,
+            "12": 163,
+            "13": 248,
+            "14": 48,
+            "15": 77,
+            "16": 16,
+            "17": 168,
+            "18": 194,
+            "19": 81,
+            "20": 227,
+            "21": 132,
+            "22": 245,
+            "23": 40,
+            "24": 171,
+            "25": 84,
+            "26": 97,
+            "27": 214,
+            "28": 228,
+            "29": 200,
+            "30": 215,
+            "31": 140
+          }
+        ]
+      }
+    ],
+    "readWrite": [],
+    "auth": 0,
+    "restore": 0,
+    "invokeHostFunction": 0,
+    "feeStroops": "4946484",
+    "resourceFeeStroops": "4945484",
+    "feeCapStroops": "10000000",
+    "referenceResourceFeeStroops": "4750503",
+    "materialDifferenceGate": "within 10% of owner reference; otherwise STOP",
+    "hash": "a381e2a112500024892aaefa4b535b37b1b5e73a6d354e0986b1c106386f8bc0"
+  },
+  "finalSourceCheck": {
+    "sequence": "22896904446672896",
+    "balance": "100000000000",
+    "ledger": 5331230,
+    "transactionSequence": "22896904446672897",
+    "match": true
+  },
+  "receipt": {
+    "hash": "a381e2a112500024892aaefa4b535b37b1b5e73a6d354e0986b1c106386f8bc0",
+    "status": "SUCCESS",
+    "ledger": 5331231,
+    "source": "GAYLTPD7QCN5BZMK4K3BRAIVKHZX3UQYYKADRFOMJNXOUW3VQ3ZHAE6D",
+    "timestamp": "2026-10-22T14:35:42Z",
+    "feeChargedStroops": "4296607",
+    "horizon": "https://horizon-testnet.stellar.org/transactions/a381e2a112500024892aaefa4b535b37b1b5e73a6d354e0986b1c106386f8bc0"
+  },
+  "comparisons": [
+    {
+      "name": "historical_battery",
+      "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHQmF0dGVyeQAAAAAOAAAAG0JZRS1XMS0wMDItNjQyNTcwMjAxMzRENEEwRgAAAAAB",
+      "preTtl": 5402349,
+      "postTtl": 5843285,
+      "preSha256": "bde8164ea9338989c85d4636961e1c2ad0e080768a9fba197fa2518e005c5bc9",
+      "postSha256": "bde8164ea9338989c85d4636961e1c2ad0e080768a9fba197fa2518e005c5bc9",
+      "valueUnchanged": true
+    },
+    {
+      "name": "historical_request",
+      "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHUmVxdWVzdAAAAAANAAAAIF1IZDqJFUE+2IndaqP4ME0QqMJR44T1KKtUYdbkyNeMAAAAAQ==",
+      "preTtl": 5420491,
+      "postTtl": 5843285,
+      "preSha256": "85e7404caf8acf86f47278ca37595051142c32ba0000752d5890f3a2fab9092a",
+      "postSha256": "85e7404caf8acf86f47278ca37595051142c32ba0000752d5890f3a2fab9092a",
+      "valueUnchanged": true
+    },
+    {
+      "name": "idempotency_battery",
+      "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHQmF0dGVyeQAAAAAOAAAAH0JZRS1EMS1JREVNUC1GNkM1MkVENDk2RDVDNkY0MUIAAAAAAQ==",
+      "preTtl": 5443883,
+      "postTtl": 5843285,
+      "preSha256": "d817017328188fe545c93e59193ae241031a7679bc4b6a313917ef6dab930421",
+      "postSha256": "d817017328188fe545c93e59193ae241031a7679bc4b6a313917ef6dab930421",
+      "valueUnchanged": true
+    }
+  ],
+  "post": {
+    "observedAt": "2026-10-22T14:35:44.861Z",
+    "ledger": 5331231,
+    "entries": [
+      {
+        "name": "historical_battery",
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHQmF0dGVyeQAAAAAOAAAAG0JZRS1XMS0wMDItNjQyNTcwMjAxMzRENEEwRgAAAAAB",
+        "liveUntilLedgerSeq": 5843285,
+        "lastModifiedLedgerSeq": 5315915,
+        "ledgerEntryDataXdr": "AAAABgAAAAAAAAAB2Gt5mwd8Q5yQe/oNtNO1iTK/63MDsVOy9/f+VnsL6iYAAAAQAAAAAQAAAAIAAAAPAAAAB0JhdHRlcnkAAAAADgAAABtCWUUtVzEtMDAyLTY0MjU3MDIwMTM0RDRBMEYAAAAAAQAAABEAAAABAAAACAAAAA8AAAAPY29sbGVjdGlvbl9oYXNoAAAAAA0AAAAgO8pkWB1aztSoWC+F/ldVsHEE4bfXz2IBzekMb/zlte8AAAAPAAAACWNvbGxlY3RvcgAAAAAAABIAAAAAAAAAAHmAMk+8xjoP5WjJ/QR7Cq3fhINnx/PO/nFsQsQu93O6AAAADwAAAAhyZWN5Y2xlcgAAABIAAAAAAAAAAFAKt47h0yflKivfDL1vuEi1hNgCVzIZxlpNosbaF1++AAAADwAAAA5yZWN5Y2xpbmdfaGFzaAAAAAAADQAAACC3Yi3NvrZZj+lffBXxU7MVpLkym8mcOCnOq9G9ELdUUQAAAA8AAAARcmVnaXN0cmF0aW9uX2hhc2gAAAAAAAANAAAAIIYhB38Mh/3M9795iVT7HasTP/95D0M0ShCrM+eBi3ZlAAAADwAAAApyZXF1ZXN0X2lkAAAAAAANAAAAIF1IZDqJFUE+2IndaqP4ME0QqMJR44T1KKtUYdbkyNeMAAAADwAAAAxyZXdhcmRfc3RhdGUAAAAQAAAAAQAAAAEAAAAPAAAABFNlbnQAAAAPAAAABXN0YXRlAAAAAAAAEAAAAAEAAAABAAAADwAAAAhSZWN5Y2xlZA==",
+        "valueSha256": "bde8164ea9338989c85d4636961e1c2ad0e080768a9fba197fa2518e005c5bc9"
+      },
+      {
+        "name": "historical_request",
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHUmVxdWVzdAAAAAANAAAAIF1IZDqJFUE+2IndaqP4ME0QqMJR44T1KKtUYdbkyNeMAAAAAQ==",
+        "liveUntilLedgerSeq": 5843285,
+        "lastModifiedLedgerSeq": 5314096,
+        "ledgerEntryDataXdr": "AAAABgAAAAAAAAAB2Gt5mwd8Q5yQe/oNtNO1iTK/63MDsVOy9/f+VnsL6iYAAAAQAAAAAQAAAAIAAAAPAAAAB1JlcXVlc3QAAAAADQAAACBdSGQ6iRVBPtiJ3Wqj+DBNEKjCUeOE9SirVGHW5MjXjAAAAAEAAAARAAAAAQAAAAMAAAAPAAAACmJhdHRlcnlfaWQAAAAAAA4AAAAbQllFLVcxLTAwMi02NDI1NzAyMDEzNEQ0QTBGAAAAAA8AAAAJcmVjaXBpZW50AAAAAAAAEgAAAAAAAAAA7gsbvn1oexg9rJMW+dTMyL+zclqXzwhqVeHNCpq4pbcAAAAPAAAABXN0YXRlAAAAAAAAEAAAAAEAAAABAAAADwAAAAlDb25maXJtZWQAAAA=",
+        "valueSha256": "85e7404caf8acf86f47278ca37595051142c32ba0000752d5890f3a2fab9092a"
+      },
+      {
+        "name": "idempotency_battery",
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHQmF0dGVyeQAAAAAOAAAAH0JZRS1EMS1JREVNUC1GNkM1MkVENDk2RDVDNkY0MUIAAAAAAQ==",
+        "liveUntilLedgerSeq": 5843285,
+        "lastModifiedLedgerSeq": 5322924,
+        "ledgerEntryDataXdr": "AAAABgAAAAAAAAAB2Gt5mwd8Q5yQe/oNtNO1iTK/63MDsVOy9/f+VnsL6iYAAAAQAAAAAQAAAAIAAAAPAAAAB0JhdHRlcnkAAAAADgAAAB9CWUUtRDEtSURFTVAtRjZDNTJFRDQ5NkQ1QzZGNDFCAAAAAAEAAAARAAAAAQAAAAgAAAAPAAAAD2NvbGxlY3Rpb25faGFzaAAAAAABAAAADwAAAAljb2xsZWN0b3IAAAAAAAABAAAADwAAAAhyZWN5Y2xlcgAAAAEAAAAPAAAADnJlY3ljbGluZ19oYXNoAAAAAAABAAAADwAAABFyZWdpc3RyYXRpb25faGFzaAAAAAAAAA0AAAAgPfaTLlPWnhjIvyeyY0nSWS1x8MZT8xmpvRufzy4G+QkAAAAPAAAACnJlcXVlc3RfaWQAAAAAAAEAAAAPAAAADHJld2FyZF9zdGF0ZQAAABAAAAABAAAAAQAAAA8AAAALTm90RWxpZ2libGUAAAAADwAAAAVzdGF0ZQAAAAAAABAAAAABAAAAAQAAAA8AAAAKUmVnaXN0ZXJlZAAA",
+        "valueSha256": "d817017328188fe545c93e59193ae241031a7679bc4b6a313917ef6dab930421"
+      },
+      {
+        "name": "ContractInstance",
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABQAAAAB",
+        "liveUntilLedgerSeq": 6703017,
+        "lastModifiedLedgerSeq": 5147800,
+        "valueSha256": "7fc37468bd98c83bea17108c03903d0e3abee78d52db820f989c47bb80ebc278"
+      },
+      {
+        "name": "ContractCode",
+        "keyXdr": "AAAAB8K8gLJtOhomWh1NGSO1A/ZVj918FIn4Gw3o9e4Y9s62",
+        "liveUntilLedgerSeq": 6703017,
+        "lastModifiedLedgerSeq": 5147800,
+        "valueSha256": "371644f90617f775faad2aae4129836908f83a20c8a66c299252d7400f5bf5ff"
+      },
+      {
+        "name": "Role_COLLECTOR",
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAwAAAA8AAAAEUm9sZQAAABIAAAAAAAAAAHmAMk+8xjoP5WjJ/QR7Cq3fhINnx/PO/nFsQsQu93O6AAAAEAAAAAEAAAABAAAADwAAAAlDb2xsZWN0b3IAAAAAAAAB",
+        "liveUntilLedgerSeq": 6703017,
+        "lastModifiedLedgerSeq": 5147800,
+        "valueSha256": "4b481b9051202115f555d21253d87de96f16b2ad2abdfede8318c0d5e4a29f41"
+      },
+      {
+        "name": "Role_RECYCLER",
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAwAAAA8AAAAEUm9sZQAAABIAAAAAAAAAAFAKt47h0yflKivfDL1vuEi1hNgCVzIZxlpNosbaF1++AAAAEAAAAAEAAAABAAAADwAAAAhSZWN5Y2xlcgAAAAE=",
+        "liveUntilLedgerSeq": 6703017,
+        "lastModifiedLedgerSeq": 5147800,
+        "valueSha256": "cdbb99502c1f9b3cfe2adff7100f222fe71a90626300d9a20962bd65b66c307f"
+      }
+    ]
+  },
+  "maintenanceTransactions": 1,
+  "broadcasts": 1,
+  "signatures": 1,
+  "entriesPreserved": "3/3",
+  "valueHashesUnchanged": "3/3",
+  "businessStateChanges": 0,
+  "lifecycleChanges": 0,
+  "roleChanges": 0,
+  "D2D3PassClaims": 0,
+  "excludedEntriesUnchanged": true,
+  "originalHashReconciliationOnly": true,
+  "replacements": 0,
+  "captureCorrection": {
+    "field": "raw local result.sourceBefore.sequence",
+    "captured": "22896904446672897",
+    "authoritativePreSequence": "22896904446672896",
+    "reason": "TransactionBuilder increments the supplied Account object in memory. The original late serialization labeled sourceBefore captured that incremented object. Preparation used the actual RPC sequence and final source sequence was checked independently before dispatch.",
+    "originalRawResultRetainedUnchanged": true,
+    "originalRawResultSha256": "5546ec03201f5933062dcf4d0fc54fd8f38a46990451c731000af4b7b3bf1f96",
+    "transactionOrSignatureChangedToCorrectRecord": false
+  },
+  "PASO0": "TTL-001-PASO-0.json",
+  "independentReadback": {
+    "task": "TTL-001",
+    "mode": "INDEPENDENT_READ_ONLY_NO_SIGNER",
+    "observedAt": "2026-10-22T14:37:20.766Z",
+    "observationLedger": 5331250,
+    "transaction": {
+      "hash": "a381e2a112500024892aaefa4b535b37b1b5e73a6d354e0986b1c106386f8bc0",
+      "status": "SUCCESS",
+      "ledger": 5331231,
+      "source": "GAYLTPD7QCN5BZMK4K3BRAIVKHZX3UQYYKADRFOMJNXOUW3VQ3ZHAE6D",
+      "timestamp": "2026-10-22T14:35:42Z",
+      "operation": "ExtendFootprintTTL",
+      "operationCount": 1,
+      "readOnly": 3,
+      "readWrite": 0,
+      "auth": 0,
+      "invokeHostFunction": 0,
+      "extendTo": 512054,
+      "hashAndSignatureVerified": true
+    },
+    "checks": [
+      {
+        "name": "historical_battery",
+        "approvedMaintenanceKey": true,
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHQmF0dGVyeQAAAAAOAAAAG0JZRS1XMS0wMDItNjQyNTcwMjAxMzRENEEwRgAAAAAB",
+        "liveUntilLedgerSeq": 5843285,
+        "valueSha256": "bde8164ea9338989c85d4636961e1c2ad0e080768a9fba197fa2518e005c5bc9",
+        "valueUnchanged": true
+      },
+      {
+        "name": "historical_request",
+        "approvedMaintenanceKey": true,
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHUmVxdWVzdAAAAAANAAAAIF1IZDqJFUE+2IndaqP4ME0QqMJR44T1KKtUYdbkyNeMAAAAAQ==",
+        "liveUntilLedgerSeq": 5843285,
+        "valueSha256": "85e7404caf8acf86f47278ca37595051142c32ba0000752d5890f3a2fab9092a",
+        "valueUnchanged": true
+      },
+      {
+        "name": "idempotency_battery",
+        "approvedMaintenanceKey": true,
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHQmF0dGVyeQAAAAAOAAAAH0JZRS1EMS1JREVNUC1GNkM1MkVENDk2RDVDNkY0MUIAAAAAAQ==",
+        "liveUntilLedgerSeq": 5843285,
+        "valueSha256": "d817017328188fe545c93e59193ae241031a7679bc4b6a313917ef6dab930421",
+        "valueUnchanged": true
+      },
+      {
+        "name": "ContractInstance",
+        "approvedMaintenanceKey": false,
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABQAAAAB",
+        "liveUntilLedgerSeq": 6703017,
+        "valueSha256": "7fc37468bd98c83bea17108c03903d0e3abee78d52db820f989c47bb80ebc278",
+        "valueUnchanged": true
+      },
+      {
+        "name": "ContractCode",
+        "approvedMaintenanceKey": false,
+        "keyXdr": "AAAAB8K8gLJtOhomWh1NGSO1A/ZVj918FIn4Gw3o9e4Y9s62",
+        "liveUntilLedgerSeq": 6703017,
+        "valueSha256": "371644f90617f775faad2aae4129836908f83a20c8a66c299252d7400f5bf5ff",
+        "valueUnchanged": true
+      },
+      {
+        "name": "Role_COLLECTOR",
+        "approvedMaintenanceKey": false,
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAwAAAA8AAAAEUm9sZQAAABIAAAAAAAAAAHmAMk+8xjoP5WjJ/QR7Cq3fhINnx/PO/nFsQsQu93O6AAAAEAAAAAEAAAABAAAADwAAAAlDb2xsZWN0b3IAAAAAAAAB",
+        "liveUntilLedgerSeq": 6703017,
+        "valueSha256": "4b481b9051202115f555d21253d87de96f16b2ad2abdfede8318c0d5e4a29f41",
+        "valueUnchanged": true
+      },
+      {
+        "name": "Role_RECYCLER",
+        "approvedMaintenanceKey": false,
+        "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAwAAAA8AAAAEUm9sZQAAABIAAAAAAAAAAFAKt47h0yflKivfDL1vuEi1hNgCVzIZxlpNosbaF1++AAAAEAAAAAEAAAABAAAADwAAAAhSZWN5Y2xlcgAAAAE=",
+        "liveUntilLedgerSeq": 6703017,
+        "valueSha256": "cdbb99502c1f9b3cfe2adff7100f222fe71a90626300d9a20962bd65b66c307f",
+        "valueUnchanged": true
+      }
+    ],
+    "excludedFourEntriesUnchanged": true,
+    "additionalSignatures": 0,
+    "additionalBroadcasts": 0
+  },
+  "privilegedActorCheck": {
+    "task": "TTL-001",
+    "mode": "READ_ONLY_CONFIG_VERIFICATION",
+    "ledger": 5331264,
+    "payer": "GAYLTPD7QCN5BZMK4K3BRAIVKHZX3UQYYKADRFOMJNXOUW3VQ3ZHAE6D",
+    "actualOnChainAdmin": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+    "actualOnChainService": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+    "versionedCollector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+    "versionedRecycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+    "payerDistinctFromAllPrivilegedActors": true,
+    "applicationMembershipCreated": false,
+    "roleTransactions": 0
+  },
+  "preSimulationDiagnostic": {
+    "observedAt": "2026-10-22T14:32:26.169Z",
+    "payer": "GAYLTPD7QCN5BZMK4K3BRAIVKHZX3UQYYKADRFOMJNXOUW3VQ3ZHAE6D",
+    "buildLedger": 5331191,
+    "extendTo": 512091,
+    "error": "cannot set authMode with non-InvokeHostFunction operations",
+    "restorePresent": false,
+    "transactionDataPresent": false,
+    "minResourceFee": null,
+    "latestLedger": 0,
+    "resultCount": 0,
+    "authCount": 0,
+    "signatures": 0,
+    "broadcasts": 0
+  },
+  "preSimulationResolution": "Application TestnetRpc.simulate supplies authMode=record for InvokeHostFunction. RPC rejects that parameter for ExtendFootprintTTL. Maintenance-only local adapter omits authMode after decoding the operation; backend/contract unchanged. No sign/broadcast occurred during rejected simulation.",
+  "feeComparison": {
+    "ownerApproximateReferenceResourceFee": "4750503",
+    "actualSimulationResourceFee": "4945484",
+    "differenceStroops": "194981",
+    "differencePercent": 4.104429,
+    "preSignTotalFeeStroops": "4946484",
+    "feeCapStroops": "10000000",
+    "actualChargedFeeStroops": "4296607",
+    "policy": "Conservative local material-change STOP threshold >10% from the approximate reference; observed ~4.1% below threshold. Cap 1 XLM applies to total/resource fee."
+  },
+  "tests": {
+    "command": "node --experimental-strip-types --test .tools/ttl-001/guards.test.mts",
+    "passed": 15,
+    "failed": 0,
+    "signaturesCreatedByGuardTests": 0,
+    "logSha256": "5d3bd1a296e7c8d2ebc45b04e4b717b83434917d45f97135701682701f55166d"
+  },
+  "sourceManifest": {
+    "custody.mts": "288a17b268412cc181c4ab9bd6d7171f70f8d6130f0722b0268eb8833cfcf19c",
+    "guards.mts": "f40de01f47f630f36737371a53fa0a3a59d102479086b819425b2314f4478415",
+    "guards.test.mts": "885f485ba525c2004c31cbeec422f152acf71f1630d47311f44b0936a415bf56",
+    "independent-read.mts": "3d633ca3a24c9de8c50792ee64046dbd9a9511fc0a885e6dc56ce94a630646b2",
+    "inspect-simulation.mts": "aa0eed1eaba1b214088a5fe623f5b9c7757017c7ef36d570cfb87e86cef44c50",
+    "run.mts": "61b767f53242f2d6fc350ee6d2253eed14b482cc054b6d9c8cc6ba33aae1fcd9",
+    "signer.mts": "6fe575eb077030134e4a1ae8893dce65f38ee2ac26d92b2e7a8cc5c985b0d375",
+    "source-check.mts": "0dc643b2df6a1b5ece122ed7ba91d77fbc07f597e35408accd364c59bad270d1",
+    "step0.mts": "e398a5fbc90889ad572429f10214024f99b7b0ff524135688402fbcee25610b8"
+  },
+  "headUnchanged": "7a4ef7b45223df237aadab0643d1cbf382dee23b",
+  "custody": "Official Stellar CLI --secure-store under new dedicated local identity. No seed/private-key export; private identity metadata and signed envelope stay ignored/local.",
+  "friendbotRequests": 1,
+  "friendbotAccounting": "Separately authorized funding requested once; the single TTL-001 maintenance transaction is distinct from Friendbot funding.",
+  "counterScope": "1 maintenance signature / 1 maintenance broadcast / 1 maintenance SUCCESS. No replacement or business transaction.",
+  "projectAcceptanceUnchanged": {
+    "D1": "12/12 owner PASS",
+    "D2": "0/6",
+    "D3": "0/5",
+    "TTL001IsAcceptanceCriterion": false
+  },
+  "productionContractWasmChanges": 0,
+  "schemaRlsAuthMembershipChanges": 0,
+  "notionChanges": 0,
+  "mainMerged": false,
+  "tagsChanged": false,
+  "D2Started": false,
+  "D3Started": false,
+  "protectedSyncModifiedTrackedCommitted": false
+}

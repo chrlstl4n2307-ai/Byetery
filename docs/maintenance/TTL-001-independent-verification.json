@@ -1,0 +1,82 @@
+{
+  "task": "TTL-001",
+  "mode": "INDEPENDENT_READ_ONLY_NO_SIGNER",
+  "observedAt": "2026-10-22T14:37:20.766Z",
+  "observationLedger": 5331250,
+  "transaction": {
+    "hash": "a381e2a112500024892aaefa4b535b37b1b5e73a6d354e0986b1c106386f8bc0",
+    "status": "SUCCESS",
+    "ledger": 5331231,
+    "source": "GAYLTPD7QCN5BZMK4K3BRAIVKHZX3UQYYKADRFOMJNXOUW3VQ3ZHAE6D",
+    "timestamp": "2026-10-22T14:35:42Z",
+    "operation": "ExtendFootprintTTL",
+    "operationCount": 1,
+    "readOnly": 3,
+    "readWrite": 0,
+    "auth": 0,
+    "invokeHostFunction": 0,
+    "extendTo": 512054,
+    "hashAndSignatureVerified": true
+  },
+  "checks": [
+    {
+      "name": "historical_battery",
+      "approvedMaintenanceKey": true,
+      "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHQmF0dGVyeQAAAAAOAAAAG0JZRS1XMS0wMDItNjQyNTcwMjAxMzRENEEwRgAAAAAB",
+      "liveUntilLedgerSeq": 5843285,
+      "valueSha256": "bde8164ea9338989c85d4636961e1c2ad0e080768a9fba197fa2518e005c5bc9",
+      "valueUnchanged": true
+    },
+    {
+      "name": "historical_request",
+      "approvedMaintenanceKey": true,
+      "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHUmVxdWVzdAAAAAANAAAAIF1IZDqJFUE+2IndaqP4ME0QqMJR44T1KKtUYdbkyNeMAAAAAQ==",
+      "liveUntilLedgerSeq": 5843285,
+      "valueSha256": "85e7404caf8acf86f47278ca37595051142c32ba0000752d5890f3a2fab9092a",
+      "valueUnchanged": true
+    },
+    {
+      "name": "idempotency_battery",
+      "approvedMaintenanceKey": true,
+      "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAgAAAA8AAAAHQmF0dGVyeQAAAAAOAAAAH0JZRS1EMS1JREVNUC1GNkM1MkVENDk2RDVDNkY0MUIAAAAAAQ==",
+      "liveUntilLedgerSeq": 5843285,
+      "valueSha256": "d817017328188fe545c93e59193ae241031a7679bc4b6a313917ef6dab930421",
+      "valueUnchanged": true
+    },
+    {
+      "name": "ContractInstance",
+      "approvedMaintenanceKey": false,
+      "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABQAAAAB",
+      "liveUntilLedgerSeq": 6703017,
+      "valueSha256": "7fc37468bd98c83bea17108c03903d0e3abee78d52db820f989c47bb80ebc278",
+      "valueUnchanged": true
+    },
+    {
+      "name": "ContractCode",
+      "approvedMaintenanceKey": false,
+      "keyXdr": "AAAAB8K8gLJtOhomWh1NGSO1A/ZVj918FIn4Gw3o9e4Y9s62",
+      "liveUntilLedgerSeq": 6703017,
+      "valueSha256": "371644f90617f775faad2aae4129836908f83a20c8a66c299252d7400f5bf5ff",
+      "valueUnchanged": true
+    },
+    {
+      "name": "Role_COLLECTOR",
+      "approvedMaintenanceKey": false,
+      "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAwAAAA8AAAAEUm9sZQAAABIAAAAAAAAAAHmAMk+8xjoP5WjJ/QR7Cq3fhINnx/PO/nFsQsQu93O6AAAAEAAAAAEAAAABAAAADwAAAAlDb2xsZWN0b3IAAAAAAAAB",
+      "liveUntilLedgerSeq": 6703017,
+      "valueSha256": "4b481b9051202115f555d21253d87de96f16b2ad2abdfede8318c0d5e4a29f41",
+      "valueUnchanged": true
+    },
+    {
+      "name": "Role_RECYCLER",
+      "approvedMaintenanceKey": false,
+      "keyXdr": "AAAABgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAABAAAAABAAAAAwAAAA8AAAAEUm9sZQAAABIAAAAAAAAAAFAKt47h0yflKivfDL1vuEi1hNgCVzIZxlpNosbaF1++AAAAEAAAAAEAAAABAAAADwAAAAhSZWN5Y2xlcgAAAAE=",
+      "liveUntilLedgerSeq": 6703017,
+      "valueSha256": "cdbb99502c1f9b3cfe2adff7100f222fe71a90626300d9a20962bd65b66c307f",
+      "valueUnchanged": true
+    }
+  ],
+  "excludedFourEntriesUnchanged": true,
+  "additionalSignatures": 0,
+  "additionalBroadcasts": 0
+}
