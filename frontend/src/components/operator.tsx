@@ -3,7 +3,9 @@ import { useState } from "react";
 import { evidencePayload, request } from "@/lib/client";
 import type { Battery } from "@/lib/types";
 import { StateSummary, useMutation } from "./battery";
+import { useWebRuntime } from "./web-runtime";
 export function Operator({ kind }: { kind: "COLLECTION" | "RECYCLING" }) {
+  const { readOnly } = useWebRuntime();
   const [id, setId] = useState(""),
     [rid, setRid] = useState(""),
     [note, setNote] = useState(
@@ -25,6 +27,13 @@ export function Operator({ kind }: { kind: "COLLECTION" | "RECYCLING" }) {
   const action = useMutation(load),
     collection = kind === "COLLECTION",
     expected = collection ? "RETURNED" : "COLLECTED";
+  if (readOnly)
+    return (
+      <section className="card">
+        <h1>Verificación de solo lectura</h1>
+        <p>Las confirmaciones no están habilitadas en esta etapa D2.</p>
+      </section>
+    );
   return (
     <>
       <p className="eyebrow">

@@ -12,6 +12,7 @@ import Link from "next/link";
 import { ApiFailure, request } from "@/lib/client";
 import type { Profile, Role } from "@/lib/types";
 import { AccountMenu } from "./account-menu";
+import { NetworkIndicator, useWebRuntime } from "./web-runtime";
 type User = { id: string; email?: string };
 type Session = {
   user: User | null;
@@ -91,10 +92,14 @@ export const navigation = [
 ] as const;
 export function RoleNavigation({ roles }: { roles: Role[] }) {
   const path = usePathname();
+  const { readOnly } = useWebRuntime();
   return (
     <nav aria-label="Navegación principal">
       {navigation
-        .filter((item) => !("role" in item) || roles.includes(item.role))
+        .filter(
+          (item) =>
+            !("role" in item) || (!readOnly && roles.includes(item.role)),
+        )
         .map((item) => (
           <Link
             key={item.href}
@@ -109,6 +114,8 @@ export function RoleNavigation({ roles }: { roles: Role[] }) {
 }
 export function Shell({ children }: { children: ReactNode }) {
   const { user, profile, refresh } = useSession();
+  const runtime = useWebRuntime();
+  const source = profile?.source ?? runtime.source;
   const router = useRouter();
   const [error, setError] = useState("");
   async function logout() {
@@ -127,14 +134,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <span className="brand-mark">↻</span> byetery
           <span className="brand-dot">.</span>
         </Link>
-        <div className="environment">
-          <span>
-            Environment: <b>DEV</b>
-          </span>
-          <span>
-            Blockchain source: <b>MOCK</b>
-          </span>
-        </div>
+        <NetworkIndicator source={source} />
         <div className="account">
           {user ? (
             <AccountMenu
@@ -156,7 +156,11 @@ export function Shell({ children }: { children: ReactNode }) {
               Cada batería tiene una historia.
               <br />
               <strong>Hagamos que termine bien.</strong>
-              <p>Entorno de demostración. Sin transacciones en Stellar.</p>
+              <p>
+                {source === "MOCK"
+                  ? "Entorno de demostración. Sin transacciones en Stellar."
+                  : "Consulta de atestaciones autorizadas en Stellar Testnet. Acciones deshabilitadas."}
+              </p>
             </div>
           </aside>
         )}
@@ -170,13 +174,17 @@ export function Shell({ children }: { children: ReactNode }) {
         </main>
       </div>
       <footer>
-        Byetery · Devoluciones trazables · Recompensas simuladas GREEN-TEST
+        Byetery · Devoluciones trazables ·{" "}
+        {source === "MOCK"
+          ? "Recompensas simuladas GREEN-TEST"
+          : "GREENTEST de Testnet, sin valor monetario"}
       </footer>
     </>
   );
 }
 export function Gate({ role, children }: { role?: Role; children: ReactNode }) {
   const { user, profile, loading, error } = useSession();
+  const { readOnly } = useWebRuntime();
   const router = useRouter();
   useEffect(() => {
     if (!loading && !user && !error) router.replace("/login");
@@ -188,6 +196,13 @@ export function Gate({ role, children }: { role?: Role; children: ReactNode }) {
         <h1>Inicia sesión para continuar</h1>
         {error && <p role="alert">{error}</p>}
         <Link href="/login">Ir a iniciar sesión</Link>
+      </section>
+    );
+  if (role && readOnly)
+    return (
+      <section className="card">
+        <h1>Verificación de solo lectura</h1>
+        <p>Las acciones de operador no están habilitadas en esta etapa D2.</p>
       </section>
     );
   if (role && !profile?.roles.includes(role))

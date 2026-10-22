@@ -1,40 +1,23 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { sessionCookieOptions, webConfiguration } from "./web-config";
 
 export function configuration() {
-  const origin = process.env.BYETERY_WEB_ORIGIN ?? "http://127.0.0.1:3000";
-  const upstream = process.env.BYETERY_API_URL ?? "http://127.0.0.1:3001";
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
-  if (
-    !/^http:\/\/127\.0\.0\.1:\d+$/.test(origin) ||
-    !/^http:\/\/127\.0\.0\.1:\d+$/.test(upstream) ||
-    url !== "https://aemxuqnnwfclzrwwiqfd.supabase.co" ||
-    !key?.startsWith("sb_publishable_")
-  )
-    throw new Error("DEV configuration required");
-  return { origin, upstream, url, key };
+  return webConfiguration(process.env);
 }
 export async function authClient() {
   const config = configuration(),
     jar = await cookies();
   return createServerClient(config.url, config.key, {
-    cookieOptions: {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: false,
-      path: "/",
-    },
+    cookieOptions: sessionCookieOptions(config.secureCookies),
     cookies: {
       getAll: () => jar.getAll(),
       setAll: (items) => {
         for (const { name, value, options } of items)
           jar.set(name, value, {
             ...options,
-            httpOnly: true,
-            sameSite: "strict",
-            secure: false,
+            ...sessionCookieOptions(config.secureCookies),
           });
       },
     },

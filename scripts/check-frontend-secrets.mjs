@@ -11,6 +11,11 @@ const allowed = new Set([
   "BYETERY_API_URL",
   "SUPABASE_URL",
   "SUPABASE_PUBLISHABLE_KEY",
+  "BYETERY_WEB_ENV",
+  "BYETERY_SOURCE",
+  "BYETERY_DEPLOYMENT_ID",
+  "BYETERY_ALLOWED_WEB_ORIGINS",
+  "BYETERY_ALLOWED_API_ORIGINS",
 ]);
 for (const key of Object.keys(local))
   if (!allowed.has(key))

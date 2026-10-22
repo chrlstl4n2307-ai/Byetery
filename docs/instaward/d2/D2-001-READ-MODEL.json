@@ -1,0 +1,26 @@
+{
+  "task": "D2-001",
+  "observedAt": "2026-10-22T17:02:48.645Z",
+  "classification": "REAL SUPABASE DEV SQL READ MODEL — NOT A FRESH CHAIN READ",
+  "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+  "contractAddress": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "view": {
+    "batteryId": "BYE-W1-002-64257020134D4A0F",
+    "source": "TESTNET",
+    "confirmedBatteryState": "RECYCLED",
+    "confirmedRewardState": "SENT",
+    "pendingOperation": null,
+    "lastAttempt": {
+      "state": "SUCCEEDED",
+      "attempt_number": 1,
+      "error_code": null
+    }
+  },
+  "readOnlyTransaction": true,
+  "authenticatedBrowserApiValidated": false,
+  "newTransactions": 0,
+  "newSignatures": 0,
+  "newBroadcasts": 0,
+  "newSupabaseRows": 0,
+  "limits": "Existing Repository.config/view exercised against the existing TESTNET deployment. No live signer/worker/RPC or Auth login. HTTPS API hosting and authenticated deployed browser verification remain pending."
+}

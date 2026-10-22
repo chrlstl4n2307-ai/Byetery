@@ -1,4 +1,5 @@
 import type { BatteryState, RewardState } from "../../../backend/src/domain";
+import type { BlockchainSource } from "./web-config";
 export type { BatteryState, RewardState };
 export type Role = "USER" | "ADMIN" | "COLLECTOR" | "RECYCLER";
 export interface PendingOperation {
@@ -15,7 +16,7 @@ export interface Battery {
   batteryId: string;
   confirmedBatteryState: BatteryState | null;
   confirmedRewardState: RewardState | null;
-  source: "MOCK";
+  source: BlockchainSource;
   pendingOperation: PendingOperation | null;
   lastAttempt: { state: string; error_code: string | null } | null;
   metadata?: { type?: string; manufacturer?: string; batch?: string };
@@ -34,12 +35,12 @@ export interface Profile {
       | "pendingOperation"
     > & { createdAt: string })[];
   hasMoreRequests: boolean;
-  source: "MOCK";
+  source: BlockchainSource;
 }
 export interface Challenge {
   challengeId: string;
   address: string;
   messageBase64: string;
   expiresAt: string;
-  source: "MOCK";
+  source: BlockchainSource;
 }

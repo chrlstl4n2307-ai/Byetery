@@ -1,4 +1,11 @@
-import { authClient, error, json, readJson, sameOrigin } from "@/lib/server";
+import {
+  authClient,
+  configuration,
+  error,
+  json,
+  readJson,
+  sameOrigin,
+} from "@/lib/server";
 export const dynamic = "force-dynamic";
 type Context = { params: Promise<{ action: string }> };
 export async function GET(_request: Request, context: Context) {
@@ -19,6 +26,8 @@ export async function POST(request: Request, context: Context) {
     const { action } = await context.params;
     if (!["login", "signup", "logout"].includes(action))
       return error(404, "NotFound");
+    if (action === "signup" && configuration().runtime.readOnly)
+      return error(403, "ReadOnlyTestnet");
     const client = await authClient();
     if (action === "logout") {
       const { error: failure } = await client.auth.signOut({ scope: "local" });

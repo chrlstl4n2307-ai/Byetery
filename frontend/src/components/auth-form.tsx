@@ -4,12 +4,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { request } from "@/lib/client";
 import { useSession } from "./session";
+import { useWebRuntime } from "./web-runtime";
 export function AuthForm({ signup = false }: { signup?: boolean }) {
+  const { source, readOnly } = useWebRuntime();
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
     [failure, setFailure] = useState("");
   const { refresh } = useSession(),
     router = useRouter();
+  if (signup && readOnly)
+    return (
+      <section className="card">
+        <h1>Acceso con cuenta existente</h1>
+        <Link href="/login">Iniciar sesión</Link>
+      </section>
+    );
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
@@ -46,15 +55,16 @@ export function AuthForm({ signup = false }: { signup?: boolean }) {
         </h1>
         <p>
           Devuelve tus baterías y sigue su recorrido, desde la solicitud hasta
-          el reciclaje verificado.
+          la atestación autorizada de reciclaje.
         </p>
         <div className="battery-art" aria-hidden="true">
           <div>+</div>
           <span>↻</span>
         </div>
         <p className="caption">
-          DEV / MOCK · Esta experiencia utiliza datos de desarrollo y
-          recompensas simuladas.
+          {source === "MOCK"
+            ? "DEV / MOCK · Esta experiencia utiliza datos de desarrollo y recompensas simuladas."
+            : "D2 PREVIEW — TESTNET READ/VERIFICATION · Consulta de atestaciones; sin acciones blockchain desde esta web."}
         </p>
       </section>
       <section className="card auth-card">
@@ -101,12 +111,14 @@ export function AuthForm({ signup = false }: { signup?: boolean }) {
             {message}
           </p>
         )}
-        <p>
-          {signup ? "¿Ya tienes cuenta?" : "¿Primera vez aquí?"}{" "}
-          <Link href={signup ? "/login" : "/signup"}>
-            {signup ? "Inicia sesión" : "Crea una cuenta"}
-          </Link>
-        </p>
+        {!readOnly && (
+          <p>
+            {signup ? "¿Ya tienes cuenta?" : "¿Primera vez aquí?"}{" "}
+            <Link href={signup ? "/login" : "/signup"}>
+              {signup ? "Inicia sesión" : "Crea una cuenta"}
+            </Link>
+          </p>
+        )}
       </section>
     </div>
   );

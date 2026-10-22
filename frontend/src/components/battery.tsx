@@ -13,6 +13,7 @@ import { ApiFailure, batteryPath, qrValue, request } from "@/lib/client";
 import type { Battery, BatteryState } from "@/lib/types";
 import { useSession } from "./session";
 import { physicalLabel, rewardLabel } from "@/lib/labels";
+import { useWebRuntime } from "./web-runtime";
 export const stages: {
   state: BatteryState;
   label: string;
@@ -32,7 +33,7 @@ export const stages: {
   {
     state: "RECYCLED",
     label: "Reciclada",
-    description: "Reciclaje confirmado",
+    description: "Atestación autorizada",
   },
 ];
 export function Timeline({ state }: { state: BatteryState | null }) {
@@ -106,7 +107,10 @@ export function StateSummary({ battery }: { battery: Battery }) {
           {battery.confirmedBatteryState
             ? "Confirmado"
             : "Pendiente de confirmación"}{" "}
-          · Entorno de demostración
+          ·{" "}
+          {battery.source === "MOCK"
+            ? "Entorno de demostración"
+            : "Stellar Testnet · Atestación autorizada"}
         </span>
       </div>
       <Timeline state={battery.confirmedBatteryState} />
@@ -129,15 +133,23 @@ export function StateSummary({ battery }: { battery: Battery }) {
           {completed ? "↻" : "✳"}
         </span>
         <div>
-          <small>RECOMPENSA SIMULADA</small>
+          <small>
+            {battery.source === "MOCK"
+              ? "RECOMPENSA SIMULADA"
+              : "RECOMPENSA TESTNET"}
+          </small>
           {completed && (
             <>
               <h2>Ciclo completado</h2>
               <p>
-                Tu batería fue reciclada correctamente en esta demostración.
+                Se registró la atestación autorizada de reciclaje. No acredita
+                por sí sola el proceso físico ni una certificación ambiental.
               </p>
               <p className="reward-amount">
-                +10 <span>GREEN-TEST</span>
+                +10{" "}
+                <span>
+                  {battery.source === "MOCK" ? "GREEN-TEST" : "GREENTEST"}
+                </span>
               </p>
             </>
           )}
@@ -159,7 +171,12 @@ export function StateSummary({ battery }: { battery: Battery }) {
           <dt>Estado de recompensa</dt>
           <dd>{battery.confirmedRewardState ?? "Sin confirmar"}</dd>
           <dt>Origen blockchain</dt>
-          <dd>{battery.source} · El mock no ejecuta el contrato Soroban.</dd>
+          <dd>
+            {battery.source} ·{" "}
+            {battery.source === "MOCK"
+              ? "El mock no ejecuta el contrato Soroban."
+              : "Proyección confirmada de Stellar Testnet; no es una consulta directa de cadena."}
+          </dd>
           {battery.pendingOperation && (
             <>
               <dt>Operación</dt>
@@ -234,6 +251,7 @@ export function useMutation(onSuccess: () => Promise<void> | void) {
   return { send, retry, busy, message, uncertain };
 }
 export function BatteryView({ id }: { id: string }) {
+  const runtime = useWebRuntime();
   const { profile, refresh } = useSession();
   const [battery, setBattery] = useState<Battery | null>(null),
     [error, setError] = useState("");
@@ -282,6 +300,7 @@ export function BatteryView({ id }: { id: string }) {
     );
   if (!battery) return <p role="status">Consultando batería…</p>;
   const own = battery.ownRequest;
+  const readOnly = runtime.readOnly || battery.source === "TESTNET";
   const canCancel =
     battery.confirmedBatteryState === "RETURNED" &&
     own?.requestState === "OPEN";
@@ -300,8 +319,13 @@ export function BatteryView({ id }: { id: string }) {
       <div className="detail-grid">
         <section className="card">
           <StateSummary battery={battery} />
+          {readOnly && (
+            <p className="notice">
+              TESTNET READ/VERIFICATION. Las mutaciones están deshabilitadas.
+            </p>
+          )}
           <div className="actions">
-            {battery.confirmedBatteryState === "REGISTERED" && (
+            {!readOnly && battery.confirmedBatteryState === "REGISTERED" && (
               <button
                 disabled={
                   action.busy ||
@@ -313,13 +337,13 @@ export function BatteryView({ id }: { id: string }) {
                 Solicitar devolución
               </button>
             )}
-            {battery.confirmedBatteryState === "REGISTERED" &&
+            {!readOnly && battery.confirmedBatteryState === "REGISTERED" &&
               !profile?.wallets.length && (
                 <Link href="/dashboard">
                   Vincula una wallet verificada para continuar
                 </Link>
               )}
-            {canCancel && (
+            {!readOnly && canCancel && (
               <button
                 className="secondary"
                 disabled={action.busy || !!battery.pendingOperation}
@@ -330,7 +354,8 @@ export function BatteryView({ id }: { id: string }) {
                 Cancelar devolución
               </button>
             )}
-            {profile?.roles.includes("ADMIN") &&
+            {!readOnly &&
+              profile?.roles.includes("ADMIN") &&
               battery.confirmedRewardState === "PENDING" && (
                 <button
                   disabled={action.busy || !!battery.pendingOperation}
@@ -385,8 +410,15 @@ export function BatteryView({ id }: { id: string }) {
   );
 }
 export function RegisterBattery() {
+  const { readOnly } = useWebRuntime();
   const [id, setId] = useState("");
   const action = useMutation(() => {});
+  if (readOnly)
+    return (
+      <p className="notice">
+        Registro deshabilitado: verificación de solo lectura.
+      </p>
+    );
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);

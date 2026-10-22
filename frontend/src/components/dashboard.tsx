@@ -6,7 +6,9 @@ import type { Challenge } from "@/lib/types";
 import { useSession } from "./session";
 import { physicalLabel, rewardLabel } from "@/lib/labels";
 import { SearchBattery, useMutation } from "./battery";
+import { useWebRuntime } from "./web-runtime";
 export function WalletLink({ signer }: { signer?: WalletSigner }) {
+  const { source, readOnly } = useWebRuntime();
   const { refresh } = useSession();
   const [address, setAddress] = useState(""),
     [challenge, setChallenge] = useState<Challenge | null>(null),
@@ -18,6 +20,13 @@ export function WalletLink({ signer }: { signer?: WalletSigner }) {
     setChallenge(null);
     setSignature("");
   });
+  if (readOnly)
+    return (
+      <section className="card">
+        <h2>Wallet</h2>
+        <p>Vinculación deshabilitada en la vista de verificación Testnet.</p>
+      </section>
+    );
   async function start() {
     setBusy(true);
     setMessage("");
@@ -61,7 +70,11 @@ export function WalletLink({ signer }: { signer?: WalletSigner }) {
       <h2>Vincular wallet</h2>
       <p>
         Prueba el control de una dirección Stellar G… con una firma Ed25519. La
-        recompensa sigue siendo MOCK.
+        recompensa{" "}
+        {source === "MOCK"
+          ? "sigue siendo MOCK"
+          : "utiliza tokens de Testnet, sin valor monetario"}
+        .
       </p>
       <label>
         Dirección pública G…
@@ -144,6 +157,8 @@ export function WalletLink({ signer }: { signer?: WalletSigner }) {
 }
 export function Dashboard() {
   const { user, profile, refresh } = useSession();
+  const runtime = useWebRuntime();
+  const source = profile?.source ?? runtime.source;
   return (
     <>
       <p className="eyebrow">CADA DEVOLUCIÓN CUENTA</p>
@@ -214,7 +229,9 @@ export function Dashboard() {
                   <p>
                     Recompensa: <b>{rewardLabel(r.confirmedRewardState)}</b>
                     {r.confirmedRewardState === "SENT"
-                      ? " · 10 GREEN-TEST"
+                      ? source === "MOCK"
+                        ? " · 10 GREEN-TEST"
+                        : " · 10 GREENTEST de Testnet"
                       : ""}
                   </p>
                   {r.pendingOperation && (
@@ -235,7 +252,11 @@ export function Dashboard() {
             <div className="card wallet-summary" key={w.id}>
               <h3>Wallet verificada ✓</h3>
               <code>{w.address}</code>
-              <p>Dirección para GREEN-TEST simulado.</p>
+              <p>
+                {source === "MOCK"
+                  ? "Dirección para GREEN-TEST simulado."
+                  : "Dirección de recompensa registrada para GREENTEST de Testnet."}
+              </p>
             </div>
           ))}
           <WalletLink />

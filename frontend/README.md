@@ -1,3 +1,13 @@
+# D2 current scope — 2026-10-22
+
+D2-001 supports authenticated API read models with explicit MOCK/TESTNET source, a pinned existing Testnet deployment, and separate LOCAL / D2_PREVIEW HTTPS configuration. TESTNET business mutations and signup are disabled in the web proxy and UI for this phase. The backend, contract and signer are unchanged.
+
+Configuration policy: `src/lib/web-config.ts`. HTTPS requires reviewed exact origin/upstream allowlists and Secure/HttpOnly/SameSite=Strict cookies. On Vercel, only Preview from `instaward/d2-web-mvp` is accepted. No backend database/service-role/signing material belongs in frontend configuration. Existing `.env.local` values remain local and unchanged.
+
+See [D2 evidence](../docs/instaward/d2/EVIDENCE-INDEX.md). A real authenticated HTTPS read API is required before Vercel deployment; frontend configuration alone is not a working public integration. The historical baseline below is preserved and its earlier “pending” statements describe that checkpoint.
+
+---
+
 # Byetery frontend MVP — DEV / MOCK
 
 > La demo MOCK valida el flujo completo de la aplicación, pero no ejecuta el contrato Soroban. El contrato Rust está validado por su propia suite de tests y su integración real queda pendiente para Stellar Testnet.
