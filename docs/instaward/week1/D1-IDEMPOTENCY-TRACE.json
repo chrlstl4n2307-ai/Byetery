@@ -1,0 +1,524 @@
+{
+  "task": "BYE-W1-006",
+  "evidenceMode": "LIVE_TESTNET_REAL_AUTHENTICATED_HTTP",
+  "trace": {
+    "task": "BYE-W1-006",
+    "stage": "COMPLETE",
+    "startedAt": "2026-10-22T03:02:35.573Z",
+    "startingHead": "da9bfa972c14c51f92d9c0278b78ee3dddfc2164",
+    "implementationHead": "aa4f0af382d1b4da6a88403149efd76f791594b2",
+    "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+    "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+    "classification": "D1.5 LIVE TESTNET IDEMPOTENCY FIXTURE",
+    "d3Eligible": false,
+    "physicalBattery": false,
+    "environmentalEvidence": false,
+    "batteryId": "BYE-D1-IDEMP-F6C52ED496D5C6F41B",
+    "key": "4a53c61d-6aeb-47fc-bbd7-67fedf62a4b5",
+    "businessPrincipal": "3dcdb0ba-2604-4f61-bfa4-5466c5e65cfb",
+    "authPrincipal": "4349b984-87ed-4a03-84dd-98703a470290",
+    "sourceUse": "UNKNOWN external/manual use; treated as shared; application lease is not external protection",
+    "registrationHash": "3df6932e53d69e18c8bf27b26349d2592d71f0c653f319a9bd1b9fcf2e06f909",
+    "manifestUtf8": "{\"batteryId\":\"BYE-D1-IDEMP-F6C52ED496D5C6F41B\",\"metadata\":{\"caseLabel\":\"ORIGINAL\",\"d3Eligible\":false,\"environmentalEvidence\":false,\"fixture\":true,\"physicalBattery\":false,\"task\":\"BYE-W1-006\"},\"version\":1}",
+    "inputHash": "52c985a7a20e09f42d85f393edb5408365d7a113260b5efa831705e7f8099f33",
+    "changedInputHash": "b0fd0ece9b7620b90979d7b7f545abd794c6152f810266b389fb2f88e8863eee",
+    "changedField": "metadata.caseLabel",
+    "originalValue": "ORIGINAL",
+    "changedValue": "CONFLICT_PROBE",
+    "pre": {
+      "operations": [],
+      "identities": [],
+      "dispatches": 0,
+      "projection": [],
+      "cache": [],
+      "records": 0,
+      "evidence": 0,
+      "returns": 0,
+      "rewards": 0,
+      "battery": null,
+      "source": {
+        "account": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+        "sequence": "20970216477425670",
+        "nativeBalance": "99952804244",
+        "ledger": 5322913
+      },
+      "chainLedger": 5322913
+    },
+    "originalHistory": {
+      "battery": {
+        "state": "RECYCLED",
+        "rewardState": "SENT",
+        "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+        "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+        "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+        "recyclingHash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451"
+      },
+      "recipientBalance": "100000000",
+      "contractBalance": "800000000",
+      "principal": [
+        {
+          "id": "dec4c6af-93b6-4e55-80ee-927c17d75217",
+          "status": "DISABLED",
+          "auth_user_id": null
+        }
+      ],
+      "memberships": [
+        {
+          "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+          "role": "ADMIN",
+          "enabled": false,
+          "actor_address": null
+        },
+        {
+          "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+          "role": "USER",
+          "enabled": false,
+          "actor_address": null
+        }
+      ],
+      "sql": [
+        {
+          "state": "RECYCLED",
+          "reward_state": "SENT",
+          "registration_hash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+          "request_id": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+          "collection_hash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+          "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+          "recycling_hash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451",
+          "confirmed_ledger": "5315915"
+        }
+      ]
+    },
+    "readinessLedger": 5322911,
+    "operationId": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+    "simulation": {
+      "ledger": 5322917,
+      "resourceFee": "444028",
+      "restorePreamble": false,
+      "authEntries": 1,
+      "resources": {
+        "instructions": 819076,
+        "diskReadBytes": 0,
+        "writeBytes": 428,
+        "readOnlyEntries": 2,
+        "readWriteEntries": 1
+      }
+    },
+    "preSign": {
+      "source": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+      "sequence": "20970216477425671",
+      "totalFee": "454028",
+      "auth": [
+        {
+          "credentialType": "sorobanCredentialsSourceAccount",
+          "address": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+          "expirationLedger": null,
+          "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+          "method": "register_battery",
+          "argumentCount": 2,
+          "subInvocations": 0
+        }
+      ],
+      "currentLedger": 5322918,
+      "expirationLedger": 5322977,
+      "timeBounds": {
+        "minTime": "0",
+        "maxTime": "1792638352"
+      }
+    },
+    "counters": {
+      "processor": 1,
+      "authorize": 1,
+      "envelope": 1,
+      "broadcast": 1
+    },
+    "sdkHash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+    "persistBeforeSend": "PASS_COMMITTED_IDENTITY_READBACK",
+    "identityHash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+    "finalSourceCheck": {
+      "sequence": "20970216477425670",
+      "balance": "99952804244",
+      "ledger": 5322923
+    },
+    "requestA": {
+      "status": 202,
+      "body": {
+        "batteryId": "BYE-D1-IDEMP-F6C52ED496D5C6F41B",
+        "confirmedBatteryState": null,
+        "confirmedRewardState": null,
+        "pendingOperation": {
+          "id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+          "state": "UNKNOWN",
+          "command": "register_battery"
+        },
+        "lastAttempt": null,
+        "source": "TESTNET",
+        "operationId": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+        "transactionHash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+        "transportState": "SUBMITTED_OR_UNKNOWN",
+        "confirmationLedger": null
+      },
+      "confirmed": true,
+      "transactionHash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+      "ledger": 5322924,
+      "actualFee": "382529"
+    },
+    "afterA": {
+      "operations": [
+        {
+          "id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+          "command": "register_battery",
+          "state": "CONFIRMED",
+          "parameters_hash": "93608991f8d435e465957030d42a38d93ede1d9dec358c57ce3ebeb3faf79b38"
+        }
+      ],
+      "identities": [
+        {
+          "operation_id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+          "transaction_hash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+          "sequence": "20970216477425671",
+          "envelope_hash": "f5ef8df7612512312a163555b6252a3c70066403e0d153a8453c5846837f8389"
+        }
+      ],
+      "dispatches": 1,
+      "projection": [
+        {
+          "state": "REGISTERED",
+          "reward_state": "NOT_ELIGIBLE",
+          "registration_hash": "3df6932e53d69e18c8bf27b26349d2592d71f0c653f319a9bd1b9fcf2e06f909",
+          "request_id": null,
+          "collector": null,
+          "collection_hash": null,
+          "recycler": null,
+          "recycling_hash": null,
+          "confirmed_ledger": "5322924"
+        }
+      ],
+      "cache": [
+        {
+          "input_hash": "52c985a7a20e09f42d85f393edb5408365d7a113260b5efa831705e7f8099f33",
+          "operation_id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+          "response_status": 201,
+          "response_body": {
+            "source": "TESTNET",
+            "batteryId": "BYE-D1-IDEMP-F6C52ED496D5C6F41B",
+            "lastAttempt": null,
+            "operationId": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+            "transportState": "PROJECTED",
+            "transactionHash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+            "pendingOperation": null,
+            "confirmationLedger": 5322924,
+            "confirmedRewardState": "NOT_ELIGIBLE",
+            "confirmedBatteryState": "REGISTERED"
+          }
+        }
+      ],
+      "records": 1,
+      "evidence": 1,
+      "returns": 0,
+      "rewards": 0,
+      "battery": {
+        "state": "REGISTERED",
+        "rewardState": "NOT_ELIGIBLE",
+        "registrationHash": "3df6932e53d69e18c8bf27b26349d2592d71f0c653f319a9bd1b9fcf2e06f909",
+        "requestId": null,
+        "collector": null,
+        "collectionHash": null,
+        "recycler": null,
+        "recyclingHash": null
+      },
+      "source": {
+        "account": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+        "sequence": "20970216477425671",
+        "nativeBalance": "99952421715",
+        "ledger": 5322931
+      },
+      "chainLedger": 5322932
+    },
+    "countsA": {
+      "processor": 1,
+      "authorize": 1,
+      "envelope": 1,
+      "broadcast": 1
+    },
+    "requestB": {
+      "status": 201,
+      "body": {
+        "source": "TESTNET",
+        "batteryId": "BYE-D1-IDEMP-F6C52ED496D5C6F41B",
+        "lastAttempt": null,
+        "operationId": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+        "transportState": "PROJECTED",
+        "transactionHash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+        "pendingOperation": null,
+        "confirmationLedger": 5322924,
+        "confirmedRewardState": "NOT_ELIGIBLE",
+        "confirmedBatteryState": "REGISTERED"
+      }
+    },
+    "afterB": {
+      "operations": [
+        {
+          "id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+          "command": "register_battery",
+          "state": "CONFIRMED",
+          "parameters_hash": "93608991f8d435e465957030d42a38d93ede1d9dec358c57ce3ebeb3faf79b38"
+        }
+      ],
+      "identities": [
+        {
+          "operation_id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+          "transaction_hash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+          "sequence": "20970216477425671",
+          "envelope_hash": "f5ef8df7612512312a163555b6252a3c70066403e0d153a8453c5846837f8389"
+        }
+      ],
+      "dispatches": 1,
+      "projection": [
+        {
+          "state": "REGISTERED",
+          "reward_state": "NOT_ELIGIBLE",
+          "registration_hash": "3df6932e53d69e18c8bf27b26349d2592d71f0c653f319a9bd1b9fcf2e06f909",
+          "request_id": null,
+          "collector": null,
+          "collection_hash": null,
+          "recycler": null,
+          "recycling_hash": null,
+          "confirmed_ledger": "5322924"
+        }
+      ],
+      "cache": [
+        {
+          "input_hash": "52c985a7a20e09f42d85f393edb5408365d7a113260b5efa831705e7f8099f33",
+          "operation_id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+          "response_status": 201,
+          "response_body": {
+            "source": "TESTNET",
+            "batteryId": "BYE-D1-IDEMP-F6C52ED496D5C6F41B",
+            "lastAttempt": null,
+            "operationId": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+            "transportState": "PROJECTED",
+            "transactionHash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+            "pendingOperation": null,
+            "confirmationLedger": 5322924,
+            "confirmedRewardState": "NOT_ELIGIBLE",
+            "confirmedBatteryState": "REGISTERED"
+          }
+        }
+      ],
+      "records": 1,
+      "evidence": 1,
+      "returns": 0,
+      "rewards": 0,
+      "battery": {
+        "state": "REGISTERED",
+        "rewardState": "NOT_ELIGIBLE",
+        "registrationHash": "3df6932e53d69e18c8bf27b26349d2592d71f0c653f319a9bd1b9fcf2e06f909",
+        "requestId": null,
+        "collector": null,
+        "collectionHash": null,
+        "recycler": null,
+        "recyclingHash": null
+      },
+      "source": {
+        "account": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+        "sequence": "20970216477425671",
+        "nativeBalance": "99952421715",
+        "ledger": 5322933
+      },
+      "chainLedger": 5322933
+    },
+    "countsB": {
+      "processor": 1,
+      "authorize": 1,
+      "envelope": 1,
+      "broadcast": 1
+    },
+    "requestC": {
+      "status": 409,
+      "body": {
+        "source": "TESTNET",
+        "error": {
+          "code": "IdempotencyConflict",
+          "message": "Request rejected: IdempotencyConflict",
+          "requestId": "247c3dfd-b0b8-40f6-bf1d-92761b520bd6"
+        }
+      }
+    },
+    "afterC": {
+      "operations": [
+        {
+          "id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+          "command": "register_battery",
+          "state": "CONFIRMED",
+          "parameters_hash": "93608991f8d435e465957030d42a38d93ede1d9dec358c57ce3ebeb3faf79b38"
+        }
+      ],
+      "identities": [
+        {
+          "operation_id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+          "transaction_hash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+          "sequence": "20970216477425671",
+          "envelope_hash": "f5ef8df7612512312a163555b6252a3c70066403e0d153a8453c5846837f8389"
+        }
+      ],
+      "dispatches": 1,
+      "projection": [
+        {
+          "state": "REGISTERED",
+          "reward_state": "NOT_ELIGIBLE",
+          "registration_hash": "3df6932e53d69e18c8bf27b26349d2592d71f0c653f319a9bd1b9fcf2e06f909",
+          "request_id": null,
+          "collector": null,
+          "collection_hash": null,
+          "recycler": null,
+          "recycling_hash": null,
+          "confirmed_ledger": "5322924"
+        }
+      ],
+      "cache": [
+        {
+          "input_hash": "52c985a7a20e09f42d85f393edb5408365d7a113260b5efa831705e7f8099f33",
+          "operation_id": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+          "response_status": 201,
+          "response_body": {
+            "source": "TESTNET",
+            "batteryId": "BYE-D1-IDEMP-F6C52ED496D5C6F41B",
+            "lastAttempt": null,
+            "operationId": "53db4b43-7654-479a-b4aa-00d6d47ad171",
+            "transportState": "PROJECTED",
+            "transactionHash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+            "pendingOperation": null,
+            "confirmationLedger": 5322924,
+            "confirmedRewardState": "NOT_ELIGIBLE",
+            "confirmedBatteryState": "REGISTERED"
+          }
+        }
+      ],
+      "records": 1,
+      "evidence": 1,
+      "returns": 0,
+      "rewards": 0,
+      "battery": {
+        "state": "REGISTERED",
+        "rewardState": "NOT_ELIGIBLE",
+        "registrationHash": "3df6932e53d69e18c8bf27b26349d2592d71f0c653f319a9bd1b9fcf2e06f909",
+        "requestId": null,
+        "collector": null,
+        "collectionHash": null,
+        "recycler": null,
+        "recyclingHash": null
+      },
+      "source": {
+        "account": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+        "sequence": "20970216477425671",
+        "nativeBalance": "99952421715",
+        "ledger": 5322934
+      },
+      "chainLedger": 5322934
+    },
+    "countsC": {
+      "processor": 1,
+      "authorize": 1,
+      "envelope": 1,
+      "broadcast": 1
+    },
+    "historicalAfter": {
+      "battery": {
+        "state": "RECYCLED",
+        "rewardState": "SENT",
+        "registrationHash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+        "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+        "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+        "collectionHash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+        "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+        "recyclingHash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451"
+      },
+      "recipientBalance": "100000000",
+      "contractBalance": "800000000",
+      "principal": [
+        {
+          "id": "dec4c6af-93b6-4e55-80ee-927c17d75217",
+          "status": "DISABLED",
+          "auth_user_id": null
+        }
+      ],
+      "memberships": [
+        {
+          "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+          "role": "ADMIN",
+          "enabled": false,
+          "actor_address": null
+        },
+        {
+          "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+          "role": "USER",
+          "enabled": false,
+          "actor_address": null
+        }
+      ],
+      "sql": [
+        {
+          "state": "RECYCLED",
+          "reward_state": "SENT",
+          "registration_hash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+          "request_id": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+          "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+          "collection_hash": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+          "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+          "recycling_hash": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451",
+          "confirmed_ledger": "5315915"
+        }
+      ]
+    },
+    "finishedAt": "2026-10-22T03:04:25.232Z"
+  },
+  "independentChecks": {
+    "freshProcessRpc": {
+      "task": "BYE-W1-006",
+      "mode": "FRESH_PROCESS_READ_ONLY_RPC_NO_SIGNER",
+      "observedAt": "2026-10-22T03:06:11.026Z",
+      "transactionHash": "c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b",
+      "confirmationLedger": 5322924,
+      "observationLedger": 5322956,
+      "batteryId": "BYE-D1-IDEMP-F6C52ED496D5C6F41B",
+      "battery": {
+        "state": "REGISTERED",
+        "rewardState": "NOT_ELIGIBLE",
+        "registrationHash": "3df6932e53d69e18c8bf27b26349d2592d71f0c653f319a9bd1b9fcf2e06f909",
+        "requestId": null,
+        "collector": null,
+        "collectionHash": null,
+        "recycler": null,
+        "recyclingHash": null
+      },
+      "source": {
+        "address": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+        "sequence": "20970216477425671",
+        "balance": "99952421715",
+        "ledger": 5322956
+      },
+      "signing": 0,
+      "broadcasts": 0
+    },
+    "independentSupabaseMcpSelect": {
+      "projectRef": "aemxuqnnwfclzrwwiqfd",
+      "batteryId": "BYE-D1-IDEMP-F6C52ED496D5C6F41B",
+      "state": "REGISTERED",
+      "rewardState": "NOT_ELIGIBLE",
+      "registrationHash": "3df6932e53d69e18c8bf27b26349d2592d71f0c653f319a9bd1b9fcf2e06f909",
+      "confirmedLedger": 5322924,
+      "operations": 1,
+      "identities": 1,
+      "dispatches": 1,
+      "returns": 0,
+      "rewards": 0,
+      "requestId": null,
+      "collector": null,
+      "recycler": null
+    }
+  }
+}

@@ -1,3 +1,30 @@
+# D1 acceptance review matrix — current BYE-W1-006
+
+OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT. **12 READY FOR VALIDATION /0 SUPPORTED /0 NOT YET SATISFIED /0 BLOCKED. Official D1 PASS0/12; D20/6; D30/5.**
+
+[BYE-W1-006 report](BYE-W1-006-REPORT.md), [results](BYE-W1-006-results.json), [live idempotency trace](D1-IDEMPOTENCY-TRACE.json). Tested implementation `aa4f0af382d1b4da6a88403149efd76f791594b2`. One fresh synthetic registration, never D3/physical/environmental evidence. Original lifecycle and retired principal untouched. Source criterion wording remains unchanged below.
+
+| Criterion | Current status | Current evidence | Owner decision |
+| --- | --- | --- | --- |
+| D1.1 | READY FOR VALIDATION | Existing004/005 evidence preserved below. | PENDING; no official PASS |
+| D1.2 | READY FOR VALIDATION | Existing004/005 evidence preserved below. | PENDING; no official PASS |
+| D1.3 | READY FOR VALIDATION | Existing004/005 evidence preserved below. | PENDING; no official PASS |
+| D1.4 | READY FOR VALIDATION | Existing004/005 evidence preserved below. | PENDING; no official PASS |
+| D1.5 | READY FOR VALIDATION | Live authenticated API A registration SUCCESS c1e2db75ed536307c02a84315c343c2615984283adb155709cee98045ee0352b, ledger5322924; B same key/body returns same operation/hash with0 additions; C only metadata.caseLabel changed gives409 with0 additions. SQL + independent chain snapshots, one identity/dispatch/effect. Fixture BYE-D1-IDEMP-F6C52ED496D5C6F41B, NOT D3. | PENDING; no official PASS |
+| D1.6 | READY FOR VALIDATION | Existing004/005 evidence preserved below. | PENDING; no official PASS |
+| D1.7 | READY FOR VALIDATION | 005 controlled on-disk before-submit integration retained; not live Soroban or OS-process-kill evidence. No relabeling. | PENDING; no official PASS |
+| D1.8 | READY FOR VALIDATION | Existing004/005 evidence preserved below. | PENDING; no official PASS |
+| D1.9 | READY FOR VALIDATION | Existing004/005 evidence preserved below. | PENDING; no official PASS |
+| D1.10 | READY FOR VALIDATION | Existing004/005 evidence preserved below. | PENDING; no official PASS |
+| D1.11 | READY FOR VALIDATION | Existing004/005 evidence preserved below. | PENDING; no official PASS |
+| D1.12 | READY FOR VALIDATION | Existing004/005 evidence preserved below. | PENDING; no official PASS |
+
+Technical readiness is not owner acceptance. D1 OWNER ACCEPTANCE REVIEW is a proposal only; STOP, no D2/D3.
+
+## Historical BYE-W1-005 assessment — preserved
+
+The following11 READY/1 BLOCKED assessment was correct at005;006 closes the gap using a separately approved fresh fixture, without rewriting005 as success.
+
 # D1 acceptance review matrix — current BYE-W1-005
 
 OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT · 2026-10-21. **11 READY FOR VALIDATION / 0 SUPPORTED / 0 NOT YET SATISFIED / 1 BLOCKED. Official D1 PASS remains0/12; D2 0/6; D3 0/5. D1 technical state INCOMPLETE.**
