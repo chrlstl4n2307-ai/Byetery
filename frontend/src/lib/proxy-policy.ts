@@ -1,7 +1,9 @@
 export function allowedApiPath(method: string, parts: string[]) {
   const path = parts.join("/");
   if (method === "GET")
-    return path === "me" || /^batteries\/[A-Z0-9-]{1,32}$/.test(path);
+    return (
+      path === "me" || /^batteries\/[A-Z0-9-]{1,32}(?:\/history)?$/.test(path)
+    );
   return (
     method === "POST" &&
     (path === "batteries" ||

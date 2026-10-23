@@ -1,0 +1,91 @@
+{
+  "task": "D2-003",
+  "classification": "REAL PERSISTED SQL + INDEPENDENT READ-ONLY TESTNET RPC",
+  "authenticationEvidence": "Existing USER-1 live SQL session/principal checked; not an authenticated deployed browser/API login",
+  "history": {
+    "batteryId": "BYE-W1-002-64257020134D4A0F",
+    "source": "TESTNET",
+    "network": "STELLAR TESTNET",
+    "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+    "contractAddress": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+    "checkedAt": "2026-10-23T00:41:50.733Z",
+    "entries": [
+      {
+        "operationId": "6868cdd0-f4e5-483b-aa80-18e26026dd5a",
+        "kind": "REGISTERED",
+        "category": "LIFECYCLE",
+        "persistedState": "CONFIRMED",
+        "recordedAt": "2026-10-19T17:21:41.637Z",
+        "confirmedAt": "2026-10-19T17:22:17.000Z",
+        "transactionHash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+        "ledger": 5281390,
+        "verification": "CONFIRMED",
+        "chainResult": "SUCCESS",
+        "reason": null
+      },
+      {
+        "operationId": "dd1408b0-7cd5-4332-bdb0-6f61ae00cf86",
+        "kind": "RETURNED",
+        "category": "LIFECYCLE",
+        "persistedState": "CONFIRMED",
+        "recordedAt": "2026-10-20T18:33:23.880Z",
+        "confirmedAt": "2026-10-20T18:34:07.000Z",
+        "transactionHash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+        "ledger": 5299532,
+        "verification": "CONFIRMED",
+        "chainResult": "SUCCESS",
+        "reason": null
+      },
+      {
+        "operationId": "4fa3fbac-84e4-4845-8abd-fbdff757cbb4",
+        "kind": "COLLECTED",
+        "category": "LIFECYCLE",
+        "persistedState": "CONFIRMED",
+        "recordedAt": "2026-10-20T18:36:01.914Z",
+        "confirmedAt": "2026-10-21T14:47:47.000Z",
+        "transactionHash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+        "ledger": 5314096,
+        "verification": "CONFIRMED",
+        "chainResult": "SUCCESS",
+        "reason": null
+      },
+      {
+        "operationId": "3ddd9ac8-cfdd-4129-8a4a-8c8f9015145c",
+        "kind": "RECYCLED",
+        "category": "LIFECYCLE",
+        "persistedState": "CONFIRMED",
+        "recordedAt": "2026-10-21T17:15:15.660Z",
+        "confirmedAt": "2026-10-21T17:15:57.000Z",
+        "transactionHash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+        "ledger": 5315874,
+        "verification": "CONFIRMED",
+        "chainResult": "SUCCESS",
+        "reason": null
+      },
+      {
+        "operationId": "f90927f6-2a66-4bb9-ae3b-5b0565d1fb7c",
+        "kind": "REWARD",
+        "category": "REWARD",
+        "persistedState": "CONFIRMED",
+        "recordedAt": "2026-10-21T17:18:35.560Z",
+        "confirmedAt": "2026-10-21T17:19:22.000Z",
+        "transactionHash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+        "ledger": 5315915,
+        "verification": "CONFIRMED",
+        "chainResult": "SUCCESS",
+        "reason": null
+      }
+    ],
+    "hasMore": false
+  },
+  "newTransactions": 0,
+  "newOperationalSignatures": 0,
+  "newBroadcasts": 0,
+  "newSupabaseRows": 0,
+  "ownerAcceptance": {
+    "D1": "12/12",
+    "D2": "0/6",
+    "D3": "0/5"
+  },
+  "limitation": "Bounded provider retention. A missing/unavailable receipt stays UNVERIFIED. No full lifecycle or environmental certification is inferred."
+}

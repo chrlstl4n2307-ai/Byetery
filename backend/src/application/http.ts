@@ -5,10 +5,13 @@ import { SupabaseAuth } from './auth.ts';
 import { Coordinator, type Action } from './coordinator.ts';
 import { AppError, requireThat, type Reply } from './errors.ts';
 import { profile, batteryDetail } from './frontend-reads.ts';
-interface Route { action?: Action; battery?: string; profile?: boolean }
+import { batteryHistory } from '../history/read.ts';
+import { RpcHistoryReader, type HistoryChainReader } from '../history/verify.ts';
+interface Route { action?: Action; battery?: string; profile?: boolean; history?: string }
 function route(method: string, path: string): Route {
   let m: RegExpExecArray|null;
   if(method==='GET' && path==='/api/me') return {profile:true};
+  if(method==='GET' && (m=/^\/api\/batteries\/([^/]+)\/history$/.exec(path))) return {history:m[1]};
   if(method==='POST' && path==='/api/batteries') return {action:{kind:'register'}};
   if(method==='POST' && path==='/api/wallet/challenge') return {action:{kind:'challenge'}};
   if(method==='POST' && path==='/api/wallet/verify') return {action:{kind:'verify'}};
@@ -23,7 +26,7 @@ async function body(req: IncomingMessage): Promise<unknown> {
   for await(const chunk of req) {size+=chunk.length; requireThat(size<=32768,400,'BodyTooLarge');chunks.push(Buffer.from(chunk));}
   try {return JSON.parse(Buffer.concat(chunks).toString('utf8'));} catch {throw new AppError(400,'InvalidJson');}
 }
-export function api(auth: SupabaseAuth, coordinator: Coordinator): Server {
+export function api(auth: SupabaseAuth, coordinator: Coordinator, historyChain: HistoryChainReader = new RpcHistoryReader()): Server {
   let period=Date.now(),count=0;
   const server=createServer({maxHeaderSize:16384},async(req,res)=>{
     const requestId=randomUUID();let reply: Reply;
@@ -33,7 +36,8 @@ export function api(auth: SupabaseAuth, coordinator: Coordinator): Server {
       requireThat(!req.headers.origin,403,'BrowserOriginNotEnabled');
       const target=route(req.method??'',(req.url??'').split('?')[0]);
       const identity=await auth.validate(req.headers.authorization);
-      if(target.profile) reply=await profile(coordinator.repo,identity);
+      if(target.history) reply={status:200,body:await batteryHistory(coordinator.repo,identity,target.history,historyChain) as unknown as Record<string,unknown>};
+      else if(target.profile) reply=await profile(coordinator.repo,identity);
       else if(target.battery) reply=await batteryDetail(coordinator.repo,identity,target.battery);
       else {
         const key=req.headers['idempotency-key'];requireThat(typeof key==='string',400,'IdempotencyKeyRequired');

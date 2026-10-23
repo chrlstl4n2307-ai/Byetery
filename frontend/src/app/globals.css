@@ -778,3 +778,26 @@ footer {
     display: none;
   }
 }
+
+.history-card {
+  margin-top: 28px;
+}
+.history-list {
+  list-style: none;
+  padding: 0;
+}
+.history-list > li {
+  padding: 20px 0 20px 20px;
+  border-left: 3px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.history-list h3 {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+.history-list code {
+  overflow-wrap: anywhere;
+}
+.history-list dd {
+  min-width: 0;
+}

@@ -15,6 +15,7 @@ import { useSession } from "./session";
 import { physicalLabel, rewardLabel } from "@/lib/labels";
 import { useWebRuntime } from "./web-runtime";
 import { TransactionLane } from "./transaction-lane";
+import { BatteryHistoryView } from "./history";
 export const stages: {
   state: BatteryState;
   label: string;
@@ -421,6 +422,9 @@ export function BatteryView({ id }: { id: string }) {
           <BatteryQR id={id} />
         </section>
       </div>
+      {battery.source === "TESTNET" && (
+        <BatteryHistoryView key={id} batteryId={id} />
+      )}
     </>
   );
 }
