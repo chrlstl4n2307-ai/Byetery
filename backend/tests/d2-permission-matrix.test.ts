@@ -49,7 +49,7 @@ test('D2-004 SQL role matrix: explicit roles, missing/disabled/unknown and wrong
  }finally{await f.db.close();}
 });
 
-test('D2-004 BLOCKER characterization: disabled USER membership still queues open_return (not acceptance)',async()=>{
+test('D2-004 GAP1 regression: disabled USER cannot queue open_return',async()=>{
  const f=await fixture();try{
   const user=f.users.USER,batteryId='BYE-D2-004-ISOLATED',wallet=randomUUID();
   await f.db.query('insert into auth.sessions values($1,$2,null)',[f.session,user]);
@@ -61,10 +61,11 @@ test('D2-004 BLOCKER characterization: disabled USER membership still queues ope
    values($1,$2,decode($3,'hex'),$4,$5,'D2-004-ISOLATED',now())`,[wallet,f.deploymentId,NETWORK_ID,user,ACTORS.admin]);
   let processed=0;
   const c=new Coordinator(f.repo,{},undefined,{process:async()=>{processed++;return {status:202,body:{testOnly:true}};}});
-  const reply=await c.mutate({authUserId:user,sessionId:f.session},{kind:'return',resource:batteryId},{walletLinkId:wallet},randomUUID());
-  // Records the existing defect. This assertion MUST NOT be described as fail-closed PASS.
-  assert.equal(reply.status,202);assert.equal(processed,1);
-  assert.equal((await f.db.query('select * from app_private.stellar_operations')).rows.length,1);
+  await assert.rejects(c.mutate({authUserId:user,sessionId:f.session},{kind:'return',resource:batteryId},{walletLinkId:wallet},randomUUID()),{status:403,code:'RoleRequired'});
+  assert.equal(processed,0);
+  assert.equal((await f.db.query('select * from app_private.stellar_operations')).rows.length,0);
+  assert.equal((await f.db.query('select * from app_private.return_requests')).rows.length,0);
+  assert.equal((await f.db.query('select * from api_private.idempotency')).rows.length,0);
   assert.equal((await f.db.query<{enabled:boolean}>('select enabled from api_private.memberships where user_id=$1',[user])).rows[0].enabled,false);
  }finally{await f.db.close();}
 });

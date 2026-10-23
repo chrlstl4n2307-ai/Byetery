@@ -33,6 +33,7 @@ test('SEP53 application wallet boundaries and transaction rollback',async t=>{
     for(const [id,c] of [[config.deploymentId,config.contractAddress],[second,contract(25)]])await db.query(`insert into chain_private.deployments(id,mode,network_id,contract_address,wasm_hash,schema_version,admin,service,reward_token,reward_amount)
       values($1,'TESTNET',decode($2,'hex'),$3,decode($4,'hex'),1,$5,$6,$7,$8)`,[id,config.networkId,c,h(1),config.admin,config.service,config.rewardToken,config.rewardAmount.toString()]);
     for(const u of [user,other]){await db.query('insert into auth.users values($1)',[u]);await db.query('insert into app_private.users(id,auth_user_id) values($1,$1)',[u]);}
+    for(const d of [config.deploymentId,second])for(const u of [user,other])await db.query("insert into api_private.memberships(deployment_id,user_id,role) values($1,$2,'USER')",[d,u]);
     await t.test('issuance binds exact deployment/user/address/network/nonce/expiry and source',async()=>{
       const a=await issue(),b=await issue();assert.equal(a.source,'TESTNET');assert.equal(a.signingScheme,'SEP53_V2');assert.equal(a.version,2);
       const rows=await db.query<Record<string,any>>('select * from api_private.wallet_challenges where id in ($1,$2)',[a.challengeId,b.challengeId]);

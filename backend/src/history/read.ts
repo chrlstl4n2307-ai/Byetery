@@ -2,6 +2,7 @@ import type { Pool } from "pg";
 import type { Identity } from "../application/auth.ts";
 import { databaseTransaction } from "../application/database.ts";
 import { requireThat } from "../application/errors.ts";
+import { requireMembership } from "../application/membership.ts";
 import { bid } from "../application/validation.ts";
 import { CONTRACT } from "../testnet/abi.ts";
 import { NETWORK_ID } from "../testnet/identity.ts";
@@ -46,12 +47,12 @@ export async function historyRows(
       requireThat(session, 401, "SessionRevoked");
       const user = (
         await db.query(
-          `select u.id from app_private.users u where u.auth_user_id=$1 and u.status='ACTIVE'
-      and exists(select 1 from api_private.memberships m where m.deployment_id=$2 and m.user_id=u.id and m.enabled)`,
-          [identity.authUserId, d],
+          `select u.id from app_private.users u where u.auth_user_id=$1 and u.status='ACTIVE'`,
+          [identity.authUserId],
         )
       ).rows[0];
       requireThat(user, 403, "HistoryReadForbidden");
+      await requireMembership(db,d,user.id,'USER','HistoryReadForbidden');
       const config = (
         await db.query(
           `select id,mode,encode(network_id,'hex') as network_id,contract_address

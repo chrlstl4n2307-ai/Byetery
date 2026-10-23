@@ -1,7 +1,7 @@
 import type { Identity } from "./auth.ts";
 import { Repository, one } from "./repository.ts";
 import { bid } from "./validation.ts";
-import type { Reply } from "./errors.ts";
+import { AppError, type Reply } from "./errors.ts";
 
 /** Authenticated, deployment-scoped read projections. No new mutation authority. */
 export async function profile(
@@ -17,6 +17,13 @@ export async function profile(
         [d, user],
       )
     ).rows.map((r) => r.role);
+    try {
+      await repo.role(db,user,'USER');
+    } catch(error) {
+      if(!(error instanceof AppError && error.status===403 && error.code==='RoleRequired'))throw error;
+      // Keep account/role status available, without querying or disclosing protected data.
+      return {status:200,body:{userId:user,roles,wallets:[],requests:[],hasMoreRequests:false,source:repo.mode,membershipStatus:'DISABLED'}};
+    }
     const wallets = (
       await db.query(
         `select id,address,verified_at as "verifiedAt" from app_private.wallet_links
@@ -46,6 +53,7 @@ export async function profile(
         requests: requests.slice(0, 100),
         hasMoreRequests: requests.length > 100,
         source: repo.mode,
+        membershipStatus: 'ENABLED',
       },
     };
   });
@@ -59,6 +67,7 @@ export async function batteryDetail(
     const user = await repo.principal(db, identity),
       id = bid(batteryId),
       d = repo.deploymentId;
+    await repo.role(db,user,'USER');
     const view = await repo.view(db, id);
     const row = await one(
       db,

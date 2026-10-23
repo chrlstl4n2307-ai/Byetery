@@ -6,6 +6,7 @@ import type { Deployment, Command } from '../domain.ts';
 import { MockStellarService } from '../mock-stellar-service.ts';
 import { requireThat } from './errors.ts';
 import {databaseHealth,databaseTransaction} from './database.ts';
+import {requireMembership} from './membership.ts';
 export type Db = PoolClient;
 export async function one<T extends QueryResultRow = QueryResultRow>(db: Db, sql: string, params: unknown[] = []): Promise<T | undefined> {
   return (await db.query<T>(sql, params)).rows[0];
@@ -29,8 +30,7 @@ export class Repository {
     return user.id as string;
   }
   async role(db: Db, user: string, role: string): Promise<string | null> {
-    const row = await one(db,'select actor_address from api_private.memberships where deployment_id=$1 and user_id=$2 and role=$3 and enabled',[this.deploymentId,user,role]);
-    requireThat(row,403,'RoleRequired'); return row.actor_address as string | null;
+    return requireMembership(db,this.deploymentId,user,role);
   }
   async config(db: Db): Promise<Deployment> {
     const r = await one(db,'select * from chain_private.deployments where id=$1',[this.deploymentId]);

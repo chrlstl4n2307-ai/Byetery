@@ -1,5 +1,7 @@
 # D2-004 — Role / permission matrix
 
+Current owner-authorized follow-up: **PARTIAL — GAP 1 FIXED / GAP 2 PENDING**. See [GAP 1 — FIXED](#gap-1--fixed) below. D2.1 remains unaccepted. The following original blocked review is retained as historical evidence at checkpoint `1d85f1a`.
+
 Status: **BLOCKED — COUNCIL REVIEW RECOMMENDED**. Read-only observations and isolated characterization tests are complete; permission requirements are NOT fully verified. This is not D2.1 acceptance and is not `IMPLEMENTED / VERIFIED / EVIDENCE READY`.
 
 Review checkpoint: `58adca0d52e076b35464f85dae924ab14707e162`, branch `instaward/d2-web-mvp`. Observations: 2026-10-22 America/Santiago (2026-10-23 UTC). D2-005 has not started.
@@ -94,3 +96,49 @@ Remote SQL writes: 0. Stellar transactions/signatures/broadcasts: 0. Contract/WA
 D1 12/12 PASS; D2 **1/6 PASS (D2.4 only, OWNER ACCEPTED)**; D3 0/5; total **13/23**. No Stellar/SDF/Instawards acceptance or payment asserted.
 
 Raven stellarDocs was consulted first. Its search found the official [simulateTransaction getter guide](https://developers.stellar.org/docs/build/guides/transactions/simulateTransaction-Deep-Dive); page content was checked directly because Raven's section lookup returned no content. Only unsigned getter simulations and read RPC methods were used; no submission occurs from a getter simulation.
+
+## GAP 1 — FIXED
+
+Owner decision after Council review: FIX REQUIRED; authorization semantics **B — continuous until broadcast**; D1 **DO NOT REOPEN**. This task implements only the GAP1 application-request boundary. Continuous authorization at transport/signing/broadcast remains **GAP2 PENDING**, not implemented or claimed here.
+
+Previous reproduced behavior: a valid session and ACTIVE principal with USER enabled=false could enqueue open_return; protected battery reads and direct wallet mutation helpers also lacked the exact USER assertion. History accepted any enabled membership. The historical evidence above is preserved.
+
+### Implemented gate
+
+- One read-only `requireMembership` helper checks a known role, exact deployment, exact application user, enabled=true and ACTIVE principal. Unknown roles reject with 403. `Repository.role` delegates to it. No membership update, reactivation or grant is performed by this helper.
+- Open return, cancellation, wallet challenge/verify and owner reward require USER before idempotency lookup, including cached HTTP responses and cached pending operation IDs. Existing ownership, wallet, lifecycle and reward checks remain required. Non-owner ADMIN reward override retains its existing ADMIN gate without requiring USER.
+- Direct WalletService.challenge/verify calls use the same helper before changing challenge state, nonce consumption, attempts or wallet links. Signature schemes, verification algorithms and challenge bytes are unchanged.
+- Protected Coordinator.get, battery detail and history require USER. History retains its read-only transaction, session check, ACTIVE check and no provisioning. An enabled ADMIN/COLLECTOR/RECYCLER sibling does not substitute for USER on protected reads.
+- GET /api/me retains Auth/session/ACTIVE validation. If USER is disabled, it returns account ID, existing enabled role names and `membershipStatus: DISABLED`, plus empty wallets/requests and hasMoreRequests=false. It does not query protected wallet/request/battery data on that path. Existing privileged role names remain available for role-only application navigation; they do not authorize USER operations.
+- Principal provisioning remains unchanged: first access may provision the default USER membership with ON CONFLICT DO NOTHING. An existing disabled membership stays disabled. Privileged registration/collection/recycling retain their separate role gates without a new USER prerequisite.
+
+### Tests and regression evidence
+
+Failing tests were written and executed before production changes. After correcting test-only fixture setup to satisfy existing deployment uniqueness and claim-binding constraints, the pre-fix run reproduced HTTP 202 instead of 403 for disabled USER open_return, missing direct wallet rejection, and protected read HTTP 200 instead of 403. No production rule or constraint was weakened to construct the fixtures.
+
+`backend/tests/d2-user-membership.test.ts` exercises the actual local HTTP API and direct service methods with a valid test Auth identity, SQL session, ACTIVE principal, enabled/disabled memberships and verified wallets in ephemeral migrated PGlite. Its operation processor is inert: accepted requests prove durable application queue creation only, not chain execution. Its injected wallet verifier is test-only; existing real Ed25519/SEP53/legacy tests remain separate.
+
+Coverage includes disabled USER return/cancel/owner reward/wallet operations; zero new operation/request/reward/accepted-idempotency side effects on rejection; unchanged request and nonce state; protected get/detail/history; sanitized /me with a privileged sibling role; enabled USER controls; wallet/request ownership; reward eligibility; cached pending-operation/HTTP-response replay after revocation; enabled idempotent replay and conflicting input; role-only ADMIN/COLLECTOR/RECYCLER; non-owner ADMIN reward override; wrong deployment, unknown role, first provisioning, revoked session and disabled principal.
+
+The original GAP1 characterization is now a rejection regression test. The GAP2 pre-sign characterization remains unchanged and still demonstrates the pending gap. Existing wallet fixtures now explicitly provision USER memberships so their wrong-user/deployment/legacy/nonce tests continue to exercise their original boundaries rather than bypass the new gate.
+
+| Verification | Result |
+| --- | --- |
+| Pre-fix trigger | FAIL as expected: disabled USER accepted at queue, wallet and protected read boundaries |
+| Focused five-file suite | 52/52 PASS |
+| Root `npm run verify` / complete backend | PASS; 184/184 backend tests, zero failures/skips, TypeScript PASS; existing Foundation and D1 tests retained |
+| Frontend relevant regression | TypeScript PASS; lint PASS; 123/123 tests in 9 files PASS; no frontend source changes |
+| Frozen Rust / WASM | Native 20 + wrong-actor integration PASS; WASM-feature 20 + wrong-actor + WASM constructor PASS; release build, fmt and Clippy PASS |
+| Python / MOCK demo | 4/4 PASS; REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT, 10 simulated GREEN-TEST |
+| Secret / whitespace audit | PASS: scoped 12-file source/test/document audit with zero findings; `git diff --check` PASS; staged contents also checked before checkpoint |
+| Read-only independent candidate review | No concrete in-scope surviving bypass or legitimate-input regression found. Reviewer loopback tests were sandbox-blocked by EACCES; the main permitted local HTTP run passed |
+
+Rebuilt WASM SHA-256 is unchanged: `c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6`. Local test logs remain ignored. No live Supabase Auth/HTTP suite was executed; these are isolated application boundary regressions, not a new remote end-to-end claim.
+
+### Effects, remaining boundary and project status
+
+Stellar transactions: **0**. Operational signatures: **0**. Broadcasts: **0**. Remote Supabase connections/mutations: **0**. No contract/WASM source, deployment, schema/RLS, role, credential or Vercel change. Existing local verification rebuilds must retain the frozen WASM hash. No USER2, new real lifecycle or reward was used.
+
+PersistedContextGuard, TestnetTransport, worker submission, signer, expiry and SUBMITTING semantics are untouched. No command-to-authority mapping for queued work, AUTHORIZATION_REVOKED state or GAP2 fix was added. The owner-selected continuous authorization policy is not yet fully enforced until that separately authorized work closes GAP2.
+
+**D2-004: PARTIAL — GAP 1 FIXED / GAP 2 PENDING.** D1 remains 12/12; D2 1/6 (D2.4 only); D3 0/5; total 13/23 internal owner acceptance. No D2.1 PASS, external organizer acceptance/payment, or D2-005 start is asserted. STOP after this task.

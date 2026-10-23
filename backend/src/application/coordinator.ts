@@ -17,13 +17,22 @@ export class Coordinator {
   readonly processor?:OperationProcessor;
   constructor(repo: Repository, faults: Faults = {}, wallets = new WalletService(repo),processor?:OperationProcessor) {this.repo=repo;this.faults=faults;this.wallets=wallets;this.processor=processor;}
   async get(identity: Identity, batteryId: string): Promise<Reply> {
-    return this.repo.transaction(async db=>{await this.repo.principal(db,identity);return {status:200,body:await this.repo.view(db,bid(batteryId))};});
+    return this.repo.transaction(async db=>{const user=await this.repo.principal(db,identity);await this.repo.role(db,user,'USER');return {status:200,body:await this.repo.view(db,bid(batteryId))};});
   }
   async mutate(identity: Identity, action: Action, input: unknown, key: string): Promise<Reply> {
     requireThat(/^[A-Za-z0-9._:-]{8,128}$/.test(key),400,'InvalidIdempotencyKey');
     const inputHash=hash(canonical({action,input}));
     const queued=await this.repo.transaction(async db=>{
       const user=await this.repo.principal(db,identity),d=this.repo.deploymentId;
+      // New requests and HTTP replays must pass current application authority before using the cache.
+      if(['return','cancel','challenge','verify'].includes(action.kind))await this.repo.role(db,user,'USER');
+      if(action.kind==='reward'){
+        const owner=await one(db,`select r.user_id from chain_private.batteries b
+          left join app_private.return_requests r on r.deployment_id=b.deployment_id and r.request_id=b.request_id and r.battery_id=b.battery_id
+          where b.deployment_id=$1 and b.battery_id=$2`,[d,bid(action.resource)]);
+        requireThat(owner,404,'BatteryNotConfirmed');
+        await this.repo.role(db,user,owner.user_id===user?'USER':'ADMIN');
+      }
       const old=await one(db,'select * from api_private.idempotency where deployment_id=$1 and user_id=$2 and key=$3',[d,user,key]);
       if(old) {
         requireThat(old.input_hash.equals(inputHash),409,'IdempotencyConflict');

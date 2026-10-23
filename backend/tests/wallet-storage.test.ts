@@ -34,6 +34,7 @@ test('wallet migration preserves issued legacy and forbids new legacy at storage
       values($1,$2,$3,decode($4,'hex'),$5,$6,'LINK_WALLET',$7,statement_timestamp()+$8*interval '1 second',statement_timestamp()+($8+600)*interval '1 second')`,[id,config.deploymentId,user,config.networkId,key.publicKey(),randomBytes(32),raw,offset]);
     await db.exec(await readFile(new URL(upgrade,dir),'utf8'));
     for(const file of files.filter(f=>f>upgrade))await db.exec(await readFile(new URL(file,dir),'utf8'));
+    await db.query("insert into api_private.memberships(deployment_id,user_id,role) values($1,$2,'USER')",[config.deploymentId,user]);
     const service=new WalletService({deploymentId:config.deploymentId,config:async()=>config} as unknown as Repository);
     const sql=db as unknown as Db;
     await t.test('migration assigns legacy scheme only to old rows',async()=>{

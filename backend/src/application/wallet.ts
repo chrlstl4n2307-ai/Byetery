@@ -5,6 +5,7 @@ import type { WalletVerifier, WalletChallenge, WalletVerification } from '../wal
 import { Repository, one, type Db } from './repository.ts';
 import { failure, requireThat, type Reply } from './errors.ts';
 import { bytes, object, text, uuid } from './validation.ts';
+import {requireMembership} from './membership.ts';
 export class Ed25519WalletVerifier implements WalletVerifier {
   async verify(challenge: WalletChallenge, proof: Uint8Array, now: Date): Promise<WalletVerification> {
     if(now >= challenge.expiresAt) return {verified:false,reason:'EXPIRED'};
@@ -23,6 +24,7 @@ export class WalletService {
   readonly repo: Repository; readonly verifier: WalletVerifier;
   constructor(repo: Repository, verifier: WalletVerifier = new Ed25519WalletVerifier()) { this.repo=repo;this.verifier=verifier; }
   async challenge(db: Db, user: string, input: unknown): Promise<Reply> {
+    await requireMembership(db,this.repo.deploymentId,user,'USER');
     const body=object(input,['address']); const address=text(body.address,56);
     try { requireThat(address.startsWith('G'),400,'InvalidWallet'); Keypair.fromPublicKey(address); }
     catch { return failure(400,'InvalidWallet'); }
@@ -34,6 +36,7 @@ export class WalletService {
     return {status:201,body:{challengeId:id,version:2,signingScheme:WALLET_SIGNING_SCHEME,address,network:'Testnet',purpose:'LINK_WALLET',messageBase64:message.toString('base64'),expiresAt:expires.toISOString(),source:this.repo.mode}};
   }
   async verify(db: Db, user: string, input: unknown): Promise<Reply> {
+    await requireMembership(db,this.repo.deploymentId,user,'USER');
     const body=object(input,['challengeId','signature']); const id=uuid(body.challengeId),proof=bytes(body.signature,64);
     const row=await one(db,'select *,clock_timestamp() as now from api_private.wallet_challenges where deployment_id=$1 and id=$2 and user_id=$3 for update',[this.repo.deploymentId,id,user]);
     requireThat(row,404,'ChallengeNotFound');
