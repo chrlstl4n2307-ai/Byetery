@@ -13,7 +13,7 @@ Branch: `instaward/d2-web-mvp`. Start: `3c7d373ec893a2e66101c4bcfbee354b3a53e434
 | Preview | [Architecture/readiness assessment](D2-VERCEL-READINESS.md) | DEFERRED — D2.6 INFRASTRUCTURE | Prior access blocker retained as research; no deployment attempted |
 | D2-VERCEL-001 | [Read-only API architecture gate](D2-VERCEL-READONLY.md) | DEFERRED — D2.6 INFRASTRUCTURE | Preserved architectural research; no reader role, grants/RLS migration, Auth experiment or Preview credentials resumed |
 
-No criterion automatically becomes PASS. Owner acceptance remains **D1 12/12; D2 0/6; D3 0/5; total 12/23**. No organizer approval/payment asserted. A local test PASS is not owner acceptance or proof of a hosted integration.
+No criterion automatically becomes PASS. By explicit [OWNER ACCEPTANCE — 2026-10-22](D2-OWNER-ACCEPTANCE.md), **D2.4 — History = PASS — OWNER ACCEPTED**. Current owner acceptance: **D1 12/12; D2 1/6; D3 0/5; total 13/23**. D2.1/D2.2/D2.3/D2.5/D2.6 are not accepted. No organizer approval/payment asserted. A local test PASS is not owner acceptance or proof of a hosted integration.
 
 Secret material, local environment files, custody audit, signing payloads and `tools/sync_obsidian.py` do not belong in this evidence package. No new lifecycle, reward, signature or broadcast is evidence for this task.
 

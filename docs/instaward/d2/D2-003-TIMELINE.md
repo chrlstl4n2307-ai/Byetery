@@ -1,5 +1,7 @@
 # D2-003 — Confirmed Testnet history / timeline
 
+> Current decision — 2026-10-22: **D2.4 History = PASS — OWNER ACCEPTED** at reviewed checkpoint `58adca0d52e076b35464f85dae924ab14707e162`. See [owner decision](D2-OWNER-ACCEPTANCE.md). The original technical report and its pre-acceptance counts below are preserved as historical evidence. Current project count: D1 12/12, D2 1/6, D3 0/5, total 13/23. No other D2 criterion is accepted.
+
 2026-10-22 (America/Santiago) · OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT.
 
 Branch: `instaward/d2-web-mvp`. Starting task checkpoint: `f9d9fc23488cb9f327959b1bc096db49473e10e6`. Frozen comparison remains `450c21b`; D2 work also compares against `3c7d373ec893a2e66101c4bcfbee354b3a53e434`. D1 branch, evidence, contract and WASM remain frozen.
