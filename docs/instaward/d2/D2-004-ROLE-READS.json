@@ -1,0 +1,139 @@
+{
+  "task": "D2-004",
+  "checkedAt": "2026-10-23T01:11:33.729Z",
+  "classification": "READ-ONLY OBSERVATION",
+  "deployment": {
+    "id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+    "mode": "TESTNET",
+    "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+    "admin": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+    "service": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX"
+  },
+  "memberships": [
+    {
+      "alias": "ADMIN",
+      "principal_status": "ACTIVE",
+      "role": "ADMIN",
+      "enabled": true,
+      "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "actor_address": null
+    },
+    {
+      "alias": "ADMIN",
+      "principal_status": "ACTIVE",
+      "role": "USER",
+      "enabled": true,
+      "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "actor_address": null
+    },
+    {
+      "alias": "ADMIN",
+      "principal_status": "DISABLED",
+      "role": "ADMIN",
+      "enabled": false,
+      "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "actor_address": null
+    },
+    {
+      "alias": "ADMIN",
+      "principal_status": "DISABLED",
+      "role": "USER",
+      "enabled": false,
+      "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "actor_address": null
+    },
+    {
+      "alias": "COLLECTOR",
+      "principal_status": "ACTIVE",
+      "role": "COLLECTOR",
+      "enabled": true,
+      "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "actor_address": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V"
+    },
+    {
+      "alias": "COLLECTOR",
+      "principal_status": "ACTIVE",
+      "role": "USER",
+      "enabled": true,
+      "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "actor_address": null
+    },
+    {
+      "alias": "RECYCLER",
+      "principal_status": "ACTIVE",
+      "role": "RECYCLER",
+      "enabled": true,
+      "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "actor_address": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2"
+    },
+    {
+      "alias": "RECYCLER",
+      "principal_status": "ACTIVE",
+      "role": "USER",
+      "enabled": true,
+      "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "actor_address": null
+    },
+    {
+      "alias": "USER1",
+      "principal_status": "ACTIVE",
+      "role": "USER",
+      "enabled": true,
+      "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "actor_address": null
+    }
+  ],
+  "contractGetter": "has_role(address, ActorRole) -> bool; no get_role exists in frozen ABI",
+  "config": {
+    "admin": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+    "service": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+    "ledger": 5338859,
+    "result": "PASS"
+  },
+  "roles": [
+    {
+      "alias": "ADMIN",
+      "address": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+      "expectedRole": "NONE",
+      "returnedRole": "NONE",
+      "ledger": 5338859,
+      "result": "PASS"
+    },
+    {
+      "alias": "SERVICE",
+      "address": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+      "expectedRole": "NONE",
+      "returnedRole": "NONE",
+      "ledger": 5338860,
+      "result": "PASS"
+    },
+    {
+      "alias": "COLLECTOR",
+      "address": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+      "expectedRole": "COLLECTOR",
+      "returnedRole": "COLLECTOR",
+      "ledger": 5338860,
+      "result": "PASS"
+    },
+    {
+      "alias": "RECYCLER",
+      "address": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2",
+      "expectedRole": "RECYCLER",
+      "returnedRole": "RECYCLER",
+      "ledger": 5338860,
+      "result": "PASS"
+    },
+    {
+      "alias": "USER1",
+      "address": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "expectedRole": "NONE",
+      "returnedRole": "NONE",
+      "ledger": 5338861,
+      "result": "PASS"
+    }
+  ],
+  "newTransactions": 0,
+  "newSignatures": 0,
+  "newBroadcasts": 0,
+  "remoteWrites": 0
+}
