@@ -114,10 +114,11 @@ export class TestnetTransport implements TransactionTransport {
     return {ledger:result.ledger,value:{state:stateMap[enumName(v.state)],rewardState:rewardMap[enumName(v.reward_state)],registrationHash:hex(v.registration_hash),
       requestId:optionalHex(v.request_id),collector:v.collector??null,collectionHash:optionalHex(v.collection_hash),recycler:v.recycler??null,recyclingHash:optionalHex(v.recycling_hash)}};
   }
-  async request(id:string):Promise<ReturnRequest|null>{const {value:v}=await this.read('get_request',[bytes(id)]);if(!v)return null;
+  private async requestEvidence(id:string):Promise<{value:ReturnRequest|null;ledger:number}>{const {value:v,ledger}=await this.read('get_request',[bytes(id)]);if(!v)return {value:null,ledger};
     const states:Record<string,ReturnRequest['state']>={Open:'OPEN',Cancelled:'CANCELLED',Confirmed:'CONFIRMED'};ensure(states[enumName(v.state)],'UnexpectedContractState');
-    return {batteryId:v.battery_id,recipient:v.recipient,state:states[enumName(v.state)]};
+    return {value:{batteryId:v.battery_id,recipient:v.recipient,state:states[enumName(v.state)]},ledger};
   }
+  async request(id:string):Promise<ReturnRequest|null>{return (await this.requestEvidence(id)).value;}
   async prepareAndSimulate(w:Work):Promise<PreparedBody>{
     ensure(w.networkId===NETWORK_ID,'WrongNetwork');ensure(w.contractAddress===CONTRACT&&w.deploymentId===this.deploymentId,'WrongContract');
     await this.guard.validate(w);const expected=invocation(w.command);ensure(w.sourceAccount===expected.signers[0],'WrongSigner');
@@ -203,5 +204,26 @@ export class TestnetTransport implements TransactionTransport {
       evidence:JSON.stringify({predicate:w.command.kind,matched,paymentProofRequired:w.command.kind==='pay_reward',
         entryStatus:keys.map(k=>{const e=entries.entries?.find(e=>e.key===k.toXDR('base64'));return e?.liveUntilLedgerSeq&&e.liveUntilLedgerSeq>=entries.latestLedger?'LIVE':'UNKNOWN';}),
         ...(applied?{facts:{battery:b.value,request:r,stateReadLedger:b.ledger}}:{})}),correlationId:i.operationId};
+  }
+  async inspectRevokedEffect(i:TransactionIdentity,w:Work):Promise<StateEvidence>{
+    await this.rpc.network();ensure(w.command.kind!=='set_role'&&w.networkId===NETWORK_ID&&w.contractAddress===CONTRACT
+      &&i.transactionHash.length===64,'OperationContextMismatch');
+    const d=await this.config(),c=w.command,b=await this.battery(c.batteryId);
+    const rid='requestId' in c?c.requestId:b.value?.requestId;
+    const request=rid?await this.requestEvidence(rid):null,r=request?.value??null;
+    // Successful getters reject restorePreamble and archivedSorobanEntries in
+    // read(). An omitted raw ledger entry alone is NEVER an absence proof.
+    let absent=false;
+    if(c.kind==='register_battery')absent=b.value===null||b.value.registrationHash!==c.registrationHash;
+    else if(c.kind==='open_return')absent=!!request&&r===null;
+    else if(c.kind==='cancel_return')absent=!!r&&r.batteryId===c.batteryId&&r.state!=='CANCELLED';
+    else if(c.kind==='confirm_collection')absent=b.value?.state==='RETURNED'&&b.value.requestId===c.requestId&&r?.state==='OPEN'&&r.batteryId===c.batteryId;
+    else if(c.kind==='confirm_recycling')absent=b.value?.state==='COLLECTED'&&b.value.requestId===c.requestId&&r?.state==='CONFIRMED'&&r.batteryId===c.batteryId;
+    else if(c.kind==='pay_reward')absent=b.value?.state==='RECYCLED'&&b.value.rewardState==='PENDING'&&r?.state==='CONFIRMED'&&r.batteryId===c.batteryId;
+    if(c.kind==='pay_reward'&&absent&&b.value)await this.guard.validateFacts?.(w,b.value,r);
+    const matched=effectMatches(c,b.value,r,d);
+    return {outcome:absent&&!matched?'NOT_APPLIED':'UNRESOLVED',stateReadLedger:Math.min(b.ledger,request?.ledger??b.ledger),
+      evidence:JSON.stringify({classification:'AUTHORIZATION_REVOKED',predicate:c.kind,gettersSucceededWithoutRestoration:true,
+        absent,matched,battery:b.value,request:r,batteryLedger:b.ledger,requestLedger:request?.ledger??null}),correlationId:i.operationId};
   }
 }

@@ -1,3 +1,4 @@
+import {disableMemberships} from '../application/revocation.ts';
 /** BYE-W1-002 operator entrypoint. Exactly ONE register; open_return is UNSIGNED ONLY. */
 import { createHash,randomBytes,randomUUID } from 'node:crypto';
 import { readFile,writeFile,mkdir } from 'node:fs/promises';
@@ -142,7 +143,8 @@ export async function run(action:string){
       if(server)await close(server);
       if(authId){await repo.transaction(async db=>{
         await db.query("update app_private.users set status='DISABLED' where auth_user_id=$1",[authId]);
-        await db.query('update api_private.memberships set enabled=false where deployment_id=$1 and user_id in (select id from app_private.users where auth_user_id=$2)',[c.deploymentId,authId]);
+        const principals=await db.query<{id:string}>('select id from app_private.users where auth_user_id=$1',[authId]);
+        for(const principal of principals.rows)await disableMemberships(db,c.deploymentId,principal.id);
       });await authRequest(config,'/admin/users/'+authId,'DELETE');}
     }
   }finally{await repo.pool.end();}

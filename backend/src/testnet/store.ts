@@ -1,5 +1,7 @@
 import type { Pool } from 'pg';
-import { ensure, type Command } from '../domain.ts';
+import { DomainError, ensure, type Command } from '../domain.ts';
+import {assertPersistedAuthority} from '../application/persisted-authority.ts';
+import {authorizationHold,reviewEvidence} from './review.ts';
 import { NETWORK_ID, type OperationContext, type TransportState, type TransactionIdentity, type Confirmation, type StateEvidence } from './identity.ts';
 import {databaseHealth,databaseTransaction} from '../application/database.ts';
 
@@ -92,13 +94,14 @@ export class TransportStore {
   async reviewRequired(c:Claim,reason:string):Promise<void>{
     await this.database.transaction(async db=>{
       const w=await this.fence(db,c);
-      await this.evidence(db,w,'STATE_READ',{classification:'REVIEWED_RESOLUTION_REQUIRED',reason});
+      await reviewEvidence(db,w,reason);
     });
   }
   async requiresReview(id:string):Promise<boolean>{
     return this.database.transaction(async db=>(await db.query(`select 1 from api_private.testnet_observations
       where operation_id=$1 and evidence->>'classification'='REVIEWED_RESOLUTION_REQUIRED' limit 1`,[id])).rows.length>0);
   }
+  authorizationRevoked(id:string){return this.database.transaction(db=>authorizationHold(db,id));}
   async preparing(c: Claim): Promise<void> {
     await this.database.transaction(async db => {
       const w=await this.fence(db,c);
@@ -148,16 +151,56 @@ export class TransportStore {
       values($1,$2,$3,$4::jsonb,$5,$6,$7)`,[w.deploymentId,w.operationId,kind,JSON.stringify(evidence),observation,confirmation,stateRead]);
   }
   async dispatchIntent(c: Claim, reviewedSameHashRetry: boolean, decisionId: string|null=null): Promise<void> {
-    await this.database.transaction(async db => {
+    const allowed=await this.database.transaction(async db => {
       const w=await this.fence(db,c);
       ensure(w.state==='READY' || (reviewedSameHashRetry && w.state==='SUBMITTED_OR_UNKNOWN'),'DispatchRequiresReview');
       ensure(!reviewedSameHashRetry || !!decisionId?.trim(),'RetryReviewRequired');
       ensure(w.dispatchAttempts<2,'RetryLimit');
       ensure((await db.query('select 1 from api_private.testnet_envelopes where operation_id=$1',[w.operationId])).rows[0],'IdentityNotDurable');
+      if(w.dispatchAttempts===0){
+        if(await authorizationHold(db,w.operationId))return false;
+        try{await assertPersistedAuthority(db,w,true);}
+        catch(error){
+          if(!(error instanceof DomainError&&error.code==='AuthorizationRevoked'))throw error;
+          await reviewEvidence(db,w,'AUTHORIZATION_REVOKED');return false;
+        }
+      }
       await db.query("update api_private.testnet_work set state='DISPATCH_INTENT',dispatch_attempts=dispatch_attempts+1 where operation_id=$1",[w.operationId]);
       await db.query("update app_private.stellar_operations set state='SUBMITTED' where id=$1 and state='READY'",[w.operationId]);
       if(w.command.kind==='pay_reward')await db.query("update app_private.reward_attempts set state='SUBMITTED' where operation_id=$1 and state='QUEUED'",[w.operationId]);
       await this.evidence(db,w,'DISPATCH_INTENT',{attempt:w.dispatchAttempts+1,reviewedSameHashRetry,decisionId});
+      return true;
+    });
+    // Throw AFTER commit so the hold evidence and membership serialization survive.
+    ensure(allowed,'AuthorizationRevoked');
+  }
+  /** Revocation-specific observations never masquerade as send/RPC failure. */
+  async revokedObservation(c:Claim,data:Record<string,unknown>,ledger:number|null=null):Promise<void>{
+    await this.database.transaction(async db=>{const w=await this.fence(db,c);
+      ensure(w.dispatchAttempts===0&&await authorizationHold(db,w.operationId),'AuthorizationHoldRequired');
+      await this.evidence(db,w,'STATE_READ',{...data,classification:'AUTHORIZATION_REVOKED'},ledger);
+    });
+  }
+  /** All external facts were obtained before this short, SQL-only fenced transaction. */
+  async resolveRevoked(c:Claim,i:TransactionIdentity,o:Extract<import('./identity.ts').Observation,{status:'NOT_FOUND'}>,e:StateEvidence):Promise<void>{
+    await this.database.transaction(async db=>{
+      const w=await this.fence(db,c);
+      // A reviewed FIRST dispatch can already have observed NOT_FOUND, without
+      // ever committing intent. Its attempt count, not that coarse state, is the boundary.
+      ensure(['READY','SUBMITTED_OR_UNKNOWN','EXPIRED_UNRESOLVED'].includes(w.state)
+        &&w.dispatchAttempts===0&&await authorizationHold(db,w.operationId),'AuthorizationHoldRequired');
+      const row=(await db.query<Row>('select * from api_private.testnet_envelopes where operation_id=$1',[w.operationId])).rows[0];
+      ensure(row&&Buffer.from(row.transaction_hash).toString('hex')===i.transactionHash,'IdentityContextMismatch');
+      ensure(BigInt(o.ledgerCloseTime)>BigInt(row.max_time)&&o.observationLedger>Number(row.prepared_ledger)
+        &&row.authorization_expirations.every((v:number)=>o.observationLedger>Number(v)),'RevocationExpiryUnproven');
+      ensure(e.outcome==='NOT_APPLIED'&&e.stateReadLedger>=o.observationLedger&&e.evidence.length>0,'RevocationEffectUnproven');
+      await this.evidence(db,w,'NOT_FOUND',{...o,classification:'AUTHORIZATION_REVOKED'},o.observationLedger);
+      await db.query("update app_private.stellar_operations set state='REJECTED',error_code='AuthorizationRevoked' where id=$1 and state='READY'",[w.operationId]);
+      if(w.command.kind==='pay_reward')await db.query("update app_private.reward_attempts set state='FAILED',error_code='AuthorizationRevoked' where operation_id=$1 and state='QUEUED'",[w.operationId]);
+      if(w.command.kind==='open_return')await db.query(`update app_private.return_requests set reservation_state='RELEASED'
+        where deployment_id=$1 and request_id=decode($2,'hex') and reservation_state='HELD'`,[w.deploymentId,w.command.requestId]);
+      await db.query("update api_private.testnet_work set state='EXPIRED_NOT_APPLIED',state_evidence=$2::jsonb where operation_id=$1",[w.operationId,JSON.stringify(e)]);
+      await this.evidence(db,w,'STATE_READ',{...e,classification:'AUTHORIZATION_REVOKED',error:'AuthorizationRevoked',terminal:true},o.observationLedger,null,e.stateReadLedger);
     });
   }
   async unknown(c: Claim, kind: 'SUBMIT_RESPONSE'|'RPC_OUTAGE',reply?:{transactionHash:string;status?:string;ledger?:number;sourceCheck?:{sequence:string;balance:string;ledger:number}|null}): Promise<void> {

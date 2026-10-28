@@ -12,6 +12,8 @@ export interface TransactionTransport {
   submit(identity: TransactionIdentity): Promise<{ transactionHash: string;status?:string;ledger?:number }>;
   observe(identity: TransactionIdentity): Promise<Observation>;
   inspectExpiredEffect(identity: TransactionIdentity, context: Work): Promise<StateEvidence>;
+  /** Stricter non-application proof for a pre-dispatch authorization hold. */
+  inspectRevokedEffect?(identity:TransactionIdentity,context:Work):Promise<StateEvidence>;
   /** Evidence that submission/rebroadcast is still within trusted ledger/time validity. */
   validity(identity: TransactionIdentity): Promise<{ ledger: number; closeTime: string }>;
   /** Immediately before broadcast, after committed dispatch intent. */
@@ -44,6 +46,12 @@ export class DurableTransactionWorker {
     const existing=await this.store.work(id);
     if(resolved(existing.state)){ensure(!review,'UnsignedRecoveryMismatch');return existing.state;}
     const priorIdentity=await this.store.identity(id);
+    if(existing.dispatchAttempts===0&&await this.store.authorizationRevoked(id)){
+      ensure(priorIdentity&&!review,'AuthorizationRevoked');
+      const claim=await this.store.claim(id,worker);
+      try{await this.reconcileRevoked(claim,priorIdentity);return (await this.store.work(id)).state;}
+      finally{await this.store.release(claim);}
+    }
     const classification=recoveryClassification(existing,priorIdentity);
     if(review)ensure(classification==='UNSIGNED_PREPARATION_INTERRUPTED'&&existing.contextHash===review.contextHash,'UnsignedRecoveryMismatch');
     else ensure(classification!=='UNSIGNED_PREPARATION_INTERRUPTED','ExplicitUnsignedResumeRequired');
@@ -150,6 +158,32 @@ export class DurableTransactionWorker {
     await this.store.observed(claim,state,'STATE_READ',evidence);
     if(state==='CONFIRMED_SUCCESS')await this.store.project(claim,this.project);
   }
+  /** Never dispatches, re-signs, or weakens a hold after role reactivation. */
+  private async reconcileRevoked(claim:Claim,identity:TransactionIdentity):Promise<void>{
+    let observation:Observation;
+    try{observation=await this.transport.observe(identity);}
+    catch{await this.store.revokedObservation(claim,{reason:'ObservationUnavailable'});return;}
+    if(observation.status!=='NOT_FOUND'){
+      // An external submission is outside the revocation threat model. Preserve
+      // the hold for reviewed resolution; never invent an authorization failure receipt.
+      await this.store.revokedObservation(claim,{reason:'ExternalChainReceiptRequiresReview',status:observation.status,
+        transactionHash:identity.transactionHash},observation.confirmation.observationLedger);return;
+    }
+    await this.store.revokedObservation(claim,{reason:'NotFound',transactionHash:identity.transactionHash,
+      ledgerCloseTime:observation.ledgerCloseTime},observation.observationLedger);
+    if(!(BigInt(observation.ledgerCloseTime)>BigInt(identity.maxTime)
+      &&identity.authorizationExpirations.every(v=>observation.observationLedger>v)))return;
+    let evidence:StateEvidence;
+    try{
+      const inspect=this.transport.inspectRevokedEffect?.bind(this.transport)??this.transport.inspectExpiredEffect.bind(this.transport);
+      evidence=await inspect(identity,await this.store.work(identity.operationId));
+    }
+    catch{await this.store.revokedObservation(claim,{reason:'StateReadUnavailable'});return;}
+    if(evidence.outcome!=='NOT_APPLIED'||evidence.stateReadLedger<observation.observationLedger||!evidence.evidence){
+      await this.store.revokedObservation(claim,{reason:'EffectNotProvenAbsent',outcome:evidence.outcome},evidence.stateReadLedger);return;
+    }
+    await this.store.resolveRevoked(claim,identity,observation,evidence);
+  }
   /** Explicit reviewed bounded SAME identity retry; never prepares/signs a replacement. */
   async retrySameHash(review: ReviewedRetry, worker: string): Promise<TransportState> {
     ensure(review.decisionId.trim().length>0,'RetryReviewRequired');
@@ -157,6 +191,9 @@ export class DurableTransactionWorker {
     ensure(i && i.transactionHash===review.transactionHash,'RetryIdentityMismatch');
     const c=await this.store.claim(review.operationId,worker);
     try {
+      if((await this.store.work(i.operationId)).dispatchAttempts===0&&await this.store.authorizationRevoked(i.operationId)){
+        await this.reconcileRevoked(c,i);throw new DomainError('AuthorizationRevoked');
+      }
       // Reconcile before even a reviewed rebroadcast; it may already be applied.
       await this.reconcile(c,i);
       const w=await this.store.work(i.operationId);

@@ -81,7 +81,8 @@ export async function harness(db:PGlite, reward=false, sourceKey?:Keypair,collec
     values($1,$2,decode($3,'hex'),'COLLECTION',1,1,decode($4,'hex'),decode($5,'hex'),decode($6,'hex'),'fixture-only',$7)`,[d,battery,h(10),raw.toString('hex'),payloadHash,commitment,u]);
   const command:Command=collection?{kind:'confirm_collection',batteryId:battery,requestId:h(10),collector,evidence:ev}:reward?{kind:'pay_reward',batteryId:battery}:{kind:'register_battery',batteryId:battery,registrationHash:h(1)};
   await db.query(`insert into app_private.stellar_operations(id,deployment_id,principal,idempotency_key,command,battery_id,parameters,parameters_hash,request_id)
-    values($1::uuid,$2,'fixture',$1::text,$3,$4,$5,decode($6,'hex'),decode($7,'hex'))`,[op,d,command.kind,battery,JSON.stringify(command),h(1),collection?h(10):null]);
+    values($1::uuid,$2,$8,$1::text,$3,$4,$5,decode($6,'hex'),decode($7,'hex'))`,[op,d,command.kind,battery,JSON.stringify(command),h(1),collection?h(10):null,u]);
+  await db.query('insert into api_private.memberships(deployment_id,user_id,role,actor_address) values($1,$2,$3,$4)',[d,u,collection?'COLLECTOR':reward?'USER':'ADMIN',collection?collector:null]);
   if(reward)await db.query(`insert into app_private.reward_attempts(deployment_id,battery_id,request_id,operation_id,attempt_number) values($1,$2,decode($3,'hex'),$4,1)`,[d,battery,h(10),op]);
   const adapter:TransportDatabase={transaction: async work=>db.transaction(async tx=>{
     inTransaction++;

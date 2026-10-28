@@ -11,6 +11,7 @@ import { SupabaseAuth } from './auth.ts';
 import { Coordinator, type Faults } from './coordinator.ts';
 import { api, listen, close } from './http.ts';
 import { requireThat } from './errors.ts';
+import {disableMemberships} from './revocation.ts';
 export interface DevUser { id: string; token: string; key: Keypair; role: string; businessId?: string }
 export async function authRequest(config: Settings, path: string, method: string, body?: unknown, token?: string): Promise<Record<string, any>> {
   const key=token?config.publicKey:config.serverKey;
@@ -35,7 +36,7 @@ export async function fixture(faults: Faults = {}) {
     for(const u of Object.values(users)) {
       if(u.businessId) await repo.transaction(async db=>{
         await db.query("update app_private.users set status='DISABLED' where id=$1",[u.businessId]);
-        await db.query('update api_private.memberships set enabled=false where deployment_id=$1 and user_id=$2',[config.deploymentId,u.businessId]);
+        await disableMemberships(db,config.deploymentId,u.businessId!);
         await db.query('update app_private.wallet_links set revoked_at=clock_timestamp() where deployment_id=$1 and user_id=$2 and revoked_at is null',[config.deploymentId,u.businessId]);
       });
       if(u.token) {

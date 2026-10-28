@@ -15,8 +15,7 @@ import { DurableTransactionWorker,type ReviewedUnsignedResume } from './worker.t
 import {databaseHealth} from '../application/database.ts';
 import { string } from './abi.ts';
 import { Address, xdr } from '@stellar/stellar-sdk';
-import {requiredAuthority} from '../application/authority.ts';
-import {AppError} from '../application/errors.ts';
+import {assertPersistedAuthority} from '../application/persisted-authority.ts';
 
 const hash=(c:unknown)=>createHash('sha256').update(canonical(c)).digest('hex');
 /** Reads committed logical state immediately before each signing phase. */
@@ -40,30 +39,7 @@ export class PersistedContextGuard implements ContextGuard {
     const manifest=await one(db,"select encode(wasm_hash,'hex') as hash from chain_private.deployments where id=$1",[w.deploymentId]);
     ensure(w.deploymentId===d.deploymentId&&w.networkId===d.networkId&&w.contractAddress===d.contractAddress,'OperationContextMismatch');
     ensure(manifest?.hash===WASM&&op&&op.hash===w.contextHash&&hash(op.parameters)===w.contextHash&&hash(w.command)===w.contextHash,'OperationContextMismatch');
-    ensure(op.principal===w.principal&&typeof op.principal==='string'
-      &&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(op.principal),'AuthorizationRevoked');
-    ensure(op.command===w.command.kind&&'batteryId' in w.command&&op.battery_id===w.command.batteryId,'OperationContextMismatch');
-    let owner:string|null=null;
-    if(w.command.kind==='cancel_return'){
-      const r=await one(db,`select user_id from app_private.return_requests where deployment_id=$1
-        and request_id=decode($2,'hex') and battery_id=$3`,[w.deploymentId,w.command.requestId,w.command.batteryId]);
-      ensure(r&&r.user_id===op.principal,'AuthorizationRevoked');owner=r.user_id;
-    }else if(w.command.kind==='pay_reward'){
-      // These three bindings are immutable in Foundation. Never switch to a newer
-      // battery claim or fall back from revoked owner USER authority to ADMIN.
-      const r=await one(db,`select r.user_id from app_private.reward_attempts a
-        join app_private.return_requests r on r.deployment_id=a.deployment_id and r.request_id=a.request_id and r.battery_id=a.battery_id
-        join chain_private.batteries b on b.deployment_id=a.deployment_id and b.battery_id=a.battery_id and b.request_id=a.request_id
-        where a.deployment_id=$1 and a.operation_id=$2 and a.battery_id=$3`,[w.deploymentId,w.operationId,w.command.batteryId]);
-      ensure(r,'AuthorizationRevoked');owner=r.user_id;
-    }
-    const authority=requiredAuthority(w.command.kind,op.principal,owner);
-    let actor:string|null;
-    try{actor=await this.repo.role(db,op.principal,authority.role);}
-    catch(error){if(error instanceof AppError&&error.status===403)throw new DomainError('AuthorizationRevoked');throw error;}
-    if(authority.ownsRequest)ensure(owner===op.principal,'AuthorizationRevoked');
-    if(authority.actorField==='collector')ensure(w.command.kind==='confirm_collection'&&actor===w.command.collector,'AuthorizationRevoked');
-    if(authority.actorField==='recycler')ensure(w.command.kind==='confirm_recycling'&&actor===w.command.recycler,'AuthorizationRevoked');
+    await assertPersistedAuthority(db,w);
     ensure(invocation(w.command).signers[0]===w.sourceAccount,'WrongSigner');
     if(w.command.kind==='open_return'){
       const r=await one(db,`select recipient_snapshot,battery_id,reservation_state from app_private.return_requests
@@ -133,6 +109,7 @@ export class TestnetStellarService implements StellarService,OperationProcessor 
       where deployment_id=$1 and transaction_hash=decode($2,'hex')`,[s.deploymentId,s.reference])).rows[0]);
     ensure(row,'IdentityNotDurable');const w=await this.store.work(row.operation_id);
     if(w.state==='CONFIRMED_FAILED')return {status:'FAILED',error:'ConfirmedChainFailure'};
+    if(w.state==='EXPIRED_NOT_APPLIED'&&await this.store.authorizationRevoked(row.operation_id))return {status:'FAILED',error:'AuthorizationRevoked'};
     if(w.state==='PROJECTED')return {status:'SUCCESS',ledger:w.confirmation?.confirmationLedger??w.stateEvidence!.stateReadLedger,
       result:{operationId:w.operationId,transactionHash:s.reference,source:'TESTNET',reward:w.confirmation?.facts?.reward??null}};
     return {status:'UNKNOWN'};
@@ -145,7 +122,7 @@ export class TestnetStellarService implements StellarService,OperationProcessor 
     return this.processReviewed(review.operationId,review);
   }
   private async processReviewed(id:string,unsignedReview?:ReviewedUnsignedResume):Promise<Reply>{
-    const op=await this.repo.transaction(db=>one(db,'select parameters,state from app_private.stellar_operations where deployment_id=$1 and id=$2',[this.repo.deploymentId,id]));
+    const op=await this.repo.transaction(db=>one(db,'select parameters,state,error_code from app_private.stellar_operations where deployment_id=$1 and id=$2',[this.repo.deploymentId,id]));
     ensure(op,'OperationNotFound');
     try{
       const existing=await this.store.database.transaction(async db=>(await db.query('select 1 from api_private.testnet_work where operation_id=$1',[id])).rows.length>0);
@@ -158,15 +135,17 @@ export class TestnetStellarService implements StellarService,OperationProcessor 
       return {status:503,body:{source:'TESTNET',operationId:id,error:{code:'TestnetOperationUnresolved'}}};
     }
     const w=await this.store.work(id),i=await this.store.identity(id),review=await this.store.requiresReview(id);
+    const revoked=w.dispatchAttempts===0&&await this.store.authorizationRevoked(id);
     return this.repo.transaction(async db=>{
       const view=await this.repo.view(db,(op.parameters as Exclude<Command,{kind:'set_role'}>).batteryId);
-      const body={...view,operationId:id,transactionHash:i?.transactionHash??null,transportState:review?'REVIEWED_RESOLUTION_REQUIRED':w.state,
+      const body={...view,operationId:id,transactionHash:i?.transactionHash??null,transportState:review&&w.state!=='EXPIRED_NOT_APPLIED'?'REVIEWED_RESOLUTION_REQUIRED':w.state,
+        ...(revoked?{error:{code:'AuthorizationRevoked'}}:{}),
         confirmationLedger:w.confirmation?.confirmationLedger??null,...('requestId' in w.command?{requestId:w.command.requestId}:{}),
         ...(w.confirmation?.facts?.reward?{reward:{state:'SENT',...w.confirmation.facts.reward}}:{})};
       const done=w.state==='PROJECTED';
       if(done)await db.query(`update api_private.idempotency set response_status=$3,response_body=$4::jsonb where deployment_id=$1 and operation_id=$2
         and response_body is null`,[this.repo.deploymentId,id,w.command.kind==='register_battery'||w.command.kind==='open_return'?201:200,JSON.stringify(body)]);
-      return {status:done?(w.command.kind==='register_battery'||w.command.kind==='open_return'?201:200):w.state==='CONFIRMED_FAILED'?409:202,body};
+      return {status:revoked?403:done?(w.command.kind==='register_battery'||w.command.kind==='open_return'?201:200):w.state==='CONFIRMED_FAILED'?409:202,body};
     });
   }
 }
