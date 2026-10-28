@@ -118,6 +118,10 @@ export class Coordinator {
         const requestId=rid(action.resource);
         const role=requiredAuthority(commandForAction[action.kind],user).role;
         const actor=(await this.repo.role(db,user,role))!;
+        // Reject stale/ineligible requests before immutable evidence or durable work.
+        requireThat(battery.state===(action.kind==='collection'?'RETURNED':'COLLECTED')
+          &&battery.request_id&&Buffer.from(battery.request_id).toString('hex')===requestId
+          &&claim?.reservation_state===(action.kind==='collection'?'HELD':'CONSUMED'),409,'InvalidState');
         const ev=await this.evidence(db,user,batteryId,requestId,action.kind==='collection'?'COLLECTION':'RECYCLING',body.evidence);
         command=action.kind==='collection'?{kind:'confirm_collection',batteryId,requestId,collector:actor,evidence:ev}
           :{kind:'confirm_recycling',batteryId,requestId,recycler:actor,evidence:ev};
