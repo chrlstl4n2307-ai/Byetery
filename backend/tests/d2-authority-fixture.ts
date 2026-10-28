@@ -6,12 +6,12 @@ import {Repository} from '../src/application/repository.ts';
 import {ACTORS,CONTRACT,TOKEN,WASM} from '../src/testnet/abi.ts';
 import {NETWORK_ID} from '../src/testnet/identity.ts';
 // All writes below are ephemeral PGlite fixtures. No RPC, signer or remote database.
-export async function permissionFixture(){
+export async function permissionFixture(mode:'MOCK'|'TESTNET'='TESTNET'){
  const db=await localDb(),deploymentId=randomUUID(),session=randomUUID();
  const users={USER:randomUUID(),ADMIN:randomUUID(),COLLECTOR:randomUUID(),RECYCLER:randomUUID()};
  await db.exec('create table auth.sessions(id uuid primary key,user_id uuid,not_after timestamptz)');
  await db.query(`insert into chain_private.deployments(id,mode,network_id,contract_address,wasm_hash,schema_version,admin,service,reward_token,reward_amount)
-  values($1,'TESTNET',decode($2,'hex'),$3,decode($4,'hex'),1,$5,$6,$7,100000000)`,[deploymentId,NETWORK_ID,CONTRACT,WASM,ACTORS.admin,ACTORS.service,TOKEN]);
+  values($1,$8,decode($2,'hex'),$3,decode($4,'hex'),1,$5,$6,$7,100000000)`,[deploymentId,NETWORK_ID,CONTRACT,WASM,ACTORS.admin,ACTORS.service,TOKEN,mode]);
  for(const [role,user] of Object.entries(users)){
   await db.query('insert into auth.users values($1)',[user]);
   await db.query('insert into app_private.users(id,auth_user_id) values($1,$1)',[user]);
@@ -24,6 +24,6 @@ export async function permissionFixture(){
    const result=await db.query<Record<string,unknown>>(encoded,params?.map(v=>v instanceof Uint8Array?Buffer.from(v).toString('hex'):v));
    return {...result,rows:result.rows.map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k,v instanceof Uint8Array?Buffer.from(v):v])))};
   },release:()=>{}})}) as unknown as Pool;
- const repo=Object.assign(Object.create(Repository.prototype) as Repository,{pool,deploymentId,mode:'TESTNET' as const});
+ const repo=Object.assign(Object.create(Repository.prototype) as Repository,{pool,deploymentId,mode});
  return {db,repo,users,deploymentId,session};
 }

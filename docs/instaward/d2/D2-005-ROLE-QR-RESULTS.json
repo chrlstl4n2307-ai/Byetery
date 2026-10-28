@@ -1,0 +1,913 @@
+{
+  "task": "D2-005",
+  "classification": "OFFICIAL_INSTAWARD_SPRINT",
+  "date": "2026-10-28",
+  "formalBase": "1410602c39b27002b7456df15bebab4131dfd95d",
+  "evidenceMode": "LOCAL_FIXTURE_AUTH_HTTP_SQL_MOCK_NO_LIVE_STELLAR",
+  "qr": {
+    "payload": "/battery/BYE-D2-005-QR",
+    "batteryId": "BYE-D2-005-QR",
+    "source": "MOCK",
+    "httpStatus": 200,
+    "encoder": "Actual production BatteryQR / QRCodeSVG; input inspected, SVG rendered and target navigated"
+  },
+  "backend": {
+    "focusedTests": 29,
+    "forbiddenAssertions": 54,
+    "results": [
+      {
+        "case": "Known QR lookup",
+        "payload": "/battery/BYE-D2-005-QR",
+        "batteryId": "BYE-D2-005-QR",
+        "source": "MOCK",
+        "actual": 200
+      },
+      {
+        "case": "USER cannot register",
+        "principal": "USER",
+        "method": "POST",
+        "path": "/api/batteries",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "USER cannot collect",
+        "principal": "USER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/collection",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "USER cannot recycle",
+        "principal": "USER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/recycling",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "ADMIN does not inherit collector",
+        "principal": "ADMIN",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/collection",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "ADMIN does not inherit recycler",
+        "principal": "ADMIN",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/recycling",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "COLLECTOR cannot register",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/batteries",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "COLLECTOR cannot recycle",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/recycling",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "RECYCLER cannot register",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/batteries",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "RECYCLER cannot collect",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/collection",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "USER cannot cancel another claim",
+        "principal": "OTHER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/cancel",
+        "expected": 403,
+        "actual": 403,
+        "error": "RequestOwnerRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "USER cannot use another wallet",
+        "principal": "USER",
+        "method": "POST",
+        "path": "/api/batteries/BYE-D2-005-QR/returns",
+        "expected": 409,
+        "actual": 409,
+        "error": "VerifiedWalletRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Non-owner USER cannot reward",
+        "principal": "OTHER",
+        "method": "POST",
+        "path": "/api/batteries/BYE-D2-005-ADMIN-REWARD/reward",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route USER",
+        "principal": "USER",
+        "method": "POST",
+        "path": "/api/set_role",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route USER",
+        "principal": "USER",
+        "method": "POST",
+        "path": "/api/roles",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route USER",
+        "principal": "USER",
+        "method": "POST",
+        "path": "/api/batteries/BYE-D2-005-QR/set_role",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route ADMIN",
+        "principal": "ADMIN",
+        "method": "POST",
+        "path": "/api/set_role",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route ADMIN",
+        "principal": "ADMIN",
+        "method": "POST",
+        "path": "/api/roles",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route ADMIN",
+        "principal": "ADMIN",
+        "method": "POST",
+        "path": "/api/batteries/BYE-D2-005-QR/set_role",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route COLLECTOR",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/set_role",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route COLLECTOR",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/roles",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route COLLECTOR",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/batteries/BYE-D2-005-QR/set_role",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route RECYCLER",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/set_role",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route RECYCLER",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/roles",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "No role route RECYCLER",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/batteries/BYE-D2-005-QR/set_role",
+        "expected": 404,
+        "actual": 404,
+        "error": "RouteNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Anonymous + QR /api/batteries/BYE-D2-005-QR",
+        "principal": "ANONYMOUS",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-QR",
+        "expected": 401,
+        "actual": 401,
+        "error": "AuthenticationRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Anonymous + QR /api/batteries",
+        "principal": "ANONYMOUS",
+        "method": "POST",
+        "path": "/api/batteries",
+        "expected": 401,
+        "actual": 401,
+        "error": "AuthenticationRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Anonymous + QR /api/batteries/BYE-D2-005-QR/returns",
+        "principal": "ANONYMOUS",
+        "method": "POST",
+        "path": "/api/batteries/BYE-D2-005-QR/returns",
+        "expected": 401,
+        "actual": 401,
+        "error": "AuthenticationRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Anonymous + QR /api/returns/BYE-D2-005-QR/collection",
+        "principal": "ANONYMOUS",
+        "method": "POST",
+        "path": "/api/returns/BYE-D2-005-QR/collection",
+        "expected": 401,
+        "actual": 401,
+        "error": "AuthenticationRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Anonymous + QR /api/returns/BYE-D2-005-QR/recycling",
+        "principal": "ANONYMOUS",
+        "method": "POST",
+        "path": "/api/returns/BYE-D2-005-QR/recycling",
+        "expected": 401,
+        "actual": 401,
+        "error": "AuthenticationRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Anonymous + QR /api/batteries/BYE-D2-005-QR/reward",
+        "principal": "ANONYMOUS",
+        "method": "POST",
+        "path": "/api/batteries/BYE-D2-005-QR/reward",
+        "expected": 401,
+        "actual": 401,
+        "error": "AuthenticationRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Injected actor COLLECTOR",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/collection",
+        "expected": 400,
+        "actual": 400,
+        "error": "UnexpectedField",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Foreign evidence COLLECTOR",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/collection",
+        "expected": 422,
+        "actual": 422,
+        "error": "EvidenceBatteryMismatch",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Unknown request COLLECTOR",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/collection",
+        "expected": 404,
+        "actual": 404,
+        "error": "RequestNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Foreign deployment request COLLECTOR",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/collection",
+        "expected": 404,
+        "actual": 404,
+        "error": "RequestNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Injected actor RECYCLER",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/recycling",
+        "expected": 400,
+        "actual": 400,
+        "error": "UnexpectedField",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Foreign evidence RECYCLER",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/recycling",
+        "expected": 422,
+        "actual": 422,
+        "error": "EvidenceBatteryMismatch",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Unknown request RECYCLER",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/recycling",
+        "expected": 404,
+        "actual": 404,
+        "error": "RequestNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Foreign deployment request RECYCLER",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/recycling",
+        "expected": 404,
+        "actual": 404,
+        "error": "RequestNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Disabled USER",
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-QR",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Disabled ADMIN",
+        "principal": "ADMIN",
+        "method": "POST",
+        "path": "/api/batteries",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Disabled COLLECTOR",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/collection",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Disabled RECYCLER",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/recycling",
+        "expected": 403,
+        "actual": 403,
+        "error": "RoleRequired",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Malformed bye-d2-005-qr",
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/bye-d2-005-qr",
+        "expected": 400,
+        "actual": 400,
+        "error": "InvalidBatteryId",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Malformed AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "expected": 400,
+        "actual": 400,
+        "error": "InvalidInput",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Malformed BYE_000001",
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/BYE_000001",
+        "expected": 400,
+        "actual": 400,
+        "error": "InvalidBatteryId",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Malformed ..%2Fadmin",
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/..%2Fadmin",
+        "expected": 400,
+        "actual": 400,
+        "error": "InvalidBatteryId",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Malformed BYE%2F..%2Fadmin",
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/BYE%2F..%2Fadmin",
+        "expected": 400,
+        "actual": 400,
+        "error": "InvalidBatteryId",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Malformed BYE%3Frole%3DADMIN",
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/BYE%3Frole%3DADMIN",
+        "expected": 400,
+        "actual": 400,
+        "error": "InvalidBatteryId",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Unknown identifier",
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-MISSING",
+        "expected": 404,
+        "actual": 404,
+        "error": "BatteryNotFound",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Forged principal and role",
+        "principal": "USER",
+        "method": "POST",
+        "path": "/api/batteries/BYE-D2-005-QR/returns",
+        "expected": 400,
+        "actual": 400,
+        "error": "UnexpectedField",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Stale collection claim",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/collection",
+        "expected": 409,
+        "actual": 409,
+        "error": "InvalidState",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Stale recycling claim",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/recycling",
+        "expected": 409,
+        "actual": 409,
+        "error": "InvalidState",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Collector cannot repeat collected request",
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/collection",
+        "expected": 409,
+        "actual": 409,
+        "error": "InvalidState",
+        "zeroBusinessEffects": true
+      },
+      {
+        "case": "Recycler cannot skip collection",
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/recycling",
+        "expected": 409,
+        "actual": 409,
+        "error": "InvalidState",
+        "zeroBusinessEffects": true
+      }
+    ]
+  },
+  "browser": {
+    "tests": 6,
+    "task": "D2-005",
+    "mode": "ACTUAL_NEXT_CHROMIUM_WITH_FIXTURE_AUTH_BRIDGE",
+    "browserVersion": "156.0.8078.4",
+    "trace": [
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-QR",
+        "status": 200,
+        "batteryId": "BYE-D2-005-QR",
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-QR",
+        "status": 200,
+        "batteryId": "BYE-D2-005-QR",
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "POST",
+        "path": "/api/batteries",
+        "status": 403,
+        "source": "MOCK",
+        "error": "RoleRequired"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "ADMIN",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "ADMIN",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "ADMIN",
+        "method": "POST",
+        "path": "/api/batteries",
+        "status": 201,
+        "batteryId": "BYE-D2-005-BROWSER-A",
+        "source": "MOCK"
+      },
+      {
+        "principal": "ADMIN",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "ADMIN",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "COLLECTOR",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "COLLECTOR",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "COLLECTOR",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-BROWSER-C",
+        "status": 200,
+        "batteryId": "BYE-D2-005-BROWSER-C",
+        "source": "MOCK"
+      },
+      {
+        "principal": "COLLECTOR",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/collection",
+        "status": 200,
+        "batteryId": "BYE-D2-005-BROWSER-C",
+        "source": "MOCK"
+      },
+      {
+        "principal": "COLLECTOR",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-BROWSER-C",
+        "status": 200,
+        "batteryId": "BYE-D2-005-BROWSER-C",
+        "source": "MOCK"
+      },
+      {
+        "principal": "COLLECTOR",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "COLLECTOR",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "RECYCLER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "RECYCLER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "RECYCLER",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-BROWSER-R",
+        "status": 200,
+        "batteryId": "BYE-D2-005-BROWSER-R",
+        "source": "MOCK"
+      },
+      {
+        "principal": "RECYCLER",
+        "method": "POST",
+        "path": "/api/returns/<fixture-request-id>/recycling",
+        "status": 200,
+        "batteryId": "BYE-D2-005-BROWSER-R",
+        "source": "MOCK"
+      },
+      {
+        "principal": "RECYCLER",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-BROWSER-R",
+        "status": 200,
+        "batteryId": "BYE-D2-005-BROWSER-R",
+        "source": "MOCK"
+      },
+      {
+        "principal": "RECYCLER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "RECYCLER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-QR",
+        "status": 200,
+        "batteryId": "BYE-D2-005-QR",
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-QR",
+        "status": 200,
+        "batteryId": "BYE-D2-005-QR",
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/me",
+        "status": 200,
+        "source": "MOCK"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-MISSING",
+        "status": 404,
+        "source": "MOCK",
+        "error": "BatteryNotFound"
+      },
+      {
+        "principal": "USER",
+        "method": "GET",
+        "path": "/api/batteries/BYE-D2-005-MISSING",
+        "status": 404,
+        "source": "MOCK",
+        "error": "BatteryNotFound"
+      }
+    ],
+    "blockedExternalOrigins": [],
+    "liveRpcCalls": 0,
+    "operationalSignatures": 0,
+    "broadcasts": 0
+  },
+  "screenshots": [
+    {
+      "path": "evidence/d2-005/user-qr.png",
+      "sha256": "a344047b378cc016149aacd4c7245a56be4a4bcc0d07f8663214f090be9ff051"
+    },
+    {
+      "path": "evidence/d2-005/admin.png",
+      "sha256": "5a109b3e2b90fc4223ce0139bad6c9f8b9f22f4130294085c86fb4c67fa1e6a7"
+    },
+    {
+      "path": "evidence/d2-005/collector.png",
+      "sha256": "c0338500589989ac2bc8b53e541cbb1cfd9997dfc5009e1b3e417d5612bd651c"
+    },
+    {
+      "path": "evidence/d2-005/recycler.png",
+      "sha256": "aa4d682f8728c7fd0894a2879c2849aec9d0a8c7a3e49f5f87edb3bd14cccdf3"
+    }
+  ],
+  "verification": {
+    "backend": {
+      "total": 238,
+      "passed": 236,
+      "failed": 0,
+      "skipped": 2,
+      "skipReason": "Existing optional PostgreSQL race tests not rerun; no locking/revocation code changed"
+    },
+    "frontend": {
+      "passed": 145,
+      "failed": 0
+    },
+    "focusedFrontend": 22,
+    "typescript": "PASS",
+    "lint": "PASS",
+    "build": "PASS",
+    "rustNative": "PASS",
+    "wasmFeature": "PASS",
+    "releaseWasm": "PASS",
+    "rustfmt": "PASS",
+    "clippy": "PASS",
+    "python": 4,
+    "mockDemo": "PASS"
+  },
+  "productionChanges": [
+    "Coordinator rejects ineligible/stale operator requests before evidence and logical work"
+  ],
+  "technicalCandidates": {
+    "D2.1": "ACCEPT",
+    "D2.2": "ACCEPT",
+    "ownerAccepted": false
+  },
+  "officialAcceptance": {
+    "D1": "12/12",
+    "D2": "1/6",
+    "D3": "0/5",
+    "total": "13/23"
+  },
+  "newTestnetTransactions": 0,
+  "operationalSignatures": 0,
+  "broadcasts": 0,
+  "remoteSupabaseConnections": 0,
+  "frozenWasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+}

@@ -1,12 +1,12 @@
-# D2-004 â€” Role / permission matrix
+# D2-004 — Role / permission matrix
 
-Current status (2026-10-28): **D2-004 = IMPLEMENTED / GAP 1+2 CLOSED / D2-005 REQUIRED**. **GAP 1 FIXED / GAP 2A FIXED / GAP 2B FIXED.** See [GAP 2B](#gap-2b--continuous-authority-until-first-dispatch). D2.1 is not automatically PASS; D2-005 dynamic/adversarial acceptance evidence is still required and has not started. Official internal acceptance remains D1 12/12, D2 1/6, D3 0/5, total 13/23.
+Current status (2026-10-28): **D2-004 = IMPLEMENTED / GAP 1+2 CLOSED**. D2-005 acceptance evidence is linked in [D2-005-ROLE-QR-ADVERSARIAL.md](D2-005-ROLE-QR-ADVERSARIAL.md); owner review remains required. **GAP 1 FIXED / GAP 2A FIXED / GAP 2B FIXED.** See [GAP 2B](#gap-2b--continuous-authority-until-first-dispatch). D2.1 is not automatically PASS; D2-005 dynamic/adversarial evidence is completed for owner review; this does not grant D2.1 acceptance. Official internal acceptance remains D1 12/12, D2 1/6, D3 0/5, total 13/23.
 
-## HISTORICAL / SUPERSEDED â€” Initial blocked review and prior follow-ups
+## HISTORICAL / SUPERSEDED — Initial blocked review and prior follow-ups
 
-Historical owner-authorized follow-up: **PARTIAL â€” GAP 1 FIXED / GAP 2 PENDING**. See [GAP 1 â€” FIXED](#gap-1--fixed) below. The following original blocked review is retained as historical evidence at checkpoint `1d85f1a`.
+Historical owner-authorized follow-up: **PARTIAL — GAP 1 FIXED / GAP 2 PENDING**. See [GAP 1 — FIXED](#gap-1--fixed) below. The following original blocked review is retained as historical evidence at checkpoint `1d85f1a`.
 
-Status: **BLOCKED â€” COUNCIL REVIEW RECOMMENDED**. Read-only observations and isolated characterization tests are complete; permission requirements are NOT fully verified. This is not D2.1 acceptance and is not `IMPLEMENTED / VERIFIED / EVIDENCE READY`.
+Status: **BLOCKED — COUNCIL REVIEW RECOMMENDED**. Read-only observations and isolated characterization tests are complete; permission requirements are NOT fully verified. This is not D2.1 acceptance and is not `IMPLEMENTED / VERIFIED / EVIDENCE READY`.
 
 Review checkpoint: `58adca0d52e076b35464f85dae924ab14707e162`, branch `instaward/d2-web-mvp`. Observations: 2026-10-22 America/Santiago (2026-10-23 UTC). D2-005 has not started.
 
@@ -89,7 +89,7 @@ This shows a missing application authorization check at the documented pre-sign 
 
 The latter two passing assertions mean the **defects were reproduced**, not that fail-closed requirements pass. End-to-end mismatch/revocation acceptance remains NOT VERIFIED. Broader D2-004 implementation and D2-005 stopped on these findings. Existing suites and final verification outcomes are recorded in the task completion response; local logs remain ignored.
 
-Final `npm run verify`: **PASS** â€” backend 177/177 including original Foundation tests and the three new characterization tests; TypeScript PASS; Rust native 20 + wrong-actor integration test PASS; WASM-feature run 20 + wrong-actor integration + WASM constructor test PASS; release wasm32v1-none build, rustfmt and Clippy PASS; Python 4/4 PASS; local MOCK demo reaches SENT / 10 GREEN-TEST. Rebuilt WASM SHA-256 remains `c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6`.
+Final `npm run verify`: **PASS** — backend 177/177 including original Foundation tests and the three new characterization tests; TypeScript PASS; Rust native 20 + wrong-actor integration test PASS; WASM-feature run 20 + wrong-actor integration + WASM constructor test PASS; release wasm32v1-none build, rustfmt and Clippy PASS; Python 4/4 PASS; local MOCK demo reaches SENT / 10 GREEN-TEST. Rebuilt WASM SHA-256 remains `c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6`.
 
 The initial sandboxed verification could not connect its local HTTP tests to 127.0.0.1 (`EACCES`). The complete suite was rerun outside that sandbox network restriction and passed without changing tests or protections. Frontend sources were not changed; no new frontend/browser or hosted acceptance is claimed. Scoped secret audit (seven intended files) and `git diff --check`: PASS.
 
@@ -101,11 +101,11 @@ D1 12/12 PASS; D2 **1/6 PASS (D2.4 only, OWNER ACCEPTED)**; D3 0/5; total **13/2
 
 Raven stellarDocs was consulted first. Its search found the official [simulateTransaction getter guide](https://developers.stellar.org/docs/build/guides/transactions/simulateTransaction-Deep-Dive); page content was checked directly because Raven's section lookup returned no content. Only unsigned getter simulations and read RPC methods were used; no submission occurs from a getter simulation.
 
-## GAP 1 â€” FIXED
+## GAP 1 — FIXED
 
 **HISTORICAL / SUPERSEDED checkpoint record.** The GAP1 fix remains in force; its GAP2-pending conclusions describe that earlier checkpoint only.
 
-Owner decision after Council review: FIX REQUIRED; authorization semantics **B â€” continuous until broadcast**; D1 **DO NOT REOPEN**. This task implements only the GAP1 application-request boundary. Continuous authorization at transport/signing/broadcast remains **GAP2 PENDING**, not implemented or claimed here.
+Owner decision after Council review: FIX REQUIRED; authorization semantics **B — continuous until broadcast**; D1 **DO NOT REOPEN**. This task implements only the GAP1 application-request boundary. Continuous authorization at transport/signing/broadcast remains **GAP2 PENDING**, not implemented or claimed here.
 
 Previous reproduced behavior: a valid session and ACTIVE principal with USER enabled=false could enqueue open_return; protected battery reads and direct wallet mutation helpers also lacked the exact USER assertion. History accepted any enabled membership. The historical evidence above is preserved.
 
@@ -135,7 +135,7 @@ The original GAP1 characterization is now a rejection regression test. The GAP2 
 | Root `npm run verify` / complete backend | PASS; 184/184 backend tests, zero failures/skips, TypeScript PASS; existing Foundation and D1 tests retained |
 | Frontend relevant regression | TypeScript PASS; lint PASS; 123/123 tests in 9 files PASS; no frontend source changes |
 | Frozen Rust / WASM | Native 20 + wrong-actor integration PASS; WASM-feature 20 + wrong-actor + WASM constructor PASS; release build, fmt and Clippy PASS |
-| Python / MOCK demo | 4/4 PASS; REGISTERED â†’ RETURNED â†’ COLLECTED â†’ RECYCLED â†’ SENT, 10 simulated GREEN-TEST |
+| Python / MOCK demo | 4/4 PASS; REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT, 10 simulated GREEN-TEST |
 | Secret / whitespace audit | PASS: scoped 12-file source/test/document audit with zero findings; `git diff --check` PASS; staged contents also checked before checkpoint |
 | Read-only independent candidate review | No concrete in-scope surviving bypass or legitimate-input regression found. Reviewer loopback tests were sandbox-blocked by EACCES; the main permitted local HTTP run passed |
 
@@ -147,9 +147,9 @@ Stellar transactions: **0**. Operational signatures: **0**. Broadcasts: **0**. R
 
 PersistedContextGuard, TestnetTransport, worker submission, signer, expiry and SUBMITTING semantics are untouched. No command-to-authority mapping for queued work, AUTHORIZATION_REVOKED state or GAP2 fix was added. The owner-selected continuous authorization policy is not yet fully enforced until that separately authorized work closes GAP2.
 
-**D2-004: PARTIAL â€” GAP 1 FIXED / GAP 2 PENDING.** D1 remains 12/12; D2 1/6 (D2.4 only); D3 0/5; total 13/23 internal owner acceptance. No D2.1 PASS, external organizer acceptance/payment, or D2-005 start is asserted. STOP after this task.
+**D2-004: PARTIAL — GAP 1 FIXED / GAP 2 PENDING.** D1 remains 12/12; D2 1/6 (D2.4 only); D3 0/5; total 13/23 internal owner acceptance. No D2.1 PASS, external organizer acceptance/payment, or D2-005 start is asserted. STOP after this task.
 
-## GAP 2A â€” QUEUED AUTHORITY REVALIDATION
+## GAP 2A — QUEUED AUTHORITY REVALIDATION
 
 **HISTORICAL / SUPERSEDED checkpoint record.** Its implementation remains valid; the current GAP2B section below supersedes its pending-boundary status, not its evidence.
 
@@ -201,7 +201,7 @@ The first full run caught a response-semantics regression in the unchanged D1 re
 | Frozen WASM-feature suite | 20 unit tests + 1 wrong-actor integration + 1 WASM constructor PASS |
 | Release WASM / rustfmt / Clippy with warnings denied | PASS |
 | Python | 4/4 PASS |
-| Existing offline MOCK CLI demo | REGISTERED â†’ RETURNED â†’ COLLECTED â†’ RECYCLED â†’ SENT; exactly 10 simulated GREEN-TEST |
+| Existing offline MOCK CLI demo | REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT; exactly 10 simulated GREEN-TEST |
 | Secrets and whitespace | Zero audit findings; `git diff --check` PASS; exact staged patch audited before commit |
 | Protected paths and original untracked files | Contract, schema/RLS, frontend, signer/transport/worker unchanged; protected file hashes and original refs/tags retained |
 
@@ -209,13 +209,13 @@ Rebuilt WASM SHA-256: `c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee1
 
 ### Remaining boundary and acceptance
 
-**D2-004: PARTIAL â€” GAP 1 FIXED / GAP 2A FIXED / GAP 2B PENDING.** Continuous authority until broadcast is not claimed complete: post-sign revocation, submit/lease transitions, envelope expiry and ledger windows remain separately reviewable GAP2B work. No GAP2B or D2-005 is started here.
+**D2-004: PARTIAL — GAP 1 FIXED / GAP 2A FIXED / GAP 2B PENDING.** Continuous authority until broadcast is not claimed complete: post-sign revocation, submit/lease transitions, envelope expiry and ledger windows remain separately reviewable GAP2B work. No GAP2B or D2-005 is started here.
 
 New live Stellar transactions: **0**. Operational signatures: **0**. Broadcasts: **0**. Remote Supabase access/mutations: **0**. No USER2, real lifecycle, real reward, contract/WASM source, signer, deployment, roles, schema/RLS, credentials, Vercel or D1 evidence changes. Local test cryptography and the existing MOCK demo do not constitute operational Testnet signing or execution.
 
 Internal owner acceptance remains **D1 12/12; D2 1/6 (D2.4 only); D3 0/5; total 13/23**. No additional criterion, organizer acceptance or payment is asserted.
 
-## GAP 2B â€” CONTINUOUS AUTHORITY UNTIL FIRST DISPATCH
+## GAP 2B — CONTINUOUS AUTHORITY UNTIL FIRST DISPATCH
 
 Owner authorization: 2026-10-28. Formal parent: `615ea9b87544e80b07fb9469b1a81f295f76bdbf`, branch `instaward/d2-web-mvp`. No demo branch content is included.
 
@@ -282,7 +282,7 @@ Before the durable first-attempt boundary, Byetery does not intentionally broadc
 | Frozen Rust / WASM | Native 20 + wrong-actor integration PASS; WASM-feature 20 + wrong-actor + WASM constructor PASS |
 | Release WASM / rustfmt / Clippy -D warnings | PASS |
 | Python | 4/4 PASS |
-| Existing offline MOCK CLI demo | REGISTERED â†’ RETURNED â†’ COLLECTED â†’ RECYCLED â†’ SENT, exactly 10 simulated GREEN-TEST |
+| Existing offline MOCK CLI demo | REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT, exactly 10 simulated GREEN-TEST |
 | Secret / whitespace audit | Zero findings; git diff --check PASS; exact staged patch audited before commit |
 
 Rebuilt WASM SHA-256 remains `c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6`. Real PostgreSQL sessions prove the lock interleavings; PGlite is not used as evidence of concurrent row locking.
