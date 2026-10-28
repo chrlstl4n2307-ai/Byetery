@@ -15,6 +15,8 @@ export class PgTransportDatabase implements TransportDatabase {
   }
 }
 export interface Work extends OperationContext {
+  /** Original immutable application principal, never supplied by the browser/worker. */
+  principal: string;
   state: TransportState; dispatchAttempts: number;
   confirmation: Confirmation | null; stateEvidence: StateEvidence | null;
 }
@@ -37,11 +39,11 @@ export class TransportStore {
     });
   }
   private async workIn(db: Sql, id: string): Promise<Work> {
-    const r = (await db.query<Row>(`select w.*,o.parameters from api_private.testnet_work w
+    const r = (await db.query<Row>(`select w.*,o.parameters,o.principal from api_private.testnet_work w
       join app_private.stellar_operations o on o.id=w.operation_id and o.deployment_id=w.deployment_id where w.operation_id=$1`, [id])).rows[0];
     ensure(r, 'TransportWorkMissing');
     return { deploymentId:r.deployment_id, operationId:r.operation_id, networkId:Buffer.from(r.network_id).toString('hex'),
-      contractAddress:r.contract_address, sourceAccount:r.source_account, command:r.parameters as Command,
+      contractAddress:r.contract_address, sourceAccount:r.source_account, command:r.parameters as Command, principal:r.principal,
       contextHash:Buffer.from(r.context_hash).toString('hex'), argumentsXdr:r.arguments_xdr,
       state:r.state, dispatchAttempts:r.dispatch_attempts, confirmation:r.confirmation, stateEvidence:r.state_evidence };
   }

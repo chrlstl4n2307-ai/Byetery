@@ -7,7 +7,9 @@ import { Repository, one, type Db } from './repository.ts';
 import { WalletService } from './wallet.ts';
 import { AppError, commandFailure, failure, jsonSafe, requireThat, type Reply } from './errors.ts';
 import { bid, bytes, canonical, object, rid, text, uuid } from './validation.ts';
+import {requiredAuthority,type ApplicationCommandKind} from './authority.ts';
 export interface Action { kind: 'register'|'return'|'cancel'|'collection'|'recycling'|'reward'|'challenge'|'verify'; resource?: string }
+const commandForAction={register:'register_battery',return:'open_return',cancel:'cancel_return',collection:'confirm_collection',recycling:'confirm_recycling',reward:'pay_reward'} as const satisfies Record<Exclude<Action['kind'],'challenge'|'verify'>,ApplicationCommandKind>;
 /** Faults are injectable by server-side tests only. Never read from HTTP or env. */
 export interface Faults { hold?: (command: Command) => boolean; omitSigner?: (signer: string, command: Command) => boolean }
 export interface OperationProcessor { process(id:string):Promise<Reply> }
@@ -24,14 +26,19 @@ export class Coordinator {
     const inputHash=hash(canonical({action,input}));
     const queued=await this.repo.transaction(async db=>{
       const user=await this.repo.principal(db,identity),d=this.repo.deploymentId;
-      // New requests and HTTP replays must pass current application authority before using the cache.
-      if(['return','cancel','challenge','verify'].includes(action.kind))await this.repo.role(db,user,'USER');
-      if(action.kind==='reward'){
+      // Preserve GAP1 USER/reward checks before cache lookup; privileged queue
+      // failures retain their existing application Reply/idempotency semantics.
+      if(action.kind==='challenge'||action.kind==='verify')await this.repo.role(db,user,'USER');
+      else if(action.kind==='return'||action.kind==='cancel'||action.kind==='reward') {
+       let requestOwner:string|null=null;
+       if(action.kind==='reward'){
         const owner=await one(db,`select r.user_id from chain_private.batteries b
           left join app_private.return_requests r on r.deployment_id=b.deployment_id and r.request_id=b.request_id and r.battery_id=b.battery_id
           where b.deployment_id=$1 and b.battery_id=$2`,[d,bid(action.resource)]);
         requireThat(owner,404,'BatteryNotConfirmed');
-        await this.repo.role(db,user,owner.user_id===user?'USER':'ADMIN');
+        requestOwner=owner.user_id??null;
+       }
+       await this.repo.role(db,user,requiredAuthority(commandForAction[action.kind],user,requestOwner).role);
       }
       const old=await one(db,'select * from api_private.idempotency where deployment_id=$1 and user_id=$2 and key=$3',[d,user,key]);
       if(old) {
@@ -81,9 +88,7 @@ export class Coordinator {
       requireThat(claim,404,'RequestNotFound'); batteryId=claim.battery_id;
       if(action.kind==='cancel') requireThat(claim.user_id===user,403,'RequestOwnerRequired');
     } else batteryId=bid(action.kind==='register'?body.batteryId:action.resource);
-    if(action.kind==='register') await this.repo.role(db,user,'ADMIN');
-    if(action.kind==='collection') await this.repo.role(db,user,'COLLECTOR');
-    if(action.kind==='recycling') await this.repo.role(db,user,'RECYCLER');
+    if(action.kind==='register'||action.kind==='collection'||action.kind==='recycling')await this.repo.role(db,user,requiredAuthority(commandForAction[action.kind],user).role);
     const pending=await one(db,`select 1 from app_private.stellar_operations where deployment_id=$1 and battery_id=$2 and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN')`,[d,batteryId]);
     requireThat(!pending,409,'OperationInProgress');
     if(action.kind==='register') {
@@ -111,7 +116,7 @@ export class Coordinator {
         command={kind:'cancel_return',batteryId,requestId:rid(action.resource)};
       } else if(action.kind==='collection'||action.kind==='recycling') {
         const requestId=rid(action.resource);
-        const role=action.kind==='collection'?'COLLECTOR':'RECYCLER';
+        const role=requiredAuthority(commandForAction[action.kind],user).role;
         const actor=(await this.repo.role(db,user,role))!;
         const ev=await this.evidence(db,user,batteryId,requestId,action.kind==='collection'?'COLLECTION':'RECYCLING',body.evidence);
         command=action.kind==='collection'?{kind:'confirm_collection',batteryId,requestId,collector:actor,evidence:ev}
@@ -119,7 +124,7 @@ export class Coordinator {
       } else {
         requireThat(action.kind==='reward',400,'UnknownAction');
         const owner=await one(db,'select user_id from app_private.return_requests where deployment_id=$1 and request_id=$2',[d,battery.request_id]);
-        if(owner?.user_id!==user) await this.repo.role(db,user,'ADMIN');
+        await this.repo.role(db,user,requiredAuthority('pay_reward',user,owner?.user_id??null).role);
         requireThat(battery.reward_state!=='SENT',409,'RewardAlreadySent');
         requireThat(battery.state==='RECYCLED' && battery.reward_state==='PENDING',409,'RewardNotEligible');
         command={kind:'pay_reward',batteryId};

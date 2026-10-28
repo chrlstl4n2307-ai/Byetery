@@ -23,7 +23,7 @@ function rootAuth(c:Command){const args=invocation(c).args;
 }
 function fixture(){
   const c:Command={kind:'register_battery',batteryId:'BYE-W1-002-FIXTURE',registrationHash:h};
-  const v=invocation(c);const w:Work={...d,operationId:'fixture',sourceAccount:ACTORS.admin,command:c,contextHash:h,
+  const v=invocation(c);const w:Work={...d,principal:'fixture',operationId:'fixture',sourceAccount:ACTORS.admin,command:c,contextHash:h,
     argumentsXdr:v.args.map(a=>a.toXDR('base64')),state:'CLAIMED',dispatchAttempts:0,confirmation:null,stateEvidence:null};
   const raw:rpc.Api.RawSimulateTransactionResponse={id:'1',latestLedger:10,minResourceFee:'1000',
     transactionData:new SorobanDataBuilder().setResourceFee('1000').build().toXDR('base64'),results:[{auth:rootAuth(c).map(a=>a.toXDR('base64')),xdr:xdr.ScVal.scvVoid().toXDR('base64')}]};

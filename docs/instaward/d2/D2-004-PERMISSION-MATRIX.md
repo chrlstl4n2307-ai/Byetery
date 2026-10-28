@@ -142,3 +142,67 @@ Stellar transactions: **0**. Operational signatures: **0**. Broadcasts: **0**. R
 PersistedContextGuard, TestnetTransport, worker submission, signer, expiry and SUBMITTING semantics are untouched. No command-to-authority mapping for queued work, AUTHORIZATION_REVOKED state or GAP2 fix was added. The owner-selected continuous authorization policy is not yet fully enforced until that separately authorized work closes GAP2.
 
 **D2-004: PARTIAL — GAP 1 FIXED / GAP 2 PENDING.** D1 remains 12/12; D2 1/6 (D2.4 only); D3 0/5; total 13/23 internal owner acceptance. No D2.1 PASS, external organizer acceptance/payment, or D2-005 start is asserted. STOP after this task.
+
+## GAP 2A — QUEUED AUTHORITY REVALIDATION
+
+Current implementation record: **2026-10-28**. This section supersedes the current-status conclusions above without changing the historical reproductions or GAP1 results. Formal base: `d5e53dd589a5cb8b5dd891b78d2fed901fe2361d` on `instaward/d2-web-mvp`.
+
+### Demo isolation and reproduced defect
+
+The local demo-only code commit `46a1086019bbfa95efb8767cc9b2441842ea838a` and its evidence checkpoint `b4d873851699a7f0f6ec0779eacc802a1ec44ee1` are preserved on local branch `demo/local-testnet-ui`. They are excluded from this formal patch and its push. Original untracked files, including the custody audit and Obsidian tool, remain untouched and outside the commit.
+
+Before the fix, the actual ADMIN persisted-guard regression failed with **Missing expected rejection**: after an authorized registration was queued, revoking ADMIN did not cause `PersistedContextGuard.validate` to reject. This was reproduced using disposable migrated PGlite only, with no Stellar preparation, operational signing or broadcast.
+
+### Single authority policy and immutable context
+
+`backend/src/application/authority.ts` defines one compile-time exhaustive policy, shared by the application queue and persisted pre-sign guard. Unknown command kinds, inherited object property names and `set_role` are denied. Wallet and protected-read USER gates introduced by GAP1 remain in place.
+
+| Durable command | Required current application authority | Additional binding |
+| --- | --- | --- |
+| `register_battery` | ADMIN | Exact deployment and ACTIVE original principal |
+| `open_return` | USER | Existing recipient snapshot checks retained |
+| `cancel_return` | USER | Original principal owns the exact request and battery |
+| `confirm_collection` | COLLECTOR | Enabled membership actor equals `command.collector` exactly |
+| `confirm_recycling` | RECYCLER | Enabled membership actor equals `command.recycler` exactly |
+| `pay_reward`, original principal is request owner | USER | No fallback to an enabled ADMIN sibling |
+| `pay_reward`, original principal is not request owner | ADMIN | Owner resolved from the original reward attempt/request |
+
+The durable principal is loaded from `app_private.stellar_operations.principal` through `TransportStore.work`, then independently compared with that operation's SQL row in the guard. It must be a present application UUID; request input cannot select it. The guard also verifies exact deployment/network/contract, operation command, battery, stored parameters hash and work command hash before applying current membership checks. Membership must be enabled and its principal ACTIVE.
+
+Reward authority is resolved through the reward attempt bound to this exact operation and its original return request, with matching deployment, battery and confirmed chain projection request. The operation principal, reward-attempt request association and request owner are already immutable. No new authority-class column or migration is needed, and the lookup does not switch to an unrelated/latest claim.
+
+Current membership/ownership/actor failures produce the stable domain error `AuthorizationRevoked`; `TestnetStellarService.process` exposes it as HTTP 403 rather than an RPC/simulation/network error. The existing transport invokes the guard before preparation and again before each signing phase. No transport, signer or worker submission redesign is included. A preparation interrupted by this rejection retains the existing auditable operation and requires `ExplicitUnsignedResumeRequired` on automatic replay; no identity or dispatch is created. This is not a new durable authorization-revoked state.
+
+### Regression evidence
+
+`backend/tests/d2-queued-authority.test.ts` uses the real Coordinator, SQL-backed TransportStore, PersistedContextGuard and transport with RPC/preparation/signer tripwires. All seven valid authority paths pass unchanged before their required membership is disabled. Each revoked path then rejects before those tripwires are invoked. The ADMIN case also exercises the real application service response and replay boundary: 403 `AuthorizationRevoked`, zero identities, zero dispatch attempts, then explicit unsigned review required.
+
+Both enabled operator actor-mismatch cases reject. Additional controls cover missing/changed work principal, inactive principal, absent membership, wrong deployment, cancellation by a non-owner, SQL rejection of attempts to change reward authority bindings, and unknown commands. Ordinary schema constraints already prohibit membership deletion/rebinding. Only these adversarial membership-corruption tests temporarily disable that immutable trigger inside their disposable PGlite fixture, then restore it; no migration, production constraint or remote database is changed.
+
+The first full run caught a response-semantics regression in the unchanged D1 retired-principal cache test: moving privileged queue checks before cache lookup threw `RoleRequired` instead of retaining the existing 403 Reply. Privileged checks were restored to their original queue/error-handling boundary while still using the shared authority policy; GAP1 USER/reward pre-cache checks remain in place. The unchanged D1 test and targeted GAP1/GAP2A recheck passed (16/16) before repeating the complete suite. D1 implementation and evidence were not changed.
+
+| Verification, final candidate | Result |
+| --- | --- |
+| Original persisted ADMIN regression, before fix | FAIL as expected: Missing expected rejection |
+| Focused GAP2A and permission-matrix suite | 16/16 PASS |
+| Targeted recheck including unchanged D1 retired-principal regression | 16/16 PASS |
+| Root `npm run verify` | PASS, exit 0 |
+| Complete backend, including GAP1 and existing Foundation/D1 tests | 197/197 PASS; 0 failed, skipped or cancelled |
+| Backend TypeScript | PASS |
+| Frozen Rust native | 20 unit tests + 1 wrong-actor integration PASS |
+| Frozen WASM-feature suite | 20 unit tests + 1 wrong-actor integration + 1 WASM constructor PASS |
+| Release WASM / rustfmt / Clippy with warnings denied | PASS |
+| Python | 4/4 PASS |
+| Existing offline MOCK CLI demo | REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT; exactly 10 simulated GREEN-TEST |
+| Secrets and whitespace | Zero audit findings; `git diff --check` PASS; exact staged patch audited before commit |
+| Protected paths and original untracked files | Contract, schema/RLS, frontend, signer/transport/worker unchanged; protected file hashes and original refs/tags retained |
+
+Rebuilt WASM SHA-256: `c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6` (unchanged). No frontend or shared browser DTO is changed; `Work.principal` is backend-internal, so no frontend regression run is required for this patch. Logs remain local and ignored. The complete suite uses offline fixtures/local loopback, not the remote DEV HTTP suite or a live Testnet flow.
+
+### Remaining boundary and acceptance
+
+**D2-004: PARTIAL — GAP 1 FIXED / GAP 2A FIXED / GAP 2B PENDING.** Continuous authority until broadcast is not claimed complete: post-sign revocation, submit/lease transitions, envelope expiry and ledger windows remain separately reviewable GAP2B work. No GAP2B or D2-005 is started here.
+
+New live Stellar transactions: **0**. Operational signatures: **0**. Broadcasts: **0**. Remote Supabase access/mutations: **0**. No USER2, real lifecycle, real reward, contract/WASM source, signer, deployment, roles, schema/RLS, credentials, Vercel or D1 evidence changes. Local test cryptography and the existing MOCK demo do not constitute operational Testnet signing or execution.
+
+Internal owner acceptance remains **D1 12/12; D2 1/6 (D2.4 only); D3 0/5; total 13/23**. No additional criterion, organizer acceptance or payment is asserted.

@@ -46,8 +46,9 @@ test('actual persisted recipient guard rejects substitution and logical-operatio
     const command:Command={kind:'open_return',batteryId:id,requestId:rid,recipient:ACTORS.service};
     const h=createHash('sha256').update(canonical(command)).digest('hex');
     await f.db.query(`insert into app_private.stellar_operations(id,deployment_id,principal,idempotency_key,command,battery_id,request_id,parameters,parameters_hash)
-      values($1::uuid,$2,'TEST-ONLY',$1::text,'open_return',$3,decode($4,'hex'),$5,decode($6,'hex'))`,[operationId,f.deploymentId,id,rid,JSON.stringify(command),h]);
-    const w:Work={deploymentId:f.deploymentId,operationId,networkId:NETWORK_ID,contractAddress:CONTRACT,sourceAccount:ACTORS.service,command,contextHash:h,
+      values($1::uuid,$2,$7,$1::text,'open_return',$3,decode($4,'hex'),$5,decode($6,'hex'))`,[operationId,f.deploymentId,id,rid,JSON.stringify(command),h,f.user]);
+    await f.db.query("insert into api_private.memberships(deployment_id,user_id,role) values($1,$2,'USER')",[f.deploymentId,f.user]);
+    const w:Work={principal:f.user,deploymentId:f.deploymentId,operationId,networkId:NETWORK_ID,contractAddress:CONTRACT,sourceAccount:ACTORS.service,command,contextHash:h,
       argumentsXdr:invocation(command).args.map(a=>a.toXDR('base64')),state:'CLAIMED',dispatchAttempts:0,confirmation:null,stateEvidence:null};
     await assert.rejects(new PersistedContextGuard(f.repo).validate(w),/RecipientSnapshotMismatch/);
     // An authorized body cannot change the immutable logical operation to make it pass.

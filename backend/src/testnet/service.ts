@@ -15,6 +15,8 @@ import { DurableTransactionWorker,type ReviewedUnsignedResume } from './worker.t
 import {databaseHealth} from '../application/database.ts';
 import { string } from './abi.ts';
 import { Address, xdr } from '@stellar/stellar-sdk';
+import {requiredAuthority} from '../application/authority.ts';
+import {AppError} from '../application/errors.ts';
 
 const hash=(c:unknown)=>createHash('sha256').update(canonical(c)).digest('hex');
 /** Reads committed logical state immediately before each signing phase. */
@@ -32,12 +34,37 @@ export class PersistedContextGuard implements ContextGuard {
     });
   }
   async validate(w:Work){await this.repo.transaction(async db=>{
-    const d=await this.repo.config(db),op=await one(db,`select parameters,encode(parameters_hash,'hex') as hash from app_private.stellar_operations
+    const d=await this.repo.config(db),op=await one(db,`select principal,command,battery_id,parameters,encode(parameters_hash,'hex') as hash from app_private.stellar_operations
       where deployment_id=$1 and id=$2`,[w.deploymentId,w.operationId]);
     ensure(d.mode==='TESTNET'&&d.contractAddress===CONTRACT&&d.rewardToken===TOKEN&&d.admin===ACTORS.admin&&d.service===ACTORS.service,'UnexpectedDeployment');
     const manifest=await one(db,"select encode(wasm_hash,'hex') as hash from chain_private.deployments where id=$1",[w.deploymentId]);
+    ensure(w.deploymentId===d.deploymentId&&w.networkId===d.networkId&&w.contractAddress===d.contractAddress,'OperationContextMismatch');
     ensure(manifest?.hash===WASM&&op&&op.hash===w.contextHash&&hash(op.parameters)===w.contextHash&&hash(w.command)===w.contextHash,'OperationContextMismatch');
-    ensure(w.command.kind!=='set_role'&&invocation(w.command).signers[0]===w.sourceAccount,'WrongSigner');
+    ensure(op.principal===w.principal&&typeof op.principal==='string'
+      &&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(op.principal),'AuthorizationRevoked');
+    ensure(op.command===w.command.kind&&'batteryId' in w.command&&op.battery_id===w.command.batteryId,'OperationContextMismatch');
+    let owner:string|null=null;
+    if(w.command.kind==='cancel_return'){
+      const r=await one(db,`select user_id from app_private.return_requests where deployment_id=$1
+        and request_id=decode($2,'hex') and battery_id=$3`,[w.deploymentId,w.command.requestId,w.command.batteryId]);
+      ensure(r&&r.user_id===op.principal,'AuthorizationRevoked');owner=r.user_id;
+    }else if(w.command.kind==='pay_reward'){
+      // These three bindings are immutable in Foundation. Never switch to a newer
+      // battery claim or fall back from revoked owner USER authority to ADMIN.
+      const r=await one(db,`select r.user_id from app_private.reward_attempts a
+        join app_private.return_requests r on r.deployment_id=a.deployment_id and r.request_id=a.request_id and r.battery_id=a.battery_id
+        join chain_private.batteries b on b.deployment_id=a.deployment_id and b.battery_id=a.battery_id and b.request_id=a.request_id
+        where a.deployment_id=$1 and a.operation_id=$2 and a.battery_id=$3`,[w.deploymentId,w.operationId,w.command.batteryId]);
+      ensure(r,'AuthorizationRevoked');owner=r.user_id;
+    }
+    const authority=requiredAuthority(w.command.kind,op.principal,owner);
+    let actor:string|null;
+    try{actor=await this.repo.role(db,op.principal,authority.role);}
+    catch(error){if(error instanceof AppError&&error.status===403)throw new DomainError('AuthorizationRevoked');throw error;}
+    if(authority.ownsRequest)ensure(owner===op.principal,'AuthorizationRevoked');
+    if(authority.actorField==='collector')ensure(w.command.kind==='confirm_collection'&&actor===w.command.collector,'AuthorizationRevoked');
+    if(authority.actorField==='recycler')ensure(w.command.kind==='confirm_recycling'&&actor===w.command.recycler,'AuthorizationRevoked');
+    ensure(invocation(w.command).signers[0]===w.sourceAccount,'WrongSigner');
     if(w.command.kind==='open_return'){
       const r=await one(db,`select recipient_snapshot,battery_id,reservation_state from app_private.return_requests
         where deployment_id=$1 and request_id=decode($2,'hex')`,[w.deploymentId,w.command.requestId]);
@@ -126,7 +153,7 @@ export class TestnetStellarService implements StellarService,OperationProcessor 
       if(unsignedReview)await this.worker.resumeUnsigned(unsignedReview,'byetery-reviewed-unsigned-recovery');
       else await this.worker.run(id,'byetery-testnet-api');
     }catch(error){
-      if(error instanceof DomainError){return {status:503,body:{source:'TESTNET',operationId:id,error:{code:error.code}}};}
+      if(error instanceof DomainError){return {status:error.code==='AuthorizationRevoked'?403:503,body:{source:'TESTNET',operationId:id,error:{code:error.code}}};}
       // Durable state survives unexpected SQL/process/RPC errors; never substitute MOCK.
       return {status:503,body:{source:'TESTNET',operationId:id,error:{code:'TestnetOperationUnresolved'}}};
     }
