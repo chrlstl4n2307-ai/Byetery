@@ -1,0 +1,597 @@
+{
+  "task": "D2-007",
+  "criterion": "D2.3 — State display",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "dateLocal": "2026-10-28",
+  "timezone": "America/Santiago",
+  "startingHead": "66e1a859e862e5d781cf2021e8345e93b894c64d",
+  "branch": "instaward/d2-web-mvp",
+  "status": "IMPLEMENTED / TESTED / EVIDENCE READY",
+  "preFixCharacterization": {
+    "baselineCommit": "66e1a859e862e5d781cf2021e8345e93b894c64d",
+    "classification": "PRE-FIX CHARACTERIZATION — actual isolated HTTP/SQL reads rendered by StateSummary",
+    "terminalGapReproduced": true,
+    "terminalCases": [
+      {
+        "case": "C",
+        "expectedTransaction": "CONFIRMED",
+        "actualReadDisplayOperation": null,
+        "actualRenderedTransaction": "NO_PENDING_OPERATION"
+      },
+      {
+        "case": "E",
+        "expectedTransaction": "FAILED",
+        "actualReadDisplayOperation": null,
+        "actualRenderedTransaction": "NO_PENDING_OPERATION"
+      },
+      {
+        "case": "F",
+        "expectedTransaction": "CONFIRMED",
+        "actualReadDisplayOperation": null,
+        "actualRenderedTransaction": "NO_PENDING_OPERATION"
+      },
+      {
+        "case": "G",
+        "expectedTransaction": "FAILED",
+        "actualReadDisplayOperation": null,
+        "actualRenderedTransaction": "NO_PENDING_OPERATION"
+      }
+    ],
+    "backend": {
+      "total": 18,
+      "pass": 9,
+      "fail": 9,
+      "note": "Eight terminal visibility subchecks (four detail + four profile) failed; the parent test also counts as failed"
+    },
+    "frontend": {
+      "total": 9,
+      "pass": 5,
+      "fail": 4
+    },
+    "productionCodeChangedBeforeCapture": false,
+    "sourceBytesSha256": "05c959d1c2bed6bcebb7dc9df4d5f9fd488ecfa31fe23561a6f738f371a47ef5"
+  },
+  "productionChange": "Read-only latestTerminalOperation separated from unresolved pendingOperation; display selector prioritizes unresolved work; failure provenance qualified",
+  "operationSelection": {
+    "unresolvedStates": [
+      "QUEUED",
+      "AWAITING_AUTH",
+      "READY",
+      "SUBMITTED",
+      "UNKNOWN"
+    ],
+    "terminalStates": [
+      "CONFIRMED",
+      "REJECTED"
+    ],
+    "order": "created_at DESC, id DESC",
+    "displayPriority": "pendingOperation ?? latestTerminalOperation ?? null",
+    "mutationGating": "Existing unresolved pendingOperation only; unchanged"
+  },
+  "scenarios": [
+    {
+      "case": "A",
+      "classification": "LOCAL FIXTURE STATE — actual HTTP/SQL/MOCK read",
+      "batteryId": "BYE-D2-005-LANE-A",
+      "expected": {
+        "lifecycle": "COLLECTED",
+        "transaction": "PENDING",
+        "reward": "NOT_ELIGIBLE"
+      },
+      "actual": {
+        "lifecycle": "COLLECTED",
+        "transaction": "PENDING",
+        "reward": "NOT_ELIGIBLE",
+        "lastAttempt": null
+      },
+      "rawOperationState": "SUBMITTED",
+      "unresolved": true,
+      "failureScope": null,
+      "falseSuccess": false,
+      "uiTest": "PASS"
+    },
+    {
+      "case": "B",
+      "classification": "LOCAL FIXTURE STATE — actual HTTP/SQL/MOCK read",
+      "batteryId": "BYE-D2-005-LANE-B",
+      "expected": {
+        "lifecycle": "COLLECTED",
+        "transaction": "UNCERTAIN",
+        "reward": "NOT_ELIGIBLE"
+      },
+      "actual": {
+        "lifecycle": "COLLECTED",
+        "transaction": "UNCERTAIN",
+        "reward": "NOT_ELIGIBLE",
+        "lastAttempt": null
+      },
+      "rawOperationState": "UNKNOWN",
+      "unresolved": true,
+      "failureScope": null,
+      "falseSuccess": false,
+      "uiTest": "PASS"
+    },
+    {
+      "case": "C",
+      "classification": "LOCAL FIXTURE STATE — actual HTTP/SQL/MOCK read",
+      "batteryId": "BYE-D2-005-LANE-C",
+      "expected": {
+        "lifecycle": "RECYCLED",
+        "transaction": "CONFIRMED",
+        "reward": "PENDING"
+      },
+      "actual": {
+        "lifecycle": "RECYCLED",
+        "transaction": "CONFIRMED",
+        "reward": "PENDING",
+        "lastAttempt": null
+      },
+      "rawOperationState": "CONFIRMED",
+      "unresolved": false,
+      "failureScope": null,
+      "falseSuccess": false,
+      "uiTest": "PASS"
+    },
+    {
+      "case": "D",
+      "classification": "LOCAL FIXTURE STATE — actual HTTP/SQL/MOCK read",
+      "batteryId": "BYE-D2-005-LANE-D",
+      "expected": {
+        "lifecycle": "RECYCLED",
+        "transaction": "UNCERTAIN",
+        "reward": "PENDING"
+      },
+      "actual": {
+        "lifecycle": "RECYCLED",
+        "transaction": "UNCERTAIN",
+        "reward": "PENDING",
+        "lastAttempt": "UNKNOWN"
+      },
+      "rawOperationState": "UNKNOWN",
+      "unresolved": true,
+      "failureScope": null,
+      "falseSuccess": false,
+      "uiTest": "PASS"
+    },
+    {
+      "case": "E",
+      "classification": "LOCAL FIXTURE STATE — actual HTTP/SQL/MOCK read",
+      "batteryId": "BYE-D2-005-LANE-E",
+      "expected": {
+        "lifecycle": "RECYCLED",
+        "transaction": "FAILED",
+        "reward": "PENDING"
+      },
+      "actual": {
+        "lifecycle": "RECYCLED",
+        "transaction": "FAILED",
+        "reward": "PENDING",
+        "lastAttempt": "FAILED"
+      },
+      "rawOperationState": "REJECTED",
+      "unresolved": false,
+      "failureScope": "APPLICATION",
+      "falseSuccess": false,
+      "uiTest": "PASS"
+    },
+    {
+      "case": "F",
+      "classification": "LOCAL FIXTURE STATE — actual HTTP/SQL/MOCK read",
+      "batteryId": "BYE-D2-005-LANE-F",
+      "expected": {
+        "lifecycle": "RECYCLED",
+        "transaction": "CONFIRMED",
+        "reward": "SENT"
+      },
+      "actual": {
+        "lifecycle": "RECYCLED",
+        "transaction": "CONFIRMED",
+        "reward": "SENT",
+        "lastAttempt": "SUCCEEDED"
+      },
+      "rawOperationState": "CONFIRMED",
+      "unresolved": false,
+      "failureScope": null,
+      "falseSuccess": false,
+      "uiTest": "PASS"
+    },
+    {
+      "case": "G",
+      "classification": "LOCAL FIXTURE STATE — actual HTTP/SQL/MOCK read",
+      "batteryId": "BYE-D2-005-LANE-G",
+      "expected": {
+        "lifecycle": "COLLECTED",
+        "transaction": "FAILED",
+        "reward": "NOT_ELIGIBLE"
+      },
+      "actual": {
+        "lifecycle": "COLLECTED",
+        "transaction": "FAILED",
+        "reward": "NOT_ELIGIBLE",
+        "lastAttempt": null
+      },
+      "rawOperationState": "REJECTED",
+      "unresolved": false,
+      "failureScope": "APPLICATION",
+      "falseSuccess": false,
+      "uiTest": "PASS"
+    },
+    {
+      "case": "Q",
+      "classification": "LOCAL FIXTURE STATE — actual HTTP/SQL/MOCK read",
+      "batteryId": "BYE-D2-005-LANE-Q",
+      "expected": {
+        "lifecycle": "COLLECTED",
+        "transaction": "QUEUED",
+        "reward": "NOT_ELIGIBLE"
+      },
+      "actual": {
+        "lifecycle": "COLLECTED",
+        "transaction": "QUEUED",
+        "reward": "NOT_ELIGIBLE",
+        "lastAttempt": null
+      },
+      "rawOperationState": "QUEUED",
+      "unresolved": true,
+      "failureScope": null,
+      "falseSuccess": false,
+      "uiTest": "PASS"
+    },
+    {
+      "case": "N",
+      "classification": "LOCAL FIXTURE STATE — actual HTTP/SQL/MOCK read",
+      "batteryId": "BYE-D2-007-NONE",
+      "expected": {
+        "lifecycle": "REGISTERED",
+        "transaction": "NO_PENDING_OPERATION",
+        "reward": "NOT_ELIGIBLE"
+      },
+      "actual": {
+        "lifecycle": "REGISTERED",
+        "transaction": "NO_PENDING_OPERATION",
+        "reward": "NOT_ELIGIBLE",
+        "lastAttempt": null
+      },
+      "rawOperationState": null,
+      "unresolved": false,
+      "failureScope": null,
+      "falseSuccess": false,
+      "uiTest": "PASS"
+    },
+    {
+      "case": "H",
+      "classification": "LOCAL FRONTEND BOUNDARY FIXTURE — not a SQL enum value",
+      "expected": {
+        "lifecycle": "COLLECTED",
+        "transaction": "UNCERTAIN",
+        "reward": "NOT_ELIGIBLE"
+      },
+      "actual": {
+        "lifecycle": "COLLECTED",
+        "transaction": "UNCERTAIN",
+        "reward": "NOT_ELIGIBLE"
+      },
+      "falseSuccess": false,
+      "uiTest": "PASS"
+    },
+    {
+      "case": "I",
+      "classification": "LOCAL FRONTEND BOUNDARY — confirmed transaction alone is not a SENT projection",
+      "expected": {
+        "lifecycle": "RECYCLED",
+        "transaction": "CONFIRMED",
+        "reward": "PENDING"
+      },
+      "actual": {
+        "lifecycle": "RECYCLED",
+        "transaction": "CONFIRMED",
+        "reward": "PENDING"
+      },
+      "falseSuccess": false,
+      "uiTest": "PASS"
+    },
+    {
+      "case": "J",
+      "classification": "LOCAL_FAKE durable failed transport — NOT a live Testnet failure",
+      "expected": {
+        "lifecycle": "RECYCLED",
+        "transaction": "FAILED",
+        "reward": "PENDING",
+        "lastAttempt": "FAILED"
+      },
+      "actual": {
+        "lifecycle": "RECYCLED",
+        "transaction": "FAILED",
+        "reward": "PENDING",
+        "lastAttempt": "FAILED"
+      },
+      "rawOperationState": "REJECTED",
+      "failureScope": "CHAIN",
+      "falseSuccess": false,
+      "readModelTest": "PASS"
+    }
+  ],
+  "additionalAssertions": {
+    "newerConfirmedCannotMaskUnknown": "PASS",
+    "deterministicTimestampIdTie": "PASS",
+    "terminalDoesNotDisableLegitimateActions": "PASS",
+    "unresolvedStillDisablesActions": "PASS",
+    "confirmedTxWithoutSentRewardProjection": "PASS — UI boundary, no claim of valid atomic production projection",
+    "sentSurvivesUnrelatedUncertainty": "PASS — original regression retained",
+    "applicationRejectionDoesNotClaimChainFailure": "PASS",
+    "errorCodeAloneCannotEstablishChainFailure": "PASS",
+    "durableFailedTransportScope": "PASS — LOCAL_FAKE worker, not a live Testnet failure",
+    "validationWithoutOperationDoesNotCreateDisplayedTransaction": "No write/queue path changed; existing zero-business-effect guards remain in full suite"
+  },
+  "historicalControl": {
+    "classification": "HISTORICAL TESTNET CONFIRMED — archived accepted evidence replay, not a fresh RPC/SQL read",
+    "sourceDocument": "docs/instaward/d2/D2-003-TIMELINE.json",
+    "batteryId": "BYE-W1-002-64257020134D4A0F",
+    "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+    "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+    "transactionHash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+    "ledger": 5315915,
+    "confirmedAt": "2026-10-21T17:19:22.000Z",
+    "operation": "pay_reward",
+    "transaction": "CONFIRMED",
+    "reward": "SENT",
+    "freshChainOrSqlRead": false
+  },
+  "browser": {
+    "runtime": "Existing local Next production build + installed Chromium",
+    "browser": "156.0.8078.4",
+    "tests": {
+      "total": 8,
+      "pass": 8,
+      "fail": 0
+    },
+    "fixtureAuthBridge": true,
+    "realSupabaseLoginProven": false,
+    "bffCookiePathProven": false,
+    "hostedEvaluatorPathProven": false,
+    "screenshots": [
+      {
+        "case": "A",
+        "classification": "LOCAL FIXTURE STATE — HTTP / SQL / MOCK; NOT a live Testnet transaction",
+        "expected": {
+          "case": "A",
+          "lifecycle": "COLLECTED",
+          "operation": "SUBMITTED",
+          "command": "confirm_recycling",
+          "reward": "NOT_ELIGIBLE",
+          "lane": "PENDING"
+        },
+        "actual": {
+          "lifecycle": "COLLECTED",
+          "transaction": "PENDING",
+          "reward": "NOT_ELIGIBLE"
+        },
+        "falseSuccess": false,
+        "screenshot": "01-pending.png",
+        "sha256": "b746ef3191eb9966e332424905dee23b892db1ad4f3ac0ade67c707181da08c8"
+      },
+      {
+        "case": "B",
+        "classification": "LOCAL FIXTURE STATE — HTTP / SQL / MOCK; NOT a live Testnet transaction",
+        "expected": {
+          "case": "B",
+          "lifecycle": "COLLECTED",
+          "operation": "UNKNOWN",
+          "command": "confirm_recycling",
+          "reward": "NOT_ELIGIBLE",
+          "lane": "UNCERTAIN"
+        },
+        "actual": {
+          "lifecycle": "COLLECTED",
+          "transaction": "UNCERTAIN",
+          "reward": "NOT_ELIGIBLE"
+        },
+        "falseSuccess": false,
+        "screenshot": "02-uncertain.png",
+        "sha256": "1485103e512d63dd2ed51b4a4c4f3fa797d16e2b10e95d4d5b0a96b548ebc967"
+      },
+      {
+        "case": "C",
+        "classification": "LOCAL FIXTURE STATE — HTTP / SQL / MOCK; NOT a live Testnet transaction",
+        "expected": {
+          "case": "C",
+          "lifecycle": "RECYCLED",
+          "operation": "CONFIRMED",
+          "command": "confirm_recycling",
+          "reward": "PENDING",
+          "lane": "CONFIRMED"
+        },
+        "actual": {
+          "lifecycle": "RECYCLED",
+          "transaction": "CONFIRMED",
+          "reward": "PENDING"
+        },
+        "falseSuccess": false,
+        "screenshot": "03-confirmed-reward-pending.png",
+        "sha256": "dbc38861a9b593c6938fac28e8eca03f6798d635fc027e66dfeaebc9086cc98b"
+      },
+      {
+        "case": "E",
+        "classification": "LOCAL FIXTURE STATE — HTTP / SQL / MOCK; NOT a live Testnet transaction",
+        "expected": {
+          "case": "E",
+          "lifecycle": "RECYCLED",
+          "operation": "REJECTED",
+          "command": "pay_reward",
+          "reward": "PENDING",
+          "lane": "FAILED"
+        },
+        "actual": {
+          "lifecycle": "RECYCLED",
+          "transaction": "FAILED",
+          "reward": "PENDING"
+        },
+        "falseSuccess": false,
+        "screenshot": "04-failed-reward-pending.png",
+        "sha256": "f66f039ea753366dac396c2d2888cd4ccf98725fd8179936ef96dad13a7774b1"
+      },
+      {
+        "case": "F",
+        "classification": "LOCAL FIXTURE STATE — HTTP / SQL / MOCK; NOT a live Testnet transaction",
+        "expected": {
+          "case": "F",
+          "lifecycle": "RECYCLED",
+          "operation": "CONFIRMED",
+          "command": "pay_reward",
+          "reward": "SENT",
+          "lane": "CONFIRMED"
+        },
+        "actual": {
+          "lifecycle": "RECYCLED",
+          "transaction": "CONFIRMED",
+          "reward": "SENT"
+        },
+        "falseSuccess": false,
+        "screenshot": "05-confirmed-reward-sent.png",
+        "sha256": "9489347f4b15a341df871bb75dcde11e077b33e46ffb35f5b34f9642af63c454"
+      },
+      {
+        "case": "N",
+        "classification": "LOCAL FIXTURE STATE — HTTP / SQL / MOCK; NOT a live Testnet transaction",
+        "expected": {
+          "lifecycle": "REGISTERED",
+          "lane": "NO_PENDING_OPERATION",
+          "reward": "NOT_ELIGIBLE"
+        },
+        "actual": {
+          "lifecycle": "REGISTERED",
+          "transaction": "NO_PENDING_OPERATION",
+          "reward": "NOT_ELIGIBLE"
+        },
+        "falseSuccess": false,
+        "screenshot": "06-no-operation.png",
+        "sha256": "53988653e951cd5177d7b6f507a2a77eb02f0c8d2b304ccbee6a2659bb0dd85b"
+      },
+      {
+        "case": "HISTORICAL",
+        "classification": "HISTORICAL TESTNET CONFIRMED — archived accepted evidence replay, not a fresh RPC/SQL read",
+        "expected": {
+          "lifecycle": "RECYCLED",
+          "lane": "CONFIRMED",
+          "reward": "SENT"
+        },
+        "actual": {
+          "lifecycle": "RECYCLED",
+          "transaction": "CONFIRMED",
+          "reward": "SENT"
+        },
+        "falseSuccess": false,
+        "screenshot": "07-historical-testnet-confirmed.png",
+        "sha256": "a79760b80c0347773669ced6aec9be76e6d93f3adcd51448b96dbe4dc40fb1e4"
+      }
+    ],
+    "externalConnections": [],
+    "businessSnapshotUnchanged": true
+  },
+  "tests": {
+    "backendFocused": {
+      "total": 23,
+      "pass": 23,
+      "fail": 0
+    },
+    "frontendStateLanesFocused": {
+      "total": 39,
+      "pass": 39,
+      "fail": 0
+    },
+    "backendComplete": {
+      "total": 312,
+      "pass": 310,
+      "fail": 0,
+      "skip": 2,
+      "skipReason": "Optional GAP2B PostgreSQL concurrency fixtures not rerun; authority/revocation unchanged"
+    },
+    "frontendComplete": {
+      "files": 11,
+      "total": 164,
+      "pass": 164,
+      "fail": 0
+    },
+    "frontendSerialRerun": {
+      "command": "npm --prefix frontend test -- --maxWorkers=1",
+      "total": 164,
+      "pass": 164,
+      "fail": 0,
+      "workerShutdownTimeouts": 0
+    },
+    "backendTypeScript": "PASS",
+    "frontendTypeScript": "PASS",
+    "frontendLint": "PASS",
+    "frontendProductionBuild": "PASS",
+    "rustNative": {
+      "unit": 20,
+      "wrongActor": 1,
+      "fail": 0
+    },
+    "wasmFeature": {
+      "unit": 20,
+      "wrongActor": 1,
+      "wasmConstructor": 1,
+      "fail": 0
+    },
+    "wasmRelease": "PASS",
+    "rustfmt": "PASS",
+    "clippy": "PASS",
+    "python": {
+      "pass": 4,
+      "fail": 0
+    },
+    "mockDemo": "PASS — simulated lifecycle to SENT, 10 GREEN-TEST",
+    "secretAudit": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "verificationNotes": [
+    "Development first-render readiness timed out; production build rendering subsequently passed all seven captures. No application config or dependency changed.",
+    "Parallel frontend run passed all 164 tests and build, with worker-shutdown warnings under load; the same complete suite passed serially with clean shutdown."
+  ],
+  "privacyAudit": {
+    "status": "PASS",
+    "jsonWhitelistChecked": true,
+    "allSevenScreenshotsVisuallyReviewed": true,
+    "noEmails": true,
+    "noAuthIdsOrSessions": true,
+    "noCredentials": true,
+    "localOperationIdsAliasedInJson": true,
+    "publicOperationAndRequestIdsMayAppearInScreenshots": true
+  },
+  "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "wasmMatchesFrozen": true,
+  "acceptanceCandidate": "ACCEPT",
+  "ownerAccepted": false,
+  "officialAcceptance": {
+    "D1": "12/12",
+    "D2": "4/6",
+    "D3": "0/5",
+    "total": "16/23",
+    "acceptedD2": [
+      "D2.1",
+      "D2.2",
+      "D2.4",
+      "D2.5"
+    ],
+    "pendingD2": [
+      "D2.3",
+      "D2.6"
+    ]
+  },
+  "newTestnetTransactions": 0,
+  "newOperationalSignatures": 0,
+  "newBroadcasts": 0,
+  "newLiveChainReads": 0,
+  "remoteSupabaseActions": 0,
+  "user2Used": false,
+  "authorizationWorkerLeaseChanges": 0,
+  "contractWasmAbiChanges": 0,
+  "schemaRlsChanges": 0,
+  "signerRoleChanges": 0,
+  "mainMerged": false,
+  "tagsChanged": false,
+  "protectedFilesUnchanged": true,
+  "claimLimit": "RECYCLED is an authorized lifecycle attestation, not physical/environmental certification. GREENTEST is a Testnet demo asset with no monetary value. No Stellar/SDF/Instawards acceptance or payment claimed.",
+  "implementationCommit": "13a373db0dcfc4588851e4af0e13fa4edc99607b"
+}

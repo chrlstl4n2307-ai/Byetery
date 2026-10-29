@@ -1,0 +1,236 @@
+{
+  "task": "D2.3",
+  "classification": "LOCAL HTTP / SQL / MOCK FIXTURE; not live Testnet",
+  "cases": [
+    {
+      "case": "A",
+      "classification": "LOCAL FIXTURE STATE",
+      "expected": {
+        "case": "A",
+        "lifecycle": "COLLECTED",
+        "operation": "SUBMITTED",
+        "command": "confirm_recycling",
+        "reward": "NOT_ELIGIBLE",
+        "lane": "PENDING"
+      },
+      "battery": {
+        "batteryId": "BYE-D2-005-LANE-A",
+        "confirmedBatteryState": "COLLECTED",
+        "confirmedRewardState": "NOT_ELIGIBLE",
+        "pendingOperation": {
+          "id": "LOCAL-FIXTURE-A-confirm_recycling",
+          "state": "SUBMITTED",
+          "command": "confirm_recycling"
+        },
+        "lastAttempt": null,
+        "source": "MOCK",
+        "metadata": {
+          "type": "LOCAL FIXTURE — D2.3; no live Stellar transaction"
+        }
+      }
+    },
+    {
+      "case": "B",
+      "classification": "LOCAL FIXTURE STATE",
+      "expected": {
+        "case": "B",
+        "lifecycle": "COLLECTED",
+        "operation": "UNKNOWN",
+        "command": "confirm_recycling",
+        "reward": "NOT_ELIGIBLE",
+        "lane": "UNCERTAIN"
+      },
+      "battery": {
+        "batteryId": "BYE-D2-005-LANE-B",
+        "confirmedBatteryState": "COLLECTED",
+        "confirmedRewardState": "NOT_ELIGIBLE",
+        "pendingOperation": {
+          "id": "LOCAL-FIXTURE-B-confirm_recycling",
+          "state": "UNKNOWN",
+          "command": "confirm_recycling"
+        },
+        "lastAttempt": null,
+        "source": "MOCK",
+        "metadata": {
+          "type": "LOCAL FIXTURE — D2.3; no live Stellar transaction"
+        }
+      }
+    },
+    {
+      "case": "C",
+      "classification": "LOCAL FIXTURE STATE",
+      "expected": {
+        "case": "C",
+        "lifecycle": "RECYCLED",
+        "operation": "CONFIRMED",
+        "command": "confirm_recycling",
+        "reward": "PENDING",
+        "lane": "CONFIRMED"
+      },
+      "battery": {
+        "batteryId": "BYE-D2-005-LANE-C",
+        "confirmedBatteryState": "RECYCLED",
+        "confirmedRewardState": "PENDING",
+        "pendingOperation": null,
+        "lastAttempt": null,
+        "source": "MOCK",
+        "metadata": {
+          "type": "LOCAL FIXTURE — D2.3; no live Stellar transaction"
+        }
+      }
+    },
+    {
+      "case": "D",
+      "classification": "LOCAL FIXTURE STATE",
+      "expected": {
+        "case": "D",
+        "lifecycle": "RECYCLED",
+        "operation": "UNKNOWN",
+        "command": "pay_reward",
+        "reward": "PENDING",
+        "lane": "UNCERTAIN"
+      },
+      "battery": {
+        "batteryId": "BYE-D2-005-LANE-D",
+        "confirmedBatteryState": "RECYCLED",
+        "confirmedRewardState": "PENDING",
+        "pendingOperation": {
+          "id": "LOCAL-FIXTURE-D-pay_reward",
+          "state": "UNKNOWN",
+          "command": "pay_reward"
+        },
+        "lastAttempt": {
+          "state": "UNKNOWN",
+          "attempt_number": 1,
+          "error_code": null
+        },
+        "source": "MOCK",
+        "metadata": {
+          "type": "LOCAL FIXTURE — D2.3; no live Stellar transaction"
+        }
+      }
+    },
+    {
+      "case": "E",
+      "classification": "LOCAL FIXTURE STATE",
+      "expected": {
+        "case": "E",
+        "lifecycle": "RECYCLED",
+        "operation": "REJECTED",
+        "command": "pay_reward",
+        "reward": "PENDING",
+        "lane": "FAILED"
+      },
+      "battery": {
+        "batteryId": "BYE-D2-005-LANE-E",
+        "confirmedBatteryState": "RECYCLED",
+        "confirmedRewardState": "PENDING",
+        "pendingOperation": null,
+        "lastAttempt": {
+          "state": "FAILED",
+          "attempt_number": 1,
+          "error_code": "AuthorizationRevoked"
+        },
+        "source": "MOCK",
+        "metadata": {
+          "type": "LOCAL FIXTURE — D2.3; no live Stellar transaction"
+        }
+      }
+    },
+    {
+      "case": "F",
+      "classification": "LOCAL FIXTURE STATE",
+      "expected": {
+        "case": "F",
+        "lifecycle": "RECYCLED",
+        "operation": "CONFIRMED",
+        "command": "pay_reward",
+        "reward": "SENT",
+        "lane": "CONFIRMED"
+      },
+      "battery": {
+        "batteryId": "BYE-D2-005-LANE-F",
+        "confirmedBatteryState": "RECYCLED",
+        "confirmedRewardState": "SENT",
+        "pendingOperation": null,
+        "lastAttempt": {
+          "state": "SUCCEEDED",
+          "attempt_number": 1,
+          "error_code": null
+        },
+        "source": "MOCK",
+        "metadata": {
+          "type": "LOCAL FIXTURE — D2.3; no live Stellar transaction"
+        }
+      }
+    },
+    {
+      "case": "G",
+      "classification": "LOCAL FIXTURE STATE",
+      "expected": {
+        "case": "G",
+        "lifecycle": "COLLECTED",
+        "operation": "REJECTED",
+        "command": "confirm_recycling",
+        "reward": "NOT_ELIGIBLE",
+        "lane": "FAILED"
+      },
+      "battery": {
+        "batteryId": "BYE-D2-005-LANE-G",
+        "confirmedBatteryState": "COLLECTED",
+        "confirmedRewardState": "NOT_ELIGIBLE",
+        "pendingOperation": null,
+        "lastAttempt": null,
+        "source": "MOCK",
+        "metadata": {
+          "type": "LOCAL FIXTURE — D2.3; no live Stellar transaction"
+        }
+      }
+    },
+    {
+      "case": "Q",
+      "classification": "LOCAL FIXTURE STATE",
+      "expected": {
+        "case": "Q",
+        "lifecycle": "COLLECTED",
+        "operation": "QUEUED",
+        "command": "confirm_recycling",
+        "reward": "NOT_ELIGIBLE",
+        "lane": "QUEUED"
+      },
+      "battery": {
+        "batteryId": "BYE-D2-005-LANE-Q",
+        "confirmedBatteryState": "COLLECTED",
+        "confirmedRewardState": "NOT_ELIGIBLE",
+        "pendingOperation": {
+          "id": "LOCAL-FIXTURE-Q-confirm_recycling",
+          "state": "QUEUED",
+          "command": "confirm_recycling"
+        },
+        "lastAttempt": null,
+        "source": "MOCK",
+        "metadata": {
+          "type": "LOCAL FIXTURE — D2.3; no live Stellar transaction"
+        }
+      }
+    },
+    {
+      "case": "N",
+      "classification": "LOCAL FIXTURE STATE",
+      "expected": {
+        "lane": "NO_PENDING_OPERATION"
+      },
+      "battery": {
+        "batteryId": "BYE-D2-007-NONE",
+        "confirmedBatteryState": "REGISTERED",
+        "confirmedRewardState": "NOT_ELIGIBLE",
+        "pendingOperation": null,
+        "lastAttempt": null,
+        "source": "MOCK",
+        "metadata": {
+          "type": "LOCAL FIXTURE — D2.3; no live Stellar transaction"
+        }
+      }
+    }
+  ]
+}

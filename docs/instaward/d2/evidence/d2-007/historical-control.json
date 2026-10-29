@@ -1,0 +1,29 @@
+{
+  "classification": "HISTORICAL TESTNET CONFIRMED \u2014 archived accepted evidence replay, not a fresh RPC/SQL read",
+  "sourceDocument": "docs/instaward/d2/D2-003-TIMELINE.json",
+  "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+  "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "transactionHash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+  "ledger": 5315915,
+  "confirmedAt": "2026-10-21T17:19:22.000Z",
+  "battery": {
+    "batteryId": "BYE-W1-002-64257020134D4A0F",
+    "confirmedBatteryState": "RECYCLED",
+    "confirmedRewardState": "SENT",
+    "pendingOperation": null,
+    "latestTerminalOperation": {
+      "id": "f90927f6-2a66-4bb9-ae3b-5b0565d1fb7c",
+      "state": "CONFIRMED",
+      "command": "pay_reward",
+      "failureScope": null
+    },
+    "lastAttempt": {
+      "state": "SUCCEEDED",
+      "error_code": null
+    },
+    "source": "TESTNET",
+    "metadata": {
+      "type": "HISTORICAL TESTNET CONFIRMED \u2014 archived evidence replay; not a fresh chain read"
+    }
+  }
+}
