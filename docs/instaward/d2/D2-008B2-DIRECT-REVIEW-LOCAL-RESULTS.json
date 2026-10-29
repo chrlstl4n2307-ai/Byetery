@@ -1,0 +1,319 @@
+{
+  "task": "D2-008B2",
+  "date": "2026-10-29",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "status": "DIRECT_REVIEW HOSTED PACKAGE LOCALLY READY",
+  "startingCheckpoint": "48b6a723ab78973f8a3314499c0351fb6155d172",
+  "branch": "instaward/d2-web-mvp",
+  "acceptance": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "total": "17/23",
+    "D2.6": "PENDING",
+    "newOwnerAcceptance": false
+  },
+  "tests": {
+    "rootVerify": "PASS: all stages completed; native/WASM/release/fmt/Clippy, backend, Python, MOCK demo",
+    "rustNative": {
+      "passed": 21,
+      "failed": 0
+    },
+    "rustWasmFeature": {
+      "passed": 22,
+      "failed": 0
+    },
+    "releaseWasm": "PASS",
+    "rustfmt": "PASS",
+    "clippyWarningsDenied": "PASS",
+    "backend": {
+      "passed": 343,
+      "failed": 0,
+      "skipped": 0,
+      "includesB1": 31
+    },
+    "frontend": {
+      "filesPassed": 17,
+      "passed": 274,
+      "failed": 0,
+      "newB2Tests": 110,
+      "retainedTests": 164,
+      "typecheck": "PASS",
+      "lint": "PASS",
+      "localBuild": "PASS",
+      "directReviewBuild": "PASS"
+    },
+    "localPostgresB2": {
+      "passed": 11,
+      "failed": 0,
+      "realPostgreSQL": true,
+      "remainingFixtureDatabases": 0,
+      "serverStopped": true
+    },
+    "python": {
+      "passed": 4,
+      "failed": 0
+    },
+    "mockDemo": "REGISTERED -> RETURNED -> COLLECTED -> RECYCLED -> SENT; simulated reward 100000000",
+    "movedBrowserHarnesses": "PRESERVED / SYNTAX PASS / NOT RERUN",
+    "initialParallelFrontendRun": "worker startup timeout; executed assertions passed; superseded by complete single-worker PASS"
+  },
+  "audit": {
+    "source": {
+      "frontendOutsideImports": 0,
+      "forbiddenOwnCode": 0,
+      "serverMarkers": "PASS"
+    },
+    "build": {
+      "routeManifest": "PASS",
+      "serverActionCount": 0,
+      "browserChunks": 14,
+      "browserStellarCode": 0
+    },
+    "secrets": {
+      "inspectedFiles": 355,
+      "candidatesChecksumValidated": 12,
+      "validSecrets": 0
+    }
+  },
+  "repositorySecretAudit": {
+    "files": 564,
+    "historicalBlobs": 644,
+    "stagedFiles": 57,
+    "findings": []
+  },
+  "immutability": {
+    "baselineFiles": 125,
+    "changedProtectedFiles": [],
+    "otherRefsUnchanged": true,
+    "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+  },
+  "fixtureProvenance": {
+    "horizon.json": {
+      "sha256": "46f11efc8b24e7781f59f369d020d65486b61226c05bf61445ceb9ca12b8c94f",
+      "classification": "recorded public Horizon transaction body; outer signatures removed"
+    },
+    "rpc.json": {
+      "sha256": "b45b24e79d79968bb701dec769290661359460c9484dc7fced5d3f894a9d7c87",
+      "classification": "synthetic offline RPC response using public frozen WASM and derived storage keys"
+    }
+  },
+  "testMatrix": [
+    {
+      "requirements": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "localEvidence": "direct-review-boundary.test.ts; audit:review",
+      "status": "PASS",
+      "caveat": null
+    },
+    {
+      "requirements": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "localEvidence": "direct-review-http.test.ts",
+      "status": "PASS",
+      "caveat": null
+    },
+    {
+      "requirements": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "localEvidence": "direct-review-sql.test.ts",
+      "status": "PASS",
+      "caveat": null
+    },
+    {
+      "requirements": [
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "localEvidence": "direct-review-sql.test.ts",
+      "status": "PASS",
+      "caveat": null
+    },
+    {
+      "requirements": [
+        22,
+        23,
+        24,
+        25,
+        26
+      ],
+      "localEvidence": "direct-review-sql.test.ts; direct-review-http.test.ts",
+      "status": "PASS",
+      "caveat": null
+    },
+    {
+      "requirements": [
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "localEvidence": "direct-review-http.test.ts; direct-review-boundary.test.ts; audit:review",
+      "status": "PASS",
+      "caveat": "Raw guard tests original strings; WHATWG/Next may normalize before observable Request. Hosted canonicalization remains a Preview gate."
+    },
+    {
+      "requirements": [
+        35,
+        36,
+        37,
+        38,
+        39
+      ],
+      "localEvidence": "direct-review-http.test.ts",
+      "status": "PASS",
+      "caveat": null
+    },
+    {
+      "requirements": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46
+      ],
+      "localEvidence": "direct-review-sql.test.ts; unchanged B1 tests; direct-review-ui.test.tsx",
+      "status": "PASS",
+      "caveat": null
+    },
+    {
+      "requirements": [
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54
+      ],
+      "localEvidence": "direct-review-chain.test.ts",
+      "status": "PASS",
+      "caveat": null
+    },
+    {
+      "requirements": [
+        55,
+        56,
+        57
+      ],
+      "localEvidence": "direct-review-chain.test.ts; direct-review-boundary.test.ts",
+      "status": "PASS",
+      "caveat": null
+    },
+    {
+      "requirements": [
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ],
+      "localEvidence": "audit:review; direct-review-config.test.ts",
+      "status": "PASS",
+      "caveat": null
+    },
+    {
+      "requirements": [
+        64,
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "localEvidence": "direct-review-sql.test.ts",
+      "status": "PASS",
+      "caveat": null
+    }
+  ],
+  "auth": {
+    "strategy": "AUTH_USER_ONLY",
+    "getSession": "transport only",
+    "authoritativeCheck": "getUser(exact cookie token) before SQL",
+    "futureLiveness": "injected dependency; fail closed if missing",
+    "realSessionExperiment": 0
+  },
+  "sql": {
+    "artifact": "database/review/d2-008b2-direct-review.sql",
+    "remoteApplied": false,
+    "readOwner": "NOLOGIN NOINHERIT NOBYPASSRLS; no underlying table ownership",
+    "hostedRoleRawTableAccess": false,
+    "hostedExecuteFunctionCount": 5,
+    "B1ArtifactModified": false
+  },
+  "dependencyCaveats": {
+    "productionBaseline": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 2,
+      "critical": 1,
+      "total": 3
+    },
+    "productionCurrent": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 2,
+      "critical": 1,
+      "total": 3
+    },
+    "newlyAffectedPackages": [],
+    "stellarBase": "15.0.0 deprecated upstream; SDK forbidden by owner; frozen XDR compatibility tested; future package decision requires review"
+  },
+  "remoteMutations": {
+    "supabase": 0,
+    "realAuthSessionExperiment": 0,
+    "vercel": 0,
+    "stellarTransactions": 0,
+    "operationalSignatures": 0,
+    "broadcasts": 0,
+    "liveAuthRpcHorizonInTests": 0,
+    "USER2": false
+  },
+  "implementationCheckpoint": "38b7285ccd691ba26750f138e91f140d10aec3ed",
+  "publication": {
+    "scope": "fast-forward instaward/d2-web-mvp only",
+    "mainMerged": false,
+    "tagsChanged": false
+  },
+  "localExecutionCaveat": "A delayed pg_ctl launcher resumed after cleanup; duplicate SQL setup returned ECONNREFUSED before assertions. Superseded by the complete clean-log final run with awaited stdio-isolated launcher.",
+  "remainingBlockers": [
+    "D2-008B2A Supabase Auth Session Gate: separate owner authorization",
+    "Reviewed remote SQL and restricted credential provisioning",
+    "Review/resolve preexisting production advisories and stellar-base deprecation constraints",
+    "Verify actual Vercel plan and enable Protection BEFORE any deploy",
+    "Exact hosted origins/root isolation/branch/SHA and live read-only verification",
+    "Hosted path canonicalization and four-role review",
+    "Any owner-assisted adoption/transaction requires separate authorization",
+    "D2.6 owner acceptance"
+  ],
+  "stop": "STOP; no B2A, remote SQL, Vercel or signing/broadcast"
+}
