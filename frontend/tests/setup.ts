@@ -1,5 +1,6 @@
 import { cleanup } from "@testing-library/react";
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
+beforeEach(() => { vi.stubGlobal("fetch", () => Promise.reject(new Error("ExternalNetworkForbiddenInTests"))); });
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();

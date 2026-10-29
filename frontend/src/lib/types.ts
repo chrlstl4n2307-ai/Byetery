@@ -1,4 +1,4 @@
-import type { BatteryState, RewardState } from "../../../backend/src/domain";
+import type { BatteryState, RewardState } from "@/shared/review/legacy-types";
 import type { BlockchainSource } from "./web-config";
 export type { BatteryState, RewardState };
 export type Role = "USER" | "ADMIN" | "COLLECTOR" | "RECYCLER";

@@ -1,7 +1,7 @@
 import type {
   BatteryHistory,
   HistoryEntry,
-} from "../../../backend/src/history/model";
+} from "@/shared/review/legacy-types";
 import { TESTNET_DEPLOYMENT_ID } from "./web-config";
 export type { BatteryHistory, HistoryEntry };
 export const historyLabels: Record<HistoryEntry["kind"], string> = {

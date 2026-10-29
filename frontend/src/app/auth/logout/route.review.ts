@@ -1,0 +1,11 @@
+import "server-only";
+import { directReviewRoute } from "@/server/direct-review/runtime";
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const GET = directReviewRoute;
+export const POST = directReviewRoute;
+export const PUT = directReviewRoute;
+export const PATCH = directReviewRoute;
+export const DELETE = directReviewRoute;
+export const HEAD = directReviewRoute;
+export const OPTIONS = directReviewRoute;

@@ -1,4 +1,18 @@
-# D2 current scope — 2026-10-22
+# D2 DIRECT_REVIEW package — 2026-10-29
+
+Local-only package: [D2-008B2 report](../docs/instaward/d2/D2-008B2-DIRECT-REVIEW-LOCAL.md). No hosted Preview or remote SQL has been configured. D2.6 remains pending.
+
+`BYETERY_REVIEW_ADAPTER=DIRECT_REVIEW` selects separate `*.review.ts(x)` routes and server-only bounded SQL/chain readers. The legacy catch-all exists only in the normal LOCAL build. `npm run audit:review` must run after the DIRECT_REVIEW build to inspect actual routes, server actions, client chunks and checksum-validated seed candidates. Never build this mode with legacy upstream/admin/signing environment variables; their presence is rejected.
+
+Tests require the existing guarded portable PostgreSQL fixture on loopback, not Supabase Cloud. `npm run verify` uses one Vitest worker for reproducible Windows execution. All external fetch is denied by default in tests; fixed receipt/RPC fixtures explicitly replace the transport. No credential provisioning or package installation is performed by the tests.
+
+The existing browser harnesses now live in `scripts/browser-tests/d2-role-qr.test.mjs` and `scripts/browser-tests/d2-state-lanes.test.mjs`, outside the isolated frontend package. Their integration fixtures have not been converted into DIRECT_REVIEW operational endpoints. They were preserved and syntax-checked; their real browser workflows were not rerun in B2.
+
+Future-only configuration names and security gates are listed in the B2 report. Its restricted DB URL must never be replaced with DATABASE_URL/admin/service-role credentials. Future Vercel root: `frontend`, outside-root build inclusion OFF, Protection enabled before deploy and exact Preview origins/branch verified. No B2A Auth experiment or deployment is authorized by this package.
+
+---
+
+# D2 earlier scope — 2026-10-22
 
 D2-001 supports authenticated API read models with explicit MOCK/TESTNET source, a pinned existing Testnet deployment, and separate LOCAL / D2_PREVIEW HTTPS configuration. TESTNET business mutations and signup are disabled in the web proxy and UI for this phase. The backend, contract and signer are unchanged.
 

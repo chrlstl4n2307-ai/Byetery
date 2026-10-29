@@ -33,7 +33,7 @@ const labels: Record<TransactionLaneState, string> = {
   CONFIRMED: "Confirmada",
   FAILED: "Fallida",
 };
-export function transactionPresentation(operation: PendingOperation | null) {
+export function transactionPresentation<T extends Pick<PendingOperation, "state">>(operation: T | null) {
   const state = operation
     ? Object.hasOwn(states, operation.state)
       ? states[operation.state]

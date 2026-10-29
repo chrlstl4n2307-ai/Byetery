@@ -6,12 +6,12 @@ import { mkdir, readFile, writeFile, unlink } from 'node:fs/promises';
 import { existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { chromium } from '@playwright/test';
+import { chromium } from '../../frontend/node_modules/@playwright/test/index.mjs';
 import { stateLanesFixture } from '../../backend/tests/d2-state-lanes-fixture.ts';
 
 test('D2.3 actual Next/Chromium state lanes with isolated HTTP/SQL fixtures and archived control', { timeout: 240000 }, async t => {
   const f = await stateLanesFixture(), contexts = [], results = [], blocked = [];
-  const frontend = fileURLToPath(new URL('../', import.meta.url));
+  const frontend = fileURLToPath(new URL('../../frontend/', import.meta.url));
   const logs = new URL('../../.tools/d2-007/', import.meta.url);
   const evidence = new URL('../../docs/instaward/d2/evidence/d2-007/', import.meta.url);
   const historical = JSON.parse(await readFile(new URL('historical-control.json', evidence), 'utf8'));

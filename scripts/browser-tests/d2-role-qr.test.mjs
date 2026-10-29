@@ -6,18 +6,18 @@ import {mkdir,writeFile,readFile,unlink} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {existsSync,readdirSync} from 'node:fs';
 import path from 'node:path';
-import {chromium} from '@playwright/test';
+import {chromium} from '../../frontend/node_modules/@playwright/test/index.mjs';
 import {roleQrFixture} from '../../backend/tests/d2-role-qr-fixture.ts';
 
 test('D2-005 actual Next pages + Chromium + isolated HTTP/SQL/MOCK fixture bridge',{timeout:240000},async t=>{
  const f=await roleQrFixture(),trace=[],blockedExternal=[];
- const frontend=fileURLToPath(new URL('../',import.meta.url));
+ const frontend=fileURLToPath(new URL('../../frontend/',import.meta.url));
  const evidence=new URL('../../docs/instaward/d2/evidence/d2-005/',import.meta.url);
  const localLogs=new URL('../../.tools/d2-005/',import.meta.url);
  await mkdir(evidence,{recursive:true});await mkdir(localLogs,{recursive:true});
  const generatedFiles=['next-env.d.ts','AGENTS.md','CLAUDE.md'];
  const beforeFiles=new Map(await Promise.all(generatedFiles.map(async name=>{
-  try{return [name,await readFile(new URL('../'+name,import.meta.url))];}catch(error){if(error.code!=='ENOENT')throw error;return [name,null];}
+  try{return [name,await readFile(new URL('../../frontend/'+name,import.meta.url))];}catch(error){if(error.code!=='ENOENT')throw error;return [name,null];}
  })));
  const probe=createServer();await new Promise(resolve=>probe.listen(0,'127.0.0.1',resolve));
  const port=probe.address().port;await new Promise(resolve=>probe.close(resolve));
@@ -26,7 +26,7 @@ test('D2-005 actual Next pages + Chromium + isolated HTTP/SQL/MOCK fixture bridg
   BYETERY_WEB_ORIGIN:origin,BYETERY_API_URL:f.origin,SUPABASE_URL:'https://aemxuqnnwfclzrwwiqfd.supabase.co',
   SUPABASE_PUBLISHABLE_KEY:'sb_publishable_D2_005_BROWSER_FIXTURE_ONLY'};
  for(const key of ['VERCEL','VERCEL_ENV','VERCEL_URL','VERCEL_BRANCH_URL','VERCEL_GIT_COMMIT_REF'])delete env[key];
- const child=spawn(process.execPath,[fileURLToPath(new URL('../node_modules/next/dist/bin/next',import.meta.url)),'dev','--hostname','127.0.0.1','--port',String(port)],
+ const child=spawn(process.execPath,[fileURLToPath(new URL('../../frontend/node_modules/next/dist/bin/next',import.meta.url)),'dev','--hostname','127.0.0.1','--port',String(port)],
   {cwd:frontend,env,windowsHide:true,stdio:['ignore','pipe','pipe']});
  let log='',browser,browserVersion=null;
  child.stdout.on('data',b=>{log=(log+b.toString()).slice(-128000);});child.stderr.on('data',b=>{log=(log+b.toString()).slice(-128000);});
@@ -134,7 +134,7 @@ test('D2-005 actual Next pages + Chromium + isolated HTTP/SQL/MOCK fixture bridg
    else child.kill('SIGTERM');
   }
   for(const name of generatedFiles){
-   const target=new URL('../'+name,import.meta.url),before=beforeFiles.get(name);
+   const target=new URL('../../frontend/'+name,import.meta.url),before=beforeFiles.get(name);
    if(name==='next-env.d.ts'&&before){await writeFile(target,before);continue;}
    if(before!==null)continue;
    let bytes;try{bytes=await readFile(target);}catch(error){if(error.code==='ENOENT')continue;throw error;}

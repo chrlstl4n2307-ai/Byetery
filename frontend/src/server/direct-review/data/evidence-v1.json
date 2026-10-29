@@ -1,0 +1,21 @@
+{
+  "evidenceVersion": 1,
+  "domain": "BYETERY_EVIDENCE_V1",
+  "networkId": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+  "contractAddress": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "batteryId": "BYE-W1-002-64257020134D4A0F",
+  "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+  "evidenceKind": "RECYCLING",
+  "manifestBase64": "eyJ2ZXJzaW9uIjoxLCJ0YXNrIjoiQllFLVcxLTAwNCIsImZpeHR1cmUiOnRydWUsImJhdHRlcnlJZCI6IkJZRS1XMS0wMDItNjQyNTcwMjAxMzRENEEwRiIsInJlcXVlc3RJZCI6IjVkNDg2NDNhODkxNTQxM2VkODg5ZGQ2YWEzZjgzMDRkMTBhOGMyNTFlMzg0ZjUyOGFiNTQ2MWQ2ZTRjOGQ3OGMiLCJraW5kIjoiUkVDWUNMSU5HIiwiYXR0ZXN0YXRpb24iOiJTeW50aGV0aWMgVGVzdG5ldCBkZW1vbnN0cmF0aW9uIGV2aWRlbmNlOyBOT1QgcHJvb2Ygb2YgcGh5c2ljYWwgcmVjeWNsaW5nLCBjdXN0b2R5LCBlbnZpcm9ubWVudGFsIGJlbmVmaXQsIHJlZ3VsYXRvcnkgY29tcGxpYW5jZSBvciBtYXRlcmlhbCByZWNvdmVyeS4iLCJub25jZSI6IjY1Nzc4Mjg4YzJkNjc1YWViZGVhMzkwMjU2ZWNlYWZjIn0=",
+  "manifestByteLength": 398,
+  "payloadHash": "50250c13774ca250b35bd4f6dbdf315a2963c17591f28471bea334f95cc13e6c",
+  "expectedCommitment": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451",
+  "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+  "transactionHash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+  "ledger": 5315874,
+  "method": "confirm_recycling",
+  "source": "docs/instaward/week1/BYE-W1-004-results.json#evidence.manifestUtf8",
+  "disclosureRule": "UTF-8 bytes of the original already disclosed string, with no added newline or JSON reserialization",
+  "synthetic": true,
+  "claimLimit": "Integrity of disclosed bytes only. Does not prove any physical event or truthfulness."
+}
