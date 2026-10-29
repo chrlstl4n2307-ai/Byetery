@@ -2,6 +2,8 @@
   "name": "byetery-monorepo",
   "private": true,
   "scripts": {
+    "verify:evidence": "node --experimental-strip-types backend/src/evidence-cli.ts",
+    "verify:evidence:chain": "node --experimental-strip-types backend/src/evidence-provenance-cli.ts",
     "demo": "npm --prefix backend run demo",
     "test:backend": "npm --prefix backend run verify",
     "test:python": "python -m unittest discover -s tools/python -p test_*.py -v",

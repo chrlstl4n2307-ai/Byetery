@@ -3,7 +3,7 @@ import { Address as StellarAddress, xdr } from '@stellar/stellar-sdk';
 import { hash32, nonzeroHash, type Deployment, type Evidence } from './domain.ts';
 
 /** Soroban contracttype struct = ScMap with lexicographically ordered symbol keys. */
-export function evidenceCommitment(config: Deployment, evidence: Evidence): string {
+export function evidenceCommitment<T extends Pick<Deployment, 'networkId' | 'contractAddress'>>(config: T, evidence: Evidence): string {
   const symbol = (s: string) => xdr.ScVal.scvSymbol(s);
   const bytes = (s: string) => xdr.ScVal.scvBytes(Buffer.from(hash32(s), 'hex'));
   nonzeroHash(evidence.payloadHash);
