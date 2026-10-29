@@ -1,0 +1,201 @@
+{
+  "task": "D2-006",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "dateLocal": "2026-10-28",
+  "timezone": "America/Santiago",
+  "startingHead": "795108b011a5c1abea06c33707c73ea3de8b9d0c",
+  "branch": "instaward/d2-web-mvp",
+  "status": "IMPLEMENTED / TESTED / EVIDENCE READY",
+  "evidenceVersion": 1,
+  "domain": "BYETERY_EVIDENCE_V1",
+  "batteryId": "BYE-W1-002-64257020134D4A0F",
+  "requestId": "5d48643a8915413ed889dd6aa3f8304d10a8c251e384f528ab5461d6e4c8d78c",
+  "evidenceKind": "RECYCLING",
+  "transactionHash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+  "ledger": 5315874,
+  "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+  "networkId": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+  "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "method": "confirm_recycling",
+  "disclosureFile": "evidence/d2-006/historical-recycling.json",
+  "manifestByteLength": 398,
+  "payloadHash": "50250c13774ca250b35bd4f6dbdf315a2963c17591f28471bea334f95cc13e6c",
+  "expectedCommitment": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451",
+  "computedCommitment": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451",
+  "intactResult": "VERIFIED",
+  "tamperMutation": {
+    "index": 0,
+    "operation": "XOR 0x01",
+    "originalByte": 123,
+    "modifiedByte": 122,
+    "changedByteCount": 1,
+    "expectedCommitmentUnchanged": true
+  },
+  "tamperedPayloadHash": "107c836054116e3f60ab1b8a285ec469b71f92a9c3b16faf3ba8aa25aa5cde5c",
+  "tamperedCommitment": "851c47034a6b4e541365cf208372fe6040080164442a09b435bee14a70d503b4",
+  "tamperedResult": "NOT_VERIFIED",
+  "chainProvenance": {
+    "verification": "CONFIRMED",
+    "reason": null,
+    "transactionHash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+    "ledger": 5315874,
+    "commitment": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451",
+    "source": "STELLAR_TESTNET_HORIZON",
+    "checkedAt": "2026-10-29T00:50:49.833Z",
+    "network": "TESTNET",
+    "networkId": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+    "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+    "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+    "batteryId": "BYE-W1-002-64257020134D4A0F",
+    "method": "confirm_recycling",
+    "payloadHash": "50250c13774ca250b35bd4f6dbdf315a2963c17591f28471bea334f95cc13e6c",
+    "persistedReference": "docs/instaward/d2/D2-003-TIMELINE.json (historical SQL observation; no fresh SQL read)",
+    "commitmentBasis": "Exact confirmed invocation Evidence XDR; reconstructed with frozen V1 encoder, not a new event read",
+    "newTransactions": 0,
+    "newOperationalSignatures": 0,
+    "newBroadcasts": 0
+  },
+  "rpcRead": {
+    "status": "NOT_FOUND",
+    "latestLedger": 5442176,
+    "interpretation": "Not treated as failure; historical receipt independently verified through official Horizon Testnet",
+    "oldestLedger": 5321217
+  },
+  "additionalAdversarialCases": {
+    "notVerified": [
+      "truncated",
+      "appended",
+      "whitespace",
+      "JSON property order",
+      "valid other contract",
+      "valid other network",
+      "other domain",
+      "other battery",
+      "other request",
+      "other evidence kind"
+    ],
+    "invalidInput": [
+      "malformed/short/long/uppercase hash",
+      "invalid network",
+      "invalid contract/account address",
+      "empty/oversize evidence",
+      "unsupported version",
+      "malformed context",
+      "invalid/noncanonical base64"
+    ],
+    "provenanceUnverified": [
+      "wrong payload/request/actor/method/contract/argument count",
+      "wrong network/deployment",
+      "missing/failed/unavailable tx",
+      "result/status mismatch",
+      "hash/ledger mismatch",
+      "SQL pending",
+      "wrong expected commitment"
+    ]
+  },
+  "crossLanguageVector": {
+    "file": "backend/tests/contract-evidence-vector.json",
+    "unchanged": true,
+    "result": "PASS",
+    "commitment": "1e985a8468f016db7434d228ccfe80e614a68d81ef70f7a5e87c63c2c3938bb4",
+    "scope": "Frozen XDR encoder with recorded payload hash; no fabricated manifest preimage"
+  },
+  "tests": {
+    "focused": {
+      "total": 51,
+      "pass": 51,
+      "fail": 0,
+      "skip": 0
+    },
+    "backend": {
+      "total": 289,
+      "pass": 287,
+      "fail": 0,
+      "skip": 2,
+      "skipReason": "Optional GAP2B PostgreSQL concurrency tests; authorization/revocation unchanged"
+    },
+    "typeScript": "PASS",
+    "rustNative": {
+      "unit": 20,
+      "wrongActor": 1,
+      "fail": 0
+    },
+    "wasmFeature": {
+      "unit": 20,
+      "wrongActor": 1,
+      "wasmConstructor": 1,
+      "fail": 0
+    },
+    "releaseWasm": "PASS",
+    "rustfmt": "PASS",
+    "clippy": "PASS",
+    "python": {
+      "pass": 4,
+      "fail": 0
+    },
+    "mockDemo": "PASS — lifecycle to SENT, 10 simulated GREEN-TEST",
+    "frontend": "NOT RUN — no frontend/shared frontend code changed",
+    "offlineCli": {
+      "intact": "VERIFIED",
+      "intactExit": 0,
+      "oneByte": "NOT_VERIFIED",
+      "oneByteExit": 1
+    },
+    "gitDiffCheck": "PASS",
+    "secretAudit": "PASS"
+  },
+  "piiAudit": {
+    "status": "PASS",
+    "disclosureByteLength": 398,
+    "payloadHash": "50250c13774ca250b35bd4f6dbdf315a2963c17591f28471bea334f95cc13e6c",
+    "originalDisclosureUnchanged": true,
+    "manifestKeysInspected": [
+      "attestation",
+      "batteryId",
+      "fixture",
+      "kind",
+      "nonce",
+      "requestId",
+      "task",
+      "version"
+    ],
+    "syntheticOnly": true,
+    "emailCount": 0,
+    "authUserIdCount": 0,
+    "sessionOrCredentialCount": 0,
+    "privateKeyCount": 0,
+    "walletAddressCount": 0,
+    "notes": "Decoded original manifest inspected; nonce is an already public synthetic evidence field, not an Auth/wallet challenge or credential. Contract/deployment/request identifiers are public context."
+  },
+  "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "wasmMatchesFrozen": true,
+  "protectedFilesUnchanged": true,
+  "acceptanceCandidate": "ACCEPT",
+  "acceptanceRequirements": {
+    "exactHistoricalBytes": true,
+    "intactExactCommitment": true,
+    "independentConfirmedTestnetProvenance": true,
+    "oneByteFailsSameCommitment": true,
+    "noPiiOrSecrets": true,
+    "integrityOnlyLimitation": true
+  },
+  "ownerAccepted": false,
+  "officialAcceptance": {
+    "D1": "12/12",
+    "D2": "1/6 (D2.4 only)",
+    "D3": "0/5",
+    "total": "13/23"
+  },
+  "newTestnetTransactions": 0,
+  "newOperationalSignatures": 0,
+  "newBroadcasts": 0,
+  "remoteSupabaseAccess": 0,
+  "remoteSupabaseMutations": 0,
+  "user2Used": false,
+  "contractWasmAbiChanged": false,
+  "schemaRlsSignerRolesChanged": false,
+  "mainMerged": false,
+  "tagsChanged": false,
+  "claimLimit": "Integrity of exact disclosed bytes/context against the independently confirmed attestation commitment. Does not prove a physical event occurred, evidence truthfulness, environmental compliance or certification. No Stellar/SDF/Instawards acceptance or payment.",
+  "implementationCommit": "e6e5167e7b1ac4753d39897c8114d134ced3e8e3"
+}
