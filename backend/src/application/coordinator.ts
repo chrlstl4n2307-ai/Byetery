@@ -92,6 +92,9 @@ export class Coordinator {
     const pending=await one(db,`select 1 from app_private.stellar_operations where deployment_id=$1 and battery_id=$2 and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN')`,[d,batteryId]);
     requireThat(!pending,409,'OperationInProgress');
     if(action.kind==='register') {
+      // Server-generated review IDs are reserved for explicit local owner adoption.
+      // Namespace exclusion closes the ordinary-registration race without reading intents.
+      requireThat(!batteryId.startsWith('BYE-REVIEW-'),409,'ReviewBatteryReserved');
       requireThat(!await one(db,'select 1 from app_private.battery_records where deployment_id=$1 and battery_id=$2',[d,batteryId]),409,'BatteryAlreadyExists');
       const metadata=body.metadata??{};
       requireThat(metadata!==null && typeof metadata==='object' && !Array.isArray(metadata) && Buffer.byteLength(canonical(metadata))<=8192,400,'InvalidMetadata');
