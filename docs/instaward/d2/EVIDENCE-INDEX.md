@@ -12,6 +12,12 @@ By Christian's explicit [D2.3 owner-acceptance decision](D2-OWNER-ACCEPTANCE.md#
 
 This is internal Byetery owner acceptance only, not Stellar/SDF/Instawards acceptance, approval, certification or payment. Documentation only; implementation and Testnet state are unchanged. New transactions, operational signatures and broadcasts: **0**. No USER2, main merge or tag change. **STOP: do not begin D2.6 automatically.**
 
+## D2.6 local foundation — D2-008B1, no acceptance change
+
+Owner-authorized [registration intents and explicit owner adoption](D2-008B1-REGISTRATION-INTENTS.md), [sanitized results](D2-008B1-REGISTRATION-INTENTS-RESULTS.json): **LOCAL FOUNDATION READY**. Council Candidate B keeps WAITING exclusively in a separate private intent; Foundation is created atomically only on local owner adoption, preserving the reserved UUID. This supersedes D2-008A's proposed waiting representation without changing that historical report. Restricted functions and real PostgreSQL locks/RLS are tested locally; GAP2 is reused unchanged. Complete backend **343/343**, B1 **31/31**, GAP1/role/state focused **64/64**, real PG GAP2B **2/2**, Rust/native/WASM/release/fmt/Clippy, frozen hash, Python **4/4** and MOCK demo PASS. No remote SQL/Auth/Vercel/chain mutations or operational signing/broadcast.
+
+**D2.6 remains pending / NOT OWNER ACCEPTED. D1 12/12; D2 5/6; D3 0/5; TOTAL 17/23 unchanged.** SQL is a separate local audit/apply artifact, not applied remotely. Hosted Auth/session/DIRECT_REVIEW, Preview, live verification and the separately authorized assisted registration remain future gates. STOP after B1 publication; do not start B2.
+
 ## D2.6 planning — D2-008A, no acceptance change
 
 Owner-authorized [review-access final preflight](D2-008A-REVIEW-ACCESS-PREFLIGHT.md), [sanitized machine-readable plan](D2-008A-REVIEW-ACCESS-PREFLIGHT.json): **DESIGN ONLY / NOT DEPLOYED**. Current Vercel/Supabase metadata were refreshed read-only. Recommended architecture B uses a restricted Next/Vercel review adapter and human-assisted local ADMIN signing; the least-privilege DB boundary and first-dispatch owner-adoption gate are proposed, not implemented. No hosted signers are required by the minimal D2.6 review plan.

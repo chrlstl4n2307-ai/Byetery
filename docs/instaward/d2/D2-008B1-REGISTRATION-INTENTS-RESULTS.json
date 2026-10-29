@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "task": "D2-008B1",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "date": "2026-10-29",
+  "timezone": "America/Santiago",
+  "status": "LOCAL FOUNDATION READY",
+  "branch": "instaward/d2-web-mvp",
+  "startingCheckpoint": "ee1005dbeb2f8b39d19ccd83258da2c563135656",
+  "criterion": "D2.6",
+  "criterionOwnerAccepted": false,
+  "ownerAcceptance": {
+    "D1": "12/12",
+    "D2": "5/6",
+    "D3": "0/5",
+    "total": "17/23",
+    "acceptedD2": [
+      "D2.1",
+      "D2.2",
+      "D2.3",
+      "D2.4",
+      "D2.5"
+    ],
+    "externalApprovalOrPaymentClaimed": false
+  },
+  "architecture": {
+    "councilChoice": "CANDIDATE B — SEPARATE REVIEW INTENT",
+    "waitingObject": "review_private.registration_intents",
+    "waitingStates": [
+      "WAITING",
+      "ADOPTED"
+    ],
+    "waitingFoundationRows": 0,
+    "waitingTransportRows": 0,
+    "foundationStatesChanged": false,
+    "noAutomaticExpiry": true,
+    "noDelete": true,
+    "serverGeneratedUuid": true,
+    "serverGeneratedBattery": true,
+    "sameUuidAtAdoption": true,
+    "normalRegistrationReservation": "BYE-REVIEW- namespace reserved; no intent query by Coordinator",
+    "postAdoption": "ordinary QUEUED; existing local reconciler",
+    "adoptionCallsProcessor": false
+  },
+  "sql": {
+    "artifact": "database/review/d2-008b1-registration-intents.sql",
+    "normalMigrationSequence": false,
+    "appliedOnlyToDisposableLocalPostgres": true,
+    "remotelyApplied": false,
+    "role": "byetery_d2_review_app",
+    "roleOwner": "byetery_d2_intent_owner",
+    "ownerLogin": false,
+    "ownerBypassRls": false,
+    "ownerOwnsUnderlyingTables": false,
+    "hostedRoleRawAccess": false,
+    "hostedRoleAdoptionExecute": false,
+    "hostedRoleFunctions": [
+      "create_registration_intent",
+      "registration_intent_status"
+    ],
+    "forcedRlsPreserved": true,
+    "browserDenyPreserved": true,
+    "authSessionOracle": false,
+    "rawAuthGrant": false,
+    "explicitReviewPermission": "CREATE_D2_REGISTRATION_INTENT",
+    "adminMembershipAlsoRequired": true
+  },
+  "adoption": {
+    "isolation": "READ COMMITTED",
+    "lockOrder": [
+      "intent FOR UPDATE",
+      "ACTIVE principal FOR SHARE",
+      "enabled ADMIN FOR SHARE",
+      "enabled review permission FOR SHARE"
+    ],
+    "precheck": "injected deterministic fixture only; ABSENT required",
+    "hashVerification": "SHA256 exact original stored bytes; no JSON reserialization for hash",
+    "foundationEvidenceBytesIdentical": true,
+    "operationInsertCollision": "FAIL CLOSED; no ON CONFLICT DO NOTHING",
+    "atomicFoundationAndAdoptedTransition": true,
+    "concurrentWinners": 1,
+    "secondAdopterRealLockWaitObserved": true,
+    "existingRevokerWaitObserved": true,
+    "newAuthorityArchitecture": false,
+    "liveCliBootstrapInstalled": false
+  },
+  "workerIsolation": {
+    "structuralCodeBoundaryProven": true,
+    "waitingNotVisibleAsOperation": true,
+    "automaticEntryPointsTested": [
+      "Coordinator.reconcile repeated/startup-equivalent",
+      "TestnetStellarService.process",
+      "TestnetStellarService.prepare",
+      "TestnetStellarService.submit",
+      "TransportStore.queue",
+      "TransportStore.claim",
+      "worker.run"
+    ],
+    "rpcTripwireCallsBeforeAdoption": 0,
+    "signerTripwireCallsBeforeAdoption": 0,
+    "privilegedLocalCredentialNotRedesigned": true,
+    "sqlIncapabilityOfCurrentPrivilegedWorkerClaimed": false
+  },
+  "verification": {
+    "rootCommand": "npm run verify",
+    "rootExitCode": 0,
+    "focusedB1": {
+      "pass": 31,
+      "fail": 0,
+      "skip": 0
+    },
+    "gap1RoleStateFocused": {
+      "pass": 64,
+      "fail": 0,
+      "skip": 0
+    },
+    "backendComplete": {
+      "pass": 343,
+      "fail": 0,
+      "skip": 0,
+      "foundationSuitePreserved": true
+    },
+    "backendTypeScript": "PASS",
+    "gap2A": "PASS — complete backend",
+    "gap2B": "PASS — complete backend",
+    "gap2BRealPostgres": {
+      "pass": 2,
+      "fail": 0,
+      "skip": 0
+    },
+    "restrictedRoleActualLogin": "PASS",
+    "adoptionRealPostgres": "PASS",
+    "nativeRust": {
+      "pass": 21,
+      "fail": 0
+    },
+    "wasmFeatureRust": {
+      "pass": 22,
+      "fail": 0,
+      "nativeTestsOverlap": true
+    },
+    "releaseWasm": "PASS",
+    "rustfmt": "PASS",
+    "clippy": "PASS — D warnings",
+    "python": {
+      "pass": 4,
+      "fail": 0
+    },
+    "mockDemo": "PASS — REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT",
+    "frontend": "NOT RERUN — no frontend/shared frontend changes",
+    "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+    "frozenWasmMatches": true,
+    "fullLocalVerificationLogSha256": "64b68f080b64c9b50acfe347c40ee780404b06eadb9f3c3a6b57e9763c064729",
+    "secretAudit": "PASS — 517 files, 635 historical blobs, zero findings before staging; repeated on publication set",
+    "gitDiffCheck": "PASS"
+  },
+  "operations": {
+    "remoteMutations": "NONE",
+    "remoteFixtureDatabaseConnections": 0,
+    "authMutations": 0,
+    "vercelChanges": 0,
+    "newTestnetTransactions": 0,
+    "operationalSignatures": 0,
+    "broadcasts": 0,
+    "realRpcCalls": 0,
+    "user2Used": false,
+    "contractWasmAbiSignerChanges": 0
+  },
+  "caveats": [
+    "No hosted Auth adapter/session oracle or DIRECT_REVIEW package",
+    "No remote schema/roles/grants/RLS applied",
+    "Chain precheck only faked; live trusted precheck/bootstrap still required",
+    "SQL dispatch fixture uses opaque non-XDR/non-signed bytes; existing cryptographic fixture tests separate",
+    "Existing privileged local worker credential remains privileged",
+    "One future assisted registration is not authorized by B1",
+    "D2.6 not owner accepted; no D3"
+  ],
+  "stopAfterPublication": true,
+  "implementationCheckpoint": "b5a6ab11d76798c0d619933495cf5d40e0e04576"
+}
