@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "task": "D2 OWNER ACCEPTANCE CHECKPOINT",
+  "date": "2026-10-28",
+  "timezone": "America/Santiago",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "decisionAuthority": "Christian — Byetery project owner",
+  "decisionSource": "Explicit OWNER ACCEPTANCE CHECKPOINT instruction",
+  "acceptanceScope": "Internal Byetery owner acceptance only",
+  "externalOrganizerAcceptanceOrPaymentClaimed": false,
+  "reviewedCheckpoint": "c774360e7c7f4b849945f9361cc277a3e93f7034",
+  "branch": "instaward/d2-web-mvp",
+  "acceptanceRecord": "D2-OWNER-ACCEPTANCE.md#d2-owner-acceptance--2026-10-28",
+  "criteria": [
+    {
+      "criterion": "D2.1",
+      "title": "Roles / permissions",
+      "ownerDecision": "OWNER ACCEPTED",
+      "decisionDate": "2026-10-28",
+      "status": "PASS",
+      "newlyAccepted": true,
+      "evidence": ["D2-005-ROLE-QR-ADVERSARIAL.md"]
+    },
+    {
+      "criterion": "D2.2",
+      "title": "QR lookup / QR grants no authority",
+      "ownerDecision": "OWNER ACCEPTED",
+      "decisionDate": "2026-10-28",
+      "status": "PASS",
+      "newlyAccepted": true,
+      "evidence": ["D2-005-ROLE-QR-ADVERSARIAL.md"]
+    },
+    {
+      "criterion": "D2.3",
+      "ownerDecision": "PENDING",
+      "decisionDate": null,
+      "status": "PENDING",
+      "newlyAccepted": false,
+      "evidence": []
+    },
+    {
+      "criterion": "D2.4",
+      "title": "History",
+      "ownerDecision": "OWNER ACCEPTED",
+      "decisionDate": "2026-10-22",
+      "status": "PASS",
+      "newlyAccepted": false,
+      "evidence": ["D2-003-TIMELINE.md", "D2-003-TIMELINE.json"],
+      "priorDecisionPreserved": true
+    },
+    {
+      "criterion": "D2.5",
+      "title": "Evidence V1 integrity verification",
+      "ownerDecision": "OWNER ACCEPTED",
+      "decisionDate": "2026-10-28",
+      "status": "PASS",
+      "newlyAccepted": true,
+      "evidence": ["D2-006-EVIDENCE-V1.md", "D2-006-EVIDENCE-V1-RESULTS.json", "evidence/d2-006/historical-recycling.json"],
+      "claimLimit": "Integrity only; no proof of physical events, truthfulness, environmental compliance or certification"
+    },
+    {
+      "criterion": "D2.6",
+      "ownerDecision": "PENDING",
+      "decisionDate": null,
+      "status": "PENDING",
+      "newlyAccepted": false,
+      "evidence": [],
+      "infrastructureStatus": "DEFERRED — not started by this decision"
+    }
+  ],
+  "acceptedD2Criteria": ["D2.1", "D2.2", "D2.4", "D2.5"],
+  "pendingD2Criteria": ["D2.3", "D2.6"],
+  "officialProjectStatus": {
+    "D1": { "accepted": 12, "total": 12, "display": "12/12 PASS" },
+    "D2": { "accepted": 4, "total": 6, "display": "4/6 PASS" },
+    "D3": { "accepted": 0, "total": 5, "display": "0/5" },
+    "total": { "accepted": 16, "total": 23, "display": "16/23" }
+  },
+  "historicalEvaluationsPreserved": true,
+  "implementationChanges": 0,
+  "newTestnetTransactions": 0,
+  "newOperationalSignatures": 0,
+  "newBroadcasts": 0,
+  "remoteSupabaseActions": 0,
+  "mainMerge": false,
+  "tagChanges": false,
+  "protectedFilesUntouched": true,
+  "nextWorkStarted": false,
+  "stopBoundary": "STOP; do not start D2.3 or D2.6"
+}
