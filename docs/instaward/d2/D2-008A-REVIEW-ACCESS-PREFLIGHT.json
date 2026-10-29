@@ -1,0 +1,397 @@
+{
+  "schemaVersion": 1,
+  "task": "D2-008A",
+  "classification": "OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT",
+  "status": "PREFLIGHT COMPLETE — DESIGN ONLY",
+  "criterion": "D2.6",
+  "criterionStatus": "HOLD — NOT OWNER ACCEPTED",
+  "branch": "instaward/d2-web-mvp",
+  "startingCheckpoint": "462eff63e0480e3b9d1083cd3274b41af553ada5",
+  "timezone": "America/Santiago",
+  "inspectionDateLocal": "2026-10-28",
+  "authoritativeCatalogObservedAt": "2026-10-29T02:43:57.44814+00:00",
+  "grantsObservedAt": "2026-10-29T02:51:13.433697+00:00",
+  "ownerAcceptance": {
+    "D1": {
+      "pass": 12,
+      "total": 12
+    },
+    "D2": {
+      "pass": 5,
+      "total": 6,
+      "accepted": [
+        "D2.1",
+        "D2.2",
+        "D2.3",
+        "D2.4",
+        "D2.5"
+      ],
+      "pending": [
+        "D2.6"
+      ]
+    },
+    "D3": {
+      "pass": 0,
+      "total": 5
+    },
+    "total": {
+      "pass": 17,
+      "criteria": 23
+    },
+    "externalAcceptanceOrPaymentClaimed": false
+  },
+  "vercel": {
+    "teamId": "team_EuRw1k4ZykOoSP1fBTcumdnO",
+    "teamSlug": "chrlstl4n2307-ais-projects",
+    "byeteryProjectFoundInConnectedScope": false,
+    "byeteryDeploymentsReturned": 0,
+    "repositoryLinkObserved": false,
+    "previewConfigured": false,
+    "environmentNamesInspectable": false,
+    "localProjectLinkFilesFound": false,
+    "scopeCaveat": "Connected visible team; not every inaccessible account."
+  },
+  "supabase": {
+    "projectRef": "aemxuqnnwfclzrwwiqfd",
+    "projectName": "Byetery Dev",
+    "status": "ACTIVE_HEALTHY",
+    "region": "us-east-1",
+    "deployment": {
+      "id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "mode": "TESTNET",
+      "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+      "reward_amount": 100000000,
+      "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON"
+    },
+    "configuredLocalDatabaseRole": "postgres",
+    "configuredRole": {
+      "bypassRls": true,
+      "createRole": true,
+      "createDb": true,
+      "privateTableReadWrite": true
+    },
+    "namedRoles": [
+      {
+        "name": "anon",
+        "login": false,
+        "inherit": true,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": false,
+        "create_role": false
+      },
+      {
+        "name": "authenticated",
+        "login": false,
+        "inherit": true,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": false,
+        "create_role": false
+      },
+      {
+        "name": "authenticator",
+        "login": true,
+        "inherit": false,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": false,
+        "create_role": false
+      },
+      {
+        "name": "cli_login_postgres",
+        "login": true,
+        "inherit": false,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": false,
+        "create_role": false
+      },
+      {
+        "name": "dashboard_user",
+        "login": false,
+        "inherit": true,
+        "create_db": true,
+        "superuser": false,
+        "bypass_rls": false,
+        "create_role": true
+      },
+      {
+        "name": "postgres",
+        "login": true,
+        "inherit": true,
+        "create_db": true,
+        "superuser": false,
+        "bypass_rls": true,
+        "create_role": true
+      },
+      {
+        "name": "service_role",
+        "login": false,
+        "inherit": true,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": true,
+        "create_role": false
+      },
+      {
+        "name": "supabase_admin",
+        "login": true,
+        "inherit": true,
+        "create_db": true,
+        "superuser": true,
+        "bypass_rls": true,
+        "create_role": true
+      },
+      {
+        "name": "supabase_auth_admin",
+        "login": true,
+        "inherit": false,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": false,
+        "create_role": true
+      },
+      {
+        "name": "supabase_etl_admin",
+        "login": true,
+        "inherit": true,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": true,
+        "create_role": false
+      },
+      {
+        "name": "supabase_privileged_role",
+        "login": false,
+        "inherit": true,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": false,
+        "create_role": false
+      },
+      {
+        "name": "supabase_read_only_user",
+        "login": true,
+        "inherit": true,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": true,
+        "create_role": false
+      },
+      {
+        "name": "supabase_realtime_admin",
+        "login": false,
+        "inherit": false,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": false,
+        "create_role": false
+      },
+      {
+        "name": "supabase_replication_admin",
+        "login": true,
+        "inherit": true,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": false,
+        "create_role": false
+      },
+      {
+        "name": "supabase_storage_admin",
+        "login": true,
+        "inherit": false,
+        "create_db": false,
+        "superuser": false,
+        "bypass_rls": false,
+        "create_role": true
+      }
+    ],
+    "dedicatedByeteryRoles": [],
+    "privateBusinessTransportTables": 20,
+    "privateTablesRlsEnabledAndForced": true,
+    "browserPolicies": "RESTRICTIVE browser_deny; USING false; WITH CHECK false",
+    "anonAuthenticatedPrivateSchemaUsage": false,
+    "anonAuthenticatedPrivateTableOrColumnSelect": false,
+    "safeExistingReadServiceEstablished": false,
+    "edgeFunctionsReturned": 0,
+    "authSessions": {
+      "rls": true,
+      "forceRls": false,
+      "browserSelect": false
+    },
+    "managedReadOnlyUser": {
+      "bypassRls": true,
+      "privateAndAuthSessionsSelect": true,
+      "recommended": false
+    },
+    "roleCandidates": [
+      {
+        "role": "ADMIN",
+        "linked_user1_wallet": 0,
+        "mapped_auth_accounts": 1,
+        "with_user_membership": 1,
+        "actor_projection_matches": 1,
+        "active_enabled_principals": 1
+      },
+      {
+        "role": "COLLECTOR",
+        "linked_user1_wallet": 0,
+        "mapped_auth_accounts": 1,
+        "with_user_membership": 1,
+        "actor_projection_matches": 0,
+        "active_enabled_principals": 1
+      },
+      {
+        "role": "RECYCLER",
+        "linked_user1_wallet": 0,
+        "mapped_auth_accounts": 1,
+        "with_user_membership": 1,
+        "actor_projection_matches": 0,
+        "active_enabled_principals": 1
+      },
+      {
+        "role": "USER",
+        "linked_user1_wallet": 1,
+        "mapped_auth_accounts": 5,
+        "with_user_membership": 5,
+        "actor_projection_matches": 5,
+        "active_enabled_principals": 5
+      }
+    ],
+    "actorBindings": [
+      {
+        "role": "COLLECTOR",
+        "total": 1,
+        "matches_frozen_actor": true
+      },
+      {
+        "role": "RECYCLER",
+        "total": 1,
+        "matches_frozen_actor": true
+      }
+    ],
+    "actorProjectionRows": 0,
+    "actorProjectionCaveat": "Empty SQL projection is not evidence of on-chain revocation; no chain call made.",
+    "fixture": {
+      "state": "RECYCLED",
+      "battery_id": "BYE-W1-002-64257020134D4A0F",
+      "reward_state": "SENT",
+      "operation_count": 5,
+      "confirmed_ledger": 5315915
+    }
+  },
+  "architecture": {
+    "choice": "B",
+    "model": "Next/Vercel server-side review adapter",
+    "hostedSigner": false,
+    "hostedWorker": false,
+    "hostedTimer": false,
+    "hostedRawTableAccess": false,
+    "hostedBoundary": "EXECUTE-only restricted role, curated reads and one bounded registration-intent function",
+    "proposedRole": "byetery_d2_review_app",
+    "proposedDbFunctions": [
+      "profile",
+      "battery",
+      "history_rows",
+      "registration_status",
+      "create_registration_intent"
+    ],
+    "sessionOracleRequiresSeparateReview": true,
+    "readOnlyPrincipalLookup": true,
+    "automaticPrincipalProvisioning": false,
+    "explicitDirectReviewModeNeeded": true
+  },
+  "a2": {
+    "model": "HUMAN-ASSISTED ADMIN SIGNING",
+    "waitingDisplay": "AWAITING_ADMIN_SIGNATURE",
+    "proposedDurableWaitingRepresentation": "TESTNET register_battery, QUEUED, no testnet_work/envelope",
+    "autoDispatchGateCurrentlyMissing": true,
+    "existingUnsignedRecoveryDoesNotSupplyWaitingGate": true,
+    "localAdoptionInput": "operation_id only",
+    "oneOriginalOperationId": true,
+    "prepareOnlyAfterExplicitOwnerAdoption": true,
+    "adminKeyCustody": "LOCAL WINDOWS SECURE STORE ONLY",
+    "sourceSequenceFinalCheck": true,
+    "feeCapStroops": 50000000,
+    "noReplacementAfterUnknown": true,
+    "assistedWindowRequired": true
+  },
+  "hostedOperationalSignerDecision": {
+    "ADMIN": "NOT REQUIRED FOR D2.6",
+    "SERVICE": "NOT REQUIRED FOR D2.6",
+    "COLLECTOR": "NOT REQUIRED FOR D2.6",
+    "RECYCLER": "NOT REQUIRED FOR D2.6"
+  },
+  "futureOwnerScopes": [
+    {
+      "step": 1,
+      "action": "Implement/test local review adapter and A2 adoption guard"
+    },
+    {
+      "step": 2,
+      "action": "Review/test/apply restricted DB boundary only after separate approval"
+    },
+    {
+      "step": 3,
+      "action": "Reuse four app accounts; optional official password reset separately authorized"
+    },
+    {
+      "step": 4,
+      "action": "Configure empty Vercel project, no Git auto-deploy or Production"
+    },
+    {
+      "step": 5,
+      "action": "Configure exact-branch Preview variables and restricted secret"
+    },
+    {
+      "step": 6,
+      "action": "Deploy one audited reviewed Preview commit"
+    },
+    {
+      "step": 7,
+      "action": "Four-role hosted Auth/session/read/negative checks without signing"
+    },
+    {
+      "step": 8,
+      "action": "Separately authorize one exact assisted Testnet registration"
+    },
+    {
+      "step": 9,
+      "action": "Publish evidence; request owner acceptance"
+    }
+  ],
+  "futureRegistrationAuthorizedNow": false,
+  "futureRegistrationLimits": {
+    "count": 1,
+    "method": "register_battery",
+    "batteryIdChosen": false,
+    "operationIdChosen": false,
+    "manifestHashChosen": false,
+    "reviewWindowChosen": false,
+    "requiresSeparateOwnerApproval": true
+  },
+  "execution": {
+    "cloudMutations": 0,
+    "authMutations": 0,
+    "databaseRoleGrantRlsMutations": 0,
+    "vercelDeployments": 0,
+    "newTestnetTransactions": 0,
+    "operationalSignatures": 0,
+    "broadcasts": 0,
+    "chainCalls": 0,
+    "productionCodeChanges": 0,
+    "contractWasmChanges": 0,
+    "user2Used": false
+  },
+  "verification": {
+    "heavySuitesRerun": false,
+    "reason": "Documentation-only; targeted verification expressly authorized",
+    "documentationSanity": "PASS",
+    "secretAudit": "PASS — 510 files, 632 historical blobs, zero findings before staging",
+    "gitDiffCheck": "PASS",
+    "protectedFilesAndHistoricalDocs": "PASS — byte hashes and original refs unchanged"
+  },
+  "stopAfterPublication": true,
+  "completedDateLocal": "2026-10-29"
+}

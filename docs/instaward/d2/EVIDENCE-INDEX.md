@@ -12,6 +12,12 @@ By Christian's explicit [D2.3 owner-acceptance decision](D2-OWNER-ACCEPTANCE.md#
 
 This is internal Byetery owner acceptance only, not Stellar/SDF/Instawards acceptance, approval, certification or payment. Documentation only; implementation and Testnet state are unchanged. New transactions, operational signatures and broadcasts: **0**. No USER2, main merge or tag change. **STOP: do not begin D2.6 automatically.**
 
+## D2.6 planning — D2-008A, no acceptance change
+
+Owner-authorized [review-access final preflight](D2-008A-REVIEW-ACCESS-PREFLIGHT.md), [sanitized machine-readable plan](D2-008A-REVIEW-ACCESS-PREFLIGHT.json): **DESIGN ONLY / NOT DEPLOYED**. Current Vercel/Supabase metadata were refreshed read-only. Recommended architecture B uses a restricted Next/Vercel review adapter and human-assisted local ADMIN signing; the least-privilege DB boundary and first-dispatch owner-adoption gate are proposed, not implemented. No hosted signers are required by the minimal D2.6 review plan.
+
+**D2.6 remains HOLD / NOT OWNER ACCEPTED. D1 12/12; D2 5/6; D3 0/5; TOTAL 17/23 unchanged.** No cloud/Auth/grant/RLS mutation, deployment, chain call, new Testnet transaction, operational signature or broadcast. Exact future implementation/cloud/assisted-registration scopes require new explicit owner authorization. Historical readiness reports and all acceptance sections remain unchanged. STOP after documentation publication.
+
 ## Earlier checkpoint retained — D2 4/6
 
 The following earlier acceptance section and all subsequent task snapshots retain their original wording/counts as history. The D2.3 decision above is authoritative for current status.
