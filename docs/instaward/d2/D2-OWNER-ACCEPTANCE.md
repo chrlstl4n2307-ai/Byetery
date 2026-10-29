@@ -58,3 +58,39 @@ D2.5 acceptance is **integrity only**: the exact disclosed synthetic evidence ma
 Documentation only. No implementation, contract/WASM/ABI, schema/RLS, role, Auth/principal, signer, credential or infrastructure changes. No Testnet lifecycle rerun, transaction, operational signature, broadcast, remote Supabase action or USER2 use. Repository-required verification is local/offline and does not create live evidence or additional acceptance.
 
 Only this acceptance record, its JSON companion and the D2 evidence index belong in the commit. Protected `docs/security/KEY-CUSTODY-AUDIT.md` and `tools/sync_obsidian.py` remain untouched, untracked and excluded. Fast-forward publication is limited to `instaward/d2-web-mvp`; no main merge or tag change. **STOP: do not start D2.3 or D2.6.**
+
+## D2.3 OWNER ACCEPTANCE — 2026-10-28
+
+**Current authoritative internal owner checkpoint: D2 5/6 PASS; TOTAL 17/23.** Christian, Byetery project owner, explicitly accepts **D2.3 — State display** as **PASS — OWNER ACCEPTED**. This decision follows and supersedes the earlier 4/6 checkpoint above for current status only. Every prior acceptance section and its contemporaneous counts is preserved unchanged.
+
+Reviewed implementation/evidence checkpoint: `70e290728b3a60b4506cecd1285749068d296f74`, branch `instaward/d2-web-mvp`. Acceptance basis: [D2-007 state-lanes report](D2-007-STATE-LANES.md) and [machine-readable results](D2-007-STATE-LANES-RESULTS.json).
+
+The owner's acceptance explicitly covers:
+
+- PENDING displayed without implying success.
+- UNKNOWN / UNCERTAIN displayed as uncertainty.
+- CONFIRMED only from durable confirmed operation state.
+- FAILED / REJECTED displayed without rewriting confirmed lifecycle.
+- Lifecycle / attestation state independent from transaction state.
+- Reward state independent from transaction and lifecycle state.
+- RECYCLED does not imply reward SENT.
+- Reward failure does not undo confirmed recycling.
+- No pending operation does not imply transaction success.
+- Unresolved operation has display priority over a previous terminal operation.
+- Terminal operation display does not block later legitimate actions.
+- Historical Testnet confirmed evidence remains clearly separated from local negative/intermediate fixtures.
+
+| Criterion | Current owner decision | Official project status |
+| --- | --- | --- |
+| D2.1 — Roles / permissions | OWNER ACCEPTED — 2026-10-28, retained | **PASS** |
+| D2.2 — QR lookup / QR grants no authority | OWNER ACCEPTED — 2026-10-28, retained | **PASS** |
+| D2.3 — State display | **OWNER ACCEPTED — 2026-10-28**, newly accepted by this checkpoint | **PASS** |
+| D2.4 — History | OWNER ACCEPTED — 2026-10-22, retained | **PASS** |
+| D2.5 — Evidence V1 integrity | OWNER ACCEPTED — 2026-10-28, retained | **PASS** |
+| D2.6 — Review access | PENDING; not started by this decision | **PENDING** |
+
+Current project status: **D1 12/12 PASS; D2 5/6 PASS; D3 0/5; TOTAL 17/23**. Only D2.3 changes in this decision. D1, the four prior D2 acceptances and D3 remain unchanged. The JSON companion records the current checkpoint and preserves its full previous 4/6 snapshot in acceptanceHistory.
+
+This is **INTERNAL OWNER ACCEPTANCE ONLY**. It does not assert acceptance, approval, certification or payment by Stellar, SDF or Instawards. Evidence limitations remain unchanged: RECYCLED is an authorized lifecycle attestation, not physical/environmental certification; local negative/intermediate fixtures are not live Testnet outcomes.
+
+Documentation only: no frontend, backend, contract/WASM, schema/RLS, Auth, roles, signer, Vercel or Testnet state changes. New Testnet transactions **0**; operational signatures **0**; broadcasts **0**; USER2 use **NO**. Protected custody/sync files remain untouched, untracked and outside the commit. Publication is fast-forward only to `instaward/d2-web-mvp`; no merge or tag changes. **STOP — do not begin D2.6 automatically.**

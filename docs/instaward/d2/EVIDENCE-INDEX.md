@@ -4,6 +4,18 @@ OFFICIAL INSTAWARD SPRINT / FUNDED SPRINT · started 2026-10-22 by explicit owne
 
 Branch: `instaward/d2-web-mvp`. Start: `3c7d373ec893a2e66101c4bcfbee354b3a53e434`. Frozen pre-sprint comparison: `450c21b`; D2-only changes also compared with the start. D1 branch and historical evidence are preserved.
 
+## Current authoritative owner checkpoint — D2.3 accepted, 2026-10-28
+
+By Christian's explicit [D2.3 owner-acceptance decision](D2-OWNER-ACCEPTANCE.md#d23-owner-acceptance--2026-10-28), **D2.3 — State display = PASS — OWNER ACCEPTED**. Reviewed implementation/evidence: `70e290728b3a60b4506cecd1285749068d296f74`. Basis: [D2-007 report](D2-007-STATE-LANES.md) and [results](D2-007-STATE-LANES-RESULTS.json). [Current machine-readable acceptance](D2-OWNER-ACCEPTANCE.json).
+
+**Current authoritative internal status: D1 12/12 PASS; D2 5/6 PASS; D3 0/5; TOTAL 17/23.** Accepted D2: **D2.1, D2.2, D2.3, D2.4, D2.5**. Only **D2.6 — Review access** remains pending. The four prior D2 acceptances retain their original decisions and dates.
+
+This is internal Byetery owner acceptance only, not Stellar/SDF/Instawards acceptance, approval, certification or payment. Documentation only; implementation and Testnet state are unchanged. New transactions, operational signatures and broadcasts: **0**. No USER2, main merge or tag change. **STOP: do not begin D2.6 automatically.**
+
+## Earlier checkpoint retained — D2 4/6
+
+The following earlier acceptance section and all subsequent task snapshots retain their original wording/counts as history. The D2.3 decision above is authoritative for current status.
+
 ## Current owner acceptance — 2026-10-28
 
 By Christian's explicit [owner-acceptance checkpoint](D2-OWNER-ACCEPTANCE.md#d2-owner-acceptance--2026-10-28), **D2.1 — Roles / permissions**, **D2.2 — QR lookup / QR grants no authority**, and **D2.5 — Evidence V1 integrity verification** are now **PASS — OWNER ACCEPTED**. **D2.4 — History** retains its prior acceptance of 2026-10-22. [Machine-readable acceptance](D2-OWNER-ACCEPTANCE.json).
@@ -24,6 +36,7 @@ This checkpoint records acceptance decisions only. No implementation or infrastr
 | D2-005 | [Role + QR adversarial report](D2-005-ROLE-QR-ADVERSARIAL.md), [sanitized results and screenshot hashes](D2-005-ROLE-QR-RESULTS.json) | TESTED / EVIDENCE READY; D2.1 ACCEPT candidate, D2.2 ACCEPT candidate | Real Next/Chromium/API/SQL/MOCK fixture flow; backend focused 29/29 and 54 zero-business-effect rejection checks; frontend focused 22/22; browser 6/6; complete backend 236 PASS + 2 optional PG skips, frontend 145/145, TypeScript/lint/build, Rust/WASM/fmt/Clippy, Python 4/4 PASS. One minimal early-eligibility fix, separate commit; no new live Stellar/Auth/remote SQL or owner acceptance |
 | D2-006 | [Evidence V1 integrity verifier and limits](D2-006-EVIDENCE-V1.md), [machine-readable results](D2-006-EVIDENCE-V1-RESULTS.json), [exact disclosed historical bytes](evidence/d2-006/historical-recycling.json) | IMPLEMENTED / TESTED / EVIDENCE READY; D2.5 ACCEPT candidate | Original D1 RECYCLING manifest, 398 bytes; intact VERIFIED, one-byte mutation NOT_VERIFIED against unchanged commitment; separate official Horizon Testnet SUCCESS/invocation provenance. Pure offline verifier, unchanged frozen encoder, no new transaction/signature/broadcast or owner acceptance |
 | D2-007 / D2.3 | [State-lanes report](D2-007-STATE-LANES.md), [results and screenshot hashes](D2-007-STATE-LANES-RESULTS.json) | IMPLEMENTED / TESTED / EVIDENCE READY; **D2.3 ACCEPT candidate** | Pre-fix actual detail/profile terminal gap reproduced; separate latestTerminalOperation, unchanged unresolved gating, rejection provenance; backend focused 23/23, frontend focused 39/39, seven real Chromium captures (8/8 tests), backend 310 PASS + 2 optional PG skips, frontend 164/164; no new live Stellar action or owner acceptance |
+| D2.3 owner acceptance — 2026-10-28 | [Current authoritative decision](D2-OWNER-ACCEPTANCE.md#d23-owner-acceptance--2026-10-28), [acceptance JSON with prior snapshot](D2-OWNER-ACCEPTANCE.json) | **D2 5/6 PASS — OWNER ACCEPTED** | Newly accepts D2.3 from reviewed checkpoint 70e2907; D2.1/D2.2/D2.4/D2.5 retained; D2.6 pending. Documentation only; total 17/23; no implementation or Testnet action |
 | Owner acceptance — 2026-10-28 | [Dated decision and all six D2 criteria](D2-OWNER-ACCEPTANCE.md#d2-owner-acceptance--2026-10-28), [current acceptance JSON](D2-OWNER-ACCEPTANCE.json) | **D2 4/6 PASS — OWNER ACCEPTED** | Newly accepts D2.1/D2.2 from D2-005 and D2.5 from D2-006; retains D2.4; D2.3/D2.6 pending. Documentation only; official total 16/23; no main merge/tags |
 | Preview | [Architecture/readiness assessment](D2-VERCEL-READINESS.md) | DEFERRED — D2.6 INFRASTRUCTURE | Prior access blocker retained as research; no deployment attempted |
 | D2-VERCEL-001 | [Read-only API architecture gate](D2-VERCEL-READONLY.md) | DEFERRED — D2.6 INFRASTRUCTURE | Preserved architectural research; no reader role, grants/RLS migration, Auth experiment or Preview credentials resumed |
