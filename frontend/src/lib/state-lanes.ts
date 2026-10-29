@@ -1,4 +1,10 @@
-import type { PendingOperation } from "./types";
+import type { Battery, PendingOperation } from "./types";
+/** Display only. Mutation controls must continue to use unresolved pendingOperation. */
+export function displayOperation(
+  battery: Pick<Battery, "pendingOperation" | "latestTerminalOperation">,
+) {
+  return battery.pendingOperation ?? battery.latestTerminalOperation ?? null;
+}
 /** Display vocabulary only: no lifecycle transitions or reward eligibility rules. */
 export type TransactionLaneState =
   | "NO_PENDING_OPERATION"

@@ -2,11 +2,13 @@ import type { BatteryState, RewardState } from "../../../backend/src/domain";
 import type { BlockchainSource } from "./web-config";
 export type { BatteryState, RewardState };
 export type Role = "USER" | "ADMIN" | "COLLECTOR" | "RECYCLER";
-export interface PendingOperation {
+export interface TransactionOperation {
   id: string;
   state: string;
   command: string;
+  failureScope?: "APPLICATION" | "CHAIN" | null;
 }
+export type PendingOperation = TransactionOperation;
 export interface OwnRequest {
   requestId: string;
   reservationState: string;
@@ -18,6 +20,7 @@ export interface Battery {
   confirmedRewardState: RewardState | null;
   source: BlockchainSource;
   pendingOperation: PendingOperation | null;
+  latestTerminalOperation?: TransactionOperation | null;
   lastAttempt: { state: string; error_code: string | null } | null;
   metadata?: { type?: string; manufacturer?: string; batch?: string };
   ownRequest?: OwnRequest | null;
@@ -33,6 +36,7 @@ export interface Profile {
       | "confirmedBatteryState"
       | "confirmedRewardState"
       | "pendingOperation"
+      | "latestTerminalOperation"
     > & { createdAt: string })[];
   hasMoreRequests: boolean;
   source: BlockchainSource;

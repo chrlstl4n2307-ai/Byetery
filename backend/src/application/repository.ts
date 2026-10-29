@@ -51,10 +51,16 @@ export class Repository {
     requireThat(exists,404,'BatteryNotFound');
     const battery = await one(db,'select state,reward_state from chain_private.batteries where deployment_id=$1 and battery_id=$2',[this.deploymentId,batteryId]);
     const pending = await one(db,`select id,state,command from app_private.stellar_operations where deployment_id=$1 and battery_id=$2
-      and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN') order by created_at desc limit 1`,[this.deploymentId,batteryId]);
+      and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN') order by created_at desc,id desc limit 1`,[this.deploymentId,batteryId]);
+    const terminal = await one(db,`select o.id,o.state,o.command,
+      case when o.state='REJECTED' then case when exists(select 1 from api_private.testnet_work t
+        where t.deployment_id=o.deployment_id and t.operation_id=o.id and t.state='CONFIRMED_FAILED' and t.confirmation is not null)
+        then 'CHAIN' else 'APPLICATION' end else null end as "failureScope"
+      from app_private.stellar_operations o where o.deployment_id=$1 and o.battery_id=$2
+      and o.state in ('CONFIRMED','REJECTED') order by o.created_at desc,o.id desc limit 1`,[this.deploymentId,batteryId]);
     const attempt = await one(db,`select state,attempt_number,error_code from app_private.reward_attempts where deployment_id=$1 and battery_id=$2 order by attempt_number desc limit 1`,[this.deploymentId,batteryId]);
     return { batteryId, confirmedBatteryState:battery?.state ?? null, confirmedRewardState:battery?.reward_state ?? null,
-      pendingOperation:pending ?? null, lastAttempt:attempt ?? null, source:this.mode };
+      pendingOperation:pending ?? null, latestTerminalOperation:terminal ?? null, lastAttempt:attempt ?? null, source:this.mode };
   }
   async project(db: Db, mock: Pick<MockStellarService,'getBattery'|'getReturnRequest'>, command: Command, ledger: number): Promise<void> {
     const d=this.deploymentId;

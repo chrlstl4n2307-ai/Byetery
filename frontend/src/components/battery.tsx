@@ -15,6 +15,7 @@ import { useSession } from "./session";
 import { physicalLabel, rewardLabel } from "@/lib/labels";
 import { useWebRuntime } from "./web-runtime";
 import { TransactionLane } from "./transaction-lane";
+import { displayOperation } from "@/lib/state-lanes";
 import { BatteryHistoryView } from "./history";
 export const stages: {
   state: BatteryState;
@@ -96,6 +97,7 @@ export function BatteryQR({ id }: { id: string }) {
   );
 }
 export function StateSummary({ battery }: { battery: Battery }) {
+  const operation = displayOperation(battery);
   const completed =
     battery.confirmedBatteryState === "RECYCLED" &&
     battery.confirmedRewardState === "SENT";
@@ -128,9 +130,15 @@ export function StateSummary({ battery }: { battery: Battery }) {
           </p>
         )}
       </section>
-      <TransactionLane operation={battery.pendingOperation} />
+      <TransactionLane operation={operation} />
       <section className="state-lane" aria-label="Estado de recompensa">
         <h2>Estado de recompensa</h2>
+        {battery.source === "TESTNET" && (
+          <p className="caption">
+            GREENTEST es un activo de demostración de Testnet, sin valor
+            monetario.
+          </p>
+        )}
         {battery.lastAttempt?.state === "FAILED" && (
           <p className="notice error">
             Intento fallido · El último intento de recompensa fue rechazado. El
@@ -192,12 +200,11 @@ export function StateSummary({ battery }: { battery: Battery }) {
               ? "El mock no ejecuta el contrato Soroban."
               : "Proyección confirmada de Stellar Testnet; no es una consulta directa de cadena."}
           </dd>
-          {battery.pendingOperation && (
+          {operation && (
             <>
               <dt>Operación</dt>
               <dd>
-                {battery.pendingOperation.state} ·{" "}
-                {battery.pendingOperation.command}
+                {operation.state} · {operation.command}
               </dd>
             </>
           )}

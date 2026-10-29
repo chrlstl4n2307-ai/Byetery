@@ -21,7 +21,12 @@ export function TransactionLane({
           ". La incertidumbre no es éxito ni fallo confirmado."}
         {presentation.state === "PENDING" &&
           ". El envío o preparación no confirma el resultado."}
-        {operation && " El estado físico confirmado no ha cambiado."}
+        {presentation.state === "FAILED" &&
+          (operation?.failureScope === "CHAIN"
+            ? ". Fallo confirmado de la transacción en Stellar."
+            : ". Rechazo de la operación en la aplicación; no acredita un fallo confirmado en Stellar.")}
+        {operation &&
+          " Esta operación no redefine por sí sola el estado de ciclo ni la recompensa."}
       </p>
       {operation ? (
         <dl>
@@ -36,8 +41,9 @@ export function TransactionLane({
         </dl>
       ) : (
         <p className="caption">
-          El read model no incluye el último recibo terminal. La ausencia de una
-          operación pendiente no confirma por sí sola una transacción.
+          No hay una operación pendiente ni un terminal disponible para mostrar.
+          La ausencia de una operación pendiente no confirma por sí sola una
+          transacción.
         </p>
       )}
     </section>

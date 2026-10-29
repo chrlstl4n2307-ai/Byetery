@@ -7,7 +7,7 @@ import { useSession } from "./session";
 import { physicalLabel, rewardLabel } from "@/lib/labels";
 import { SearchBattery, useMutation } from "./battery";
 import { useWebRuntime } from "./web-runtime";
-import { transactionPresentation } from "@/lib/state-lanes";
+import { displayOperation, transactionPresentation } from "@/lib/state-lanes";
 export function WalletLink({ signer }: { signer?: WalletSigner }) {
   const { source, readOnly } = useWebRuntime();
   const { refresh } = useSession();
@@ -240,10 +240,14 @@ export function Dashboard() {
                   </p>
                   <p>
                     Transacción Stellar:{" "}
-                    <b>{transactionPresentation(r.pendingOperation).label}</b>
-                    {r.pendingOperation
-                      ? ` · ${r.pendingOperation.state}`
-                      : " · Sin recibo terminal en esta proyección"}
+                    <b>{transactionPresentation(displayOperation(r)).label}</b>
+                    {displayOperation(r)
+                      ? ` · ${displayOperation(r)?.state}`
+                      : " · Sin operación disponible para mostrar"}
+                    {displayOperation(r)?.state === "REJECTED" &&
+                      (displayOperation(r)?.failureScope === "CHAIN"
+                        ? " · fallo confirmado en Stellar"
+                        : " · rechazo de aplicación, no fallo confirmado en Stellar")}
                   </p>
                 </article>
               ))}
