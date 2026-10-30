@@ -1,0 +1,277 @@
+{
+  "task": "D2-008B2A",
+  "timestamp": "2026-10-30T03:55:28.067Z",
+  "projectRef": "aemxuqnnwfclzrwwiqfd",
+  "accountClass": "EXISTING_REVIEW_USER",
+  "supabaseJsVersion": "2.116.0",
+  "startingGitSha": "10a62d77158f1b200d2459b1a9dbb122576c350c",
+  "harnessSha256": "83c3844357e13c4cfe6b80749258a812e1b63b69b053bacdc42a4689c21a684a",
+  "dryRun": {
+    "status": "PASS",
+    "cases": [
+      {
+        "case": "CASE 1",
+        "variants": 1,
+        "status": "PASS"
+      },
+      {
+        "case": "CASE 2",
+        "variants": 1,
+        "status": "PASS"
+      },
+      {
+        "case": "CASE 3",
+        "variants": 1,
+        "status": "PASS"
+      },
+      {
+        "case": "CASE 4",
+        "variants": 3,
+        "status": "PASS"
+      }
+    ],
+    "actualB2Module": "frontend/src/server/direct-review/auth.ts",
+    "realAdapterExercised": true,
+    "sourceHashVerified": true,
+    "networkCalls": 0,
+    "secretOutputDetected": false,
+    "filesystemSecretWrites": 0,
+    "negativeRoleGuard": true,
+    "blockedSensitiveSinkProbes": 30
+  },
+  "execution": "LIVE_COMPLETE",
+  "sessionAInitial": {
+    "classification": "ACCEPTED",
+    "httpStatus": 200,
+    "authErrorCode": null,
+    "timestamp": "2026-10-30T03:55:28.984Z"
+  },
+  "sessionBInitial": {
+    "classification": "ACCEPTED",
+    "httpStatus": 200,
+    "authErrorCode": null,
+    "timestamp": "2026-10-30T03:55:29.805Z"
+  },
+  "negativeControl": {
+    "classification": "ACCEPTED",
+    "httpStatus": 200,
+    "authErrorCode": null,
+    "timestamp": "2026-10-30T03:55:29.963Z"
+  },
+  "negativeControlLogoutRequests": 0,
+  "localLogoutHttpStatus": 204,
+  "localLogoutSdkErrorPresent": false,
+  "sessionAAfterLocalLogout": {
+    "classification": "REJECTED",
+    "httpStatus": 403,
+    "authErrorCode": "session_not_found",
+    "timestamp": "2026-10-30T03:55:30.565Z"
+  },
+  "sessionBAfterLocalLogout": {
+    "classification": "ACCEPTED",
+    "httpStatus": 200,
+    "authErrorCode": null,
+    "timestamp": "2026-10-30T03:55:30.742Z"
+  },
+  "refreshAAfterLocalLogout": "REJECTED",
+  "refreshAuthErrorCode": "refresh_token_not_found",
+  "globalCleanup": {
+    "status": "PASS",
+    "logoutHttpStatus": 204,
+    "sessionBAfter": {
+      "classification": "REJECTED",
+      "httpStatus": 403,
+      "authErrorCode": "session_not_found",
+      "timestamp": "2026-10-30T03:55:31.306Z"
+    }
+  },
+  "minutesUntilExpA": 59,
+  "minutesUntilExpB": 59,
+  "finalCase": "CASE 1",
+  "strategyDecision": "AUTH_USER_ONLY SUFFICIENT",
+  "stopReason": null,
+  "clientIsolation": {
+    "separateClients": true,
+    "separateMemoryStorage": true,
+    "separateStorageKeys": true,
+    "independentLogins": 2,
+    "distinctSessionIds": true,
+    "validatorSessionAbsent": true
+  },
+  "realB2Invocations": 6,
+  "http": [
+    {
+      "method": "POST",
+      "pathname": "/auth/v1/token",
+      "status": 200,
+      "timestamp": "2026-10-30T03:55:28.802Z",
+      "authErrorCode": null
+    },
+    {
+      "method": "GET",
+      "pathname": "/auth/v1/user",
+      "status": 200,
+      "timestamp": "2026-10-30T03:55:28.983Z",
+      "authErrorCode": null
+    },
+    {
+      "method": "POST",
+      "pathname": "/auth/v1/token",
+      "status": 200,
+      "timestamp": "2026-10-30T03:55:29.293Z",
+      "authErrorCode": null
+    },
+    {
+      "method": "GET",
+      "pathname": "/auth/v1/user",
+      "status": 200,
+      "timestamp": "2026-10-30T03:55:29.804Z",
+      "authErrorCode": null
+    },
+    {
+      "method": "GET",
+      "pathname": "/auth/v1/user",
+      "status": 200,
+      "timestamp": "2026-10-30T03:55:29.961Z",
+      "authErrorCode": null
+    },
+    {
+      "method": "GET",
+      "pathname": "/auth/v1/user",
+      "status": 200,
+      "timestamp": "2026-10-30T03:55:30.129Z",
+      "authErrorCode": null
+    },
+    {
+      "method": "POST",
+      "pathname": "/auth/v1/logout",
+      "status": 204,
+      "timestamp": "2026-10-30T03:55:30.297Z",
+      "authErrorCode": null
+    },
+    {
+      "method": "GET",
+      "pathname": "/auth/v1/user",
+      "status": 403,
+      "timestamp": "2026-10-30T03:55:30.565Z",
+      "authErrorCode": "session_not_found"
+    },
+    {
+      "method": "GET",
+      "pathname": "/auth/v1/user",
+      "status": 200,
+      "timestamp": "2026-10-30T03:55:30.741Z",
+      "authErrorCode": null
+    },
+    {
+      "method": "POST",
+      "pathname": "/auth/v1/token",
+      "status": 400,
+      "timestamp": "2026-10-30T03:55:30.904Z",
+      "authErrorCode": "refresh_token_not_found"
+    },
+    {
+      "method": "POST",
+      "pathname": "/auth/v1/logout",
+      "status": 204,
+      "timestamp": "2026-10-30T03:55:31.126Z",
+      "authErrorCode": null
+    },
+    {
+      "method": "GET",
+      "pathname": "/auth/v1/user",
+      "status": 403,
+      "timestamp": "2026-10-30T03:55:31.306Z",
+      "authErrorCode": "session_not_found"
+    }
+  ],
+  "expiryTest": "NOT_RUN",
+  "remoteSideEffectsClassification": "SEPARATELY_OWNER_AUTHORIZED_USER1_PASSWORD_UPDATE_ONCE_AND_ONE_CHECK_LOGIN; B2A_NORMAL_AUTH_ONLY",
+  "secretExposure": false,
+  "passwordRecovery": {
+    "authorization": "Direct owner authorization, 2026-10-30; permanent password update for existing USER1 only",
+    "status": "PASSWORD_UPDATED_AND_ONE_LOGIN_VERIFIED",
+    "updateRequests": 1,
+    "submittedAttributeNames": [
+      "password"
+    ],
+    "identityPrecheck": "PASS",
+    "identityPostcheck": "PASS",
+    "authUidEmailAndAuthMetadataPreserved": true,
+    "verificationLogins": 1,
+    "verificationLoginHttpStatus": 200,
+    "verificationGetUserHttpStatus": 200,
+    "otherAccountsUpdated": 0,
+    "membershipRoleReviewAccessSqlRequests": 0,
+    "credentialHandling": "Owner no-echo local input only; no credential arguments/env/files/logs; existing admin key isolated in ignored maintenance process; original B2A harness uses public key only",
+    "maintenanceToolTracked": false,
+    "http": [
+      {
+        "phase": "USER1_IDENTITY_READ",
+        "method": "GET",
+        "httpStatus": 200,
+        "authCode": null,
+        "timestamp": "2026-10-30T03:55:05.629Z"
+      },
+      {
+        "phase": "USER1_PASSWORD_UPDATE",
+        "method": "PUT",
+        "httpStatus": 200,
+        "authCode": null,
+        "timestamp": "2026-10-30T03:55:05.948Z"
+      },
+      {
+        "phase": "USER1_IDENTITY_READ",
+        "method": "GET",
+        "httpStatus": 200,
+        "authCode": null,
+        "timestamp": "2026-10-30T03:55:06.129Z"
+      },
+      {
+        "phase": "USER1_LOGIN_CHECK",
+        "method": "POST",
+        "httpStatus": 200,
+        "authCode": null,
+        "timestamp": "2026-10-30T03:55:06.692Z"
+      },
+      {
+        "phase": "USER1_GETUSER_CHECK",
+        "method": "GET",
+        "httpStatus": 200,
+        "authCode": null,
+        "timestamp": "2026-10-30T03:55:06.881Z"
+      }
+    ],
+    "preservationLimit": "No SQL state readback was performed; zero application permission writes is established by the exact Auth endpoint and password-only request boundary"
+  },
+  "historicalAttempts": [
+    {
+      "classification": "CASE 4 — B2A INCONCLUSIVE",
+      "phase": "Initial login before recovery",
+      "httpStatus": 400,
+      "authCode": "invalid_credentials",
+      "successfulSessionsObserved": 0
+    },
+    {
+      "classification": "LOCAL_INPUT_REJECTED",
+      "authRequests": 0,
+      "passwordUpdates": 0
+    }
+  ],
+  "verification": {
+    "harnessTypeScript": "PASS",
+    "harnessSyntax": "PASS",
+    "unchangedBaselineFiles": 496,
+    "recoveryOfflineGuards": "PASS",
+    "noEchoCanary": "PASS",
+    "coreApplicationChanged": false,
+    "D2.6Acceptance": "PENDING"
+  },
+  "projectStatus": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "total": "17/23",
+    "D2.6": "PENDING"
+  }
+}
