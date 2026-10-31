@@ -1,0 +1,339 @@
+{
+  "task": "D2-008B3",
+  "date": "2026-10-30",
+  "mode": "READ_ONLY_REMOTE_PREFLIGHT",
+  "status": "OWNER REVIEW REQUIRED",
+  "startingGitSha": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1",
+  "branch": "instaward/d2-web-mvp",
+  "projectRef": "aemxuqnnwfclzrwwiqfd",
+  "projectLabelFromOwner": "Byetery Dev",
+  "remoteReadsExecuted": 1,
+  "initialAutomaticReviewRejectionResolvedByDirectOwnerReadAuthorization": true,
+  "remoteState": {
+    "schemas": [
+      {
+        "name": "app_private",
+        "owner": "postgres"
+      },
+      {
+        "name": "chain_private",
+        "owner": "postgres"
+      },
+      {
+        "name": "api_private",
+        "owner": "postgres"
+      }
+    ],
+    "features": {
+      "sha256": true,
+      "gen_random_uuid": true,
+      "sha256_known_vector": true
+    },
+    "checked_at": "2026-10-30T04:23:41.436575+00:00",
+    "connection": {
+      "database": "postgres",
+      "current_user": "postgres",
+      "session_user": "postgres",
+      "server_version": "17.6",
+      "server_version_num": "170006",
+      "createrole_self_grant": "",
+      "transaction_read_only": "off"
+    },
+    "deployment": {
+      "id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "mode": "TESTNET",
+      "wasm_hash": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+      "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+      "schema_version": 1,
+      "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON"
+    },
+    "current_role": {
+      "name": "postgres",
+      "login": true,
+      "inherit": true,
+      "createdb": true,
+      "bypassrls": true,
+      "superuser": false,
+      "createrole": true,
+      "replication": true
+    },
+    "review_roles": [],
+    "review_schema": null,
+    "review_objects": [],
+    "review_functions": []
+  },
+  "remoteCollision": "NONE OBSERVED: three named roles and review_private absent",
+  "blocker": {
+    "code": "NON_SUPERUSER_FUNCTION_OWNERSHIP_PREREQUISITES",
+    "observed": "MCP executes as postgres, PostgreSQL 17.6, SUPERUSER=false, CREATEROLE=true, createrole_self_grant empty",
+    "artifactFact": "Both artifacts transfer function ownership but grant schema USAGE only, not CREATE; neither establishes SET capability for the executor",
+    "reasoning": "PostgreSQL 17 requires executor SET ROLE capability and new-owner CREATE on the function schema for non-superuser ownership transfer",
+    "scope": "Documented privilege-path incompatibility, not a remote DDL failure observed by executing the artifacts",
+    "smallestProposal": "Owner-reviewed temporary ownership-transition privileges confined to review_private and the trusted apply operator, removed before commit; or another legitimate documented apply mechanism. No grants/code/settings changed here",
+    "noSuperuserFallbackAssumed": true,
+    "applyAllowed": false
+  },
+  "artifacts": {
+    "database/review/d2-008b1-registration-intents.sql": {
+      "sha256": "b6422a6b542e429a969060aae44971a8ee441eb6df42f09b84c2852db54f233a",
+      "bytes": 21454,
+      "tables": [
+        "permissions",
+        "registration_intents"
+      ],
+      "policies": [
+        "review_permission_read",
+        "review_intent_read",
+        "review_intent_insert",
+        "review_intent_adopt",
+        "review_existing_user",
+        "review_user_lock",
+        "review_existing_admin",
+        "review_admin_lock",
+        "review_permission_lock",
+        "review_pinned_deployment",
+        "review_battery_collision_read",
+        "review_uuid_collision_read",
+        "review_adopt_battery",
+        "review_adopt_evidence",
+        "review_adopt_operation",
+        "review_adopt_idempotency"
+      ],
+      "functionCount": 5,
+      "functions": [
+        {
+          "artifact": "database/review/d2-008b1-registration-intents.sql",
+          "name": "immutable_intent",
+          "signature": "immutable_intent()",
+          "securityDefiner": false,
+          "plannedOwner": "apply role (postgres); SECURITY INVOKER trigger",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "617a5f5d96b5a253e8f633fddccb58d360cf8fdfe890ca70c05a330d243fdb40"
+        },
+        {
+          "artifact": "database/review/d2-008b1-registration-intents.sql",
+          "name": "require_authority",
+          "signature": "require_authority(uuid)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_intent_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "c2bb2f41b793a3e91427b1693de299992158f21f5f2020eb934a42ae7cbe1f35"
+        },
+        {
+          "artifact": "database/review/d2-008b1-registration-intents.sql",
+          "name": "create_registration_intent",
+          "signature": "create_registration_intent(uuid,text,jsonb)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_intent_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "124a937698160b405cd98feebaf31093c01704f048c808f65361e6a9e5eace4f"
+        },
+        {
+          "artifact": "database/review/d2-008b1-registration-intents.sql",
+          "name": "registration_intent_status",
+          "signature": "registration_intent_status(uuid,uuid)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_intent_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "657740244ec41566628ad8e9dff4423ae33b583e1736f188ad65417a46b59ac1"
+        },
+        {
+          "artifact": "database/review/d2-008b1-registration-intents.sql",
+          "name": "adopt_registration_intent",
+          "signature": "adopt_registration_intent(uuid)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_intent_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "a183b74d236fc25804fc91787e82e161e78963f136d849854189c06b5f5b302c"
+        }
+      ],
+      "transactionBeginCommit": true,
+      "grantsSchemaCreateToFunctionOwners": false
+    },
+    "database/review/d2-008b2-direct-review.sql": {
+      "sha256": "7720341657b66dbc2df99145fe269eed8d6e0f899be8410e9536ff9bdc579827",
+      "bytes": 24443,
+      "tables": [
+        "review_access",
+        "review_batteries"
+      ],
+      "policies": [
+        "review_access_read",
+        "review_batteries_read",
+        "review_permissions_read",
+        "review_intents_read_owner",
+        "review_auth_mapping",
+        "review_read_memberships",
+        "review_read_deployment",
+        "review_approved_records",
+        "review_approved_chain",
+        "review_approved_requests",
+        "review_approved_chain_requests",
+        "review_approved_operations",
+        "review_approved_attempts",
+        "review_approved_evidence",
+        "review_approved_work",
+        "review_approved_envelopes",
+        "review_intent_access_lock_read",
+        "review_intent_access_lock",
+        "review_intent_allowlist_read",
+        "review_intent_allowlist_insert"
+      ],
+      "functionCount": 8,
+      "functions": [
+        {
+          "artifact": "database/review/d2-008b2-direct-review.sql",
+          "name": "resolve_review",
+          "signature": "resolve_review(uuid)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_read_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "2c241cf277e9f70a9d3c7645df6efc833998c01c79ff425f45a0f9ef01571614"
+        },
+        {
+          "artifact": "database/review/d2-008b2-direct-review.sql",
+          "name": "visible_battery",
+          "signature": "visible_battery(uuid,text,text)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_read_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "231b906ec8c51f631fe5fe0385ce6ec1e4e4dab88f3d8cb8ad4c8ee71869cff2"
+        },
+        {
+          "artifact": "database/review/d2-008b2-direct-review.sql",
+          "name": "profile",
+          "signature": "profile(uuid)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_read_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "566c17bcbe69d488ca47b4141962cba8ceef3ec18abbd3c0eab22580aa5e0d0b"
+        },
+        {
+          "artifact": "database/review/d2-008b2-direct-review.sql",
+          "name": "operation_dto",
+          "signature": "operation_dto(uuid)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_read_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "0a472f6e12b8a458d2c201eda4c0d50f14829966f132c3c2ebcb888d5104011b"
+        },
+        {
+          "artifact": "database/review/d2-008b2-direct-review.sql",
+          "name": "battery",
+          "signature": "battery(uuid,text)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_read_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "1aa4a9a604bf4d80ab06260fec4e4c777029feeebfca8f10062a3ba73cd42d62"
+        },
+        {
+          "artifact": "database/review/d2-008b2-direct-review.sql",
+          "name": "history_rows",
+          "signature": "history_rows(uuid,text)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_read_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "7f488ea02d96929ab88d1c5d05f0fb1bcd414810bb495f8577099792d62a8173"
+        },
+        {
+          "artifact": "database/review/d2-008b2-direct-review.sql",
+          "name": "create_review_registration_intent",
+          "signature": "create_review_registration_intent(uuid,text,jsonb)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_intent_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "47b13ebd040d12df20af6a073093e6c5070f887cf34d8df1c3935abf51978aa1"
+        },
+        {
+          "artifact": "database/review/d2-008b2-direct-review.sql",
+          "name": "review_registration_intent_status",
+          "signature": "review_registration_intent_status(uuid,uuid)",
+          "securityDefiner": true,
+          "plannedOwner": "byetery_d2_intent_owner",
+          "fixedEmptySearchPath": true,
+          "bodySha256": "1042952960390dbb8c1cd910ec19dbfa0c9eacca57a859a7eb633128534bf739"
+        }
+      ],
+      "transactionBeginCommit": true,
+      "grantsSchemaCreateToFunctionOwners": false
+    }
+  },
+  "plannedSecurityDefinerCount": 12,
+  "plannedHostedFunctions": [
+    "profile(uuid)",
+    "battery(uuid,text)",
+    "history_rows(uuid,text)",
+    "create_review_registration_intent(uuid,text,jsonb)",
+    "review_registration_intent_status(uuid,uuid)"
+  ],
+  "rlsStaticReview": {
+    "newForcedReviewTables": 4,
+    "newPolicies": 36,
+    "usingTrueFound": false,
+    "principalScopeCaveat": "B1 intent/permission SELECT policies are deployment-scoped; principal checks are also enforced inside bounded functions. Do not describe every B1 SELECT policy as principal-scoped",
+    "remoteApplicationRlsRechecked": false
+  },
+  "defaultPrivileges": {
+    "remoteInspected": false,
+    "reason": "STOP after ownership prerequisite gap",
+    "static": "Each artifact begins/commits explicitly; terminal revokes precede commit. FOR ROLE owner defaults do not replace revokes for objects created as postgres. No remote exposure-window claim beyond transaction-preserved plan"
+  },
+  "remainingReadChecks": [
+    "Additional remote table/column/constraint/index/trigger prerequisites",
+    "Remote default ACLs, event-trigger effects and full grant-option/ownership capabilities",
+    "Supabase security advisors: no call made after the stop condition",
+    "Remote object owner/policy/grant execution tests (objects do not exist)",
+    "Actual Supavisor restricted-role connection and credential provisioning"
+  ],
+  "plannedConnection": {
+    "pooler": "Supavisor shared transaction mode",
+    "hostShape": "<verified shared-pooler-host>.pooler.supabase.com",
+    "port": 6543,
+    "database": "postgres",
+    "clientUsername": "byetery_d2_review_app.aemxuqnnwfclzrwwiqfd",
+    "serverRole": "byetery_d2_review_app",
+    "futureVariable": "BYETERY_REVIEW_DATABASE_URL",
+    "tls": "verified CA / rejectUnauthorized true",
+    "poolMax": 1,
+    "namedPreparedStatements": false,
+    "adminCredentialFallback": false
+  },
+  "futureHardening": {
+    "createdByB1": [
+      "LOGIN",
+      "NOINHERIT",
+      "NOSUPERUSER",
+      "NOBYPASSRLS",
+      "NOCREATEDB",
+      "NOCREATEROLE",
+      "NOREPLICATION"
+    ],
+    "proposedLaterConnectionLimit": 4,
+    "connectionLimitOwnerApproved": false,
+    "statementTimeout": "5s",
+    "idleInTransactionSessionTimeout": "5s",
+    "applied": false
+  },
+  "advisors": {
+    "status": "NOT_RUN — STOP CONDITION",
+    "preexisting": "NOT ASSESSED",
+    "materialToB1B2": "NOT ASSESSED",
+    "unrelated": "NOT ASSESSED",
+    "noFindingsClaimed": false
+  },
+  "remoteMutations": "NONE",
+  "passwordGenerated": false,
+  "authCalls": 0,
+  "vercelCalls": 0,
+  "stellarCalls": 0,
+  "postApplyPlanOnly": true,
+  "nextOwnerAuthorization": "D2-008B4 — Apply B1+B2 remotely and provision restricted review credential — HOLD / NOT READY TO AUTHORIZE.\nAutorizacion propuesta, solo despues de cerrar la brecha de privilegios mediante revision OWNER y revalidar los prerrequisitos pendientes: exclusivamente proyecto aemxuqnnwfclzrwwiqfd y deployment 5c0cad2f-5f25-4216-8068-6cb9d2d26325. Verificar antes de DDL B1 SHA-256 b6422a6b542e429a969060aae44971a8ee441eb6df42f09b84c2852db54f233a y B2 SHA-256 7720341657b66dbc2df99145fe269eed8d6e0f899be8410e9536ff9bdc579827; aplicar B1 completo, luego B2 completo, luego verificacion estructural, hardening aprobado, provision interactiva de la credencial restringida y pruebas del rol. Roles nuevos/atributos: byetery_d2_intent_owner, byetery_d2_read_owner, byetery_d2_review_app. ACLs adicionales solo las exactas del plan aprobado, incluyendo revocaciones a PUBLIC/anon/authenticated y EXECUTE de adopcion al operador postgres segun B1; ningun atributo privilegiado nuevo para esos roles ni membresia privilegiada al rol hosted. No business rows, intents, bindings review_access/review_batteries/permissions, Auth, Vercel ni Stellar. Contrasena CSPRNG generada localmente y entrada oculta, sin chat/log/CLI/env del repositorio; no generar ni compartir URL con credencial. STOP antes de DDL si persiste la brecha observada, falta cualquier prerrequisito, cambia cualquier hash/owner/ACL/rol/atomicidad, hay colision o se necesita un cambio no aprobado. Si el arreglo requiere editar los artefactos o un wrapper de ejecucion, esta propuesta queda invalidada hasta revisar y congelar su contenido/hashes nuevos; no autoriza cambios implicitos.",
+  "projectStatus": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "total": "17/23",
+    "D2.6": "PENDING"
+  },
+  "commitOrPush": false
+}

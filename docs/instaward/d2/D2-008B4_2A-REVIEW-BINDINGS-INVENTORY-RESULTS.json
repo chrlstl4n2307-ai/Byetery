@@ -1,0 +1,272 @@
+{
+  "task": "D2-008B4.2A-CONTINUE",
+  "status": "B4.2A BINDING PROPOSAL READY",
+  "date": "2026-10-30",
+  "timezone": "America/Santiago",
+  "project": "aemxuqnnwfclzrwwiqfd",
+  "deployment": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+  "review_user_resolution": {
+    "matched_USER1_wallet": "YES",
+    "unique_match": "YES",
+    "selected_alias": "REVIEW-USER"
+  },
+  "four_review_principals": [
+    {
+      "alias": "REVIEW-USER",
+      "role": "USER",
+      "app_active": true,
+      "membership_enabled": true,
+      "Auth_linkage_exists": true,
+      "account_record_exists": true,
+      "not_deleted": true,
+      "not_banned": true,
+      "metadata_readiness": "ELIGIBLE",
+      "actual_login_readiness": "LOGIN READINESS UNKNOWN \u2014 no login attempted"
+    },
+    {
+      "alias": "REVIEW-ADMIN",
+      "role": "ADMIN",
+      "app_active": true,
+      "membership_enabled": true,
+      "Auth_linkage_exists": true,
+      "account_record_exists": true,
+      "not_deleted": true,
+      "not_banned": true,
+      "metadata_readiness": "ELIGIBLE",
+      "actual_login_readiness": "LOGIN READINESS UNKNOWN \u2014 no login attempted"
+    },
+    {
+      "alias": "REVIEW-COLLECTOR",
+      "role": "COLLECTOR",
+      "app_active": true,
+      "membership_enabled": true,
+      "Auth_linkage_exists": true,
+      "account_record_exists": true,
+      "not_deleted": true,
+      "not_banned": true,
+      "metadata_readiness": "ELIGIBLE",
+      "actual_login_readiness": "LOGIN READINESS UNKNOWN \u2014 no login attempted"
+    },
+    {
+      "alias": "REVIEW-RECYCLER",
+      "role": "RECYCLER",
+      "app_active": true,
+      "membership_enabled": true,
+      "Auth_linkage_exists": true,
+      "account_record_exists": true,
+      "not_deleted": true,
+      "not_banned": true,
+      "metadata_readiness": "ELIGIBLE",
+      "actual_login_readiness": "LOGIN READINESS UNKNOWN \u2014 no login attempted"
+    }
+  ],
+  "four_distinct_internal_principals": true,
+  "historical_battery": {
+    "battery_id": "BYE-W1-002-64257020134D4A0F",
+    "source": "Persisted TESTNET SQL + accepted archived evidence",
+    "lifecycle": "RECYCLED",
+    "reward": "SENT",
+    "confirmed_ledger": 5315915,
+    "minimum_battery_count": 1,
+    "user_relation_valid": true,
+    "collector_relation_matches": true,
+    "recycler_relation_matches": true,
+    "confirmed_request_relation": true,
+    "archived_evidence_consistency": {
+      "status": "PASS",
+      "archived_D2_3_control_matches": true,
+      "archived_D2_4_operations_match": true,
+      "archived_D2_5_evidence_matches": true,
+      "B2_evidence_selection_predicate_matches": true,
+      "SQL_payload_hash_checks": true,
+      "UI_disclosure_matches_accepted_disclosure": true,
+      "privacy": {
+        "UI_metadata_matches_prior_public_synthetic_fixture": true,
+        "UI_metadata_keys": [
+          "type"
+        ],
+        "Auth_UID_or_email_selected": false,
+        "private_identity_mapping_in_public_report": false
+      },
+      "operations": [
+        {
+          "kind": "REGISTERED",
+          "persisted_state": "CONFIRMED",
+          "transport_state": "PROJECTED",
+          "transaction_hash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+          "ledger": 5281390,
+          "matches_D2_4_archived_receipt": true
+        },
+        {
+          "kind": "RETURNED",
+          "persisted_state": "CONFIRMED",
+          "transport_state": "PROJECTED",
+          "transaction_hash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+          "ledger": 5299532,
+          "matches_D2_4_archived_receipt": true
+        },
+        {
+          "kind": "COLLECTED",
+          "persisted_state": "CONFIRMED",
+          "transport_state": "PROJECTED",
+          "transaction_hash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+          "ledger": 5314096,
+          "matches_D2_4_archived_receipt": true
+        },
+        {
+          "kind": "RECYCLED",
+          "persisted_state": "CONFIRMED",
+          "transport_state": "PROJECTED",
+          "transaction_hash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+          "ledger": 5315874,
+          "matches_D2_4_archived_receipt": true
+        },
+        {
+          "kind": "REWARD",
+          "persisted_state": "CONFIRMED",
+          "transport_state": "PROJECTED",
+          "transaction_hash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+          "ledger": 5315915,
+          "matches_D2_4_archived_receipt": true
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "COLLECTION",
+          "revision": 1,
+          "format_version": 1,
+          "payload_hash": "ef61932cb180ffbafac39eddffaed46dccb6e42366c7999913116d9eb8f73766",
+          "commitment": "3bca64581d5aced4a8582f85fe5755b07104e1b7d7cf6201cde90c6ffce5b5ef",
+          "stored_bytes_hash_valid": true
+        },
+        {
+          "kind": "RECYCLING",
+          "revision": 1,
+          "format_version": 1,
+          "payload_hash": "50250c13774ca250b35bd4f6dbdf315a2963c17591f28471bea334f95cc13e6c",
+          "commitment": "b7622dcdbeb6598fe95f7c15f153b315a4b9329bc99c3829ceabd1bd10b75451",
+          "stored_bytes_hash_valid": true
+        },
+        {
+          "kind": "REGISTRATION",
+          "revision": 1,
+          "format_version": 1,
+          "payload_hash": "8621077f0c87fdccf7bf798954fb1dab133fff790f43344a10ab33e7818b7665",
+          "commitment": null,
+          "stored_bytes_hash_valid": true
+        }
+      ],
+      "fresh_Stellar_call": false,
+      "classification": "Fresh read-only SQL consistency + existing accepted historical evidence; not a fresh independent chain verification"
+    },
+    "fresh_chain_read": false
+  },
+  "proposed_access": {
+    "row_count": 4,
+    "role_aliases": [
+      "REVIEW-USER",
+      "REVIEW-ADMIN",
+      "REVIEW-COLLECTOR",
+      "REVIEW-RECYCLER"
+    ],
+    "enabled": true,
+    "can_create_intent": false,
+    "exact_private_packet": ".tools/d2-008b4_2a-continue/APPROVAL-ROWS-PRIVATE.json",
+    "packet_sha256": "2d07cc641acc53ca54d3009b48b591328928c3a922e944936df8297fd9475dfd",
+    "internal_UUIDs_in_public_report": false,
+    "inserted": false
+  },
+  "proposed_batteries": [
+    {
+      "deployment_id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "battery_id": "BYE-W1-002-64257020134D4A0F",
+      "enabled": true,
+      "purpose": "HISTORICAL",
+      "user_principal_alias": "REVIEW-USER",
+      "collector_relevant": true,
+      "recycler_relevant": true,
+      "intent_operation_id": null,
+      "exact_private_row_in_packet": true
+    }
+  ],
+  "final_baseline": {
+    "at": "2026-10-31T00:09:21.308764+00:00",
+    "rows": {
+      "permissions": 0,
+      "review_access": 0,
+      "review_batteries": 0,
+      "registration_intents": 0
+    },
+    "hosted": [
+      "review_private.battery(uuid,text)",
+      "review_private.create_review_registration_intent(uuid,text,jsonb)",
+      "review_private.history_rows(uuid,text)",
+      "review_private.profile(uuid)",
+      "review_private.review_registration_intent_status(uuid,uuid)"
+    ],
+    "read_only": "on",
+    "memberships": 0,
+    "role_counts": {
+      "ADMIN": 1,
+      "RECYCLER": 1,
+      "COLLECTOR": 1
+    },
+    "schema_create": false,
+    "raw_violation_count": 0,
+    "selected_still_active": true,
+    "user1_wallet_match_count": 1
+  },
+  "remote_mutations": "NONE",
+  "read_only_transactions": 6,
+  "Auth_login_attempts": 0,
+  "review_business_function_invocations": 0,
+  "Stellar_calls": 0,
+  "Vercel_operations": 0,
+  "privacy": {
+    "principal_UUIDs_public": false,
+    "emails_selected": false,
+    "Auth_UID_values_selected": false,
+    "passwords_or_tokens_selected": false,
+    "private_evidence_ignored": true,
+    "UI_metadata_matches_prior_public_synthetic_fixture": true
+  },
+  "prior_checkpoint": {
+    "status": "OWNER REVIEW REQUIRED",
+    "reason": "Five ACTIVE/enabled USER candidates; no arbitrary selection",
+    "resolution": "Owner supplied unique existing USER1 wallet linkage rule",
+    "historical_snapshots_preserved_private": true
+  },
+  "next_gate": "D2-008B4.2B \u2014 exact five-row insert draft enumerated privately; NOT EXECUTED",
+  "project_status": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "total": "17/23",
+    "D2.6": "PENDING"
+  },
+  "commit": null,
+  "push": false,
+  "merge": false,
+  "tags_changed": false,
+  "secret_audit": {
+    "files": 584,
+    "historicalBlobs": 700,
+    "stagedFiles": 0,
+    "findings": []
+  },
+  "local_closure": {
+    "only_allowed_reports_updated": true,
+    "unchanged_baseline_files": 514,
+    "git_refs_unchanged": true,
+    "protected_files_unchanged": true,
+    "sanitized_report_privacy_scan": "PASS",
+    "private_packet_ignored": true,
+    "packet_four_plus_one": "PASS",
+    "can_create_intent_all_false": true,
+    "new_file_whitespace": "PASS",
+    "git_diff_check": "PASS",
+    "remote_mutations": "NONE",
+    "commit": null,
+    "push": false
+  }
+}

@@ -1,0 +1,437 @@
+{
+  "schemaVersion": 1,
+  "task": "D2-008B4.4-PREP",
+  "date": "2026-10-31",
+  "classification": "LOCAL ONLY — NO HOSTED_PREVIEW",
+  "baseHEAD": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1",
+  "branch": "instaward/d2-web-mvp",
+  "status": "LOCAL PREP PASS; B4.4 NO PASS; D2.6 BLOCKED/PENDING",
+  "versions": {
+    "Node": "v24.16.0",
+    "npm": "11.13.0",
+    "Next": "16.3.5",
+    "PostgreSQL": "17.6"
+  },
+  "build": {
+    "command": [
+      "cmd.exe",
+      "/d",
+      "/c",
+      "npm run build"
+    ],
+    "cwd": ".tools\\d2-b44-prep\\workspace\\frontend",
+    "exit_code": 0,
+    "duration_seconds": 17.26,
+    "log": ".tools\\d2-b44-prep\\build.log"
+  },
+  "typecheck": {
+    "command": [
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "--noEmit",
+      "--incremental",
+      "false"
+    ],
+    "cwd": ".tools\\d2-b44-prep\\workspace\\frontend",
+    "exit_code": 0,
+    "duration_seconds": 5.64,
+    "log": ".tools\\d2-b44-prep\\frontend-typecheck.log"
+  },
+  "client": {
+    "files": 15,
+    "StrKeyCandidates": 0,
+    "checksumValidSeeds": 0,
+    "secretScan": "NO MATCH",
+    "findings": [],
+    "genericSecretWordOccurrences": []
+  },
+  "manifests": {
+    "expectedRoutes": [
+      "/",
+      "/admin",
+      "/api/batteries/[batteryId]",
+      "/api/batteries/[batteryId]/history",
+      "/api/me",
+      "/api/review/registration-intents",
+      "/api/review/registration-intents/[operationId]",
+      "/auth/login",
+      "/auth/logout",
+      "/battery/[batteryId]",
+      "/collector",
+      "/dashboard",
+      "/login",
+      "/recycler",
+      "/review/evidence"
+    ],
+    "actualRoutes": [
+      "/",
+      "/admin",
+      "/api/batteries/[batteryId]",
+      "/api/batteries/[batteryId]/history",
+      "/api/me",
+      "/api/review/registration-intents",
+      "/api/review/registration-intents/[operationId]",
+      "/auth/login",
+      "/auth/logout",
+      "/battery/[batteryId]",
+      "/collector",
+      "/dashboard",
+      "/login",
+      "/recycler",
+      "/review/evidence"
+    ],
+    "routePass": true,
+    "serverActions": 0,
+    "expectedServerActions": 0,
+    "loginLogout": "HTTP POST handlers; not Next server actions",
+    "middleware": [
+      "/"
+    ],
+    "manifestFiles": [
+      {
+        "file": ".next/server/app-paths-manifest.json",
+        "SHA256": "131a7e43fcbdc093997f014a6f3e822830e3fecdea84ffee1dd7e87e808880d6"
+      },
+      {
+        "file": ".next/server/server-reference-manifest.json",
+        "SHA256": "ef86e8e87b7b83153448b435f714eedaa0693e6f24890fd887ce662f309b86a0"
+      },
+      {
+        "file": ".next/server/middleware-manifest.json",
+        "SHA256": "20aae56b8dedd5d1fc0a7898a5fbd8f71ed84d7c945a818f651b3a05abc2e3f2"
+      }
+    ]
+  },
+  "buildId": "sT7DSX6fUTw1Fnn2h-Lpb",
+  "outputTreeSHA256": "e610b9d70d49f2eb26cd5727c7dc70c7c6dc5f9ad8e1f28af6c252bd2892431a",
+  "existingReviewAudit": {
+    "command": [
+      "node",
+      "--experimental-strip-types",
+      "tools/audit-review.mjs"
+    ],
+    "cwd": ".tools\\d2-b44-prep\\workspace\\frontend",
+    "exit_code": 0,
+    "duration_seconds": 5.59,
+    "log": ".tools\\d2-b44-prep\\existing-review-audit.log",
+    "execution": "Executed separately with the recorded exact command; also included in the final reproduction script."
+  },
+  "regression": {
+    "backend": {
+      "tests": 343,
+      "pass": 343,
+      "fail": 0,
+      "skipped": 0,
+      "exit_code": 0
+    },
+    "frontend": {
+      "total": 321,
+      "passed": 321,
+      "failed": 0,
+      "skipped": 0,
+      "existingPassed": 274,
+      "newPassed": 47,
+      "newTestFiles": [
+        {
+          "file": "b44-prep-build-audit.test.ts",
+          "passed": 2
+        },
+        {
+          "file": "b44-prep-csrf.test.ts",
+          "passed": 24
+        },
+        {
+          "file": "b44-prep-dto.test.ts",
+          "passed": 16
+        },
+        {
+          "file": "b44-prep-network-guard.test.ts",
+          "passed": 1
+        },
+        {
+          "file": "b44-prep-stellar-offline.test.tsx",
+          "passed": 4
+        }
+      ]
+    }
+  },
+  "PostgreSQL": {
+    "executors": {
+      "postgres": {
+        "current_user": "postgres",
+        "session_user": "postgres",
+        "version": "170006",
+        "createrole_self_grant": "",
+        "role": {
+          "rolname": "postgres",
+          "rolsuper": false,
+          "rolinherit": true,
+          "rolcreaterole": true,
+          "rolcreatedb": true,
+          "rolcanlogin": true,
+          "rolreplication": true,
+          "rolbypassrls": true
+        },
+        "memberships": [
+          {
+            "role": "pg_monitor",
+            "admin": false,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "pg_signal_backend",
+            "admin": false,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "anon",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "authenticated",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "service_role",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          }
+        ]
+      },
+      "byetery_gap2b": {
+        "current_user": "byetery_gap2b",
+        "session_user": "byetery_gap2b",
+        "version": "170006",
+        "createrole_self_grant": "",
+        "role": {
+          "rolname": "byetery_gap2b",
+          "rolsuper": false,
+          "rolinherit": true,
+          "rolcreaterole": true,
+          "rolcreatedb": true,
+          "rolcanlogin": true,
+          "rolreplication": true,
+          "rolbypassrls": true
+        },
+        "memberships": [
+          {
+            "role": "pg_monitor",
+            "admin": false,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "pg_signal_backend",
+            "admin": false,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "anon",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "authenticated",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "service_role",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          }
+        ]
+      }
+    },
+    "negativeControls": {
+      "d2-008b1-registration-intents.sql": {
+        "status": "PASS",
+        "SQLSTATE": "P0001",
+        "error": "ReviewRequiresNonSuperuserPostgresEmptySelfGrant"
+      },
+      "d2-008b2-direct-review.sql": {
+        "status": "PASS",
+        "SQLSTATE": "P0001",
+        "error": "ReviewRequiresNonSuperuserPostgresEmptySelfGrant"
+      }
+    },
+    "cleanup": {
+      "remaining_fixture_databases": 0,
+      "test_cluster_stopped_retained": true,
+      "legacy_cluster_restored_unmodified": true
+    },
+    "bootstrapConnectionsClosed": true,
+    "protectedBeforeAfterEqual": true
+  },
+  "network": {
+    "guard": "deny-only JS process instrumentation; not an OS firewall",
+    "expectedBlockedControlAttempts": [
+      {
+        "kind": "fetch",
+        "host": "control.example.invalid",
+        "blocked": true
+      },
+      {
+        "kind": "http",
+        "host": "control.example.invalid",
+        "blocked": true
+      },
+      {
+        "kind": "socket",
+        "host": "control.example.invalid",
+        "blocked": true
+      },
+      {
+        "kind": "dns",
+        "host": "control.example.invalid",
+        "blocked": true
+      }
+    ],
+    "unexpectedBlockedAttempts": 0,
+    "remoteCallsExecuted": 0,
+    "nativeBoundary": "No remote OS-wide traffic guarantee; build has no external font or resource fetch and telemetry is disabled."
+  },
+  "integrity": {
+    "baselineFiles": 537,
+    "changedExistingFiles": [],
+    "WASM": {
+      "SHA256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+      "matches": true
+    },
+    "frontendLockSHA256": "633c0f5f1ae347d34aa0a2e45d43224b29e24ff8ffe1252d086b28cc2cdb8679",
+    "lockMatches": true,
+    "SQL": {
+      "database/migrations/20260909142956_backend_foundation.sql": "cb65a0c8d135b70f826fdd343a43c7063733da1f3e00c1b523ceb58bcb02f7b6",
+      "database/migrations/20260913140711_application_http.sql": "386a45f4862028fba5abeb1afd02f5b5a6add0d4a4a0ca8d04a3203e3e156e63",
+      "database/migrations/20260914124739_wallet_sep53.sql": "06767d157904fea0d386d13de26595a37aac8be35831f055ba7effe6213068d3",
+      "database/migrations/20260914130553_wallet_guard_search_path.sql": "d465d2f88c5f72a75ce37695f932c4b0548fb43d78e6aeb976e6ccacfe463398",
+      "database/migrations/20261011000100_vol003_private_transport.sql": "7b0257cd2b15630af0a88e8626568dc1cef216ba007b185fbf459a5dd23fb04e",
+      "database/review/d2-008b1-registration-intents.sql": "957e19e768a6ca90f5bbf5c6268945ef129686d3cd342ec17cca1e3eca41585d",
+      "database/review/d2-008b2-direct-review.sql": "d25b53d15cbc6d6ab3b8037130c0319edd34a3349c49465af2b82153c7eb61d4",
+      "database/tests/foundation-dev.sql": "967fa8e21c353bfb66b142dfcecb7c005691effc38a7f60ad54ebec2dab14c4d"
+    },
+    "existingTestFiles": 54,
+    "existingTestHashMapSHA256": "d0077e645df1f2a67ab55edda85c0c71fe9da5e6108320a7f660a4283c2a3cd7",
+    "SQLHashMapSHA256": "fa14727180a1053a7323337be6b504393af9f8dcd852ce86097ea2304779c271",
+    "refsUnchanged": true,
+    "diffCheck": "PASS",
+    "secretAudit": {
+      "status": "PASS",
+      "files": 620,
+      "historicalBlobs": 700,
+      "stagedFiles": 0,
+      "findings": [],
+      "scope": "pattern-only, no .env supplied"
+    },
+    "newFileWhitespaceCheck": "PASS",
+    "finalBaselineJSONSHA256": "8dfc584bf37fd89344fb633725e8ba3bf5545ebe378530e1c7865b546de9a286"
+  },
+  "rawEvidence": [
+    {
+      "file": ".tools/d2-b44-prep/build.log",
+      "SHA256": "86330497b8e70d8aa4b49b8bda633992c60602a829d313469802121c43f197f3"
+    },
+    {
+      "file": ".tools/d2-b44-prep/frontend-typecheck.log",
+      "SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tools/d2-b44-prep/build-audit.json",
+      "SHA256": "3aed06b7ed991542de7189af606723428535ff2dcddc27fdba44f9e651e403f2"
+    },
+    {
+      "file": ".tools/d2-b44-prep/frontend-tests.json",
+      "SHA256": "d0d4ee6f4f577ec742a599e508a14239866f64aba2c9393f3330e5d8a32f58e5"
+    },
+    {
+      "file": ".tools/d2-b44-prep/frontend-tests.log",
+      "SHA256": "f532e3031df2eb46dce668b57ee9a4437b2f8f588be2ff09cda7310ffe0acf54"
+    },
+    {
+      "file": ".tools/d2-b44-prep/postgres/run-ab948f0f30fc4f1c996543878c097aa2/result.json",
+      "SHA256": "707f48d1aeef65ef313b8260da1faa53b61cfe1c7994cd9942a3f8f876125716"
+    },
+    {
+      "file": ".tools/d2-b44-prep/postgres/run-ab948f0f30fc4f1c996543878c097aa2/backend.log",
+      "SHA256": "913ec8a23d831e0ae792b194d43de843f4ebdb231c379db103999ba0fc3a5c87"
+    },
+    {
+      "file": ".tools/d2-b44-prep/existing-review-audit.log",
+      "SHA256": "8c5e9dd5fdda43483a740702235b334c08bc49d3a5e73ae5688e44fba6e08987"
+    }
+  ],
+  "Git": {
+    "commit": false,
+    "push": false,
+    "merge": false,
+    "tagsChanged": false,
+    "preexistingDirtyWorkPreserved": true,
+    "protectedFilesUnchanged": true,
+    "stagedFiles": 0
+  },
+  "remoteServices": {
+    "VercelTouched": false,
+    "SupabaseTouched": false,
+    "StellarTouched": false,
+    "NotionTouched": false,
+    "transactions": 0,
+    "signatures": 0,
+    "broadcasts": 0
+  },
+  "project": {
+    "D1": "12/12",
+    "D2": "5/6",
+    "D3": "0/5",
+    "total": "17/23",
+    "B4.4": "NO PASS",
+    "D2.6": "BLOCKED/PENDING"
+  },
+  "limitations": [
+    "Dummy build configuration deliberately fails runtime validation; no real .env loaded.",
+    "Auth/DB remote evidence in older reports was not repeated.",
+    "Login/logout are HTTP POST routes; zero Next Server Actions is the current approved design.",
+    "Missing primary VERCEL_URL can use an exact authorized VERCEL_BRANCH_URL; missing both fails closed.",
+    "Missing instance alone maps to STATE_EXPIRED; NETWORK_RESET requires a ledger below confirmed anchor.",
+    "LOCAL EVIDENCE — SHA PENDING; no new acceptance."
+  ],
+  "newFiles": [
+    "docs/instaward/d2/D2-008B4_4-PREP-LOCAL-HOSTED-READINESS.json",
+    "docs/instaward/d2/D2-008B4_4-PREP-LOCAL-HOSTED-READINESS.md",
+    "docs/instaward/d2/D2-EVIDENCE-MATRIX.md",
+    "docs/instaward/d2/D2-LOCAL-TEST-EVIDENCE-PACK.md",
+    "docs/instaward/d2/D2-REVIEWER-RUNBOOK.md",
+    "frontend/tests/b44-prep-build-audit.test.ts",
+    "frontend/tests/b44-prep-csrf.test.ts",
+    "frontend/tests/b44-prep-dto.test.ts",
+    "frontend/tests/b44-prep-network-guard.test.ts",
+    "frontend/tests/b44-prep-stellar-offline.test.tsx",
+    "frontend/tests/fixtures/b44-prep/scenarios.json",
+    "scripts/instaward/b44-prep-build-audit.mjs",
+    "scripts/instaward/b44-prep-local.py",
+    "scripts/instaward/b44-prep-network-guard.mjs",
+    "scripts/instaward/b44-prep-vitest.config.mts"
+  ],
+  "currentNewTestScriptSHA256": {
+    "frontend/tests/b44-prep-build-audit.test.ts": "70661bb4c08e095e2f8f403b42673419c33cf438090e01f86db8f4f135d39925",
+    "frontend/tests/b44-prep-csrf.test.ts": "cc3dac27007c292094a121835f71f4facd4ca3b9c1dfb45e60ec2d7bceb9b91b",
+    "frontend/tests/b44-prep-dto.test.ts": "2741b8be9287f923382821299e8296fe10b98a4b636b7b0b11d1ac54ed7b085e",
+    "frontend/tests/b44-prep-network-guard.test.ts": "be0f43c77845482ea38e580c6d27c85229606f3da10bd3450bc8ef6965787da3",
+    "frontend/tests/b44-prep-stellar-offline.test.tsx": "a74819724a00bceb1ea0a61f9c85d15e68ec7fbc15dafb9afa49f4c7890ae9bc",
+    "frontend/tests/fixtures/b44-prep/scenarios.json": "3121eb0dcd885e8ce3a7895f735b1a713e7b9c4a3ff10c3f268a1c71c8b3de3e",
+    "scripts/instaward/b44-prep-build-audit.mjs": "480cc0acc1f9aa94948721da253d2001c998f1726eb64718f44d1e170e705b1b",
+    "scripts/instaward/b44-prep-local.py": "79dac4bdbba62956222430d8ee81f3c575e71b447144190f6fb827d1c58032d1",
+    "scripts/instaward/b44-prep-network-guard.mjs": "4a4d0514eaf19fd68209e9692cdb9fceb72c87d5feb78594283016ddfa384e28",
+    "scripts/instaward/b44-prep-vitest.config.mts": "6269c2a48ce98815927eed7960caa7ad4656ff7b77055711262cb3b10ca13b54"
+  }
+}

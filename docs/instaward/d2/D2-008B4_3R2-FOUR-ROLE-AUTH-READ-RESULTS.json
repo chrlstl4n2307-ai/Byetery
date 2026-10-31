@@ -1,0 +1,518 @@
+{
+  "task": "D2-008B4.3R2",
+  "status": "D2-008B4.3 = FOUR-ROLE AUTH/READ PASS",
+  "phase": "STOPPED",
+  "at": "2026-10-31T01:29:09.512Z",
+  "roles": {
+    "REVIEW-USER": {
+      "rotation": "NOT RUN",
+      "identity_before": "NOT RUN",
+      "identity_after": "NOT RUN",
+      "login": "PASS",
+      "getUser": "PASS",
+      "uid_linkage": "PASS",
+      "cleanup": "PASS",
+      "update_attempts": 0,
+      "login_attempts": 1,
+      "http": [
+        {
+          "phase": "fresh_login",
+          "httpStatus": 200,
+          "authCode": null,
+          "at": "2026-10-31T01:30:01.280Z"
+        },
+        {
+          "phase": "authoritative_getUser",
+          "httpStatus": 200,
+          "authCode": null,
+          "at": "2026-10-31T01:30:01.478Z"
+        },
+        {
+          "phase": "local_logout",
+          "httpStatus": 204,
+          "authCode": null,
+          "at": "2026-10-31T01:30:02.289Z"
+        }
+      ],
+      "profile": "PRIOR PASS — B4.3",
+      "battery": "PRIOR PASS — B4.3",
+      "history": "PASS",
+      "review_role": "USER",
+      "canCreateIntent": false,
+      "battery_scope_count": 1,
+      "null_counts": {
+        "transactionHash": 0,
+        "ledger": 0,
+        "updatedAt": 5,
+        "errorCode": 5,
+        "revision": 2,
+        "payloadHash": 2,
+        "commitment": 3
+      },
+      "public_internal_fields_present": false,
+      "history_source": "FRESH RESTRICTED SQL + LOCAL SOURCE-EXACT PUBLIC PROJECTION",
+      "history_rows": [
+        {
+          "kind": "REGISTERED",
+          "status": "CONFIRMED",
+          "transactionHash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+          "ledger": 5281390,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:02.101Z"
+          }
+        },
+        {
+          "kind": "RETURNED",
+          "status": "CONFIRMED",
+          "transactionHash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+          "ledger": 5299532,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:02.101Z"
+          }
+        },
+        {
+          "kind": "COLLECTED",
+          "status": "CONFIRMED",
+          "transactionHash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+          "ledger": 5314096,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:02.101Z"
+          }
+        },
+        {
+          "kind": "RECYCLED",
+          "status": "CONFIRMED",
+          "transactionHash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+          "ledger": 5315874,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:02.101Z"
+          }
+        },
+        {
+          "kind": "REWARD",
+          "status": "CONFIRMED",
+          "transactionHash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+          "ledger": 5315915,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:02.101Z"
+          }
+        }
+      ]
+    },
+    "REVIEW-ADMIN": {
+      "rotation": "NOT RUN",
+      "identity_before": "NOT RUN",
+      "identity_after": "NOT RUN",
+      "login": "PASS",
+      "getUser": "PASS",
+      "uid_linkage": "PASS",
+      "cleanup": "PASS",
+      "update_attempts": 0,
+      "login_attempts": 1,
+      "http": [
+        {
+          "phase": "fresh_login",
+          "httpStatus": 200,
+          "authCode": null,
+          "at": "2026-10-31T01:30:11.424Z"
+        },
+        {
+          "phase": "authoritative_getUser",
+          "httpStatus": 200,
+          "authCode": null,
+          "at": "2026-10-31T01:30:11.594Z"
+        },
+        {
+          "phase": "local_logout",
+          "httpStatus": 204,
+          "authCode": null,
+          "at": "2026-10-31T01:30:13.125Z"
+        }
+      ],
+      "profile": "PASS",
+      "battery": "PASS",
+      "history": "PASS",
+      "review_role": "ADMIN",
+      "canCreateIntent": false,
+      "battery_scope_count": 1,
+      "ownRequest": "NULL",
+      "null_counts": {
+        "transactionHash": 0,
+        "ledger": 0,
+        "updatedAt": 5,
+        "errorCode": 5,
+        "revision": 2,
+        "payloadHash": 2,
+        "commitment": 3
+      },
+      "public_internal_fields_present": false,
+      "history_source": "FRESH RESTRICTED SQL + LOCAL SOURCE-EXACT PUBLIC PROJECTION",
+      "history_rows": [
+        {
+          "kind": "REGISTERED",
+          "status": "CONFIRMED",
+          "transactionHash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+          "ledger": 5281390,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:12.943Z"
+          }
+        },
+        {
+          "kind": "RETURNED",
+          "status": "CONFIRMED",
+          "transactionHash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+          "ledger": 5299532,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:12.943Z"
+          }
+        },
+        {
+          "kind": "COLLECTED",
+          "status": "CONFIRMED",
+          "transactionHash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+          "ledger": 5314096,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:12.943Z"
+          }
+        },
+        {
+          "kind": "RECYCLED",
+          "status": "CONFIRMED",
+          "transactionHash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+          "ledger": 5315874,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:12.944Z"
+          }
+        },
+        {
+          "kind": "REWARD",
+          "status": "CONFIRMED",
+          "transactionHash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+          "ledger": 5315915,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:12.944Z"
+          }
+        }
+      ]
+    },
+    "REVIEW-COLLECTOR": {
+      "rotation": "NOT RUN",
+      "identity_before": "NOT RUN",
+      "identity_after": "NOT RUN",
+      "login": "PASS",
+      "getUser": "PASS",
+      "uid_linkage": "PASS",
+      "cleanup": "PASS",
+      "update_attempts": 0,
+      "login_attempts": 1,
+      "http": [
+        {
+          "phase": "fresh_login",
+          "httpStatus": 200,
+          "authCode": null,
+          "at": "2026-10-31T01:30:21.371Z"
+        },
+        {
+          "phase": "authoritative_getUser",
+          "httpStatus": 200,
+          "authCode": null,
+          "at": "2026-10-31T01:30:21.546Z"
+        },
+        {
+          "phase": "local_logout",
+          "httpStatus": 204,
+          "authCode": null,
+          "at": "2026-10-31T01:30:23.061Z"
+        }
+      ],
+      "profile": "PASS",
+      "battery": "PASS",
+      "history": "PASS",
+      "review_role": "COLLECTOR",
+      "canCreateIntent": false,
+      "battery_scope_count": 1,
+      "ownRequest": "NULL",
+      "null_counts": {
+        "transactionHash": 0,
+        "ledger": 0,
+        "updatedAt": 5,
+        "errorCode": 5,
+        "revision": 2,
+        "payloadHash": 2,
+        "commitment": 3
+      },
+      "public_internal_fields_present": false,
+      "history_source": "FRESH RESTRICTED SQL + LOCAL SOURCE-EXACT PUBLIC PROJECTION",
+      "history_rows": [
+        {
+          "kind": "REGISTERED",
+          "status": "CONFIRMED",
+          "transactionHash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+          "ledger": 5281390,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:22.877Z"
+          }
+        },
+        {
+          "kind": "RETURNED",
+          "status": "CONFIRMED",
+          "transactionHash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+          "ledger": 5299532,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:22.877Z"
+          }
+        },
+        {
+          "kind": "COLLECTED",
+          "status": "CONFIRMED",
+          "transactionHash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+          "ledger": 5314096,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:22.877Z"
+          }
+        },
+        {
+          "kind": "RECYCLED",
+          "status": "CONFIRMED",
+          "transactionHash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+          "ledger": 5315874,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:22.877Z"
+          }
+        },
+        {
+          "kind": "REWARD",
+          "status": "CONFIRMED",
+          "transactionHash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+          "ledger": 5315915,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:22.877Z"
+          }
+        }
+      ]
+    },
+    "REVIEW-RECYCLER": {
+      "rotation": "NOT RUN",
+      "identity_before": "NOT RUN",
+      "identity_after": "NOT RUN",
+      "login": "PASS",
+      "getUser": "PASS",
+      "uid_linkage": "PASS",
+      "cleanup": "PASS",
+      "update_attempts": 0,
+      "login_attempts": 1,
+      "http": [
+        {
+          "phase": "fresh_login",
+          "httpStatus": 200,
+          "authCode": null,
+          "at": "2026-10-31T01:30:34.869Z"
+        },
+        {
+          "phase": "authoritative_getUser",
+          "httpStatus": 200,
+          "authCode": null,
+          "at": "2026-10-31T01:30:35.040Z"
+        },
+        {
+          "phase": "local_logout",
+          "httpStatus": 204,
+          "authCode": null,
+          "at": "2026-10-31T01:30:36.553Z"
+        }
+      ],
+      "profile": "PASS",
+      "battery": "PASS",
+      "history": "PASS",
+      "review_role": "RECYCLER",
+      "canCreateIntent": false,
+      "battery_scope_count": 1,
+      "ownRequest": "NULL",
+      "null_counts": {
+        "transactionHash": 0,
+        "ledger": 0,
+        "updatedAt": 5,
+        "errorCode": 5,
+        "revision": 2,
+        "payloadHash": 2,
+        "commitment": 3
+      },
+      "public_internal_fields_present": false,
+      "history_source": "FRESH RESTRICTED SQL + LOCAL SOURCE-EXACT PUBLIC PROJECTION",
+      "history_rows": [
+        {
+          "kind": "REGISTERED",
+          "status": "CONFIRMED",
+          "transactionHash": "ec0f231a61f2c0fa8b1092adae475f6da0f649a2085ee4783fe825ff65b01a27",
+          "ledger": 5281390,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:36.359Z"
+          }
+        },
+        {
+          "kind": "RETURNED",
+          "status": "CONFIRMED",
+          "transactionHash": "4d7aa3b0e656692d0c8467ff08cc5e2edf6d8563290171bc06e2c39e9c0452e2",
+          "ledger": 5299532,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:36.359Z"
+          }
+        },
+        {
+          "kind": "COLLECTED",
+          "status": "CONFIRMED",
+          "transactionHash": "e105a8dc4072bc601c65d53cf694ca834aa5ff7e4b6457ecb9cb4c980b0f6d22",
+          "ledger": 5314096,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:36.359Z"
+          }
+        },
+        {
+          "kind": "RECYCLED",
+          "status": "CONFIRMED",
+          "transactionHash": "9b1042a5b8f31509149f0b0d1effc7329132f1bfea4a3e7a8505df589ad024fb",
+          "ledger": 5315874,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:36.359Z"
+          }
+        },
+        {
+          "kind": "REWARD",
+          "status": "CONFIRMED",
+          "transactionHash": "d38548ec53c292224b65e4fd85e2f69cb5d2013b51c2f7f0b7e81f4697f63e02",
+          "ledger": 5315915,
+          "verification": {
+            "status": "UNVERIFIED",
+            "reason": "B4_3R2_NO_FRESH_CHAIN_READ",
+            "verifiedAt": "2026-10-31T01:30:36.359Z"
+          }
+        }
+      ]
+    }
+  },
+  "database_business_mutations": "NONE",
+  "review_function_invocations": 10,
+  "restricted_DB_password_changes": 0,
+  "password_or_tokens_persisted": false,
+  "global_signout_calls": 0,
+  "Vercel_operations": 0,
+  "Stellar_calls": 0,
+  "commit": null,
+  "push": false,
+  "password_changes": 0,
+  "Auth_account_changes": 0,
+  "intent_function_invocations": 0,
+  "optional_denial": "SKIPPED — previous private fixture ID was not retained; no new inventory",
+  "public_history_evidence": "Local source-exact projection with explicit UNVERIFIED schema metadata; not a hosted response",
+  "pre_baseline": "PASS",
+  "counts_before": {
+    "permissions": 0,
+    "review_access": 4,
+    "review_batteries": 1,
+    "registration_intents": 0
+  },
+  "business_tables_checked": 20,
+  "USER_history_source": "FRESH REQUIRED — prior raw response was not retained",
+  "restricted_database": {
+    "identity": "PASS",
+    "tls_authorized": true,
+    "tls_protocol": "TLSv1.3",
+    "privileged_fallback": false
+  },
+  "post_baseline": "PASS",
+  "counts_after": {
+    "permissions": 0,
+    "review_access": 4,
+    "review_batteries": 1,
+    "registration_intents": 0
+  },
+  "business_rows_unchanged": true,
+  "finishedAt": "2026-10-31T01:30:50.831Z",
+  "project_status": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "TOTAL": "17/23",
+    "D2.6": "PENDING"
+  },
+  "history_nullability_matrix": {
+    "transactionHash": "NULL ACCEPTED",
+    "ledger": "NULL ACCEPTED",
+    "updatedAt": "NULL ACCEPTED",
+    "errorCode": "NULL ACCEPTED",
+    "revision": "NULL ACCEPTED",
+    "payloadHash": "NULL ACCEPTED",
+    "commitment": "NULL ACCEPTED"
+  },
+  "public_internal_fields": {
+    "identityContract": "NOT REQUIRED; REJECTED IF PRESENT",
+    "identityNetwork": "NOT REQUIRED; REJECTED IF PRESENT",
+    "requestId": "NOT REQUIRED; REJECTED IF PRESENT"
+  },
+  "verification_scope": "SQL reads real; safe public projection and UNVERIFIED metadata tested locally; no hosted HTTP or chain verification claimed",
+  "offline_validator_checks": 29,
+  "secret_audit": {
+    "files": 594,
+    "historicalBlobs": 700,
+    "stagedFiles": 0,
+    "findings": []
+  },
+  "next_gate": "D2-008B4.4 — Vercel Preview hosted review verification; NOT EXECUTED",
+  "B4_3R2_executed": true,
+  "B4_4_executed": false,
+  "local_closure": {
+    "unchanged_baseline_files": 524,
+    "only_two_sanitized_reports_new": true,
+    "git_diff_check": "PASS",
+    "git_refs_unchanged": true,
+    "protected_files_unchanged_untracked": true,
+    "historical_private_mapping_unchanged": true,
+    "report_privacy_scan": "PASS",
+    "private_helper_output_pattern_scan": "PASS",
+    "execution_helper_integrity_unchanged": true,
+    "secret_audit": "PASS",
+    "exact_value_password_scan": false,
+    "staged_files": 0,
+    "commit": null,
+    "push": false,
+    "B4_4_executed": false
+  }
+}

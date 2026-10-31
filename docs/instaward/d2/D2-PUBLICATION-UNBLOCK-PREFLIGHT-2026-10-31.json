@@ -1,0 +1,135 @@
+{
+  "task": "D2 publication unblock preflight",
+  "date": "2026-10-31",
+  "status": "STOP - local fixture/SQL compatibility blocker and Vercel classification C",
+  "branch": "instaward/d2-web-mvp",
+  "local_head": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1",
+  "remote_head": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1",
+  "phase_A": {
+    "generated_config": ".tools/d2-gap2b/postgres-test.json",
+    "archived_source": ".tools/d2-gap2b/postgres-test.last-run.json",
+    "ignored": true,
+    "fields": [
+      "host",
+      "port",
+      "user",
+      "database"
+    ],
+    "credential_fields_present": false,
+    "package_bootstrap_script": false,
+    "existing_launcher_used": ".tools/d2-008b2/start-postgres.mjs",
+    "manual_JSON_invented": false,
+    "backend_TypeScript": "PASS",
+    "backend_tests": {
+      "total": 343,
+      "pass": 312,
+      "fail": 31,
+      "skip": 0,
+      "ENOENT_occurrences": 0,
+      "security_guard_failures": 31
+    },
+    "new_error": {
+      "code": "P0001",
+      "message": "ReviewRequiresNonSuperuserPostgresEmptySelfGrant",
+      "location": "review-postgres-fixture.ts applies current B1 SQL first DO block"
+    },
+    "verified_local_profile": {
+      "host": "127.0.0.1",
+      "port": 49197,
+      "current_user": "byetery_gap2b",
+      "session_user": "byetery_gap2b",
+      "rolsuper": true,
+      "createrole_self_grant": "",
+      "version": "17.11"
+    },
+    "required_SQL_profile": {
+      "current_user": "postgres",
+      "session_user": "postgres",
+      "rolsuper": false,
+      "createrole_self_grant": ""
+    },
+    "tests_SQL_or_roles_modified": false,
+    "previous_B32_non_superuser_profile_identified": true,
+    "previous_B32_adapter_or_bootstrap_rerun": false,
+    "cleanup": {
+      "existing_helper_used": ".tools/d2-008b2/close-postgres.mjs",
+      "remaining_fixture_databases": 0,
+      "cluster_stopped": true,
+      "generated_active_config_removed": true,
+      "archived_config_preserved": true
+    }
+  },
+  "phase_B": {
+    "classification": "C",
+    "Git_link": {
+      "verified": true,
+      "provider": "github",
+      "org": "chrlstl4n2307-ai",
+      "repo": "Byetery"
+    },
+    "team": "team_EuRw1k4ZykOoSP1fBTcumdnO",
+    "project": "prj_gVe1Sz73FRZ4bAQPubimaqOXQylH",
+    "production_branch": "UNKNOWN - normalized MCP read omits field",
+    "ignored_build_step": "UNKNOWN",
+    "effective_remote_branch_rules": "UNKNOWN",
+    "deployment_hooks": "UNKNOWN - no hook URLs requested or disclosed",
+    "repository_Vercel_config_present": false,
+    "tracked_GitHub_workflow_present": false,
+    "current_deployments": 0,
+    "latestDeployment": null,
+    "live": false,
+    "protection": "UNCHANGED - all_except_custom_domains",
+    "browser_read": "FAILED TO INITIALIZE - kernel assets Windows os error 3",
+    "CLI_project_read": "ETIMEDOUT - not a fresh token validity conclusion",
+    "test_push": false,
+    "configuration_changes": false
+  },
+  "phase_C": {
+    "infrastructure_changes_applied": false,
+    "ignored_build_step_guarantees_zero_deployments": false,
+    "branch_specific_suppression_identified_in_official_docs": true,
+    "suppression_applied": false,
+    "Git_disconnected": false,
+    "stop_on_C": true
+  },
+  "phase_D": {
+    "staged_files": 0,
+    "commit_created": false,
+    "commit_SHA": null,
+    "push": false,
+    "reason": "Required backend suite remains red and Vercel effective rules cannot be determined"
+  },
+  "acceptance": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "TOTAL": "17/23",
+    "B4.4": "STOPPED / NOT PASS",
+    "D2.6": "BLOCKED / PENDING",
+    "external_program_approval_claimed": false
+  },
+  "safety": {
+    "preexisting_files_verified_unchanged_before_reporting": 530,
+    "Supabase_reads": 0,
+    "Supabase_mutations": 0,
+    "Stellar_operations": 0,
+    "operational_signatures": 0,
+    "broadcasts": 0,
+    "Vercel_mutations": 0,
+    "Vercel_deployments": 0,
+    "Production_changes": 0,
+    "new_remote_functional_records": 0,
+    "main_merge": false,
+    "tags_changed": false,
+    "secrets_disclosed": false
+  },
+  "Notion": "VERIFIED - existing changelog and D2.6 appended once for material new blocker; historical content/properties preserved; Status BLOCKED; 17/23 unchanged",
+  "checks": {
+    "git_diff_check": "PASS - final",
+    "secret_audit": "PASS - 600 files / 700 historical blobs / 0 staged / 0 findings",
+    "root_verify": "NOT RERUN after backend failure; no checkpoint made",
+    "documentation": "PASS - JSON, links, whitespace, email-disclosure checks",
+    "preservation": "529 pre-existing files unchanged; only existing evidence index changed; two new preflight report files",
+    "Git_refs_and_index": "HEAD/main/tags unchanged; index empty; remote HEAD independently checked"
+  }
+}

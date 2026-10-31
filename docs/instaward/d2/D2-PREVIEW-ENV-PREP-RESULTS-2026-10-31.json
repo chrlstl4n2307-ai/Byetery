@@ -1,0 +1,584 @@
+{
+  "task": "D2-008B4.4-PREVIEW-ENV-PREP",
+  "date": "2026-10-31",
+  "classification": "ENV PREPARATION + LOCAL SANITIZED VALIDATION; NOT HOSTED ACCEPTANCE",
+  "project": {
+    "name": "byetery",
+    "id": "prj_gVe1Sz73FRZ4bAQPubimaqOXQylH",
+    "team": "team_EuRw1k4ZykOoSP1fBTcumdnO",
+    "supabaseRef": "aemxuqnnwfclzrwwiqfd",
+    "branch": "instaward/d2-web-mvp"
+  },
+  "requirements": [
+    {
+      "key": "BYETERY_REVIEW_ADAPTER",
+      "required": true,
+      "usedWhere": [
+        "frontend/next.config.ts",
+        "frontend/src/server/direct-review/config.ts"
+      ],
+      "phase": "BUILD + RUNTIME",
+      "format": "Approved fixed adapter selector",
+      "sensitive": false,
+      "sourceCategory": "VERCEL_EXISTING_BRANCH_CONFIG",
+      "created": false,
+      "deferred": false,
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "classification": "A. STATIC_NON_SECRET"
+    },
+    {
+      "key": "BYETERY_WEB_ENV",
+      "required": true,
+      "usedWhere": [
+        "frontend/src/server/direct-review/config.ts"
+      ],
+      "phase": "RUNTIME",
+      "format": "Exact branch review environment enum required by source",
+      "sensitive": false,
+      "sourceCategory": "CURRENT_CONFIG_SOURCE",
+      "created": true,
+      "deferred": false,
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "classification": "B. BRANCH_SPECIFIC_NON_SECRET"
+    },
+    {
+      "key": "BYETERY_SOURCE",
+      "required": true,
+      "usedWhere": [
+        "frontend/src/server/direct-review/config.ts"
+      ],
+      "phase": "RUNTIME",
+      "format": "Exact configured source enum; no mock fallback",
+      "sensitive": false,
+      "sourceCategory": "CURRENT_CONFIG_SOURCE",
+      "created": true,
+      "deferred": false,
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "classification": "A. STATIC_NON_SECRET"
+    },
+    {
+      "key": "BYETERY_DEPLOYMENT_ID",
+      "required": true,
+      "usedWhere": [
+        "frontend/src/server/direct-review/config.ts",
+        "frontend/src/shared/review/model.ts"
+      ],
+      "phase": "RUNTIME",
+      "format": "Pinned existing contract-deployment UUID; not a future Vercel deployment ID",
+      "sensitive": false,
+      "sourceCategory": "FROZEN_DOMAIN_MODEL_PIN",
+      "created": true,
+      "deferred": false,
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "classification": "A. STATIC_NON_SECRET"
+    },
+    {
+      "key": "BYETERY_WEB_ORIGIN",
+      "required": true,
+      "usedWhere": [
+        "frontend/src/server/direct-review/config.ts"
+      ],
+      "phase": "RUNTIME",
+      "format": "Canonical exact HTTPS origin, no path/query/credentials/port; must match a verified platform URL",
+      "sensitive": false,
+      "sourceCategory": "VERIFIED_FUTURE_PLATFORM_ORIGIN_REQUIRED",
+      "created": false,
+      "deferred": true,
+      "status": "DEFERRED_UNTIL_DEPLOYMENT",
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "classification": "B. BRANCH_SPECIFIC_NON_SECRET"
+    },
+    {
+      "key": "BYETERY_ALLOWED_WEB_ORIGINS",
+      "required": true,
+      "usedWhere": [
+        "frontend/src/server/direct-review/config.ts"
+      ],
+      "phase": "RUNTIME",
+      "format": "JSON array of one to four unique exact approved HTTPS origins; includes primary origin; no wildcard",
+      "sensitive": false,
+      "sourceCategory": "VERIFIED_FUTURE_PLATFORM_ORIGIN_REQUIRED",
+      "created": false,
+      "deferred": true,
+      "status": "DEFERRED_UNTIL_DEPLOYMENT",
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "classification": "B. BRANCH_SPECIFIC_NON_SECRET"
+    },
+    {
+      "key": "SUPABASE_URL",
+      "required": true,
+      "usedWhere": [
+        "frontend/src/server/direct-review/config.ts",
+        "frontend/src/server/direct-review/runtime.ts"
+      ],
+      "phase": "RUNTIME",
+      "format": "Exact existing project API origin required by source",
+      "sensitive": false,
+      "sourceCategory": "SUPABASE_MCP_EXISTING_PROJECT",
+      "created": true,
+      "deferred": false,
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "classification": "C. PUBLIC_CONFIG"
+    },
+    {
+      "key": "SUPABASE_PUBLISHABLE_KEY",
+      "required": true,
+      "usedWhere": [
+        "frontend/src/server/direct-review/config.ts",
+        "frontend/src/server/direct-review/runtime.ts"
+      ],
+      "phase": "RUNTIME",
+      "format": "Enabled modern publishable key from the correct project; service/secret keys forbidden",
+      "sensitive": false,
+      "sourceCategory": "SUPABASE_MCP_ENABLED_MODERN_PUBLISHABLE",
+      "created": true,
+      "deferred": false,
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "classification": "C. PUBLIC_CONFIG"
+    },
+    {
+      "key": "BYETERY_REVIEW_DATABASE_URL",
+      "required": true,
+      "usedWhere": [
+        "frontend/src/server/direct-review/database.ts",
+        "frontend/src/server/direct-review/runtime.ts"
+      ],
+      "phase": "LAZY AUTHENTICATED RUNTIME",
+      "format": "PostgreSQL URL using approved Supavisor transaction endpoint and only the qualified restricted review role; no URL query",
+      "sensitive": true,
+      "sourceCategory": "OWNER_EXISTING_SECRET_AND_VERIFIED_RESTRICTED_TLS_LOGIN",
+      "created": true,
+      "deferred": false,
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "classification": "D. RESTRICTED_SECRET"
+    },
+    {
+      "key": "DATABASE_SSL_CA",
+      "required": true,
+      "usedWhere": [
+        "frontend/src/server/direct-review/database.ts"
+      ],
+      "phase": "LAZY AUTHENTICATED RUNTIME",
+      "format": "Inline existing verified CA PEM, bounded size; not a local filesystem path or a private key",
+      "sensitive": true,
+      "sourceCategory": "EXISTING_LOCAL_VERIFIED_CA",
+      "created": true,
+      "deferred": false,
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "classification": "D. RESTRICTED_SECRET"
+    }
+  ],
+  "systemSources": {
+    "keys": [
+      "VERCEL_ENV",
+      "VERCEL_GIT_COMMIT_REF",
+      "VERCEL_URL",
+      "VERCEL_BRANCH_URL"
+    ],
+    "classification": "E. DERIVED_AT_RUNTIME",
+    "created": false,
+    "source": "Vercel managed deployment metadata",
+    "validation": "Confirm actual exposure and matching branch/environment/host on the authorized deployment; no manual override or assumed URL. One current platform URL is required by existing code."
+  },
+  "unnecessary": {
+    "optionalNotCreated": [
+      "BYETERY_EXPECTED_GIT_SHA"
+    ],
+    "legacyOrForbiddenNotCreated": [
+      "BYETERY_API_URL",
+      "BYETERY_ALLOWED_API_ORIGINS",
+      "DATABASE_URL",
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "SUPABASE_SECRET_KEY"
+    ],
+    "explanation": "Legacy env examples describe earlier proxy architecture. Current DIRECT_REVIEW production source governs; none of the ten required custom names is unnecessary."
+  },
+  "metadata": [
+    {
+      "key": "BYETERY_REVIEW_DATABASE_URL",
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "type": "sensitive"
+    },
+    {
+      "key": "DATABASE_SSL_CA",
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "type": "sensitive"
+    },
+    {
+      "key": "BYETERY_WEB_ENV",
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "type": "plain"
+    },
+    {
+      "key": "BYETERY_SOURCE",
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "type": "plain"
+    },
+    {
+      "key": "BYETERY_DEPLOYMENT_ID",
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "type": "plain"
+    },
+    {
+      "key": "SUPABASE_URL",
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "type": "plain"
+    },
+    {
+      "key": "SUPABASE_PUBLISHABLE_KEY",
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "type": "plain"
+    },
+    {
+      "key": "BYETERY_REVIEW_ADAPTER",
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "type": "plain"
+    }
+  ],
+  "createdKeys": [
+    "BYETERY_REVIEW_DATABASE_URL",
+    "DATABASE_SSL_CA",
+    "BYETERY_WEB_ENV",
+    "BYETERY_SOURCE",
+    "BYETERY_DEPLOYMENT_ID",
+    "SUPABASE_URL",
+    "SUPABASE_PUBLISHABLE_KEY"
+  ],
+  "security": {
+    "decrypt": false,
+    "branchSpecificScope": "PASS",
+    "PreviewGeneralSensitiveVariables": false,
+    "ProductionReviewVariables": false,
+    "DevelopmentReviewVariables": false,
+    "sensitiveNameFindings": [],
+    "valueScan": "NO MATCH",
+    "scanScope": "Exact plaintext source values scanned in memory before creation/disposal; sensitive write-only values were not downloaded or rescanned as ciphertext.",
+    "privilegedCredentialsUsed": false,
+    "restrictedRole": "byetery_d2_review_app",
+    "restrictedVerification": {
+      "status": "PASS",
+      "databaseConfig": "PASS",
+      "verifiedTLS": true,
+      "restrictedIdentity": "PASS",
+      "readOnly": true,
+      "valueScan": "NO MATCH"
+    },
+    "noPasswordRotation": true,
+    "noCredentialFiles": true,
+    "noRawAuthOrSQLResultsPublished": true
+  },
+  "remotePostcheck": {
+    "protectionUnchanged": true,
+    "VercelAuthenticationEnabled": true,
+    "totalDeployments": 0,
+    "PreviewDeployments": 0,
+    "ProductionDeployments": 0,
+    "latestDeployment": null
+  },
+  "deferred": {
+    "keys": [
+      "BYETERY_WEB_ORIGIN",
+      "BYETERY_ALLOWED_WEB_ORIGINS"
+    ],
+    "noAutomaticDerivation": "Existing loader requires explicit application origins and compares them with platform metadata; it does not expand literal variable references.",
+    "steps": [
+      "Keep current Vercel Authentication enabled in this task.",
+      "If an authoritative stable branch alias can be verified before any deployment, review it against the exact branch/project and use it only under a later scoped env authorization. Do not guess alias spelling or use the Production domain.",
+      "Otherwise wait for a separately authorized protected bootstrap Preview; obtain the exact Vercel branch/deployment URL metadata. That bootstrap can compile but its review runtime remains fail-closed until explicit origins exist.",
+      "Validate the selected canonical HTTPS origin against actual Vercel system URL metadata. Create the primary origin and JSON allowlist only for Preview and this branch; never a wildcard or a literal variable reference.",
+      "Repeat value/scope/config checks in memory with those exact origins; confirm required platform system variables are available.",
+      "Env changes affect subsequent deployments. If values are obtained after a bootstrap, a separately authorized new Preview/redeploy is required; changing project env does not repair the old deployment.",
+      "Do not disable protection or assert hosted functionality/acceptance automatically. The next task must explicitly authorize the exact D14 change scope and any deployment."
+    ],
+    "actionsExecuted": false
+  },
+  "D14": {
+    "gate": "READY_FOR_D14_CHANGE",
+    "meaning": "Ready to request/review the next scoped D14 authorization using the owner's permitted correctly-deferred-variable rule; change not executed.",
+    "readinessLevel": "Local complete sanitized configuration model + verified restricted source + exact remote env scope",
+    "actualHostedRuntime": "NOT TESTED; explicit origins remain absent until authorized completion",
+    "noHostedOrAcceptanceClaim": true,
+    "rootIsolation": "OFF — OWNER MANUAL CONFIRMED",
+    "protectionStillEnabled": true,
+    "note": "This gate is not READY_FOR_HOSTED_PREVIEW_PASS. Do not treat a bootstrap as a usable reviewer session."
+  },
+  "safety": {
+    "commit": false,
+    "push": false,
+    "stage": false,
+    "deployment": false,
+    "protectionChanged": false,
+    "ProductionUpdated": false,
+    "SupabaseMutation": false,
+    "Stellar": false,
+    "contractOrWASMChanged": false,
+    "codeChanged": false,
+    "mainChanged": false,
+    "tagsChanged": false,
+    "NotionChanged": false
+  },
+  "projectStatus": {
+    "D1": "12/12",
+    "D2": "5/6",
+    "D3": "0/5",
+    "total": "17/23",
+    "B4_4": "NO PASS",
+    "D2_6": "BLOCKED/PENDING"
+  },
+  "documentationSources": [
+    "https://vercel.com/docs/environment-variables/manage-across-environments",
+    "https://vercel.com/docs/environment-variables/managing-environment-variables",
+    "https://vercel.com/docs/environment-variables/system-environment-variables",
+    "https://vercel.com/docs/environment-variables/sensitive-environment-variables"
+  ],
+  "closure": {
+    "diffCheck": "PASS",
+    "secretAudit": {
+      "status": "PASS",
+      "files": 626,
+      "historicalBlobs": 700,
+      "stagedFiles": 0,
+      "findings": []
+    },
+    "baselineFilesUnchanged": 556,
+    "allRefsUnchanged": true,
+    "localHelperPatternAudit": {
+      "files": 13,
+      "findings": []
+    },
+    "WASM": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+    "frontendLock": "633c0f5f1ae347d34aa0a2e45d43224b29e24ff8ffe1252d086b28cc2cdb8679"
+  },
+  "localValidation": {
+    "functional": {
+      "classification": "LOCAL SANITIZED MODEL ONLY; NOT HOSTED CONFIG PASS",
+      "checks": [
+        {
+          "name": "Complete sanitized config loader",
+          "status": "PASS"
+        },
+        {
+          "name": "Allowed origins JSON parsing and exact platform-origin matching",
+          "status": "PASS"
+        },
+        {
+          "name": "Vercel deployment ID cannot replace the pinned contract deployment ID",
+          "status": "PASS"
+        },
+        {
+          "name": "System URL does not derive missing explicit application origins",
+          "status": "PASS"
+        },
+        {
+          "name": "Literal runtime-variable reference is not a valid origin",
+          "status": "PASS"
+        },
+        {
+          "name": "Verified branch URL can be the exact platform binding",
+          "status": "PASS"
+        },
+        {
+          "name": "DB loader accepts restricted structure and inline existing PEM with fixture password",
+          "status": "PASS"
+        },
+        {
+          "name": "Privileged DB username is rejected without a connection",
+          "status": "PASS"
+        },
+        {
+          "name": "CA file path cannot replace inline PEM",
+          "status": "PASS"
+        },
+        {
+          "name": "Actual runtime factory with explicit Auth/cookie/chain stubs and lazy DB",
+          "status": "PASS"
+        }
+      ],
+      "passed": 10,
+      "remoteNetworkCalls": 0,
+      "realCredentialsUsed": false,
+      "completeSanitizedModel": "PASS",
+      "currentActualOrigins": "DEFERRED_UNTIL_DEPLOYMENT",
+      "currentEffectiveRuntime": "INCOMPLETE_UNTIL_ORIGINS_ARE_CONFIGURED"
+    },
+    "build": {
+      "scope": "LOCAL SANITIZED ONLY; NO HOSTED OR SECRET DOWNLOAD",
+      "build": {
+        "command": [
+          "cmd.exe",
+          "/d",
+          "/c",
+          "npm run build"
+        ],
+        "cwd": ".tools\\d2-preview-env-prep\\build-workspace\\frontend",
+        "exit_code": 0,
+        "duration_seconds": 53.74,
+        "log": ".tools\\d2-preview-env-prep\\build.log"
+      },
+      "typecheck": {
+        "command": [
+          "node",
+          "node_modules/typescript/bin/tsc",
+          "--noEmit",
+          "--incremental",
+          "false"
+        ],
+        "cwd": ".tools\\d2-preview-env-prep\\build-workspace\\frontend",
+        "exit_code": 0,
+        "duration_seconds": 5.3,
+        "log": ".tools\\d2-preview-env-prep\\typecheck.log"
+      },
+      "pass": true,
+      "auditExitCode": 0
+    },
+    "bundle": {
+      "files": 15,
+      "StrKeyCandidates": 0,
+      "checksumValidSeeds": 0,
+      "secretScan": "NO MATCH",
+      "findings": [],
+      "genericSecretWordOccurrences": []
+    },
+    "manifests": {
+      "expectedRoutes": [
+        "/",
+        "/admin",
+        "/api/batteries/[batteryId]",
+        "/api/batteries/[batteryId]/history",
+        "/api/me",
+        "/api/review/registration-intents",
+        "/api/review/registration-intents/[operationId]",
+        "/auth/login",
+        "/auth/logout",
+        "/battery/[batteryId]",
+        "/collector",
+        "/dashboard",
+        "/login",
+        "/recycler",
+        "/review/evidence"
+      ],
+      "actualRoutes": [
+        "/",
+        "/admin",
+        "/api/batteries/[batteryId]",
+        "/api/batteries/[batteryId]/history",
+        "/api/me",
+        "/api/review/registration-intents",
+        "/api/review/registration-intents/[operationId]",
+        "/auth/login",
+        "/auth/logout",
+        "/battery/[batteryId]",
+        "/collector",
+        "/dashboard",
+        "/login",
+        "/recycler",
+        "/review/evidence"
+      ],
+      "routePass": true,
+      "serverActions": 0,
+      "expectedServerActions": 0,
+      "loginLogout": "HTTP POST handlers; not Next server actions",
+      "middleware": [
+        "/"
+      ],
+      "manifestFiles": [
+        {
+          "file": ".next/server/app-paths-manifest.json",
+          "SHA256": "131a7e43fcbdc093997f014a6f3e822830e3fecdea84ffee1dd7e87e808880d6"
+        },
+        {
+          "file": ".next/server/server-reference-manifest.json",
+          "SHA256": "588b33ed8340be5d765b8dff2a89804d6dcb1f35027ad56319f902353aea9ff8"
+        },
+        {
+          "file": ".next/server/middleware-manifest.json",
+          "SHA256": "9f00b1e90929aa520bf553897b34f5fcd3f8abf969c1ff3bc19191b49d0add53"
+        }
+      ]
+    },
+    "buildOutputSHA256": "17d790695951f3cb0271dea8c2232cc1a1b5fd10e8a969668bc9db996068e172",
+    "buildId": "8sRELFwiGc6makmBFMybB",
+    "baselineFilesUnchanged": 556,
+    "helperAdjustment": "Added a missing HTTP import stub to the ignored config-only harness; no production source change."
+  },
+  "evidence": [
+    {
+      "path": ".tools/d2-preview-env-prep/functional-check.json",
+      "SHA256": "a49dc421f90c8050483152cc7ce656a75c234756e000d11ad876bc6a09d569b5"
+    },
+    {
+      "path": ".tools/d2-preview-env-prep/functional-model.log",
+      "SHA256": "a49dc421f90c8050483152cc7ce656a75c234756e000d11ad876bc6a09d569b5"
+    },
+    {
+      "path": ".tools/d2-preview-env-prep/build-result.json",
+      "SHA256": "abea473db7443dfc3ba1ec380fa73c710d7a1ced9b6e48df062656375085f151"
+    },
+    {
+      "path": ".tools/d2-preview-env-prep/build-audit.json",
+      "SHA256": "bcbd9632e36cf9d6c9b717cf92387dcda041cd56901623dd0a9038641ff27cc2"
+    },
+    {
+      "path": ".tools/d2-preview-env-prep/build.log",
+      "SHA256": "a411bab1557f6acbf3d674d725df33c42aeeba950782921b13c50cb8a92a6f6c"
+    },
+    {
+      "path": ".tools/d2-preview-env-prep/typecheck.log",
+      "SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

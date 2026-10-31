@@ -1,0 +1,987 @@
+{
+  "task": "D2-008B3.2",
+  "status": "B4 READY FOR OWNER AUTHORIZATION",
+  "date": "2026-10-30",
+  "timezone": "America/Santiago",
+  "checkpoint": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1",
+  "branch": "instaward/d2-web-mvp",
+  "design": "A + owner-approved single adoption ACL exception",
+  "role_split_preserved": true,
+  "exception": {
+    "signature": "review_private.adopt_registration_intent(uuid)",
+    "owner": "byetery_d2_intent_owner",
+    "acl": [
+      {
+        "grantee": "postgres",
+        "grantor": "byetery_d2_intent_owner",
+        "grantable": false,
+        "privilege": "EXECUTE"
+      },
+      {
+        "grantee": "byetery_d2_intent_owner",
+        "grantor": "byetery_d2_intent_owner",
+        "grantable": false,
+        "privilege": "EXECUTE"
+      }
+    ],
+    "implemented": true
+  },
+  "dp2": {
+    "owner_default_statements_removed": 2,
+    "local_default_acl_diff": [],
+    "security_authority": "Explicit per-function ACLs + fail-closed pre-COMMIT catalogue assertions"
+  },
+  "local": {
+    "executor": {
+      "current_user": "postgres",
+      "session_user": "postgres",
+      "version": "17.6",
+      "self_grant": "",
+      "rolsuper": false,
+      "rolcreatedb": true,
+      "rolcreaterole": true,
+      "rolbypassrls": true,
+      "rolreplication": true
+    },
+    "matrix": [
+      {
+        "item": "1",
+        "gate": "Original B1 and B2 controls",
+        "status": "PASS",
+        "evidence": "Both fail with expected SQLSTATE 42501 at owner-specific defaults; no committed partial changes."
+      },
+      {
+        "item": "2",
+        "gate": "Patched B1",
+        "status": "PASS",
+        "evidence": "Applied by actual NOSUPERUSER postgres login using psql -X / ON_ERROR_STOP=1."
+      },
+      {
+        "item": "3",
+        "gate": "Patched B2",
+        "status": "PASS",
+        "evidence": "Applied by the same nonsuperuser executor after B1."
+      },
+      {
+        "item": "4",
+        "gate": "Privilege warnings",
+        "status": "PASS",
+        "evidence": "Zero in both apply scripts, controls and completed suites. Three separate 25P01 cleanup warnings are disclosed."
+      },
+      {
+        "item": "5",
+        "gate": "Function owners",
+        "status": "PASS",
+        "evidence": "Four B1 + two B2 wrappers intent_owner; six B2 read functions read_owner; invoker trigger postgres."
+      },
+      {
+        "item": "6",
+        "gate": "Definer/search_path",
+        "status": "PASS",
+        "evidence": "All twelve definers and invoker trigger have exact empty search_path catalogue configuration."
+      },
+      {
+        "item": "7",
+        "gate": "Function ACLs",
+        "status": "PASS",
+        "evidence": "Each signature checked via aclexplode for exact grantees, owner grantor, no delegated grant option."
+      },
+      {
+        "item": "8",
+        "gate": "Adoption EXECUTE",
+        "status": "PASS",
+        "evidence": "Independent postgres grant survives cleanup; grantor=intent_owner."
+      },
+      {
+        "item": "9",
+        "gate": "postgres SET after B1",
+        "status": "PASS",
+        "evidence": "Effective SET/USAGE to intent_owner false; asserted before B1 commit."
+      },
+      {
+        "item": "10",
+        "gate": "Owner schema CREATE",
+        "status": "PASS",
+        "evidence": "Both false after their transactions; asserted before commit."
+      },
+      {
+        "item": "11",
+        "gate": "Hosted SET ROLE",
+        "status": "PASS",
+        "evidence": "Real review_app login denied for both owners, SQLSTATE 42501."
+      },
+      {
+        "item": "12",
+        "gate": "Raw table/column authority",
+        "status": "PASS",
+        "evidence": "Catalogue privileges absent; actual SELECT and nonexecuting DML EXPLAIN denied on all scoped tables."
+      },
+      {
+        "item": "13",
+        "gate": "Five hosted entrypoints",
+        "status": "PASS",
+        "evidence": "Exact signature set checked before B2 commit and exercised by existing B2 tests."
+      },
+      {
+        "item": "14",
+        "gate": "Old principal-taking functions",
+        "status": "PASS",
+        "evidence": "Denied to review_app after B2, catalogue plus actual calls."
+      },
+      {
+        "item": "15",
+        "gate": "Hosted adoption",
+        "status": "PASS",
+        "evidence": "Denied to review_app after B1/B2, catalogue plus actual call."
+      },
+      {
+        "item": "16",
+        "gate": "Existing suites",
+        "status": "PASS",
+        "evidence": "B1 31/31; B2 110/110 across six test files; unchanged assertion bodies."
+      },
+      {
+        "item": "17",
+        "gate": "OwnerRegistrationAdoption",
+        "status": "PASS",
+        "evidence": "Actual class passed after B2 injected rollback; same UUID, normal QUEUED operation only."
+      },
+      {
+        "item": "18",
+        "gate": "B2 rollback",
+        "status": "PASS",
+        "evidence": "Injected exception after final postconditions and before COMMIT restores entire committed B1 snapshot; B1 remains functionally healthy."
+      },
+      {
+        "item": "19",
+        "gate": "B1 reapply",
+        "status": "PASS",
+        "evidence": "Fails at duplicate schema (42P06), entire B1 snapshot unchanged."
+      },
+      {
+        "item": "20",
+        "gate": "Tables/RLS",
+        "status": "PASS",
+        "evidence": "Review tables remain postgres-owned with ENABLE + FORCE RLS; definitions unchanged."
+      },
+      {
+        "item": "21",
+        "gate": "No postgres definer",
+        "status": "PASS",
+        "evidence": "Zero review SECURITY DEFINER functions owned by postgres."
+      },
+      {
+        "item": "22",
+        "gate": "DP2 default ACL diff",
+        "status": "PASS",
+        "evidence": "Exact before/after pg_default_acl rows equal; no owner defaults created."
+      }
+    ],
+    "commands": [
+      {
+        "label": "b32_acceptance-prerequisites",
+        "exit": 0,
+        "warnings": 0
+      },
+      {
+        "label": "unpatched-b1-control",
+        "exit": 3,
+        "warnings": 0
+      },
+      {
+        "label": "patched-b1",
+        "exit": 0,
+        "warnings": 0
+      },
+      {
+        "label": "unpatched-b2-control",
+        "exit": 3,
+        "warnings": 0
+      },
+      {
+        "label": "b1-reapply",
+        "exit": 3,
+        "warnings": 0
+      },
+      {
+        "label": "b2-injected-rollback",
+        "exit": 3,
+        "warnings": 0
+      },
+      {
+        "label": "patched-b2",
+        "exit": 0,
+        "warnings": 0
+      },
+      {
+        "label": "existing-b1-suite",
+        "exit": 0,
+        "warnings": 0,
+        "nonPrivilegeCleanupWarnings": 0
+      },
+      {
+        "label": "existing-b2-suite",
+        "exit": 0,
+        "warnings": 0,
+        "nonPrivilegeCleanupWarnings": 0
+      }
+    ],
+    "B1_tests": {
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0
+    },
+    "B2_tests": {
+      "files": 6,
+      "passed": 110,
+      "failed": 0
+    },
+    "privilege_warnings": 0,
+    "non_privilege_cleanup_warnings": [
+      {
+        "postgres_notice": {
+          "severity": "WARNING",
+          "code": "25P01",
+          "message": "there is no transaction in progress"
+        }
+      },
+      {
+        "postgres_notice": {
+          "severity": "WARNING",
+          "code": "25P01",
+          "message": "there is no transaction in progress"
+        }
+      },
+      {
+        "postgres_notice": {
+          "severity": "WARNING",
+          "code": "25P01",
+          "message": "there is no transaction in progress"
+        }
+      }
+    ],
+    "after_B1": {
+      "functions": [
+        {
+          "signature": "review_private.adopt_registration_intent(uuid)",
+          "owner": "byetery_d2_intent_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "postgres",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            },
+            {
+              "grantee": "byetery_d2_intent_owner",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "a183b74d236fc25804fc91787e82e161e78963f136d849854189c06b5f5b302c"
+        },
+        {
+          "signature": "review_private.create_registration_intent(uuid,text,jsonb)",
+          "owner": "byetery_d2_intent_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_intent_owner",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            },
+            {
+              "grantee": "byetery_d2_review_app",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "124a937698160b405cd98feebaf31093c01704f048c808f65361e6a9e5eace4f"
+        },
+        {
+          "signature": "review_private.immutable_intent()",
+          "owner": "postgres",
+          "definer": false,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "postgres",
+              "grantor": "postgres",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "617a5f5d96b5a253e8f633fddccb58d360cf8fdfe890ca70c05a330d243fdb40"
+        },
+        {
+          "signature": "review_private.registration_intent_status(uuid,uuid)",
+          "owner": "byetery_d2_intent_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_intent_owner",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            },
+            {
+              "grantee": "byetery_d2_review_app",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "657740244ec41566628ad8e9dff4423ae33b583e1736f188ad65417a46b59ac1"
+        },
+        {
+          "signature": "review_private.require_authority(uuid)",
+          "owner": "byetery_d2_intent_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_intent_owner",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "c2bb2f41b793a3e91427b1693de299992158f21f5f2020eb934a42ae7cbe1f35"
+        }
+      ],
+      "tables": [
+        {
+          "relname": "permissions",
+          "owner": "postgres",
+          "rls": true,
+          "force": true
+        },
+        {
+          "relname": "registration_intents",
+          "owner": "postgres",
+          "rls": true,
+          "force": true
+        }
+      ],
+      "roles": [
+        {
+          "rolname": "byetery_d2_intent_owner",
+          "rolcanlogin": false,
+          "rolinherit": false,
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false
+        },
+        {
+          "rolname": "byetery_d2_review_app",
+          "rolcanlogin": true,
+          "rolinherit": false,
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false
+        }
+      ],
+      "members": [
+        {
+          "role": "byetery_d2_intent_owner",
+          "member": "postgres",
+          "grantor": "b32_bootstrap",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        },
+        {
+          "role": "byetery_d2_review_app",
+          "member": "postgres",
+          "grantor": "b32_bootstrap",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        }
+      ],
+      "defaults": []
+    },
+    "after_B2": {
+      "functions": [
+        {
+          "signature": "review_private.adopt_registration_intent(uuid)",
+          "owner": "byetery_d2_intent_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "postgres",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            },
+            {
+              "grantee": "byetery_d2_intent_owner",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "a183b74d236fc25804fc91787e82e161e78963f136d849854189c06b5f5b302c"
+        },
+        {
+          "signature": "review_private.battery(uuid,text)",
+          "owner": "byetery_d2_read_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_review_app",
+              "grantor": "byetery_d2_read_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            },
+            {
+              "grantee": "byetery_d2_read_owner",
+              "grantor": "byetery_d2_read_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "1aa4a9a604bf4d80ab06260fec4e4c777029feeebfca8f10062a3ba73cd42d62"
+        },
+        {
+          "signature": "review_private.create_registration_intent(uuid,text,jsonb)",
+          "owner": "byetery_d2_intent_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_intent_owner",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "124a937698160b405cd98feebaf31093c01704f048c808f65361e6a9e5eace4f"
+        },
+        {
+          "signature": "review_private.create_review_registration_intent(uuid,text,jsonb)",
+          "owner": "byetery_d2_intent_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_intent_owner",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            },
+            {
+              "grantee": "byetery_d2_review_app",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "47b13ebd040d12df20af6a073093e6c5070f887cf34d8df1c3935abf51978aa1"
+        },
+        {
+          "signature": "review_private.history_rows(uuid,text)",
+          "owner": "byetery_d2_read_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_review_app",
+              "grantor": "byetery_d2_read_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            },
+            {
+              "grantee": "byetery_d2_read_owner",
+              "grantor": "byetery_d2_read_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "7f488ea02d96929ab88d1c5d05f0fb1bcd414810bb495f8577099792d62a8173"
+        },
+        {
+          "signature": "review_private.immutable_intent()",
+          "owner": "postgres",
+          "definer": false,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "postgres",
+              "grantor": "postgres",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "617a5f5d96b5a253e8f633fddccb58d360cf8fdfe890ca70c05a330d243fdb40"
+        },
+        {
+          "signature": "review_private.operation_dto(uuid)",
+          "owner": "byetery_d2_read_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_read_owner",
+              "grantor": "byetery_d2_read_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "0a472f6e12b8a458d2c201eda4c0d50f14829966f132c3c2ebcb888d5104011b"
+        },
+        {
+          "signature": "review_private.profile(uuid)",
+          "owner": "byetery_d2_read_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_review_app",
+              "grantor": "byetery_d2_read_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            },
+            {
+              "grantee": "byetery_d2_read_owner",
+              "grantor": "byetery_d2_read_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "566c17bcbe69d488ca47b4141962cba8ceef3ec18abbd3c0eab22580aa5e0d0b"
+        },
+        {
+          "signature": "review_private.registration_intent_status(uuid,uuid)",
+          "owner": "byetery_d2_intent_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_intent_owner",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "657740244ec41566628ad8e9dff4423ae33b583e1736f188ad65417a46b59ac1"
+        },
+        {
+          "signature": "review_private.require_authority(uuid)",
+          "owner": "byetery_d2_intent_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_intent_owner",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "c2bb2f41b793a3e91427b1693de299992158f21f5f2020eb934a42ae7cbe1f35"
+        },
+        {
+          "signature": "review_private.resolve_review(uuid)",
+          "owner": "byetery_d2_read_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_intent_owner",
+              "grantor": "byetery_d2_read_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            },
+            {
+              "grantee": "byetery_d2_read_owner",
+              "grantor": "byetery_d2_read_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "2c241cf277e9f70a9d3c7645df6efc833998c01c79ff425f45a0f9ef01571614"
+        },
+        {
+          "signature": "review_private.review_registration_intent_status(uuid,uuid)",
+          "owner": "byetery_d2_intent_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_intent_owner",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            },
+            {
+              "grantee": "byetery_d2_review_app",
+              "grantor": "byetery_d2_intent_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "1042952960390dbb8c1cd910ec19dbfa0c9eacca57a859a7eb633128534bf739"
+        },
+        {
+          "signature": "review_private.visible_battery(uuid,text,text)",
+          "owner": "byetery_d2_read_owner",
+          "definer": true,
+          "config": [
+            "search_path=\"\""
+          ],
+          "acl": [
+            {
+              "grantee": "byetery_d2_read_owner",
+              "grantor": "byetery_d2_read_owner",
+              "grantable": false,
+              "privilege": "EXECUTE"
+            }
+          ],
+          "bodySha256": "231b906ec8c51f631fe5fe0385ce6ec1e4e4dab88f3d8cb8ad4c8ee71869cff2"
+        }
+      ],
+      "tables": [
+        {
+          "relname": "permissions",
+          "owner": "postgres",
+          "rls": true,
+          "force": true
+        },
+        {
+          "relname": "registration_intents",
+          "owner": "postgres",
+          "rls": true,
+          "force": true
+        },
+        {
+          "relname": "review_access",
+          "owner": "postgres",
+          "rls": true,
+          "force": true
+        },
+        {
+          "relname": "review_batteries",
+          "owner": "postgres",
+          "rls": true,
+          "force": true
+        }
+      ],
+      "roles": [
+        {
+          "rolname": "byetery_d2_intent_owner",
+          "rolcanlogin": false,
+          "rolinherit": false,
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false
+        },
+        {
+          "rolname": "byetery_d2_read_owner",
+          "rolcanlogin": false,
+          "rolinherit": false,
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false
+        },
+        {
+          "rolname": "byetery_d2_review_app",
+          "rolcanlogin": true,
+          "rolinherit": false,
+          "rolsuper": false,
+          "rolbypassrls": false,
+          "rolcreatedb": false,
+          "rolcreaterole": false,
+          "rolreplication": false
+        }
+      ],
+      "members": [
+        {
+          "role": "byetery_d2_intent_owner",
+          "member": "postgres",
+          "grantor": "b32_bootstrap",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        },
+        {
+          "role": "byetery_d2_read_owner",
+          "member": "postgres",
+          "grantor": "b32_bootstrap",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        },
+        {
+          "role": "byetery_d2_review_app",
+          "member": "postgres",
+          "grantor": "b32_bootstrap",
+          "admin_option": true,
+          "inherit_option": false,
+          "set_option": false
+        }
+      ],
+      "defaults": []
+    },
+    "function_definition_integrity": [
+      {
+        "file": "database/review/d2-008b1-registration-intents.sql",
+        "functions": 5,
+        "bodies_and_headers_unchanged": true
+      },
+      {
+        "file": "database/review/d2-008b2-direct-review.sql",
+        "functions": 8,
+        "bodies_and_headers_unchanged": true
+      }
+    ],
+    "fixture_stopped": true,
+    "preliminary_harness_issues": [
+      "Windows 8.3 vs long path guard corrected using device/inode identity",
+      "PL/pgSQL assertion variable ambiguity corrected before final validation",
+      "Local cleanup membership pg_signal_backend mirrored from prior remote inventory",
+      "25P01 cleanup notices recorded separately rather than mislabeled ACL warnings"
+    ],
+    "original_test_files_modified": false
+  },
+  "remote": {
+    "mutations": "NONE",
+    "completion": {
+      "version": "17.6",
+      "read_only": "on",
+      "deployment": {
+        "id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+        "mode": "TESTNET",
+        "wasm_hash": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+        "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+        "schema_version": 1,
+        "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON"
+      },
+      "observed_at": "2026-10-30T05:31:08.837653+00:00",
+      "review_roles": [],
+      "review_schema": null,
+      "graphql_wrappers": [
+        {
+          "body": "\n            DECLARE\n                server_version float;\n            BEGIN\n                server_version = (SELECT (SPLIT_PART((select version()), ' ', 2))::float);\n\n                IF server_version >= 14 THEN\n                    RETURN jsonb_build_object(\n                        'errors', jsonb_build_array(\n                            jsonb_build_object(\n                                'message', 'pg_graphql extension is not enabled.'\n                            )\n                        )\n                    );\n                ELSE\n                    RETURN jsonb_build_object(\n                        'errors', jsonb_build_array(\n                            jsonb_build_object(\n                                'message', 'pg_graphql is only available on projects running Postgres 14 onwards.'\n                            )\n                        )\n                    );\n                END IF;\n            END;\n        ",
+          "owner": "supabase_admin",
+          "config": null,
+          "definer": false,
+          "signature": "graphql_public.graphql(text,text,jsonb,jsonb)"
+        }
+      ],
+      "graphql_extension": [],
+      "role_search_paths": [
+        {
+          "role": "postgres",
+          "setting": "search_path=\"\\$user\", public, extensions",
+          "database": null
+        }
+      ],
+      "graphql_schema_comments": [
+        {
+          "schema": "graphql_public",
+          "comment": null
+        },
+        {
+          "schema": "graphql",
+          "comment": null
+        },
+        {
+          "schema": "public",
+          "comment": "standard public schema"
+        }
+      ]
+    },
+    "final_collision_check": {
+      "read_only": "on",
+      "deployment": {
+        "id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+        "mode": "TESTNET",
+        "wasm_hash": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+        "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+        "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON"
+      },
+      "observed_at": "2026-10-30T05:37:43.923955+00:00",
+      "review_roles": [],
+      "review_schema": null
+    },
+    "prerequisite_parity": {
+      "columns": {
+        "local_count": 171,
+        "remote_count": 171,
+        "missing_remote": [],
+        "extra_remote": [],
+        "differences": [],
+        "status": "PASS"
+      },
+      "functions": {
+        "local_count": 12,
+        "remote_count": 12,
+        "missing_remote": [],
+        "extra_remote": [],
+        "differences": [],
+        "status": "PASS"
+      },
+      "constraints": {
+        "local_count": 141,
+        "remote_count": 141,
+        "missing_remote": [],
+        "extra_remote": [],
+        "differences": [],
+        "status": "PASS"
+      },
+      "indexes": {
+        "local_count": 52,
+        "remote_count": 52,
+        "missing_remote": [],
+        "extra_remote": [],
+        "differences": [],
+        "status": "PASS"
+      },
+      "triggers": {
+        "local_count": 38,
+        "remote_count": 38,
+        "missing_remote": [],
+        "extra_remote": [],
+        "differences": [],
+        "status": "PASS"
+      }
+    },
+    "reuse_baseline": ".tools/d2-008b3_1/remote.json; summarized in preserved B3.1 report",
+    "security_advisors": {
+      "lints": [
+        {
+          "name": "auth_leaked_password_protection",
+          "title": "Leaked Password Protection Disabled",
+          "level": "WARN",
+          "facing": "EXTERNAL",
+          "categories": [
+            "SECURITY"
+          ],
+          "description": "Leaked password protection is currently disabled.",
+          "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection",
+          "count": 1,
+          "findings": [
+            {
+              "detail": "Supabase Auth prevents the use of compromised passwords by checking against HaveIBeenPwned.org. Enable this feature to enhance security.",
+              "metadata": {
+                "type": "auth",
+                "entity": "Auth"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "advisor_classification": "One preexisting unrelated Auth warning; no material blocking finding returned",
+    "graphql_exposure": "pg_graphql absent; graphql_public is invoker placeholder; no review reflection. No enabling/change performed.",
+    "postgrest_exposure": "Prior B3.1 406/PGRST106 permits only public, graphql_public; reused, not inferred from absent schema.",
+    "future_managed_grantor": "APPLY-TIME ASSERTION; inline assertions require safe automatic superuser-issued ADMIN-only edge and no remaining SET/INHERIT."
+  },
+  "hashes": {
+    "new": {
+      "database/review/d2-008b1-registration-intents.sql": "957e19e768a6ca90f5bbf5c6268945ef129686d3cd342ec17cca1e3eca41585d",
+      "database/review/d2-008b2-direct-review.sql": "d25b53d15cbc6d6ab3b8037130c0319edd34a3349c49465af2b82153c7eb61d4"
+    },
+    "old": {
+      "database/review/d2-008b1-registration-intents.sql": "b6422a6b542e429a969060aae44971a8ee441eb6df42f09b84c2852db54f233a",
+      "database/review/d2-008b2-direct-review.sql": "7720341657b66dbc2df99145fe269eed8d6e0f899be8410e9536ff9bdc579827"
+    },
+    "old_status": "OBSOLETE FOR REMOTE APPLY",
+    "local_harnesses": {
+      "scripts/instaward/b32-local-postgres.py": "ace101b9335fcd4283cf7aeec84e29b865d665768d2f57d36be749cab0641373",
+      "scripts/instaward/b32-pg-check.mjs": "1724aeaeccf032ede9976cf9e82b59a266c414797de80d47eee987407d6cda56",
+      "scripts/instaward/b32-fixture-adapter.mjs": "58ce9a6df4dd375671fc7bd1707c5b7c458dd7b063b9ee94a35435bf5ae3a5f5",
+      "scripts/instaward/b32-vitest.config.mts": "c6a1af7e5243f68a1155b92ac0b964d561499d2a17cbdb8e90d89b8207518951"
+    },
+    "remote_apply_helper_created": false
+  },
+  "production_changes": 0,
+  "auth_operations": 0,
+  "stellar_transactions": 0,
+  "operational_signatures": 0,
+  "broadcasts": 0,
+  "project_status": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "total": "17/23",
+    "D2.6": "PENDING"
+  },
+  "git": {
+    "commit_created": false,
+    "push": false,
+    "merge": false,
+    "tags_changed": false
+  },
+  "b4_executed": false,
+  "closure_verification": {
+    "baseline_files": 504,
+    "only_changes": [
+      "database/review/d2-008b1-registration-intents.sql",
+      "database/review/d2-008b2-direct-review.sql"
+    ],
+    "unchanged_files": 502,
+    "refs_unchanged": true,
+    "new_file_whitespace": "PASS",
+    "python_syntax": "PASS",
+    "fixture_stopped": true
+  },
+  "secret_audit": {
+    "files": 578,
+    "historicalBlobs": 700,
+    "stagedFiles": 0,
+    "findings": []
+  }
+}

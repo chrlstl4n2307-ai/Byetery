@@ -1,0 +1,842 @@
+{
+  "task": "D2-008B4.4-CLOSEOUT-PRECHECK",
+  "date": "2026-10-31",
+  "classification": "LOCAL ONLY; GATE BLOCKED; NO HOSTED ACCEPTANCE",
+  "branch": "instaward/d2-web-mvp",
+  "localHEAD": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1",
+  "remoteHEADLastDocumented": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1",
+  "remoteHEADReread": false,
+  "localCheckpoint": {
+    "backend": {
+      "tests": 343,
+      "pass": 343,
+      "fail": 0,
+      "skipped": 0,
+      "exit_code": 0
+    },
+    "frontend": {
+      "total": 321,
+      "passed": 321,
+      "failed": 0,
+      "skipped": 0,
+      "existingPassed": 274,
+      "newPassed": 47
+    },
+    "build": {
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "durationSeconds": 65.89,
+      "Node": "v24.16.0",
+      "Next": "16.3.5",
+      "outputTreeSHA256": "2f3698aa7721c14301e60c7928c54945f706093af520e2383adb04f7fcba4641",
+      "buildId": "C6eQXfRcpV1Et4F9EMRpB"
+    },
+    "TypeScript": {
+      "frontend": true,
+      "backend": true
+    },
+    "client": {
+      "files": 15,
+      "StrKeyCandidates": 0,
+      "checksumValidSeeds": 0,
+      "secretScan": "NO MATCH",
+      "findings": [],
+      "genericSecretWordOccurrences": []
+    },
+    "manifests": {
+      "expectedRoutes": [
+        "/",
+        "/admin",
+        "/api/batteries/[batteryId]",
+        "/api/batteries/[batteryId]/history",
+        "/api/me",
+        "/api/review/registration-intents",
+        "/api/review/registration-intents/[operationId]",
+        "/auth/login",
+        "/auth/logout",
+        "/battery/[batteryId]",
+        "/collector",
+        "/dashboard",
+        "/login",
+        "/recycler",
+        "/review/evidence"
+      ],
+      "actualRoutes": [
+        "/",
+        "/admin",
+        "/api/batteries/[batteryId]",
+        "/api/batteries/[batteryId]/history",
+        "/api/me",
+        "/api/review/registration-intents",
+        "/api/review/registration-intents/[operationId]",
+        "/auth/login",
+        "/auth/logout",
+        "/battery/[batteryId]",
+        "/collector",
+        "/dashboard",
+        "/login",
+        "/recycler",
+        "/review/evidence"
+      ],
+      "routePass": true,
+      "serverActions": 0,
+      "expectedServerActions": 0,
+      "loginLogout": "HTTP POST handlers; not Next server actions",
+      "middleware": [
+        "/"
+      ],
+      "manifestFiles": [
+        {
+          "file": ".next/server/app-paths-manifest.json",
+          "SHA256": "131a7e43fcbdc093997f014a6f3e822830e3fecdea84ffee1dd7e87e808880d6"
+        },
+        {
+          "file": ".next/server/server-reference-manifest.json",
+          "SHA256": "6a9f0003e33c36bca29942f272c75bb9b051f3f8e6ac497d6a9c3f34e23b0efd"
+        },
+        {
+          "file": ".next/server/middleware-manifest.json",
+          "SHA256": "00c4f79bc34c68340264c0086bd625880e342dfcff6fde3f69dcd05885d1052b"
+        }
+      ]
+    },
+    "newTestCategories": {
+      "CSRF": 24,
+      "DTO": 16,
+      "bundle": 2,
+      "networkBlocking": 1,
+      "StellarOffline": 4
+    },
+    "PostgreSQL": {
+      "version": "17.6",
+      "executors": {
+        "postgres": {
+          "current_user": "postgres",
+          "session_user": "postgres",
+          "version": "170006",
+          "createrole_self_grant": "",
+          "role": {
+            "rolname": "postgres",
+            "rolsuper": false,
+            "rolinherit": true,
+            "rolcreaterole": true,
+            "rolcreatedb": true,
+            "rolcanlogin": true,
+            "rolreplication": true,
+            "rolbypassrls": true
+          },
+          "memberships": [
+            {
+              "role": "pg_monitor",
+              "admin": false,
+              "inherit": true,
+              "set": true
+            },
+            {
+              "role": "pg_signal_backend",
+              "admin": false,
+              "inherit": true,
+              "set": true
+            },
+            {
+              "role": "anon",
+              "admin": true,
+              "inherit": true,
+              "set": true
+            },
+            {
+              "role": "authenticated",
+              "admin": true,
+              "inherit": true,
+              "set": true
+            },
+            {
+              "role": "service_role",
+              "admin": true,
+              "inherit": true,
+              "set": true
+            }
+          ]
+        },
+        "byetery_gap2b": {
+          "current_user": "byetery_gap2b",
+          "session_user": "byetery_gap2b",
+          "version": "170006",
+          "createrole_self_grant": "",
+          "role": {
+            "rolname": "byetery_gap2b",
+            "rolsuper": false,
+            "rolinherit": true,
+            "rolcreaterole": true,
+            "rolcreatedb": true,
+            "rolcanlogin": true,
+            "rolreplication": true,
+            "rolbypassrls": true
+          },
+          "memberships": [
+            {
+              "role": "pg_monitor",
+              "admin": false,
+              "inherit": true,
+              "set": true
+            },
+            {
+              "role": "pg_signal_backend",
+              "admin": false,
+              "inherit": true,
+              "set": true
+            },
+            {
+              "role": "anon",
+              "admin": true,
+              "inherit": true,
+              "set": true
+            },
+            {
+              "role": "authenticated",
+              "admin": true,
+              "inherit": true,
+              "set": true
+            },
+            {
+              "role": "service_role",
+              "admin": true,
+              "inherit": true,
+              "set": true
+            }
+          ]
+        }
+      },
+      "negativeControls": {
+        "d2-008b1-registration-intents.sql": {
+          "status": "PASS",
+          "SQLSTATE": "P0001",
+          "error": "ReviewRequiresNonSuperuserPostgresEmptySelfGrant"
+        },
+        "d2-008b2-direct-review.sql": {
+          "status": "PASS",
+          "SQLSTATE": "P0001",
+          "error": "ReviewRequiresNonSuperuserPostgresEmptySelfGrant"
+        }
+      },
+      "cleanup": {
+        "remaining_fixture_databases": 0,
+        "test_cluster_stopped_retained": true,
+        "legacy_cluster_restored_unmodified": true
+      }
+    },
+    "shortcuts": "NONE; complete build/backend/frontend repeated with unchanged reproduction harness in a new ignored output directory"
+  },
+  "workingTree": {
+    "candidateIncludes": 54,
+    "candidateExcludes": 7,
+    "unexpectedFiles": [],
+    "candidate": [
+      {
+        "path": "backend/tests/review-postgres-fixture.ts",
+        "include": true,
+        "category": "A / PostgreSQL fixture",
+        "reason": "Previously authorized direct NOSUPERUSER executor with additional identity guards; required by current 343 suite.",
+        "SHA256": "28691b3f4b86945e47df49aea5683240094d60068135ddaed9b6a4b7037609b3"
+      },
+      {
+        "path": "database/review/d2-008b1-registration-intents.sql",
+        "include": true,
+        "category": "A / approved SQL artifacts",
+        "reason": "Pre-existing B3.1/B3.2 ownership/ACL patches and fail-closed checks; matching bytes required by validated fixture. No new SQL edit.",
+        "SHA256": "957e19e768a6ca90f5bbf5c6268945ef129686d3cd342ec17cca1e3eca41585d"
+      },
+      {
+        "path": "database/review/d2-008b2-direct-review.sql",
+        "include": true,
+        "category": "A / approved SQL artifacts",
+        "reason": "Pre-existing B3.1/B3.2 ownership/ACL patches and fail-closed checks; matching bytes required by validated fixture. No new SQL edit.",
+        "SHA256": "d25b53d15cbc6d6ab3b8037130c0319edd34a3349c49465af2b82153c7eb61d4"
+      },
+      {
+        "path": "docs/instaward/d2/EVIDENCE-INDEX.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "fc0406ba0effc8f7d2495770800d2f3b5740ce0a5f1aabc9470abfe51e58c31b"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B3-REMOTE-SQL-PREFLIGHT-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "dd4fadfbc26c9408c62194bf29f46a32d1d14e0317703c014aa474edc4c17161"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B3-REMOTE-SQL-PREFLIGHT.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "9d88b9a6a09afdd2c3661a54915592a1c33e11cea22d7409b46d25fe06fc4208"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B3_1-PRIVILEGE-TRANSITION-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "f727458464b1f7c865e56c0887c1e7beb15a3aa37882c802cff4f6b9446a9359"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B3_1-PRIVILEGE-TRANSITION.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "ea501d69f91047f682a1e5a9622890dd854f78f70cc4648a76a007d26a04a941"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B3_2-ADOPTION-ACL-EXCEPTION-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "8b0cf94e585a7491a1c51ae8832f7e556b29408e8b246395e1c4ad08c1c5bcd9"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B3_2-ADOPTION-ACL-EXCEPTION.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "d4c5fc071e55fd983ad1c6d6c5652802394d827c3456daa5ccd56ee923525676"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4-REMOTE-APPLY-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "d366a2fc64a4e9770fae3e6a116acddc744209b83e31d90539a1f58c68f3628a"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4-REMOTE-APPLY.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "c2a3e3c30e6b595f20b9b0899b6e810fe7962903175b784533781010900c06c5"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_1-RESTRICTED-CREDENTIAL-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "67454937a14943e60313fb6ba5970e81d0aaa7d4b8fc4363a8ebab1d123177c6"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_1-RESTRICTED-CREDENTIAL.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "e23d8e2cc6defc1f31fee8ce35a9a4d4e08e1a2ea3509908cf704fb10491bb1b"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_2A-REVIEW-BINDINGS-INVENTORY-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "d3fbcd91d4f24f0ce5e94019249bfe4c70e799d4fcfb2127c182d272d133d5c6"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_2A-REVIEW-BINDINGS-INVENTORY.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "db9c61080fa2bed89c925bcb74cc8838aff744808610cce80ef6427779ce183e"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_2B-REVIEW-BINDINGS-APPLY-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "d4808fa83c3d3429037aae4bc358eb2f5863383e896d2152ee432e90178e38d1"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_2B-REVIEW-BINDINGS-APPLY.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "4145d57941f0d509e7aeab3f8479b78d7a1584dbefd12c6cc7d0485f68a231ac"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_3-FOUR-ROLE-LOGIN-ACCESS-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "8d6b580d515b80c85742b864aef77dc7446d9b3b033e6c4fb3d4fa7c65c2ee66"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_3-FOUR-ROLE-LOGIN-ACCESS.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "c88b99c2c388a6b3f9c02365114e0acb1fc17de2d16044f9962c5225d40c2b77"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_3M-FOUR-REVIEW-PASSWORD-MAINTENANCE-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "1b89576764618d2aa4df5be1780b84980700225daa9e61f328ccc0d7cd156f21"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_3M-FOUR-REVIEW-PASSWORD-MAINTENANCE.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "400b63385f4c844fe97f47895ee5d608c9aa8adf3eb46906536bdc0e5df5a12d"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_3M-R-FOUR-REVIEW-PASSWORD-MAINTENANCE-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "15b8e6d7f9ff011ad3cb6b6fd5b772dfbf3c06acc10176608827903bc343a485"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_3M-R-FOUR-REVIEW-PASSWORD-MAINTENANCE.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "d262d5921a797c1ad9b71770cd060cc6644255847cebf48142c5ffd1c5ca1f2e"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_3R2-FOUR-ROLE-AUTH-READ-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "1182b3fbb3321f758369d8c9772a2381ba91eea92067988d81e2d93d1c985ac7"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_3R2-FOUR-ROLE-AUTH-READ.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "65520cf006832b300c9957f0d793282da31fcf2fc335be4fd71339aa66610cc3"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_4-PREP-LOCAL-HOSTED-READINESS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "3e29d103b932199044998606ee99eaf952487013406bd7518babdf57f324b143"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_4-PREP-LOCAL-HOSTED-READINESS.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "912b852871a542e2f05ecdf363de35e83a2583c4b6c403441209ae6cd962a087"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_4-VERCEL-PREVIEW-HOSTED-REVIEW-RESULTS.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "7b3f4f018208ba2ee46365aeb98b7d011362adb031cae7e4b4dac9c357bdbd8c"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_4-VERCEL-PREVIEW-HOSTED-REVIEW.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "75ce6b450bd06b2dcb50e868f15353529c6f30806ef7973e116f12367063f4f6"
+      },
+      {
+        "path": "docs/instaward/d2/D2-EVIDENCE-MATRIX.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "d427b79e7b5225b0c3f1b2f4e87c9fc7849741002a71fec13bae8a10c0a6c717"
+      },
+      {
+        "path": "docs/instaward/d2/D2-LOCAL-TEST-EVIDENCE-PACK.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "11b5587f736b9cff411cf5963fc3e89a7d817508e6fc6f354ae3b9bdcad73613"
+      },
+      {
+        "path": "docs/instaward/d2/D2-POSTGRES-FIXTURE-AND-VERCEL-PREFLIGHT-2026-10-31.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "d49bf2fcf50f6776e46e490a343b59d70b888d4b09d268f79686bbbf3929a23d"
+      },
+      {
+        "path": "docs/instaward/d2/D2-POSTGRES-FIXTURE-AND-VERCEL-PREFLIGHT-2026-10-31.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "8012f50dcf257b42074fc9d44419487754debea8db6ee415194637e77e5abbf9"
+      },
+      {
+        "path": "docs/instaward/d2/D2-PUBLICATION-UNBLOCK-PREFLIGHT-2026-10-31.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "a8f27d8aa387f09310ace9d995ffd9d161caee6a22ce5c73aa389a73b1baccab"
+      },
+      {
+        "path": "docs/instaward/d2/D2-PUBLICATION-UNBLOCK-PREFLIGHT-2026-10-31.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "d2e8e338469de7641a2dd1b06efdbf4a106506ae4621efaad363fc45af5dcbfd"
+      },
+      {
+        "path": "docs/instaward/d2/D2-REVIEWER-RUNBOOK.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "66bc0b37bce5b8681ace01e7dd689a928c328ccc3ba3292d1afba1a7bd02797c"
+      },
+      {
+        "path": "docs/instaward/d2/D2-STATUS-SYNC-2026-10-31.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "0099d1521078428133b7070924d50a24becb534e6d32730e0f0ec42af2a7ca11"
+      },
+      {
+        "path": "docs/instaward/d2/D2-STATUS-SYNC-2026-10-31.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "6be1948193f94ad317e6c3991d8d412b7b68cb8f3ceaa61c344f9ca84d0d4fd4"
+      },
+      {
+        "path": "docs/instaward/d2/D2-VERCEL-GIT-PREFLIGHT-2026-10-31.json",
+        "include": true,
+        "category": "E / evidence",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "fc495333d6b74e016a01ded15f3d8fc3987f690b09e18e8cf1fb683de3b55628"
+      },
+      {
+        "path": "docs/instaward/d2/D2-VERCEL-GIT-PREFLIGHT-2026-10-31.md",
+        "include": true,
+        "category": "D / documentation",
+        "reason": "Prior sanitized D2 history and local evidence; preserve historical failures and current limits.",
+        "SHA256": "6055ef2a4f77e2c5dda84781948a2c383b392e8d80f770ffe40a8b700ae7908b"
+      },
+      {
+        "path": "docs/security/KEY-CUSTODY-AUDIT.md",
+        "include": false,
+        "category": "F / protected exclusion",
+        "reason": "Explicit protected untracked file; leave unchanged, never stage.",
+        "SHA256": "c50cac16e8168514c506a21bf950cdd2b77d743006f4e78c8db0f90c2cbf69c7"
+      },
+      {
+        "path": "frontend/tests/b44-prep-build-audit.test.ts",
+        "include": true,
+        "category": "B / new tests and fixtures",
+        "reason": "47 offline checks in five test files plus sanitized conceptual scenario fixture.",
+        "SHA256": "70661bb4c08e095e2f8f403b42673419c33cf438090e01f86db8f4f135d39925"
+      },
+      {
+        "path": "frontend/tests/b44-prep-csrf.test.ts",
+        "include": true,
+        "category": "B / new tests and fixtures",
+        "reason": "47 offline checks in five test files plus sanitized conceptual scenario fixture.",
+        "SHA256": "cc3dac27007c292094a121835f71f4facd4ca3b9c1dfb45e60ec2d7bceb9b91b"
+      },
+      {
+        "path": "frontend/tests/b44-prep-dto.test.ts",
+        "include": true,
+        "category": "B / new tests and fixtures",
+        "reason": "47 offline checks in five test files plus sanitized conceptual scenario fixture.",
+        "SHA256": "2741b8be9287f923382821299e8296fe10b98a4b636b7b0b11d1ac54ed7b085e"
+      },
+      {
+        "path": "frontend/tests/b44-prep-network-guard.test.ts",
+        "include": true,
+        "category": "B / new tests and fixtures",
+        "reason": "47 offline checks in five test files plus sanitized conceptual scenario fixture.",
+        "SHA256": "be0f43c77845482ea38e580c6d27c85229606f3da10bd3450bc8ef6965787da3"
+      },
+      {
+        "path": "frontend/tests/b44-prep-stellar-offline.test.tsx",
+        "include": true,
+        "category": "B / new tests and fixtures",
+        "reason": "47 offline checks in five test files plus sanitized conceptual scenario fixture.",
+        "SHA256": "a74819724a00bceb1ea0a61f9c85d15e68ec7fbc15dafb9afa49f4c7890ae9bc"
+      },
+      {
+        "path": "frontend/tests/fixtures/b44-prep/scenarios.json",
+        "include": true,
+        "category": "B / new tests and fixtures",
+        "reason": "47 offline checks in five test files plus sanitized conceptual scenario fixture.",
+        "SHA256": "3121eb0dcd885e8ce3a7895f735b1a713e7b9c4a3ff10c3f268a1c71c8b3de3e"
+      },
+      {
+        "path": "scripts/instaward/b31-ownership-probe.py",
+        "include": false,
+        "category": "C / historical scripts",
+        "reason": "Prior B3 reproducer/adapter; not required by current validated launcher. Preserve untracked; separate archival review.",
+        "SHA256": "790d3490f902685c070cce52778c2814ef01eca90b3f46413c810a4cc5fa7858"
+      },
+      {
+        "path": "scripts/instaward/b32-fixture-adapter.mjs",
+        "include": false,
+        "category": "C / historical scripts",
+        "reason": "Prior B3 reproducer/adapter; not required by current validated launcher. Preserve untracked; separate archival review.",
+        "SHA256": "58ce9a6df4dd375671fc7bd1707c5b7c458dd7b063b9ee94a35435bf5ae3a5f5"
+      },
+      {
+        "path": "scripts/instaward/b32-local-postgres.py",
+        "include": false,
+        "category": "C / historical scripts",
+        "reason": "Prior B3 reproducer/adapter; not required by current validated launcher. Preserve untracked; separate archival review.",
+        "SHA256": "ace101b9335fcd4283cf7aeec84e29b865d665768d2f57d36be749cab0641373"
+      },
+      {
+        "path": "scripts/instaward/b32-pg-check.mjs",
+        "include": false,
+        "category": "C / historical scripts",
+        "reason": "Prior B3 reproducer/adapter; not required by current validated launcher. Preserve untracked; separate archival review.",
+        "SHA256": "1724aeaeccf032ede9976cf9e82b59a266c414797de80d47eee987407d6cda56"
+      },
+      {
+        "path": "scripts/instaward/b32-vitest.config.mts",
+        "include": false,
+        "category": "C / historical scripts",
+        "reason": "Prior B3 reproducer/adapter; not required by current validated launcher. Preserve untracked; separate archival review.",
+        "SHA256": "c6a1af7e5243f68a1155b92ac0b964d561499d2a17cbdb8e90d89b8207518951"
+      },
+      {
+        "path": "scripts/instaward/b44-prep-build-audit.mjs",
+        "include": true,
+        "category": "C / current local scripts",
+        "reason": "Current loopback-only fixture/build/network/audit orchestration; no installs or remote use.",
+        "SHA256": "480cc0acc1f9aa94948721da253d2001c998f1726eb64718f44d1e170e705b1b"
+      },
+      {
+        "path": "scripts/instaward/b44-prep-local.py",
+        "include": true,
+        "category": "C / current local scripts",
+        "reason": "Current loopback-only fixture/build/network/audit orchestration; no installs or remote use.",
+        "SHA256": "79dac4bdbba62956222430d8ee81f3c575e71b447144190f6fb827d1c58032d1"
+      },
+      {
+        "path": "scripts/instaward/b44-prep-network-guard.mjs",
+        "include": true,
+        "category": "C / current local scripts",
+        "reason": "Current loopback-only fixture/build/network/audit orchestration; no installs or remote use.",
+        "SHA256": "4a4d0514eaf19fd68209e9692cdb9fceb72c87d5feb78594283016ddfa384e28"
+      },
+      {
+        "path": "scripts/instaward/b44-prep-vitest.config.mts",
+        "include": true,
+        "category": "C / current local scripts",
+        "reason": "Current loopback-only fixture/build/network/audit orchestration; no installs or remote use.",
+        "SHA256": "6269c2a48ce98815927eed7960caa7ad4656ff7b77055711262cb3b10ca13b54"
+      },
+      {
+        "path": "scripts/instaward/local-postgres-fixture.py",
+        "include": true,
+        "category": "C / current local scripts",
+        "reason": "Current loopback-only fixture/build/network/audit orchestration; no installs or remote use.",
+        "SHA256": "d7e5644f177220ec6637380b7789952ccdeccd5fca594f49da2bbddc9d848f27"
+      },
+      {
+        "path": "tools/sync_obsidian.py",
+        "include": false,
+        "category": "F / protected exclusion",
+        "reason": "Explicit protected untracked file; leave unchanged, never stage.",
+        "SHA256": "48404b9431a9d955fc4af0b2eeaf9a59bb2fb0e9457eed73b4f2f66132a5e2da"
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_4-CLOSEOUT-PRECHECK.md",
+        "include": true,
+        "category": "D / closeout record",
+        "reason": "This task: local inventory, verification and explicit blocked-gate report; no hosted claim.",
+        "SHA256": null
+      },
+      {
+        "path": "docs/instaward/d2/D2-008B4_4-CLOSEOUT-PRECHECK.json",
+        "include": true,
+        "category": "E / closeout evidence",
+        "reason": "This task: local inventory, verification and explicit blocked-gate report; no hosted claim.",
+        "SHA256": null
+      }
+    ],
+    "ignoredExclusions": [
+      ".tools/**",
+      ".next/**",
+      "node_modules/**",
+      ".env",
+      ".env.*",
+      "frontend/.env.local",
+      "ephemeral PostgreSQL data",
+      "build outputs",
+      "raw logs/dumps"
+    ],
+    "privacyReview": "One synthetic .invalid email fixture; no personal path/email findings in candidate. No actual credential value read."
+  },
+  "VercelGate": {
+    "ProductionBranch": "UNKNOWN",
+    "RootDirectory": "INFERRED",
+    "effectiveRootDirectory": "UNKNOWN",
+    "localCandidate": "frontend",
+    "AutoDeploy": "UNKNOWN",
+    "safety": "UNKNOWN",
+    "decision": "BLOCKED; STOP AT PHASE 4",
+    "freshVercelRead": false,
+    "latestDocumentedDeploymentCount": 0,
+    "currentDeploymentCount": "NOT REREAD",
+    "sources": [
+      "docs/instaward/d2/D2-VERCEL-GIT-PREFLIGHT-2026-10-31.md",
+      "docs/instaward/d2/D2-VERCEL-GIT-PREFLIGHT-2026-10-31.json",
+      "docs/instaward/d2/D2-POSTGRES-FIXTURE-AND-VERCEL-PREFLIGHT-2026-10-31.md"
+    ],
+    "localConfigPaths": {
+      ".vercel/project.json": {
+        "exists": false
+      },
+      ".vercel/repo.json": {
+        "exists": false
+      },
+      "frontend/.vercel/project.json": {
+        "exists": false
+      },
+      "frontend/.vercel/repo.json": {
+        "exists": false
+      },
+      "vercel.json": {
+        "exists": false
+      },
+      "frontend/vercel.json": {
+        "exists": false
+      },
+      "vercel.ts": {
+        "exists": false
+      },
+      "frontend/vercel.ts": {
+        "exists": false
+      },
+      "now.json": {
+        "exists": false
+      },
+      "frontend/now.json": {
+        "exists": false
+      }
+    },
+    "missing": [
+      "Authoritative current Production Branch tracking",
+      "Authoritative effective Root Directory, not the historical frontend request",
+      "Effective deployment rules for instaward/d2-web-mvp, including Production/Preview/no-deploy classification and applicable skips/hooks"
+    ],
+    "notInferredFrom": [
+      "GitHub default branch",
+      "local Next app directory",
+      "Preview-scoped variable metadata",
+      "historical zero deployments",
+      "docs-only nature of a future commit"
+    ]
+  },
+  "commitReadiness": "NOT_READY",
+  "commitMessageConditionalOnly": "test(instaward): prepare D2 hosted review readiness",
+  "publicationPlan": "DEFERRED — phase 4 STOP; no new rule, vercel.json location or deployment command proposed",
+  "hostedPreviewPlan": "DEFERRED — critical settings missing; existing reviewer runbook preserved, not executed",
+  "D2_6PassRequirements": [
+    "Real Hosted Preview tied to reviewed exact SHA and branch",
+    "Deployment ID and Preview URL; READY; independently exclude Production",
+    "Four existing roles tested with real Auth",
+    "Minimum role/battery scope and allowed/forbidden routes and reads",
+    "Refresh/logout/re-login and subsequently verified revocation; no useful surviving application access",
+    "No exposed secrets or sensitive operational DTO fields",
+    "Expected 401/403/404 without oracle and appropriately scoped 409/503/OutcomeUnknown evidence",
+    "Sanitized hosted evidence linked to exact build/configuration",
+    "Final explicit INTERNAL OWNER ACCEPTANCE; no organizer approval/payment claim"
+  ],
+  "integrity": {
+    "baselineFiles": 552,
+    "changedExistingFiles": [],
+    "allRefsUnchanged": true,
+    "protectedFilesUnchanged": true,
+    "WASM": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+    "frontendLock": "633c0f5f1ae347d34aa0a2e45d43224b29e24ff8ffe1252d086b28cc2cdb8679",
+    "SQLBeforeAfterEqual": true,
+    "SQLFiles": 8,
+    "existingTestFiles": 54,
+    "secretAudit": {
+      "status": "PASS",
+      "files": 622,
+      "historicalBlobs": 700,
+      "stagedFiles": 0,
+      "findings": [],
+      "scope": "pattern-only; no .env supplied"
+    },
+    "diffCheck": "PASS",
+    "newFileWhitespaceCheck": "PASS",
+    "rawEvidenceHashVerification": "PASS"
+  },
+  "rawEvidence": [
+    {
+      "path": ".tools/d2-b44-closeout/run-result.json",
+      "SHA256": "9787000c770ebaacae8ebec5e35ba2d21cc09ccffdf6a387384aca9f49bac18d"
+    },
+    {
+      "path": ".tools/d2-b44-closeout/build.log",
+      "SHA256": "ec7c7a61bf1da55c7df24097a342dd568259098dcd2df9670c1266281a976c82"
+    },
+    {
+      "path": ".tools/d2-b44-closeout/build-audit.json",
+      "SHA256": "1205d7571e279aa18d64b19be5497ba062859c1bc63fc794b4e6e68e7dbdde41"
+    },
+    {
+      "path": ".tools/d2-b44-closeout/frontend-typecheck.log",
+      "SHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".tools/d2-b44-closeout/frontend-tests.json",
+      "SHA256": "00ce79d33ad8c04cd68dbfb5de622e7e17423f59e5333e1b92052dc450e0993e"
+    },
+    {
+      "path": ".tools/d2-b44-closeout/frontend-tests.log",
+      "SHA256": "722335d1b520cead554996f164c1dd8ed7894f409759d4e9001b475a83fc8dcc"
+    },
+    {
+      "path": ".tools/d2-b44-closeout/existing-review-audit.log",
+      "SHA256": "8c5e9dd5fdda43483a740702235b334c08bc49d3a5e73ae5688e44fba6e08987"
+    },
+    {
+      "path": ".tools/d2-b44-closeout/postgres/run-5383945e0e6d4bf193214b6e3fd239f9/result.json",
+      "SHA256": "d6a738ed4a213b169618ac211aebc916f4f936997e71f8b251ad74e820818cd1"
+    },
+    {
+      "path": ".tools/d2-b44-closeout/postgres/run-5383945e0e6d4bf193214b6e3fd239f9/backend.log",
+      "SHA256": "dc0d7f026a96062e1efa843fd47369aaa35b60d693f171341e18aa0f768eac06"
+    }
+  ],
+  "remoteServices": {
+    "Vercel": false,
+    "Supabase": false,
+    "Stellar": false,
+    "Notion": false,
+    "operationalSignatures": 0,
+    "broadcasts": 0,
+    "transactions": 0
+  },
+  "Git": {
+    "staged": false,
+    "commit": false,
+    "push": false,
+    "merge": false,
+    "mainChanged": false,
+    "tagsChanged": false
+  },
+  "project": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "total": "17/23",
+    "B4.4": "NO PASS",
+    "D2.6": "BLOCKED/PENDING"
+  },
+  "STOP": true
+}

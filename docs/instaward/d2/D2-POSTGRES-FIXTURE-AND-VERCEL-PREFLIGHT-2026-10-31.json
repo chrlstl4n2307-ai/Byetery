@@ -1,0 +1,567 @@
+{
+  "task": "D2 PostgreSQL fixture and Vercel preflight",
+  "date": "2026-10-31",
+  "scope": "READ-ONLY remote preflights; local launcher/fixture patch; no publication",
+  "branch": "instaward/d2-web-mvp",
+  "HEAD": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1",
+  "remote_PostgreSQL": {
+    "project": "aemxuqnnwfclzrwwiqfd",
+    "read_only": true,
+    "evidence": {
+      "roles": [
+        {
+          "rolname": "postgres",
+          "rolsuper": false,
+          "rolinherit": true,
+          "rolcanlogin": true,
+          "rolcreatedb": true,
+          "rolbypassrls": true,
+          "rolcreaterole": true,
+          "rolreplication": true
+        }
+      ],
+      "setting": {
+        "source": "default",
+        "setting": "",
+        "boot_val": "",
+        "reset_val": ""
+      },
+      "version": "PostgreSQL 17.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 15.2.0, 64-bit",
+      "memberships": [
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": true,
+          "admin_option": true,
+          "granted_role": "anon",
+          "inherit_option": true
+        },
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": true,
+          "admin_option": true,
+          "granted_role": "authenticated",
+          "inherit_option": true
+        },
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": true,
+          "admin_option": true,
+          "granted_role": "authenticator",
+          "inherit_option": true
+        },
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": false,
+          "admin_option": true,
+          "granted_role": "byetery_d2_intent_owner",
+          "inherit_option": false
+        },
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": false,
+          "admin_option": true,
+          "granted_role": "byetery_d2_read_owner",
+          "inherit_option": false
+        },
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": false,
+          "admin_option": true,
+          "granted_role": "byetery_d2_review_app",
+          "inherit_option": false
+        },
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": true,
+          "admin_option": true,
+          "granted_role": "pg_create_subscription",
+          "inherit_option": true
+        },
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": true,
+          "admin_option": true,
+          "granted_role": "pg_monitor",
+          "inherit_option": true
+        },
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": true,
+          "admin_option": true,
+          "granted_role": "pg_read_all_data",
+          "inherit_option": true
+        },
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": true,
+          "admin_option": true,
+          "granted_role": "pg_signal_backend",
+          "inherit_option": true
+        },
+        {
+          "member": "cli_login_postgres",
+          "grantor": "supabase_admin",
+          "set_option": true,
+          "admin_option": false,
+          "granted_role": "postgres",
+          "inherit_option": false
+        },
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": true,
+          "admin_option": true,
+          "granted_role": "service_role",
+          "inherit_option": true
+        },
+        {
+          "member": "postgres",
+          "grantor": "supabase_admin",
+          "set_option": true,
+          "admin_option": false,
+          "granted_role": "supabase_privileged_role",
+          "inherit_option": true
+        }
+      ],
+      "current_user": "postgres",
+      "session_user": "postgres",
+      "relevant_overrides": [],
+      "server_version_num": "170006",
+      "createrole_self_grant": "",
+      "transaction_read_only": "on"
+    }
+  },
+  "local_fixture": {
+    "launcher": "scripts/instaward/local-postgres-fixture.py",
+    "fixture_helper": "backend/tests/review-postgres-fixture.ts",
+    "PostgreSQL_version": "17.6",
+    "bootstrap_role": "byetery_fixture_bootstrap",
+    "bootstrap_positive_test_execution": false,
+    "bootstrap_connections_closed_before_tests": true,
+    "direct_NOSUPERUSER_logins": {
+      "postgres": {
+        "current_user": "postgres",
+        "session_user": "postgres",
+        "version": "170006",
+        "createrole_self_grant": "",
+        "role": {
+          "rolname": "postgres",
+          "rolsuper": false,
+          "rolinherit": true,
+          "rolcreaterole": true,
+          "rolcreatedb": true,
+          "rolcanlogin": true,
+          "rolreplication": true,
+          "rolbypassrls": true
+        },
+        "memberships": [
+          {
+            "role": "pg_monitor",
+            "admin": false,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "pg_signal_backend",
+            "admin": false,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "anon",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "authenticated",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "service_role",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          }
+        ]
+      },
+      "byetery_gap2b": {
+        "current_user": "byetery_gap2b",
+        "session_user": "byetery_gap2b",
+        "version": "170006",
+        "createrole_self_grant": "",
+        "role": {
+          "rolname": "byetery_gap2b",
+          "rolsuper": false,
+          "rolinherit": true,
+          "rolcreaterole": true,
+          "rolcreatedb": true,
+          "rolcanlogin": true,
+          "rolreplication": true,
+          "rolbypassrls": true
+        },
+        "memberships": [
+          {
+            "role": "pg_monitor",
+            "admin": false,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "pg_signal_backend",
+            "admin": false,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "anon",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "authenticated",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          },
+          {
+            "role": "service_role",
+            "admin": true,
+            "inherit": true,
+            "set": true
+          }
+        ]
+      }
+    },
+    "privileged_SET_ROLE_impersonation_used": false,
+    "unit_PGlite_MOCK_tests": "UNCHANGED; real PostgreSQL integration tests use the verified direct NOSUPERUSER fixture",
+    "membership_reproduction_limits": [
+      "No provider-specific roles fabricated",
+      "No pg_read_all_data/pg_create_subscription membership",
+      "pg_monitor/pg_signal_backend ADMIN=false locally; remote ADMIN=true is not needed by the fixture"
+    ],
+    "cleanup": {
+      "remaining_fixture_databases": 0,
+      "test_cluster_stopped_retained": true,
+      "legacy_cluster_restored_unmodified": true
+    }
+  },
+  "negative_SUPERUSER_controls": {
+    "d2-008b1-registration-intents.sql": {
+      "status": "PASS",
+      "SQLSTATE": "P0001",
+      "error": "ReviewRequiresNonSuperuserPostgresEmptySelfGrant"
+    },
+    "d2-008b2-direct-review.sql": {
+      "status": "PASS",
+      "SQLSTATE": "P0001",
+      "error": "ReviewRequiresNonSuperuserPostgresEmptySelfGrant"
+    }
+  },
+  "suite": {
+    "tests": 343,
+    "pass": 343,
+    "fail": 0,
+    "skipped": 0,
+    "exit_code": 0
+  },
+  "integrity": {
+    "SQL": {
+      "database/migrations/20260909142956_backend_foundation.sql": {
+        "before": "cb65a0c8d135b70f826fdd343a43c7063733da1f3e00c1b523ceb58bcb02f7b6",
+        "after": "cb65a0c8d135b70f826fdd343a43c7063733da1f3e00c1b523ceb58bcb02f7b6"
+      },
+      "database/migrations/20260913140711_application_http.sql": {
+        "before": "386a45f4862028fba5abeb1afd02f5b5a6add0d4a4a0ca8d04a3203e3e156e63",
+        "after": "386a45f4862028fba5abeb1afd02f5b5a6add0d4a4a0ca8d04a3203e3e156e63"
+      },
+      "database/migrations/20260914124739_wallet_sep53.sql": {
+        "before": "06767d157904fea0d386d13de26595a37aac8be35831f055ba7effe6213068d3",
+        "after": "06767d157904fea0d386d13de26595a37aac8be35831f055ba7effe6213068d3"
+      },
+      "database/migrations/20260914130553_wallet_guard_search_path.sql": {
+        "before": "d465d2f88c5f72a75ce37695f932c4b0548fb43d78e6aeb976e6ccacfe463398",
+        "after": "d465d2f88c5f72a75ce37695f932c4b0548fb43d78e6aeb976e6ccacfe463398"
+      },
+      "database/migrations/20261011000100_vol003_private_transport.sql": {
+        "before": "7b0257cd2b15630af0a88e8626568dc1cef216ba007b185fbf459a5dd23fb04e",
+        "after": "7b0257cd2b15630af0a88e8626568dc1cef216ba007b185fbf459a5dd23fb04e"
+      },
+      "database/review/d2-008b1-registration-intents.sql": {
+        "before": "957e19e768a6ca90f5bbf5c6268945ef129686d3cd342ec17cca1e3eca41585d",
+        "after": "957e19e768a6ca90f5bbf5c6268945ef129686d3cd342ec17cca1e3eca41585d"
+      },
+      "database/review/d2-008b2-direct-review.sql": {
+        "before": "d25b53d15cbc6d6ab3b8037130c0319edd34a3349c49465af2b82153c7eb61d4",
+        "after": "d25b53d15cbc6d6ab3b8037130c0319edd34a3349c49465af2b82153c7eb61d4"
+      },
+      "database/tests/foundation-dev.sql": {
+        "before": "967fa8e21c353bfb66b142dfcecb7c005691effc38a7f60ad54ebec2dab14c4d",
+        "after": "967fa8e21c353bfb66b142dfcecb7c005691effc38a7f60ad54ebec2dab14c4d"
+      }
+    },
+    "test_cases": {
+      "backend/tests/checkpoint.test.ts": {
+        "before": "5a17c9f13d108befcb50e25f357557dbe0bd593486b0d02d5a16d1f6c38363d1",
+        "after": "5a17c9f13d108befcb50e25f357557dbe0bd593486b0d02d5a16d1f6c38363d1"
+      },
+      "backend/tests/d1-before-submit.test.ts": {
+        "before": "c2eab6440bc3fb3387be2c73cda1969bdf7114027d52a473b85382d6c6f9b675",
+        "after": "c2eab6440bc3fb3387be2c73cda1969bdf7114027d52a473b85382d6c6f9b675"
+      },
+      "backend/tests/d1-registration-idempotency.test.ts": {
+        "before": "2326b5f3aaf3703dd13017d84670a1babbf95030a5a9e58d80e00e0c2386208e",
+        "after": "2326b5f3aaf3703dd13017d84670a1babbf95030a5a9e58d80e00e0c2386208e"
+      },
+      "backend/tests/d2-dispatch-authority.test.ts": {
+        "before": "0e05f549695150394aa7d82c6c05bbb626029aa19b4654b94477cd76cfe569c8",
+        "after": "0e05f549695150394aa7d82c6c05bbb626029aa19b4654b94477cd76cfe569c8"
+      },
+      "backend/tests/d2-dispatch-concurrency.test.ts": {
+        "before": "0478159d542d7429b9493359da791bf4ca7d42fbe716cd3cd8a0082417514e0b",
+        "after": "0478159d542d7429b9493359da791bf4ca7d42fbe716cd3cd8a0082417514e0b"
+      },
+      "backend/tests/d2-evidence-v1.test.ts": {
+        "before": "1fd96d29a242dc25a7299c863989a44de4e58c8f8f2e598040da7f50490c92d6",
+        "after": "1fd96d29a242dc25a7299c863989a44de4e58c8f8f2e598040da7f50490c92d6"
+      },
+      "backend/tests/d2-permission-matrix.test.ts": {
+        "before": "44c8feccc821e8e8a6515e548a35adce2adbaa8027bc08389aa9abdc05412a01",
+        "after": "44c8feccc821e8e8a6515e548a35adce2adbaa8027bc08389aa9abdc05412a01"
+      },
+      "backend/tests/d2-queued-authority.test.ts": {
+        "before": "e76ab5b41c942a184161ae4fb75a51c8c23d688e51677ec81198be7ec51a028f",
+        "after": "e76ab5b41c942a184161ae4fb75a51c8c23d688e51677ec81198be7ec51a028f"
+      },
+      "backend/tests/d2-revoked-state.test.ts": {
+        "before": "a43994721a2fb350a4a520747b9df30870f269c379fd5d5cbc5549e6aee9e2ae",
+        "after": "a43994721a2fb350a4a520747b9df30870f269c379fd5d5cbc5549e6aee9e2ae"
+      },
+      "backend/tests/d2-role-qr-adversarial.test.ts": {
+        "before": "730f0357c98a255ccc877d00ddd18bbb420ac42578588f833a3cf98422a8c6b5",
+        "after": "730f0357c98a255ccc877d00ddd18bbb420ac42578588f833a3cf98422a8c6b5"
+      },
+      "backend/tests/d2-state-lanes.test.ts": {
+        "before": "ea76299ba8ef3212e8b7cc0e1fbb39f964b77b82ee159aecd3cf5d984e15d45b",
+        "after": "ea76299ba8ef3212e8b7cc0e1fbb39f964b77b82ee159aecd3cf5d984e15d45b"
+      },
+      "backend/tests/d2-user-membership.test.ts": {
+        "before": "1696d9178026df1f543409648c50df9c29d40aa1420f822b7b19a1236fae0b84",
+        "after": "1696d9178026df1f543409648c50df9c29d40aa1420f822b7b19a1236fae0b84"
+      },
+      "backend/tests/database.test.ts": {
+        "before": "5e91003f28b925f4ecfe24d503887631f7a12cba50e7b63d8dd7ea1ca19eb7a8",
+        "after": "5e91003f28b925f4ecfe24d503887631f7a12cba50e7b63d8dd7ea1ca19eb7a8"
+      },
+      "backend/tests/history.test.ts": {
+        "before": "fc256c7e44f850ec313444ef2a3255aa51b3ea7962ab53a7c4f60505c73ac087",
+        "after": "fc256c7e44f850ec313444ef2a3255aa51b3ea7962ab53a7c4f60505c73ac087"
+      },
+      "backend/tests/local-secure-store-signer.test.ts": {
+        "before": "b856aa3278362e39d776653876c8b0effd98354404d01d14341f8d2f722ee684",
+        "after": "b856aa3278362e39d776653876c8b0effd98354404d01d14341f8d2f722ee684"
+      },
+      "backend/tests/mock.test.ts": {
+        "before": "98aa8c1a5c07582d56e0c6af31b8c9c656d9637d28c780dbde1d670bc1d9c5e6",
+        "after": "98aa8c1a5c07582d56e0c6af31b8c9c656d9637d28c780dbde1d670bc1d9c5e6"
+      },
+      "backend/tests/postgres-recovery.test.ts": {
+        "before": "8501418a1cd94e75a206417c49e06d67fa82f9c1808a5c56f69a815f9f0f8f2c",
+        "after": "8501418a1cd94e75a206417c49e06d67fa82f9c1808a5c56f69a815f9f0f8f2c"
+      },
+      "backend/tests/review-registration-intents.test.ts": {
+        "before": "b1ffa6b0bb0693f5b240dbcb341a04c22f5981b445c865d8a7828491661f37e1",
+        "after": "b1ffa6b0bb0693f5b240dbcb341a04c22f5981b445c865d8a7828491661f37e1"
+      },
+      "backend/tests/sprint-recycling-reward.test.ts": {
+        "before": "a38b7dd44d03a1d037c94970d7a42928e8c98df33ad7d768143aaeecdf6b4bfd",
+        "after": "a38b7dd44d03a1d037c94970d7a42928e8c98df33ad7d768143aaeecdf6b4bfd"
+      },
+      "backend/tests/sprint-return-collection.test.ts": {
+        "before": "52e5faa8b262e816726dd99f38b76b5dff5373617f113f393b261ac5249b0aa1",
+        "after": "52e5faa8b262e816726dd99f38b76b5dff5373617f113f393b261ac5249b0aa1"
+      },
+      "backend/tests/testnet-application.test.ts": {
+        "before": "3e54de4b9cf417279c34216410444a0d0db4e7f01159fa24e1147c3428a0535f",
+        "after": "3e54de4b9cf417279c34216410444a0d0db4e7f01159fa24e1147c3428a0535f"
+      },
+      "backend/tests/testnet-identity.test.ts": {
+        "before": "176f904196fe75ea1fe48788769ce5324fc5877c2e85b4ebf58e9affdb52e003",
+        "after": "176f904196fe75ea1fe48788769ce5324fc5877c2e85b4ebf58e9affdb52e003"
+      },
+      "backend/tests/testnet-real-boundaries.test.ts": {
+        "before": "501e2a9be677408b0e0daf4a385469e304bfda66f8d6cedf95dee414ecd810dd",
+        "after": "501e2a9be677408b0e0daf4a385469e304bfda66f8d6cedf95dee414ecd810dd"
+      },
+      "backend/tests/testnet-restart.test.ts": {
+        "before": "f25ca7106218ecededae850642e559e254194be25c7cd4333295d16b501d5895",
+        "after": "f25ca7106218ecededae850642e559e254194be25c7cd4333295d16b501d5895"
+      },
+      "backend/tests/testnet-reward-evidence.test.ts": {
+        "before": "829601bb111e8c030be4b2b5701280a78c854a37b4d6cc90e52f0fcb3cfd1d97",
+        "after": "829601bb111e8c030be4b2b5701280a78c854a37b4d6cc90e52f0fcb3cfd1d97"
+      },
+      "backend/tests/testnet-rpc.test.ts": {
+        "before": "12ad5d848a469ea69ba03d517e659206f4df3d5bd8a5d2ba04623dd2f3c7a29c",
+        "after": "12ad5d848a469ea69ba03d517e659206f4df3d5bd8a5d2ba04623dd2f3c7a29c"
+      },
+      "backend/tests/testnet-storage.test.ts": {
+        "before": "897c57c581d4b16881c1eae2028a09ae21d3f616874401064f0f641f32f8430e",
+        "after": "897c57c581d4b16881c1eae2028a09ae21d3f616874401064f0f641f32f8430e"
+      },
+      "backend/tests/testnet-worker.test.ts": {
+        "before": "b1dbb2ac1f42bab35185f71cafbdf6d238a3e960b6aff383db0f43e282824282",
+        "after": "b1dbb2ac1f42bab35185f71cafbdf6d238a3e960b6aff383db0f43e282824282"
+      },
+      "backend/tests/wallet-boundaries.test.ts": {
+        "before": "e19e3b43ea935a55c4e114e4b95869cdfe6d3018c0c6f87bdba04fdb9ebeca33",
+        "after": "e19e3b43ea935a55c4e114e4b95869cdfe6d3018c0c6f87bdba04fdb9ebeca33"
+      },
+      "backend/tests/wallet-protocol.test.ts": {
+        "before": "7caa2b2c066aa639357d651a9639aca387372876eebde7c7e068cdda5c3e3dca",
+        "after": "7caa2b2c066aa639357d651a9639aca387372876eebde7c7e068cdda5c3e3dca"
+      },
+      "backend/tests/wallet-storage.test.ts": {
+        "before": "1c8f95265de6814898a0a77facee4e383433a7c74fca04d61f66d02ba37d2afc",
+        "after": "1c8f95265de6814898a0a77facee4e383433a7c74fca04d61f66d02ba37d2afc"
+      },
+      "frontend/tests/client.test.ts": {
+        "before": "d518da04c00a3b6d6fb8be21b491d6327633de0e3469ef027e4e7210bc0dabe9",
+        "after": "d518da04c00a3b6d6fb8be21b491d6327633de0e3469ef027e4e7210bc0dabe9"
+      },
+      "frontend/tests/d2-cookies.test.ts": {
+        "before": "7824e65a9f69508655892433fd6f82b2cd12543369ca0a5e8e8416d4db54108f",
+        "after": "7824e65a9f69508655892433fd6f82b2cd12543369ca0a5e8e8416d4db54108f"
+      },
+      "frontend/tests/d2-proxy.test.ts": {
+        "before": "bedf3d63d4a6575237054d437c5aff314d2e3f76128f9faaed63f5964acdb17b",
+        "after": "bedf3d63d4a6575237054d437c5aff314d2e3f76128f9faaed63f5964acdb17b"
+      },
+      "frontend/tests/direct-review-boundary.test.ts": {
+        "before": "6d8c92e041ecffa297a1e3f6fb8a6df9fffb5e9bb5e3ae93e9f0d3411a5ce142",
+        "after": "6d8c92e041ecffa297a1e3f6fb8a6df9fffb5e9bb5e3ae93e9f0d3411a5ce142"
+      },
+      "frontend/tests/direct-review-chain.test.ts": {
+        "before": "9e7f0a066bb6d5637974f217a342bdc81be706e33559b0634888c0264f07ee92",
+        "after": "9e7f0a066bb6d5637974f217a342bdc81be706e33559b0634888c0264f07ee92"
+      },
+      "frontend/tests/direct-review-config.test.ts": {
+        "before": "ab7591b2a66e0ec0f6be8436716b2c268944dd74df9b5d41f9a9d68c9d06e5e9",
+        "after": "ab7591b2a66e0ec0f6be8436716b2c268944dd74df9b5d41f9a9d68c9d06e5e9"
+      },
+      "frontend/tests/direct-review-http.test.ts": {
+        "before": "c4829c5f329c0b3f0271f76da55ac86435a58c7246b3c61347dd28193f752360",
+        "after": "c4829c5f329c0b3f0271f76da55ac86435a58c7246b3c61347dd28193f752360"
+      },
+      "frontend/tests/direct-review-sql.test.ts": {
+        "before": "825d89b1c6bbe91ab235c29d6d0413b5ec93b22236ace80753fa7800de75ffe0",
+        "after": "825d89b1c6bbe91ab235c29d6d0413b5ec93b22236ace80753fa7800de75ffe0"
+      },
+      "frontend/tests/web-config.test.ts": {
+        "before": "a7f14aafc1808b51f3a95bb6d583b9a0d6aa0c7ad826fa28a74cdbc9a422cbcc",
+        "after": "a7f14aafc1808b51f3a95bb6d583b9a0d6aa0c7ad826fa28a74cdbc9a422cbcc"
+      }
+    },
+    "only_existing_file_changed": [
+      "backend/tests/review-postgres-fixture.ts"
+    ],
+    "fixture_before": "ac69941f52416169b7d838e78110d93bb3d4a4cad6de77d62b8e37b82add3ab1",
+    "fixture_after": "28691b3f4b86945e47df49aea5683240094d60068135ddaed9b6a4b7037609b3",
+    "launcher_SHA256": "d7e5644f177220ec6637380b7789952ccdeccd5fca594f49da2bbddc9d848f27"
+  },
+  "Vercel": {
+    "project": "prj_gVe1Sz73FRZ4bAQPubimaqOXQylH",
+    "team": "team_EuRw1k4ZykOoSP1fBTcumdnO",
+    "repo": "chrlstl4n2307-ai/Byetery",
+    "Git_link_verified": true,
+    "production_branch": "UNKNOWN",
+    "branch_is_Production": "UNKNOWN",
+    "effective_root_directory": "UNKNOWN",
+    "framework": "nextjs",
+    "node": "24.x",
+    "repo_vercel_config": "ABSENT - vercel.json/vercel.ts/now.json not found",
+    "git_deploymentEnabled": "UNKNOWN effective settings",
+    "branch_deployment_rules": "UNKNOWN",
+    "ignored_build_step": "UNKNOWN",
+    "skip_build_settings": "UNKNOWN",
+    "deploy_hooks": "UNKNOWN - no hook URLs disclosed/invoked",
+    "CLI_exact_project_GET": {
+      "status": "TIMEOUT",
+      "exit": null,
+      "rawResponseSaved": false,
+      "rawResponseDisclosed": false
+    },
+    "current_deployments": 0,
+    "latestDeployment": null,
+    "live": false,
+    "protection": "UNCHANGED - all_except_custom_domains",
+    "classification": "C",
+    "configuration_changes": false,
+    "Git_disconnected": false,
+    "deployment_suppression_implemented": false,
+    "test_push": false
+  },
+  "checks": {
+    "SQL_before_after_identical": true,
+    "test_cases_before_after_identical": true,
+    "SQL_files": 8,
+    "test_case_files": 40,
+    "TypeScript": "PASS",
+    "Python_launcher_syntax": "PASS",
+    "git_diff_check": "PASS - final",
+    "secret_audit": {
+      "status": "PASS",
+      "files": 603,
+      "historicalBlobs": 700,
+      "stagedFiles": 0,
+      "findings": []
+    },
+    "documentation": "PASS - JSON/links/whitespace/privacy"
+  },
+  "Git": {
+    "commit": false,
+    "push": false,
+    "index_empty": true,
+    "main_merge": false,
+    "tags_changed": false,
+    "remote_HEAD": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1"
+  },
+  "safety": {
+    "Supabase_mutated": false,
+    "Stellar_calls": 0,
+    "operational_signatures": 0,
+    "broadcasts": 0,
+    "Vercel_mutations": 0,
+    "Vercel_deployments": 0,
+    "Production_changes": 0,
+    "Main_changed": false,
+    "Auth_mutations": 0,
+    "Notion_edits": 0,
+    "SQL_or_test_case_changes": 0,
+    "contract_WASM_or_signer_changes": 0,
+    "protected_untracked_files_unchanged": true
+  },
+  "acceptance": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "TOTAL": "17/23",
+    "B4.4": "STOPPED / NOT PASS",
+    "D2.6": "BLOCKED / PENDING",
+    "organizer_acceptance_or_payment_claimed": false
+  },
+  "STOP": true
+}

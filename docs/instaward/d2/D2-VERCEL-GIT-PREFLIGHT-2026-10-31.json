@@ -1,0 +1,182 @@
+{
+  "task": "D2 Git-to-Vercel read-only preflight",
+  "date": "2026-10-31",
+  "recommendation": "BLOCKED_INSUFFICIENT_EVIDENCE",
+  "project": {
+    "name": "byetery",
+    "projectId": "prj_gVe1Sz73FRZ4bAQPubimaqOXQylH",
+    "teamId": "team_EuRw1k4ZykOoSP1fBTcumdnO",
+    "teamSlug": "chrlstl4n2307-ais-projects",
+    "repo": "chrlstl4n2307-ai/Byetery",
+    "Git_link_verified": true,
+    "framework": "nextjs",
+    "nodeVersion": "24.x",
+    "live": false,
+    "latestDeployment": null,
+    "deployment_count": 0,
+    "protection": "Vercel Authentication enabled / all_except_custom_domains"
+  },
+  "Git": {
+    "branch": "instaward/d2-web-mvp",
+    "HEAD": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1",
+    "repo_default_branch": "codex/visual-polish",
+    "repo_default_HEAD": "0a572af29b6d4df6c16feb0329ecc225948824f6",
+    "repo_default_is_not_proof_of_Vercel_tracking": true,
+    "commit": false,
+    "push": false,
+    "main_changed": false,
+    "tags_changed": false,
+    "remote_HEAD_verified": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1"
+  },
+  "production": {
+    "branch": "UNKNOWN",
+    "is_target_branch_Production": "UNKNOWN",
+    "confidence": "INSUFFICIENT EVIDENCE",
+    "reason": "Normalized authenticated project/Git reads omit production tracking; exact full CLI API GET timed out"
+  },
+  "root_directory": {
+    "effective": "UNKNOWN",
+    "confidence": "UNKNOWN",
+    "local_candidate": "frontend",
+    "local_candidate_confidence": "INFERRED",
+    "local_link_files_present": false,
+    "historical_requested_frontend_is_not_confirmation": true
+  },
+  "rules": {
+    "buildCommand": "UNKNOWN",
+    "installCommand": "UNKNOWN",
+    "outputDirectory": "UNKNOWN",
+    "git_deploymentEnabled_effective": "UNKNOWN",
+    "versioned_Vercel_config": "ABSENT",
+    "branch_specific_deployment_settings": "UNKNOWN",
+    "auto_deploy_settings": "UNKNOWN",
+    "ignored_build_step": "UNKNOWN",
+    "skip_build_settings": "UNKNOWN",
+    "hooks": "UNKNOWN - no hook URLs requested or disclosed",
+    "custom_environments_for_branch": [],
+    "custom_environment_account_total": 0,
+    "Preview_metadata": {
+      "key": "BYETERY_REVIEW_ADAPTER",
+      "value": "DIRECT_REVIEW",
+      "type": "plain",
+      "target": [
+        "preview"
+      ],
+      "gitBranch": "instaward/d2-web-mvp",
+      "decrypted": false,
+      "hiddenProductionEnvCount": 0,
+      "not_proof_of_Production_tracking": true
+    }
+  },
+  "auto_deploy": {
+    "taxonomy": "A=no deployment; B=confirmed Preview; C=can generate Production; D=insufficient evidence",
+    "classification": "D",
+    "expected_push_effect": "UNKNOWN",
+    "Production_cannot_be_excluded": true,
+    "prior_three_way_C_equates_to_current_D": true
+  },
+  "proposed_rule": {
+    "supported": true,
+    "syntax": {
+      "git": {
+        "deploymentEnabled": {
+          "instaward/d2-web-mvp": false
+        }
+      }
+    },
+    "created": false,
+    "scope": "Exact branch in the example; no conflicting matching true rule assumed",
+    "location": "Actual Vercel project root: frontend/vercel.json only IF effective root frontend; otherwise corresponding confirmed root",
+    "same_introducing_commit_zero_record_guarantee": "UNKNOWN",
+    "first_deployment_risk": "UNRESOLVED; neither occurrence nor absence certified",
+    "retirement": "Separately authorized removal may itself trigger a deployment; first confirm tracking/approved target",
+    "post_push_verification": "Future authorized operation only: all-state/all-target project deployments + exact source SHA + latestDeployment; no immediate-read forever guarantee"
+  },
+  "tool_read_evidence": {
+    "normalized_project_GET": "PASS - critical fields omitted",
+    "Git_context": "PASS - exact repo link",
+    "custom_environment_list": "PASS - empty",
+    "Preview_env_metadata": "PASS - decrypt=false; only nonsecret selector retained",
+    "CLI_full_project_GET": {
+      "request": "GET exact project",
+      "writes": 0,
+      "raw_saved": false,
+      "raw_disclosed": false,
+      "status": "TIMEOUT_BEFORE_VERIFIABLE_RESULT"
+    },
+    "existing_CLI_source_inspected_for_process_only_update_check": true,
+    "new_login_or_credentials": false,
+    "test_push": false,
+    "credential_files_manually_inspected": false
+  },
+  "official_sources": [
+    {
+      "title": "Deploying Git Repositories with Vercel",
+      "url": "https://vercel.com/docs/git"
+    },
+    {
+      "title": "Git Configuration",
+      "url": "https://vercel.com/docs/project-configuration/git-configuration"
+    },
+    {
+      "title": "Static Configuration with vercel.json",
+      "url": "https://vercel.com/docs/project-configuration/vercel-json"
+    },
+    {
+      "title": "Configuring a Build",
+      "url": "https://vercel.com/docs/builds/configure-a-build"
+    },
+    {
+      "title": "Using Monorepos",
+      "url": "https://vercel.com/docs/monorepos"
+    },
+    {
+      "title": "Project settings / Ignored Build Step",
+      "url": "https://vercel.com/docs/project-configuration/project-settings#ignored-build-step"
+    },
+    {
+      "title": "Can you deploy based on tags/releases on Vercel?",
+      "url": "https://vercel.com/kb/guide/can-you-deploy-based-on-tags-releases-on-vercel"
+    },
+    {
+      "title": "Find a project by id or name - GET API",
+      "url": "https://vercel.com/docs/rest-api/projects/find-a-project-by-id-or-name"
+    }
+  ],
+  "safety": {
+    "Vercel_config_modified": false,
+    "deployments_created": 0,
+    "Production_modified": false,
+    "Git_disconnected": false,
+    "ignored_build_step_used": false,
+    "hook_invocations": 0,
+    "temporary_branches": 0,
+    "Supabase_access_or_mutations": 0,
+    "Stellar_operations": 0,
+    "Notion_edits": 0,
+    "secrets_disclosed": false,
+    "implementation_or_existing_docs_changed": false
+  },
+  "acceptance": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "TOTAL": "17/23",
+    "B4.4": "STOPPED / NO PASS",
+    "D2.6": "BLOCKED / PENDING"
+  },
+  "owner_metadata_question": "Requested Production Branch Tracking and Root Directory only; no values available at report preparation; no authorization inferred",
+  "checks": {
+    "existing_file_hashes": "PASS - all 535 task-start files unchanged",
+    "git_diff_check": "PASS",
+    "secret_audit": {
+      "status": "PASS",
+      "files": 605,
+      "historicalBlobs": 700,
+      "stagedFiles": 0,
+      "findings": []
+    },
+    "documentation": "PASS - JSON/whitespace/privacy; no actual vercel.json/vercel.ts"
+  },
+  "STOP": true
+}

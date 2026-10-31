@@ -11,13 +11,20 @@ export async function reviewFixture(options:{adminPermission?:boolean}={}){
  const config=JSON.parse(await readFile(new URL('../../.tools/d2-gap2b/postgres-test.json',import.meta.url),'utf8'));
  assert.equal(config.host,'127.0.0.1');assert.equal(config.user,'byetery_gap2b');assert.equal(config.database,'postgres');
  assert.ok(Number.isInteger(config.port)&&config.port>=49152);
- const admin=new Pool({...config,max:2,connectionTimeoutMillis:3000});
+ // Legacy GAP2B keeps its config alias; review SQL requires a direct postgres
+ // NOSUPERUSER login. Never inherit/bootstrap via SET ROLE or silently fall back.
+ assert.equal(config.reviewUser,'postgres','Run scripts/instaward/local-postgres-fixture.py');
+ const executionConfig={...config,user:config.reviewUser};
+ const admin=new Pool({...executionConfig,max:2,connectionTimeoutMillis:3000});
+ const identity=(await admin.query("select current_user,session_user,(select rolsuper from pg_roles where rolname=current_user) rolsuper,current_setting('server_version_num') version,current_setting('createrole_self_grant') self_grant")).rows[0];
+ assert.equal(identity.current_user,'postgres');assert.equal(identity.session_user,'postgres');
+ assert.equal(identity.rolsuper,false);assert.equal(identity.version,'170006');assert.equal(identity.self_grant,'');
  const data=(await admin.query("select current_setting('data_directory') directory")).rows[0].directory;
  assert.equal((await realpath(data)).toLowerCase(),(await realpath(new URL('../../.tools/d2-gap2b/pgdata',import.meta.url))).toLowerCase());
  const database='byetery_b1_'+randomUUID().replaceAll('-',''),pools:Pool[]=[];
  await admin.query('create database '+database);
- const connection=(name='b1-test',user=config.user)=>{
-  const p=new Pool({...config,database,user,max:4,application_name:name,connectionTimeoutMillis:3000});pools.push(p);return p;
+ const connection=(name='b1-test',user=executionConfig.user)=>{
+  const p=new Pool({...executionConfig,database,user,max:4,application_name:name,connectionTimeoutMillis:3000});pools.push(p);return p;
  };
  const pool=connection(),review=connection('b1-restricted','byetery_d2_review_app');
  const users={ADMIN:randomUUID(),USER:randomUUID(),COLLECTOR:randomUUID(),RECYCLER:randomUUID(),SECOND_ADMIN:randomUUID()};

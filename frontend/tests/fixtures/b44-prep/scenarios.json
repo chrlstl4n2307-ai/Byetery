@@ -1,0 +1,8 @@
+{
+  "level": "LOCAL_TEST",
+  "origin": "Conceptual mutations of the existing sanitized B2 RPC fixture. No live reads or new transaction receipts.",
+  "STATE_EXPIRED": { "omit": "battery entry", "ledger": "unchanged" },
+  "NETWORK_RESET": { "omit": "all entries including instance", "latestLedger": 100, "anchor": 5315915 },
+  "MISSING_INSTANCE_WITHOUT_RESET_PROOF": { "omit": "instance", "ledger": "unchanged", "expected": "STATE_EXPIRED" },
+  "NOT_RETAINED": { "HorizonStatus": 404, "contractState": "existing intact local RPC fixture", "expected": "RETENTION_UNAVAILABLE" }
+}

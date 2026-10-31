@@ -1,0 +1,113 @@
+{
+  "task": "D2-008B4.2B",
+  "status": "B4.2B REVIEW BINDINGS PASS",
+  "at": "2026-10-31T00:32:38.631935+00:00",
+  "counts": {
+    "permissions": 0,
+    "review_access": 4,
+    "review_batteries": 1,
+    "registration_intents": 0
+  },
+  "transaction_committed": true,
+  "attempts": 1,
+  "role_predicates": {
+    "REVIEW-USER": true,
+    "REVIEW-ADMIN": true,
+    "REVIEW-COLLECTOR": true,
+    "REVIEW-RECYCLER": true
+  },
+  "security_structure_unchanged": true,
+  "can_create_intent_all_false": true,
+  "Auth_login": "NOT YET PROVEN BY REAL LOGIN",
+  "business_functions_invoked": 0,
+  "pre_insert_at": "2026-10-31T00:29:04.959684+00:00",
+  "pre_insert_counts": {
+    "permissions": 0,
+    "review_access": 0,
+    "review_batteries": 0,
+    "registration_intents": 0
+  },
+  "aliases": [
+    "REVIEW-ADMIN",
+    "REVIEW-COLLECTOR",
+    "REVIEW-RECYCLER",
+    "REVIEW-USER"
+  ],
+  "review_access": {
+    "rows": 4,
+    "exact_allowlist": true,
+    "enabled_all": true,
+    "can_create_intent_all": false,
+    "disabled_at_all_null": true
+  },
+  "review_batteries": {
+    "rows": 1,
+    "fixture": "BYE-W1-002-64257020134D4A0F",
+    "exact_configured_deployment": true,
+    "enabled": true,
+    "purpose": "HISTORICAL",
+    "user_alias": "REVIEW-USER",
+    "collector_relevant": true,
+    "recycler_relevant": true,
+    "intent_operation_id": null,
+    "default_timestamp_used": true
+  },
+  "security": {
+    "hosted_execute_count": 5,
+    "review_app_memberships": 0,
+    "schema_create": false,
+    "raw_table_or_column_authority": false,
+    "owner_set": false,
+    "role_attributes_unchanged": true,
+    "function_definitions_owners_and_acls_unchanged": true,
+    "review_table_ownership_acls_rls_unchanged": true,
+    "policies_unchanged": true
+  },
+  "remote_mutations": {
+    "review_access_inserts": 4,
+    "review_batteries_inserts": 1,
+    "other_mutations_performed": 0
+  },
+  "Auth_login_attempts": 0,
+  "Auth_mutations": 0,
+  "Stellar_transactions": 0,
+  "signatures": 0,
+  "broadcasts": 0,
+  "Vercel_operations": 0,
+  "project_status": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "TOTAL": "17/23",
+    "D2.6": "PENDING"
+  },
+  "next_gate": "D2-008B4.3 — four application-role login/access verification; NOT EXECUTED",
+  "commit": null,
+  "push": false,
+  "merge": false,
+  "tags_changed": false,
+  "secret_audit": {
+    "files": 586,
+    "historicalBlobs": 700,
+    "stagedFiles": 0,
+    "findings": []
+  },
+  "local_closure": {
+    "unchanged_preexisting_files": 516,
+    "only_new_nonignored_files": [
+      "docs/instaward/d2/D2-008B4_2B-REVIEW-BINDINGS-APPLY-RESULTS.json",
+      "docs/instaward/d2/D2-008B4_2B-REVIEW-BINDINGS-APPLY.md"
+    ],
+    "git_refs_unchanged": true,
+    "protected_files_unchanged_and_untracked": true,
+    "private_execution_evidence_ignored": true,
+    "git_diff_check": "PASS",
+    "new_report_whitespace": "PASS",
+    "sanitized_report_privacy_scan": "PASS",
+    "secret_audit": "PASS",
+    "staged_files": 0,
+    "commit": null,
+    "push": false,
+    "B4.3_executed": false
+  }
+}

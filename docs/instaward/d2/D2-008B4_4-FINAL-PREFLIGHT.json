@@ -1,0 +1,222 @@
+{
+  "task": "D2-008B4.4-FINAL-PREFLIGHT",
+  "date": "2026-10-31",
+  "gate": "BLOCKED",
+  "stopPhase": 6,
+  "ownerConfirmed": {
+    "productionBranch": "codex/visual-polish",
+    "preview": "All unassigned git branches",
+    "D2Branch": "instaward/d2-web-mvp",
+    "rootDirectory": "frontend",
+    "deployHooks": "none",
+    "productionDomain": "byetery.vercel.app",
+    "source": "Current owner instruction; manual dashboard confirmation",
+    "independentlyRereadByAPI": false
+  },
+  "project": {
+    "id": "prj_gVe1Sz73FRZ4bAQPubimaqOXQylH",
+    "name": "byetery",
+    "accountId": "team_EuRw1k4ZykOoSP1fBTcumdnO",
+    "nodeVersion": "24.x",
+    "latestDeployment": null,
+    "protection": {
+      "ssoProtection": {
+        "keys": [
+          "enabled",
+          "deploymentType"
+        ],
+        "deploymentType": "all_except_custom_domains"
+      },
+      "passwordProtection": {
+        "keys": [
+          "enabled",
+          "deploymentType"
+        ],
+        "deploymentType": "NOT_RETURNED"
+      },
+      "trustedIps": {
+        "keys": [
+          "enabled",
+          "deploymentType",
+          "addresses",
+          "protectionMode"
+        ],
+        "deploymentType": "NOT_RETURNED",
+        "entryCount": 0
+      }
+    },
+    "rootDirectory": "NOT_RETURNED",
+    "sourceFilesOutsideRootDirectory": "NOT_RETURNED"
+  },
+  "protection": {
+    "ssoProtection": {
+      "enabled": true,
+      "deploymentType": "all_except_custom_domains"
+    },
+    "passwordProtection": {
+      "enabled": false,
+      "deploymentType": null
+    },
+    "trustedIps": {
+      "enabled": false,
+      "deploymentType": null
+    }
+  },
+  "envInventory": {
+    "rows": [
+      {
+        "key": "BYETERY_REVIEW_ADAPTER",
+        "target": [
+          "preview"
+        ],
+        "gitBranch": "instaward/d2-web-mvp",
+        "type": "plain",
+        "commentPresent": true
+      }
+    ],
+    "hiddenProductionEnvCount": 0,
+    "classification": {
+      "branchSpecificD2": [
+        {
+          "key": "BYETERY_REVIEW_ADAPTER",
+          "target": [
+            "preview"
+          ],
+          "gitBranch": "instaward/d2-web-mvp",
+          "type": "plain",
+          "commentPresent": true
+        }
+      ],
+      "previewGeneral": [],
+      "otherBranches": [],
+      "production": [],
+      "development": []
+    },
+    "sensitiveNamesFound": false
+  },
+  "valueScan": "NO MATCH",
+  "valueScanScope": "Only current effective D2 Preview plaintext values returned by decrypt=false; no encrypted/opaque value treated as scanned. No values retained.",
+  "baseline": {
+    "count": 0,
+    "returned": 0,
+    "paginationHasNext": false,
+    "items": []
+  },
+  "isolation": {
+    "rootDirectory": "frontend",
+    "rootSource": "OWNER_MANUAL_CONFIRMED",
+    "sourceFilesOutsideRootDirectory": "UNKNOWN",
+    "apiField": "NOT_RETURNED",
+    "browserFailure": "failed to write kernel assets: os error 3; both browser and native readers failed to initialize"
+  },
+  "additionalProtection": {
+    "firewallRead": "FAILED",
+    "code": "INVALID_ARGUMENT",
+    "otherMechanisms": "NOT_ESTABLISHED; not assumed disabled"
+  },
+  "D14": {
+    "path": "B",
+    "changeRequired": true,
+    "desiredResult": "Preview opens without a Vercel account; Byetery Auth stays authoritative",
+    "changeExecuted": false,
+    "scopeCaveat": "Removing project-level Vercel Authentication can affect protected Production deployment URLs; exact scope/impact needs separate owner-reviewed authorization. No bypass/share link generated."
+  },
+  "evidenceScope": {
+    "Vercel": "Read-only project/env/deployment queries; no mutation",
+    "Supabase": "NO ACCESS",
+    "Stellar": "NO ACCESS",
+    "browser": "Initialization failed before any UI input"
+  },
+  "deferredPhases": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "documentationSources": [
+    "https://vercel.com/docs/deployment-protection",
+    "https://vercel.com/docs/deployment-protection/methods-to-protect-deployments/vercel-authentication"
+  ],
+  "reportAsOfUTC": "2026-10-31 17:59:26 UTC",
+  "envRuntimeCompleteness": {
+    "status": "INCOMPLETE_FROM_RETURNED_PROJECT_INVENTORY",
+    "missingRequiredCustomNames": [
+      "BYETERY_WEB_ENV",
+      "BYETERY_SOURCE",
+      "BYETERY_DEPLOYMENT_ID",
+      "BYETERY_WEB_ORIGIN",
+      "BYETERY_ALLOWED_WEB_ORIGINS",
+      "SUPABASE_URL",
+      "SUPABASE_PUBLISHABLE_KEY",
+      "BYETERY_REVIEW_DATABASE_URL",
+      "DATABASE_SSL_CA"
+    ],
+    "platformVariables": "VERCEL_* are platform-injected and not classified as missing project secrets",
+    "limitation": "No secret-bearing local .env or external credential store was read; only project env metadata and production config source were compared."
+  },
+  "localCheckpoint": {
+    "backend": "343/343 PASS — prior full closeout run; evidence hashes revalidated, not rerun",
+    "frontend": "321/321 PASS — prior full closeout run; evidence hashes revalidated, not rerun",
+    "build": "PASS — prior isolated dummy build; no hosted claim",
+    "TypeScript": "PASS — prior backend/frontend checks",
+    "integrity": "554 input files unchanged; prior evidence and candidate hashes verified"
+  },
+  "candidate": {
+    "priorInventory": "D2-008B4_4-CLOSEOUT-PRECHECK.json",
+    "priorCandidateCount": 54,
+    "newStopReports": 2,
+    "provisionalCount": 56,
+    "excludedCount": 7,
+    "finalized": false,
+    "finalFingerprint": "DEFERRED — mandatory phase-6 STOP",
+    "inputFingerprintIsNotFinalCandidate": true
+  },
+  "Git": {
+    "stage": false,
+    "commit": false,
+    "push": false,
+    "merge": false,
+    "mainChanged": false,
+    "tagsChanged": false
+  },
+  "projectStatus": {
+    "D1": "12/12",
+    "D2": "5/6",
+    "D3": "0/5",
+    "total": "17/23",
+    "B4.4": "NO PASS",
+    "D2.6": "BLOCKED/PENDING"
+  },
+  "closure": {
+    "diffCheck": "PASS",
+    "secretAudit": {
+      "status": "PASS",
+      "files": 624,
+      "historicalBlobs": 700,
+      "stagedFiles": 0,
+      "findings": []
+    },
+    "newFileWhitespace": "PASS",
+    "baselineFilesUnchanged": 554,
+    "allRefsUnchanged": true
+  },
+  "localInputIntegrity": {
+    "GitDiffSHA256": "44018d947e19ebde3e22cd214cf7456f7d5efac162e783eb73200f04665fb629",
+    "inputFileManifestSHA256": "f6caa4949e9cfe72372c4efa0bc9719df63361b20f80ca1047be700d3b914b66",
+    "WASM": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+    "frontendLock": "633c0f5f1ae347d34aa0a2e45d43224b29e24ff8ffe1252d086b28cc2cdb8679",
+    "SQL": {
+      "database/migrations/20260909142956_backend_foundation.sql": "cb65a0c8d135b70f826fdd343a43c7063733da1f3e00c1b523ceb58bcb02f7b6",
+      "database/migrations/20260913140711_application_http.sql": "386a45f4862028fba5abeb1afd02f5b5a6add0d4a4a0ca8d04a3203e3e156e63",
+      "database/migrations/20260914124739_wallet_sep53.sql": "06767d157904fea0d386d13de26595a37aac8be35831f055ba7effe6213068d3",
+      "database/migrations/20260914130553_wallet_guard_search_path.sql": "d465d2f88c5f72a75ce37695f932c4b0548fb43d78e6aeb976e6ccacfe463398",
+      "database/migrations/20261011000100_vol003_private_transport.sql": "7b0257cd2b15630af0a88e8626568dc1cef216ba007b185fbf459a5dd23fb04e",
+      "database/review/d2-008b1-registration-intents.sql": "957e19e768a6ca90f5bbf5c6268945ef129686d3cd342ec17cca1e3eca41585d",
+      "database/review/d2-008b2-direct-review.sql": "d25b53d15cbc6d6ab3b8037130c0319edd34a3349c49465af2b82153c7eb61d4",
+      "database/tests/foundation-dev.sql": "967fa8e21c353bfb66b142dfcecb7c005691effc38a7f60ad54ebec2dab14c4d"
+    },
+    "notFinalCandidateFingerprint": true
+  }
+}

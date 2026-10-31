@@ -1,0 +1,1257 @@
+{
+  "task": "D2-008B3.1",
+  "status": "OWNER REVIEW REQUIRED",
+  "date": "2026-10-30",
+  "checkpoint": "d406dad4d9edd7b9b46a0c8a8090d333554dbeb1",
+  "branch": "instaward/d2-web-mvp",
+  "council": {
+    "verdict": "PATCH B1/B2",
+    "selected_design": "A",
+    "design_b_implemented": false,
+    "role_split_changed": false
+  },
+  "blocker": {
+    "code": "OLD_OWNER_EXECUTE_REWRITTEN_ON_OWNER_TRANSFER",
+    "description": "Pre-transfer GRANT EXECUTE TO postgres is rewritten to the new owner by ALTER FUNCTION OWNER. With SET/INHERIT cleanup, postgres cannot execute adoption.",
+    "required_resolution": "Approve one narrowly scoped post-transfer GRANT EXECUTE on adopt_registration_intent(uuid) to postgres, issued as intent_owner before temporary SET cleanup. Proposed only; not executed."
+  },
+  "local_probe": {
+    "status": "OWNER REVIEW REQUIRED",
+    "reproducer": "PASS — blocker demonstrated",
+    "executor": {
+      "version": "17.6",
+      "self_grant": "",
+      "current_user": "postgres",
+      "session_user": "postgres",
+      "superuser": false,
+      "createdb": true,
+      "createrole": true,
+      "replication": true,
+      "bypassrls": true,
+      "inherit": true,
+      "login": true
+    },
+    "control": {
+      "artifact": "unpatched B1",
+      "expected_failure": "psql:<stdin>:22: ERROR:  42501: permission denied to change default privileges\r\nLOCATION:  ExecAlterDefaultPrivilegesStmt, aclchk.c:1148",
+      "rollback": true
+    },
+    "probe": [
+      {
+        "stage": "before_owner_transfer",
+        "acl": "{postgres=X/postgres}",
+        "postgres_execute": true
+      },
+      {
+        "stage": "after_cleanup",
+        "owner": "byetery_d2_intent_owner",
+        "acl": "{byetery_d2_intent_owner=X/byetery_d2_intent_owner}",
+        "postgres_execute": false,
+        "postgres_set_owner": false,
+        "postgres_inherits_owner": false,
+        "owner_schema_create": false,
+        "memberships": [
+          {
+            "grantor": "b31_bootstrap",
+            "admin": true,
+            "inherit": false,
+            "set": false
+          }
+        ]
+      }
+    ],
+    "privilege_warnings": 0,
+    "calls": [
+      {
+        "label": "bootstrap",
+        "user": "b31_bootstrap",
+        "exit_code": 0,
+        "warnings": 0,
+        "stderr": ""
+      },
+      {
+        "label": "executor",
+        "user": "postgres",
+        "exit_code": 0,
+        "warnings": 0,
+        "stderr": ""
+      },
+      {
+        "label": "prerequisites",
+        "user": "postgres",
+        "exit_code": 0,
+        "warnings": 0,
+        "stderr": ""
+      },
+      {
+        "label": "unpatched-b1-control",
+        "user": "postgres",
+        "exit_code": 3,
+        "warnings": 0,
+        "stderr": "psql:<stdin>:22: ERROR:  42501: permission denied to change default privileges\r\nLOCATION:  ExecAlterDefaultPrivilegesStmt, aclchk.c:1148"
+      },
+      {
+        "label": "control-rollback",
+        "user": "postgres",
+        "exit_code": 0,
+        "warnings": 0,
+        "stderr": ""
+      },
+      {
+        "label": "design-a-old-owner",
+        "user": "postgres",
+        "exit_code": 0,
+        "warnings": 0,
+        "stderr": "psql:<stdin>:33: NOTICE:  00000: EXPECTED_DENIAL: postgres cannot execute adoption after transfer and cleanup\r\nLOCATION:  exec_stmt_raise, pl_exec.c:3925"
+      },
+      {
+        "label": "final-cleanup-check",
+        "user": "postgres",
+        "exit_code": 0,
+        "warnings": 0,
+        "stderr": ""
+      }
+    ],
+    "remote_connections": 0,
+    "original_artifacts_modified": false,
+    "complete_acceptance_matrix": "NOT_RUN — conflicting adoption ACL requirement",
+    "probe_schema_and_roles_rolled_back": true
+  },
+  "local_matrix": [
+    {
+      "item": "1",
+      "status": "PARTIAL",
+      "detail": "Original B1 fails with SQLSTATE 42501 at default privileges; rollback verified. Original B2 not run after blocker."
+    },
+    {
+      "item": "2",
+      "status": "NOT_RUN",
+      "detail": "No patched B1 issued: pre-transfer-only ACL rule cannot preserve postgres adoption EXECUTE."
+    },
+    {
+      "item": "3",
+      "status": "NOT_RUN",
+      "detail": "No patched B2 issued."
+    },
+    {
+      "item": "4",
+      "status": "PROBE PASS",
+      "detail": "Zero privilege WARNINGs in control/probe; not an acceptance of unrun patched scripts."
+    },
+    {
+      "item": "5",
+      "status": "PROBE ONLY",
+      "detail": "Synthetic adoption signature owned by intent_owner with SECURITY DEFINER and empty search_path; no full artifact audit."
+    },
+    {
+      "item": "6",
+      "status": "PROBE PASS",
+      "detail": "Automatic bootstrap ADMIN/SET false/INHERIT false preserved; direct postgres grant removed."
+    },
+    {
+      "item": "7",
+      "status": "PROBE PASS",
+      "detail": "Temporary intent_owner schema CREATE removed; full B1/B2 not run."
+    },
+    {
+      "item": "8",
+      "status": "NOT_RUN",
+      "detail": "Final five hosted ACL set requires reviewed patch."
+    },
+    {
+      "item": "9",
+      "status": "NOT_RUN",
+      "detail": "Hosted-role SET denial matrix requires reviewed patch."
+    },
+    {
+      "item": "10",
+      "status": "NOT_RUN",
+      "detail": "Hosted-role raw table/column denial matrix requires reviewed patch."
+    },
+    {
+      "item": "11",
+      "status": "NOT_RUN",
+      "detail": "Existing B1/B2 functional suites unchanged; not run because implementation is blocked."
+    },
+    {
+      "item": "12",
+      "status": "NOT_RUN",
+      "detail": "Injected B2 rollback matrix requires reviewed patch."
+    },
+    {
+      "item": "13",
+      "status": "NOT_RUN",
+      "detail": "Patched B1 reapply matrix requires reviewed patch."
+    },
+    {
+      "item": "14",
+      "status": "NOT_RUN",
+      "detail": "No DP1/DP2 artifact change applied; remote defaults inventoried."
+    },
+    {
+      "item": "15",
+      "status": "NOT_RUN",
+      "detail": "Prerequisite tables are postgres-owned with FORCE RLS; new review tables not created by probe."
+    },
+    {
+      "item": "16",
+      "status": "PROBE ONLY",
+      "detail": "Synthetic review definer transferred successfully; rolled back at end; no complete B1/B2 run."
+    }
+  ],
+  "harness": {
+    "path": "scripts/instaward/b31-ownership-probe.py",
+    "sha256": "790d3490f902685c070cce52778c2814ef01eca90b3f46413c810a4cc5fa7858",
+    "scope": "Local blocker reproducer only; NOT a remote apply helper"
+  },
+  "sql": {
+    "changed": false,
+    "current_hashes": {
+      "database/review/d2-008b1-registration-intents.sql": "b6422a6b542e429a969060aae44971a8ee441eb6df42f09b84c2852db54f233a",
+      "database/review/d2-008b2-direct-review.sql": "7720341657b66dbc2df99145fe269eed8d6e0f899be8410e9536ff9bdc579827"
+    },
+    "new_reviewed_hashes": null,
+    "old_hash_status": "OBSOLETE FOR REMOTE APPLY"
+  },
+  "default_privileges": {
+    "proposed_option": "DP2",
+    "implemented": false,
+    "reason": "Current functions are postgres-created; final NOLOGIN owners have no schema CREATE. Explicit ACLs and fail-closed assertions must secure them. Stop before editing."
+  },
+  "remote": {
+    "project": "aemxuqnnwfclzrwwiqfd",
+    "observed_at": "2026-10-30T05:07:28.464869+00:00",
+    "sql_transactions": 2,
+    "transaction_read_only": "on",
+    "executor": {
+      "user": "postgres",
+      "session": "postgres",
+      "version": "17.6",
+      "self_grant": ""
+    },
+    "deployment": {
+      "id": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "mode": "TESTNET",
+      "wasm_hash": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+      "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+      "schema_version": 1,
+      "contract_address": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON"
+    },
+    "review_roles": [],
+    "review_schema_exists": false,
+    "defaults": [
+      {
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "role": "postgres",
+        "type": "r",
+        "schema": "public"
+      },
+      {
+        "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "role": "postgres",
+        "type": "f",
+        "schema": "public"
+      },
+      {
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}",
+        "role": "postgres",
+        "type": "S",
+        "schema": "public"
+      },
+      {
+        "acl": "{postgres=rwU/supabase_admin,anon=rwU/supabase_admin,authenticated=rwU/supabase_admin,service_role=rwU/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "S",
+        "schema": "public"
+      },
+      {
+        "acl": "{postgres=arwdDxtm/supabase_admin,anon=arwdDxtm/supabase_admin,authenticated=arwdDxtm/supabase_admin,service_role=arwdDxtm/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "r",
+        "schema": "public"
+      },
+      {
+        "acl": "{postgres=X/supabase_admin,anon=X/supabase_admin,authenticated=X/supabase_admin,service_role=X/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "f",
+        "schema": "public"
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "role": "postgres",
+        "type": "r",
+        "schema": "storage"
+      },
+      {
+        "acl": "{postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "role": "postgres",
+        "type": "f",
+        "schema": "storage"
+      },
+      {
+        "acl": "{postgres=rwU/postgres,anon=rwU/postgres,authenticated=rwU/postgres,service_role=rwU/postgres}",
+        "role": "postgres",
+        "type": "S",
+        "schema": "storage"
+      },
+      {
+        "acl": "{postgres=rwU/supabase_admin,anon=rwU/supabase_admin,authenticated=rwU/supabase_admin,service_role=rwU/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "S",
+        "schema": "graphql_public"
+      },
+      {
+        "acl": "{postgres=arwdDxtm/supabase_admin,anon=arwdDxtm/supabase_admin,authenticated=arwdDxtm/supabase_admin,service_role=arwdDxtm/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "r",
+        "schema": "graphql_public"
+      },
+      {
+        "acl": "{postgres=X/supabase_admin,anon=X/supabase_admin,authenticated=X/supabase_admin,service_role=X/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "f",
+        "schema": "graphql_public"
+      },
+      {
+        "acl": "{postgres=a*r*w*d*D*x*t*m*/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "r",
+        "schema": "extensions"
+      },
+      {
+        "acl": "{postgres=X*/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "f",
+        "schema": "extensions"
+      },
+      {
+        "acl": "{postgres=r*w*U*/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "S",
+        "schema": "extensions"
+      },
+      {
+        "acl": "{postgres=arwdDxtm/supabase_admin,anon=arwdDxtm/supabase_admin,authenticated=arwdDxtm/supabase_admin,service_role=arwdDxtm/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "r",
+        "schema": "graphql"
+      },
+      {
+        "acl": "{postgres=X/supabase_admin,anon=X/supabase_admin,authenticated=X/supabase_admin,service_role=X/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "f",
+        "schema": "graphql"
+      },
+      {
+        "acl": "{postgres=rwU/supabase_admin,anon=rwU/supabase_admin,authenticated=rwU/supabase_admin,service_role=rwU/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "S",
+        "schema": "graphql"
+      },
+      {
+        "acl": "{postgres=rwU/supabase_admin,dashboard_user=rwU/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "S",
+        "schema": "realtime"
+      },
+      {
+        "acl": "{postgres=X/supabase_admin,dashboard_user=X/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "f",
+        "schema": "realtime"
+      },
+      {
+        "acl": "{postgres=a*r*wdDxtm/supabase_admin,dashboard_user=arwdDxtm/supabase_admin}",
+        "role": "supabase_admin",
+        "type": "r",
+        "schema": "realtime"
+      }
+    ],
+    "managed_settings": {
+      "supautils.superuser": "supabase_admin",
+      "supautils.reserved_roles": "supabase_admin, supabase_auth_admin, supabase_storage_admin, supabase_read_only_user, supabase_realtime_admin, supabase_replication_admin, supabase_etl_admin, dashboard_user, pgbouncer, service_role*, authenticator*, authenticated*, anon*, supabase_privileged_role",
+      "supautils.privileged_role": "supabase_privileged_role"
+    },
+    "executor_memberships": [
+      {
+        "set": true,
+        "role": "pg_read_all_data",
+        "admin": true,
+        "member": "postgres",
+        "grantor": "supabase_admin",
+        "inherit": true
+      },
+      {
+        "set": true,
+        "role": "pg_monitor",
+        "admin": true,
+        "member": "postgres",
+        "grantor": "supabase_admin",
+        "inherit": true
+      },
+      {
+        "set": true,
+        "role": "pg_signal_backend",
+        "admin": true,
+        "member": "postgres",
+        "grantor": "supabase_admin",
+        "inherit": true
+      },
+      {
+        "set": true,
+        "role": "pg_create_subscription",
+        "admin": true,
+        "member": "postgres",
+        "grantor": "supabase_admin",
+        "inherit": true
+      },
+      {
+        "set": true,
+        "role": "authenticated",
+        "admin": true,
+        "member": "postgres",
+        "grantor": "supabase_admin",
+        "inherit": true
+      },
+      {
+        "set": true,
+        "role": "anon",
+        "admin": true,
+        "member": "postgres",
+        "grantor": "supabase_admin",
+        "inherit": true
+      },
+      {
+        "set": true,
+        "role": "service_role",
+        "admin": true,
+        "member": "postgres",
+        "grantor": "supabase_admin",
+        "inherit": true
+      },
+      {
+        "set": true,
+        "role": "supabase_privileged_role",
+        "admin": false,
+        "member": "postgres",
+        "grantor": "supabase_admin",
+        "inherit": true
+      },
+      {
+        "set": true,
+        "role": "authenticator",
+        "admin": true,
+        "member": "postgres",
+        "grantor": "supabase_admin",
+        "inherit": true
+      }
+    ],
+    "inventory_counts": {
+      "tables": 20,
+      "columns": 171,
+      "constraints": 141,
+      "indexes": 52,
+      "policies": 20,
+      "triggers": 38,
+      "functions": 12
+    },
+    "browser_deny_count": 20,
+    "prerequisite_column_checks": [
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "update",
+        "table": "app_private.users",
+        "column": "status"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "app_private.users",
+        "column": "id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "app_private.users",
+        "column": "status"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "api_private.memberships",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "api_private.memberships",
+        "column": "user_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "api_private.memberships",
+        "column": "role"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "api_private.memberships",
+        "column": "enabled"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "chain_private.deployments",
+        "column": "id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "chain_private.deployments",
+        "column": "mode"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "chain_private.deployments",
+        "column": "network_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "chain_private.deployments",
+        "column": "contract_address"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "chain_private.deployments",
+        "column": "wasm_hash"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "app_private.battery_records",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "app_private.battery_records",
+        "column": "battery_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "app_private.stellar_operations",
+        "column": "id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "select",
+        "table": "app_private.stellar_operations",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.battery_records",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.battery_records",
+        "column": "battery_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.battery_records",
+        "column": "metadata"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.battery_records",
+        "column": "created_by"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.evidence_versions",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.evidence_versions",
+        "column": "battery_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.evidence_versions",
+        "column": "kind"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.evidence_versions",
+        "column": "revision"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.evidence_versions",
+        "column": "format_version"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.evidence_versions",
+        "column": "manifest_bytes"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.evidence_versions",
+        "column": "payload_hash"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.evidence_versions",
+        "column": "object_path"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.evidence_versions",
+        "column": "created_by"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.stellar_operations",
+        "column": "id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.stellar_operations",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.stellar_operations",
+        "column": "principal"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.stellar_operations",
+        "column": "idempotency_key"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.stellar_operations",
+        "column": "command"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.stellar_operations",
+        "column": "battery_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.stellar_operations",
+        "column": "parameters"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "app_private.stellar_operations",
+        "column": "parameters_hash"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "api_private.idempotency",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "api_private.idempotency",
+        "column": "user_id"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "api_private.idempotency",
+        "column": "key"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "api_private.idempotency",
+        "column": "input_hash"
+      },
+      {
+        "artifact": "database/review/d2-008b1-registration-intents.sql",
+        "privilege": "insert",
+        "table": "api_private.idempotency",
+        "column": "operation_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.users",
+        "column": "id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.users",
+        "column": "auth_user_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.users",
+        "column": "status"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.memberships",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.memberships",
+        "column": "user_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.memberships",
+        "column": "role"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.memberships",
+        "column": "actor_address"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.memberships",
+        "column": "enabled"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.deployments",
+        "column": "id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.deployments",
+        "column": "mode"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.deployments",
+        "column": "network_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.deployments",
+        "column": "contract_address"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.deployments",
+        "column": "wasm_hash"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.battery_records",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.battery_records",
+        "column": "battery_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.battery_records",
+        "column": "created_by"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.battery_records",
+        "column": "metadata"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.batteries",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.batteries",
+        "column": "battery_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.batteries",
+        "column": "state"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.batteries",
+        "column": "reward_state"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.batteries",
+        "column": "request_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.batteries",
+        "column": "collector"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.batteries",
+        "column": "recycler"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.batteries",
+        "column": "confirmed_ledger"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.return_requests",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.return_requests",
+        "column": "request_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.return_requests",
+        "column": "battery_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.return_requests",
+        "column": "user_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.return_requests",
+        "column": "reservation_state"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.return_requests",
+        "column": "created_at"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.return_requests",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.return_requests",
+        "column": "request_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.return_requests",
+        "column": "battery_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "chain_private.return_requests",
+        "column": "state"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.stellar_operations",
+        "column": "id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.stellar_operations",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.stellar_operations",
+        "column": "battery_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.stellar_operations",
+        "column": "request_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.stellar_operations",
+        "column": "command"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.stellar_operations",
+        "column": "state"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.stellar_operations",
+        "column": "error_code"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.stellar_operations",
+        "column": "created_at"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.reward_attempts",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.reward_attempts",
+        "column": "battery_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.reward_attempts",
+        "column": "request_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.reward_attempts",
+        "column": "operation_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.reward_attempts",
+        "column": "state"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.reward_attempts",
+        "column": "attempt_number"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.reward_attempts",
+        "column": "error_code"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.testnet_work",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.testnet_work",
+        "column": "operation_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.testnet_work",
+        "column": "state"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.testnet_work",
+        "column": "confirmation"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.testnet_envelopes",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.testnet_envelopes",
+        "column": "operation_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.testnet_envelopes",
+        "column": "transaction_hash"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.testnet_envelopes",
+        "column": "network_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "api_private.testnet_envelopes",
+        "column": "contract_address"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.evidence_versions",
+        "column": "deployment_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.evidence_versions",
+        "column": "battery_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.evidence_versions",
+        "column": "request_id"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.evidence_versions",
+        "column": "kind"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.evidence_versions",
+        "column": "revision"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.evidence_versions",
+        "column": "payload_hash"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.evidence_versions",
+        "column": "commitment"
+      },
+      {
+        "artifact": "database/review/d2-008b2-direct-review.sql",
+        "privilege": "select",
+        "table": "app_private.evidence_versions",
+        "column": "finalized_at"
+      }
+    ],
+    "all_business_tables_postgres_owned_force_rls": true,
+    "event_triggers": [
+      {
+        "name": "issue_graphql_placeholder",
+        "event": "sql_drop",
+        "tags": [
+          "DROP EXTENSION"
+        ],
+        "enabled": "O",
+        "owner": "supabase_admin",
+        "definition_sha256": "b0cadab880dc68f569b3e01057dc6f5acee9d05e122de6f4256130ae330bbcec"
+      },
+      {
+        "name": "pgrst_ddl_watch",
+        "event": "ddl_command_end",
+        "tags": null,
+        "enabled": "O",
+        "owner": "supabase_admin",
+        "definition_sha256": "2b4b5d702ddf70fbd1a05c9825f9f9016d5c0ef97dd3df5f5b012ea23d9b94b1"
+      },
+      {
+        "name": "pgrst_drop_watch",
+        "event": "sql_drop",
+        "tags": null,
+        "enabled": "O",
+        "owner": "supabase_admin",
+        "definition_sha256": "3a2696133853e17a0456cbfbb233a03815f50895492143e84df983b558d76593"
+      },
+      {
+        "name": "issue_pg_cron_access",
+        "event": "ddl_command_end",
+        "tags": [
+          "CREATE EXTENSION"
+        ],
+        "enabled": "O",
+        "owner": "supabase_admin",
+        "definition_sha256": "eb3fa2e82a0135bc04a6236f93331911861c91b45d72cba5d9c03c1be2c34b4c"
+      },
+      {
+        "name": "issue_pg_net_access",
+        "event": "ddl_command_end",
+        "tags": [
+          "CREATE EXTENSION"
+        ],
+        "enabled": "O",
+        "owner": "supabase_admin",
+        "definition_sha256": "e38c4060751c9695123350596f1cb0d0c943015f3267a2a455d8efe02c711184"
+      },
+      {
+        "name": "issue_pg_graphql_access",
+        "event": "ddl_command_end",
+        "tags": [
+          "CREATE EXTENSION"
+        ],
+        "enabled": "O",
+        "owner": "supabase_admin",
+        "definition_sha256": "9ec845adab4ba00bbf7740458b6c4461094697023f0f7adc693b373e2ea54f68"
+      }
+    ],
+    "exposure": {
+      "first_metadata_get": {
+        "status": 401,
+        "message": "Secret API key required",
+        "credential_escalation": false
+      },
+      "zero_row_profile_get": {
+        "method": "GET",
+        "path": "/rest/v1/registration_intents?select=operation_id&limit=0",
+        "profile": "review_private",
+        "status": 406,
+        "code": "PGRST106",
+        "message": "Invalid schema: review_private",
+        "details": null,
+        "hint": "Only the following schemas are exposed: public, graphql_public"
+      },
+      "postgrest": "review_private excluded; allowed schemas public, graphql_public",
+      "graphql": "NOT FULLY VERIFIED — wrapper inspected; no review schema currently exists. Do not infer future exposure solely from absence."
+    },
+    "managed_role_creation_grantor": "UNKNOWN before creation — APPLY-TIME ASSERTION",
+    "remaining_checks": "Full local/remote catalog parity, managed behavior and GraphQL role-specific exposure proofs remain incomplete after STOP.",
+    "mutations": "NONE"
+  },
+  "advisors": {
+    "findings": [
+      {
+        "name": "auth_leaked_password_protection",
+        "title": "Leaked Password Protection Disabled",
+        "level": "WARN",
+        "facing": "EXTERNAL",
+        "categories": [
+          "SECURITY"
+        ],
+        "description": "Leaked password protection is currently disabled.",
+        "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection",
+        "count": 1,
+        "findings": [
+          {
+            "detail": "Supabase Auth prevents the use of compromised passwords by checking against HaveIBeenPwned.org. Enable this feature to enhance security.",
+            "metadata": {
+              "type": "auth",
+              "entity": "Auth"
+            }
+          }
+        ]
+      }
+    ],
+    "classification": "1 preexisting unrelated Auth warning; no material blocker reported by security advisors; no remediation"
+  },
+  "remote_mutations": "NONE",
+  "auth_operations": 0,
+  "stellar_transactions": 0,
+  "signatures": 0,
+  "broadcasts": 0,
+  "project_status": {
+    "D1": "12/12 PASS",
+    "D2": "5/6 PASS",
+    "D3": "0/5",
+    "total": "17/23",
+    "D2.6": "PENDING"
+  },
+  "verification": {
+    "baseline_files_unchanged": 501,
+    "git_refs_unchanged": true,
+    "git_diff_check": "PASS",
+    "new_file_whitespace": "PASS",
+    "python_syntax": "PASS",
+    "secret_audit": {
+      "files": 572,
+      "historicalBlobs": 700,
+      "stagedFiles": 0,
+      "findings": []
+    }
+  },
+  "commit": null,
+  "push": false,
+  "next_owner_authorization": "Not a B4 authorization: review narrow ACL-order exception first.",
+  "local_runtime": {
+    "url": "https://get.enterprisedb.com/postgresql/postgresql-17.6-1-windows-x64-binaries.zip",
+    "bytes": 329891687,
+    "sha256": "d378882abd001a186735acd6f6ba716bca6ccd192e800412d4fd15ed25376b3e",
+    "extracted": 1590
+  }
+}

@@ -1,6 +1,13 @@
 -- D2-008B1: LOCAL TEST/APPLY ARTIFACT ONLY. NOT a remote migration authorization.
 -- Deliberately outside database/migrations and Supabase's automatic sequence.
 begin;
+do $$ begin
+ if current_user<>'postgres' or session_user<>'postgres'
+  or (select rolsuper from pg_roles where rolname=current_user)
+  or current_setting('createrole_self_grant')<>'' then
+  raise exception 'ReviewRequiresNonSuperuserPostgresEmptySelfGrant';
+ end if;
+end $$;
 do $$
 begin
  if not exists(select 1 from pg_roles where rolname='byetery_d2_intent_owner') then
@@ -19,7 +26,14 @@ begin
 end $$;
 create schema review_private;
 revoke all on schema review_private from public,anon,authenticated;
-alter default privileges for role byetery_d2_intent_owner revoke execute on functions from public;
+do $$ begin
+ if exists(select from pg_roles where rolname='service_role') then
+  revoke all on schema review_private from service_role;
+ end if;
+end $$;
+-- D2-008B3.2 / DP2: owner-specific defaults did not protect postgres-created
+-- functions. Explicit pre-transfer ACL closure + catalogue assertions do.
+-- NOLOGIN owners finish without schema CREATE; no owner default ACL is added.
 
 create table review_private.permissions (
  deployment_id uuid not null references chain_private.deployments(id),
@@ -159,6 +173,9 @@ create policy review_adopt_idempotency on api_private.idempotency for insert to 
    and i.deployment_id=idempotency.deployment_id and i.principal=idempotency.user_id
    and i.idempotency_key=idempotency.key and i.input_hash=idempotency.input_hash and i.status='WAITING'));
 
+-- Temporary transition bridge. Every new function is still created as postgres.
+grant create on schema review_private to byetery_d2_intent_owner;
+grant byetery_d2_intent_owner to postgres with inherit false, set true granted by postgres;
 create function review_private.require_authority(p_principal uuid) returns void
  language plpgsql security definer set search_path='' as $$
 begin
@@ -270,19 +287,120 @@ begin
   'source','TESTNET','deploymentId',i.deployment_id);
 end $$;
 
+-- Close every new function ACL while postgres is still its owner (design A).
+revoke all on all tables in schema review_private from public,anon,authenticated,byetery_d2_review_app;
+revoke all on all functions in schema review_private from public,anon,authenticated,byetery_d2_review_app;
+do $$ begin
+ if exists(select from pg_roles where rolname='service_role') then
+  revoke all on all tables in schema review_private from service_role;
+  revoke all on all functions in schema review_private from service_role;
+ end if;
+end $$;
+grant usage on schema review_private to byetery_d2_review_app;
+grant execute on function review_private.create_registration_intent(uuid,text,jsonb),
+ review_private.registration_intent_status(uuid,uuid) to byetery_d2_review_app;
 alter function review_private.require_authority(uuid) owner to byetery_d2_intent_owner;
 alter function review_private.create_registration_intent(uuid,text,jsonb) owner to byetery_d2_intent_owner;
 alter function review_private.registration_intent_status(uuid,uuid) owner to byetery_d2_intent_owner;
 alter function review_private.adopt_registration_intent(uuid) owner to byetery_d2_intent_owner;
-revoke all on all tables in schema review_private from public,anon,authenticated,byetery_d2_review_app;
-revoke all on all functions in schema review_private from public,anon,authenticated,byetery_d2_review_app;
-grant usage on schema review_private to byetery_d2_review_app;
-grant execute on function review_private.create_registration_intent(uuid,text,jsonb),
- review_private.registration_intent_status(uuid,uuid) to byetery_d2_review_app;
--- Existing privileged LOCAL operator only. No adoption capability to hosted role.
-do $$ begin
- if exists(select 1 from pg_roles where rolname='postgres') then
-  grant execute on function review_private.adopt_registration_intent(uuid) to postgres;
+-- OWNER-approved single post-transfer exception: reconstruct independent
+-- local adoption EXECUTE because ALTER OWNER rewrites old-owner ACL entries.
+set local role byetery_d2_intent_owner;
+grant execute on function review_private.adopt_registration_intent(uuid) to postgres;
+reset role;
+revoke create on schema review_private from byetery_d2_intent_owner;
+-- Remove only our direct grant; retain the safe automatic creator ADMIN edge.
+revoke byetery_d2_intent_owner from postgres granted by postgres;
+
+-- Fail closed inside this file's transaction. Do not accept WARNING-only success.
+do $postconditions$
+declare f record; stored_proc record; a text[]; owner_name text;
+begin
+ if current_user<>'postgres' or session_user<>'postgres' then
+  raise exception 'ReviewExecutorNotRestored';
  end if;
-end $$;
+ foreach owner_name in array array['byetery_d2_intent_owner'] loop
+  if not exists(select from pg_roles where rolname=owner_name and not rolcanlogin
+   and not rolinherit and not rolsuper and not rolbypassrls and not rolcreatedb
+   and not rolcreaterole and not rolreplication) then
+   raise exception 'UnsafeReviewOwner: %',owner_name;
+  end if;
+  if has_schema_privilege(owner_name,'review_private','CREATE')
+   or pg_has_role('postgres',owner_name,'SET') or pg_has_role('postgres',owner_name,'USAGE') then
+   raise exception 'ReviewTransitionPrivilegeSurvived: %',owner_name;
+  end if;
+  -- NOLOGIN owners must not be members of any other role. Their sole incoming
+  -- member may be postgres through a safe automatic bootstrap-superuser grant.
+  if exists(select from pg_auth_members where member=owner_name::regrole)
+   or (select count(*) from pg_auth_members where roleid=owner_name::regrole)<>1
+   or exists(select from pg_auth_members m join pg_roles g on g.oid=m.grantor
+    where m.roleid=owner_name::regrole and
+     (m.member<>'postgres'::regrole or not m.admin_option or m.inherit_option
+       or m.set_option or not g.rolsuper or m.grantor='postgres'::regrole)) then
+   raise exception 'UnexpectedReviewOwnerMembership: %',owner_name;
+  end if;
+ end loop;
+ if not exists(select from pg_roles where rolname='byetery_d2_review_app' and rolcanlogin
+  and not rolinherit and not rolsuper and not rolbypassrls and not rolcreatedb
+  and not rolcreaterole and not rolreplication)
+  or exists(select from pg_auth_members where member='byetery_d2_review_app'::regrole) then
+  raise exception 'UnsafeHostedReviewRole';
+ end if;
+ if has_schema_privilege('byetery_d2_review_app','review_private','CREATE') then
+  raise exception 'HostedReviewSchemaCreate';
+ end if;
+ if (select count(*) from pg_proc where pronamespace='review_private'::regnamespace)<>5 then
+  raise exception 'UnexpectedReviewFunctionSet';
+ end if;
+ for f in select * from (values
+  ('review_private.immutable_intent()','postgres',false,array['postgres']::text[]),
+  ('review_private.require_authority(uuid)','byetery_d2_intent_owner',true,array['byetery_d2_intent_owner']::text[]),
+  ('review_private.create_registration_intent(uuid,text,jsonb)','byetery_d2_intent_owner',true,array['byetery_d2_intent_owner','byetery_d2_review_app']::text[]),
+  ('review_private.registration_intent_status(uuid,uuid)','byetery_d2_intent_owner',true,array['byetery_d2_intent_owner','byetery_d2_review_app']::text[]),
+  ('review_private.adopt_registration_intent(uuid)','byetery_d2_intent_owner',true,array['byetery_d2_intent_owner','postgres']::text[])
+ ) as expected(signature,owner_name,definer,grantees) loop
+  select * into stored_proc from pg_proc where oid=to_regprocedure(f.signature);
+  if not found or stored_proc.proowner<>f.owner_name::regrole or stored_proc.prosecdef<>f.definer
+   or stored_proc.proconfig is distinct from array['search_path=""']::text[] then
+   raise exception 'UnsafeReviewFunction: %',f.signature;
+  end if;
+  select array_agg(pg_get_userbyid(x.grantee)::text order by pg_get_userbyid(x.grantee)::text) into a
+   from aclexplode(coalesce(stored_proc.proacl,acldefault('f',stored_proc.proowner))) x where x.privilege_type='EXECUTE';
+  if a is distinct from f.grantees or exists(
+   select from aclexplode(coalesce(stored_proc.proacl,acldefault('f',stored_proc.proowner))) x
+   where x.grantor<>stored_proc.proowner or x.is_grantable or x.privilege_type<>'EXECUTE') then
+   raise exception 'UnexpectedReviewFunctionACL: %',f.signature;
+  end if;
+ end loop;
+ if exists(select from pg_proc where pronamespace='review_private'::regnamespace
+  and prosecdef and proowner='postgres'::regrole) then
+  raise exception 'PostgresOwnedReviewDefiner';
+ end if;
+ if not has_function_privilege('postgres','review_private.adopt_registration_intent(uuid)','EXECUTE')
+  or not exists(select from pg_proc p cross join lateral aclexplode(p.proacl) x
+   where p.oid='review_private.adopt_registration_intent(uuid)'::regprocedure
+    and x.grantee='postgres'::regrole and x.grantor='byetery_d2_intent_owner'::regrole
+    and x.privilege_type='EXECUTE' and not x.is_grantable) then
+  raise exception 'IndependentLocalAdoptionExecuteMissing';
+ end if;
+ select array_agg(p.oid::regprocedure::text order by p.oid::regprocedure::text) into a
+  from pg_proc p where pronamespace='review_private'::regnamespace
+   and has_function_privilege('byetery_d2_review_app',p.oid,'EXECUTE');
+ if a is distinct from array['review_private.create_registration_intent(uuid,text,jsonb)','review_private.registration_intent_status(uuid,uuid)']::text[] then raise exception 'UnexpectedHostedEntrypoints'; end if;
+ if (select count(*) from pg_class where relnamespace='review_private'::regnamespace and relkind='r')<>2
+  or exists(select from pg_class where relnamespace='review_private'::regnamespace and relkind='r'
+   and (relowner<>'postgres'::regrole or not relrowsecurity or not relforcerowsecurity))
+  or (select nspowner from pg_namespace where oid='review_private'::regnamespace)<>'postgres'::regrole then
+  raise exception 'UnsafeReviewTableOwnershipOrRLS';
+ end if;
+ if exists(select from pg_class c join pg_namespace n on n.oid=c.relnamespace
+  where n.nspname in ('review_private','app_private','api_private','chain_private') and c.relkind in ('r','p')
+  and (has_table_privilege('byetery_d2_review_app',c.oid,'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')
+   or has_any_column_privilege('byetery_d2_review_app',c.oid,'SELECT,INSERT,UPDATE,REFERENCES'))) then
+  raise exception 'HostedRawTableOrColumnPrivilege';
+ end if;
+ if exists(select from pg_default_acl where defaclrole=any(array['byetery_d2_intent_owner']::regrole[])) then
+  raise exception 'UnexpectedOwnerDefaultACL_DP2';
+ end if;
+end $postconditions$;
 commit;
