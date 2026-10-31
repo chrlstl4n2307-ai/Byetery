@@ -1,0 +1,7 @@
+{
+  "git": {
+    "deploymentEnabled": {
+      "instaward/d2-web-mvp": false
+    }
+  }
+}
