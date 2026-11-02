@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "gitSha": "b9a1efd51f75862623992ef22dcd38b946bbc63f",
+  "network": "TESTNET",
+  "contractId": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "assetCode": "GREENTEST",
+  "issuer": "GCHROKHXHL4L635J6Y6DWFFD5DDHABOAF4BP5TEUZDZQMW4XYS6DIDL7",
+  "sac": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+  "rewardBaseUnits": "100000000",
+  "runs": [
+    {"runId":"RUN1","batteryId":"BYE-D3-EXAMPLE-1","recipient":null,"negativeCases":["duplicate_reward","altered_record"]},
+    {"runId":"RUN2","batteryId":"BYE-D3-EXAMPLE-2","recipient":null,"negativeCases":["early_reward","invalid_transition","unauthorized_recycler"]},
+    {"runId":"RUN3","batteryId":"BYE-D3-EXAMPLE-3","recipient":null,"negativeCases":["uncertain_response"]}
+  ]
+}

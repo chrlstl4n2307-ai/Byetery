@@ -3,11 +3,15 @@ import { Repository } from './repository.ts';
 import { Coordinator } from './coordinator.ts';
 import { SupabaseAuth } from './auth.ts';
 import { api,listen,close } from './http.ts';
-import { TestnetStellarService } from '../testnet/service.ts';
-import { TestnetRpc } from '../testnet/rpc.ts';
-import { LocalSecureStoreSigner,signerProcess } from '../local-secure-store-signer.ts';
+import { assertLocalRuntime } from '../d3/operator-guard.ts';
 try {
+  // This entrypoint owns local signing and automatic reconciliation. Hosted
+  // review uses its separate read-only runtime; refuse before loading secrets.
+  assertLocalRuntime();
   const config=await settings(),repo=new Repository(config);
+  const {TestnetStellarService}=await import('../testnet/service.ts');
+  const {TestnetRpc}=await import('../testnet/rpc.ts');
+  const {LocalSecureStoreSigner,signerProcess}=await import('../local-secure-store-signer.ts');
   const real=config.mode==='TESTNET'?new TestnetStellarService(repo,new TestnetRpc(),new LocalSecureStoreSigner(signerProcess(config.signerBinary!))):undefined;
   const coordinator=new Coordinator(repo,{},undefined,real);
   await repo.transaction(db=>repo.config(db));

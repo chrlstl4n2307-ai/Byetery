@@ -1,0 +1,155 @@
+{
+  "task": "D3-1-BUILD",
+  "date": "2026-11-02",
+  "timezone": "America/Santiago",
+  "startingSha": "b9a1efd51f75862623992ef22dcd38b946bbc63f",
+  "branch": "instaward/d2-web-mvp",
+  "classification": "LOCAL OFFLINE BUILD; NOT D3 LIVE COMPLETION",
+  "readiness": {
+    "runner": "READY — plan/offline simulate",
+    "manifestExporter": "READY — offline consistency validation",
+    "negativeHarness": "READY — six offline controls",
+    "uncertainResponseRecovery": "READY — unchanged D1 worker tested",
+    "liveExecute": "NOT ENABLED BY DESIGN; CLI always denies, library always fails after preflight; no live binding shipped"
+  },
+  "files": [
+    {
+      "path": "backend/src/d3/cli.ts",
+      "sha256": "e0e6414483de1202b5005b5db173d0e29347d1886751bb907284c4fee309bba3"
+    },
+    {
+      "path": "backend/src/d3/manifest.ts",
+      "sha256": "a77eaf91be17f0c36fa07a330545983a8e666904f1e6c1f3ad808a689369860e"
+    },
+    {
+      "path": "backend/src/d3/model.ts",
+      "sha256": "246c49dcce33ba6536bfc936459d5be3c5212808cbab7f26abec34b5d5cd23dc"
+    },
+    {
+      "path": "backend/src/d3/negatives.ts",
+      "sha256": "9e4a94c3b2f21ef6a4e0cec47b02c57da0f9ecb54fb587020a612b772816b471"
+    },
+    {
+      "path": "backend/src/d3/runner.ts",
+      "sha256": "fa56b534c3e721794a2bb55c616ec9832d8311f3a7c96dde471dccacd03ab41c"
+    },
+    {
+      "path": "backend/tests/d3-fixtures.ts",
+      "sha256": "29b7ec590a6c76c2a25582b6bea7cc904c5783da9014e372696e52c607802960"
+    },
+    {
+      "path": "backend/tests/d3-recovery.test.ts",
+      "sha256": "1ccdbdeb3140e3d50aa4c8977ce5a6437a08921359838b83329843f076cb3922"
+    },
+    {
+      "path": "backend/tests/d3-tooling.test.ts",
+      "sha256": "f4956dae301e7ae060cebf2409015c8c3c402639ae1be2651dc6a2e439c0f9b8"
+    },
+    {
+      "path": "docs/instaward/d3/D3-RUN-PLAN.example.json",
+      "sha256": "1710b4af393c215317edc242da74ad7931bc577d0b04ef44dfe1bc077a18b1b3"
+    },
+    {
+      "path": "docs/instaward/d3/D3-TOOLING.md",
+      "sha256": "58f5596283c897682658b9c37a5ce575719a2054d09f653e55500096fa75b4d7"
+    }
+  ],
+  "implementationFingerprint": "63f523a97753e364662a5cb61fc1113d6934c59871da233e19778eb5988fba6b",
+  "tests": {
+    "newD3": 40,
+    "backend": {
+      "total": 383,
+      "pass": 383,
+      "fail": 0,
+      "skip": 0,
+      "priorBaseline": 343
+    },
+    "frontend": {
+      "total": 321,
+      "pass": 321,
+      "fail": 0
+    },
+    "backendTypeScript": "PASS",
+    "rustNative": {
+      "pass": 21,
+      "composition": "20 unit +1 open_return authorization integration"
+    },
+    "rustWasmFeature": {
+      "pass": 22,
+      "composition": "same20 +1 open_return +1 WASM"
+    },
+    "wasmReleaseFmtClippy": "PASS",
+    "python": {
+      "pass": 4,
+      "fail": 0
+    },
+    "mockDemo": "PASS",
+    "planCLI": "PASS — three explicit wallet blockers",
+    "simulateCLI": "PASS — 3 mocked runs,15 operations,6 controls,0 network calls",
+    "secretAudit": {
+      "files": 649,
+      "historicalBlobs": 762,
+      "stagedFiles": 0,
+      "findings": 0
+    },
+    "diffCheck": "PASS"
+  },
+  "txModel": {
+    "lifecycle": 12,
+    "reward": 3,
+    "totalSuccess": 15,
+    "negativeBroadcasts": 0,
+    "setupAuthorized": 0,
+    "maintenanceAuthorized": 0
+  },
+  "frozenWasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "preexistingFilesIntact": 567,
+  "localPostgres": {
+    "version": "17.6",
+    "executors": "Direct NOSUPERUSER; existing fixture/SQL/assertions unchanged",
+    "cleanup": {
+      "remaining_fixture_databases": 0,
+      "test_cluster_stopped_retained": true,
+      "legacy_cluster_restored_unmodified": true
+    },
+    "oldLauncherCountAdaptation": "In-memory harness reporting expectation343->383 only; no source/test assertion weakened",
+    "initialSandboxInitdbAttempt": "Stopped before suite/server startup; partial fixture retained and legacy restored before successful isolated rerun"
+  },
+  "remainingOwnerDecisions": [
+    "local signer custody/authorization including ADMIN registration",
+    "final Wallet A/Wallet B and control/application links",
+    "USER2 release — no invented mapping",
+    "negative evidence policy (API/unsigned simulation/offline recovery)",
+    "TTL retention/extension policy",
+    "exact Testnet transaction budget",
+    "hosted versus local/API evidence surface",
+    "reviewed new D3 SHA and separately approved future live binding"
+  ],
+  "safety": {
+    "operationalTestnetTransactions": 0,
+    "operationalSignatures": 0,
+    "broadcasts": 0,
+    "remoteMutations": 0,
+    "SecureStoreOpened": false,
+    "realRpcSimulation": 0,
+    "newNetworkWallets": 0,
+    "trustlinesCreated": 0,
+    "ttlExtended": 0,
+    "newDeployments": 0,
+    "contractFilesChanged": false,
+    "frontendChanged": false,
+    "supabaseSchemaChanged": false,
+    "envFilesChanged": false,
+    "commits": 0,
+    "pushes": 0
+  },
+  "next": "READY_FOR_D3-2-REHEARSAL",
+  "nextScope": "Offline rehearsal/review only; live execute not implemented/enabled",
+  "newReviewedShaRequiredBeforeRealD3Runs": true,
+  "officialInternalAcceptance": {
+    "D1": "12/12",
+    "D2": "6/6",
+    "D3": "0/5",
+    "total": "18/23"
+  }
+}
