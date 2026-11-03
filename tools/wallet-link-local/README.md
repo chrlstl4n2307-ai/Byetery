@@ -83,6 +83,24 @@ SameSite=Strict loopback cookie, with lifetime capped at30minutes/access expiry.
 No token/password/signature/nonce is logged or persisted. Restart forgets sessions;
 there is no refresh or session-import endpoint. Use normal login again on expiry.
 
+### Local UI session recovery (D3-7G candidate)
+
+On load/reload the page calls the existing normal `GET /api/me`. A valid Testnet
+profile containing Wallet A restores the UI without another password grant and
+keeps logout available; invalid/expired/unavailable profiles return to login.
+The login button is disabled while authenticated or while restoring a session.
+A repeated submission that receives `409 LogoutFirst` recovers through `/api/me`
+and shows a safe session-already-active message. It never clears a valid profile
+before trying login. Other recoverable errors retain the previous profile and
+logout control; authentication rejection or an invalid profile fails closed.
+
+Normal logout still calls only the existing `POST /auth/logout`. The UI clears
+after its result, not before. If closing is uncertain it checks `/api/me`: a still
+valid session keeps a usable logout button; a missing session returns to login
+without claiming remote logout succeeded. No token/cookie extraction, manual
+session import, privileged revocation, new route or guard change.
+This candidate must be reviewed/frozen before another live wallet-link attempt.
+
 Existing Coordinator is reused only for its constant challenge/verify actions
 and idempotency semantics; no processor is provided and no reconcile is called.
 Fresh-key proof replay409; exact Idempotency-Key retry can return its cached
