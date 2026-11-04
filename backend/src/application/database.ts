@@ -47,6 +47,7 @@ export async function databaseTransaction<T>(pool:Pool,work:(client:PoolClient)=
     healthy();
     await client.query('begin');healthy();
     await client.query(`set local lock_timeout='${lockTimeout}'`);healthy();
+    await client.query("set local statement_timeout='15s'");healthy();
     if(deploymentId){await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))',[deploymentId]);healthy();}
     const result=await work(client);healthy();
     await client.query('commit');healthy();return result;

@@ -12,7 +12,8 @@ export type TransactionLaneState =
   | "PENDING"
   | "UNCERTAIN"
   | "CONFIRMED"
-  | "FAILED";
+  | "FAILED"
+  | "CANCELLED_LOCAL";
 const states: Record<string, TransactionLaneState> = {
   QUEUED: "QUEUED",
   AWAITING_AUTH: "PENDING",
@@ -24,6 +25,7 @@ const states: Record<string, TransactionLaneState> = {
   CONFIRMED: "CONFIRMED",
   FAILED: "FAILED",
   REJECTED: "FAILED",
+  CANCELLED_LOCAL: "CANCELLED_LOCAL",
 };
 const labels: Record<TransactionLaneState, string> = {
   NO_PENDING_OPERATION: "Sin operación pendiente",
@@ -32,8 +34,11 @@ const labels: Record<TransactionLaneState, string> = {
   UNCERTAIN: "Resultado incierto",
   CONFIRMED: "Confirmada",
   FAILED: "Fallida",
+  CANCELLED_LOCAL: "Cerrada antes del envío",
 };
-export function transactionPresentation<T extends Pick<PendingOperation, "state">>(operation: T | null) {
+export function transactionPresentation<
+  T extends Pick<PendingOperation, "state">,
+>(operation: T | null) {
   const state = operation
     ? Object.hasOwn(states, operation.state)
       ? states[operation.state]

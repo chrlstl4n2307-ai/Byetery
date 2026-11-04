@@ -31,11 +31,14 @@ test('D1.5 actual HTTP/Coordinator cache replay bypasses processor; one changed 
  const processor={process:async(id:string)=>{calls++;const reply={status:201,body:{source:'TESTNET',operationId:id,transactionHash:'ab'.repeat(32)}};
   await db.query('update api_private.idempotency set response_status=201,response_body=$2::jsonb where operation_id=$1',[id,JSON.stringify(reply.body)]);return reply;}};
  const auth=Object.assign(Object.create(SupabaseAuth.prototype) as SupabaseAuth,{validate:async()=>({authUserId:user,sessionId:session})});
- const server=api(auth,new Coordinator(repo,{},undefined,processor)),url=await listen(server),key=randomUUID(),p=payloads('BYE-D1-IDEMP-LOCAL');
+ const coordinator=new Coordinator(repo,{},undefined,processor);
+ const server=api(auth,coordinator),url=await listen(server),key=randomUUID(),p=payloads('BYE-D1-IDEMP-LOCAL');
  const call=async(body:unknown)=>{const r=await fetch(url+'/api/batteries',{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':key},body:JSON.stringify(body)});return {status:r.status,body:await r.json() as any};};
  try{
+  const accepted=await call(p.original);assert.equal(accepted.status,202);assert.equal(calls,0);
+  await coordinator.reconcile();
   const a=await call(p.original),b=await call(p.original),c=await call(p.changed);
-  assert.equal(a.status,201);assert.deepEqual(b,a);assert.equal(c.status,409);assert.equal(c.body.error.code,'IdempotencyConflict');assert.equal(calls,1);
+  assert.equal(a.status,201);assert.equal(a.body.operationId,accepted.body.operationId);assert.deepEqual(b,a);assert.equal(c.status,409);assert.equal(c.body.error.code,'IdempotencyConflict');assert.equal(calls,1);
   assert.equal((await db.query('select * from app_private.stellar_operations')).rows.length,1);
   assert.equal((await db.query('select * from api_private.testnet_envelopes')).rows.length,0);
   assert.equal((await db.query('select * from app_private.evidence_versions')).rows.length,1);

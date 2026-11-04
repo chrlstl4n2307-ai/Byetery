@@ -13,10 +13,22 @@ type Context = { params: Promise<{ path: string[] }> };
 async function handle(request: Request, context: Context) {
   try {
     const { path } = await context.params;
-    if (!allowedApiPath(request.method, path)) return error(404, "NotFound");
+    const localStatus =
+      request.method === "GET" &&
+      path.length === 2 &&
+      path[0] === "operations" &&
+      (path[1] === "lookup" || /^[a-f0-9-]{36}$/.test(path[1]));
+    if (!localStatus && !allowedApiPath(request.method, path))
+      return error(404, "NotFound");
     if (request.method === "POST" && !sameOrigin(request))
       return error(403, "OriginRejected");
     const config = configuration();
+    if (
+      localStatus &&
+      (config.runtime.environment !== "DEV" ||
+        config.runtime.source !== "TESTNET")
+    )
+      return error(404, "NotFound");
     if (request.method === "POST" && config.runtime.readOnly)
       return error(403, "ReadOnlyTestnet");
     const client = await authClient();
@@ -42,14 +54,24 @@ async function handle(request: Request, context: Context) {
         return error(400, "InvalidInput");
       }
     }
-    const response = await fetch(config.upstream + "/api/" + path.join("/"), {
-      method: request.method,
-      headers,
-      body,
-      cache: "no-store",
-      redirect: "error",
-      signal: AbortSignal.timeout(30000),
-    });
+    let lookup = "";
+    if (localStatus && path[1] === "lookup") {
+      const key = new URL(request.url).searchParams.get("key");
+      if (!key || !/^[A-Za-z0-9._:-]{8,128}$/.test(key))
+        return error(404, "NotFound");
+      lookup = "?key=" + encodeURIComponent(key);
+    }
+    const response = await fetch(
+      config.upstream + "/api/" + path.join("/") + lookup,
+      {
+        method: request.method,
+        headers,
+        body,
+        cache: "no-store",
+        redirect: "error",
+        signal: AbortSignal.timeout(30000),
+      },
+    );
     if (response.status >= 500)
       return error(response.status, "ServiceUnavailable");
     const payload: unknown = await response.json();

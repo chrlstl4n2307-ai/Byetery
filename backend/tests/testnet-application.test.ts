@@ -18,7 +18,7 @@ import type { Work } from '../src/testnet/store.ts';
 import type { Command } from '../src/domain.ts';
 
 async function appFixture(){
-  const db=await localDb(),deploymentId=randomUUID(),admin=randomUUID(),user=randomUUID(),session=randomUUID();
+  const db=await localDb(),deploymentId='5c0cad2f-5f25-4216-8068-6cb9d2d26325',admin=randomUUID(),user=randomUUID(),session=randomUUID();
   await db.exec('create table auth.sessions(id uuid primary key,user_id uuid,not_after timestamptz)');
   await db.query('insert into auth.users values($1),($2)',[admin,user]);
   await db.query('insert into auth.sessions values($1,$2,null)',[session,admin]);
@@ -66,10 +66,12 @@ test('real HTTP path queues authenticated Testnet operation and preserves it acr
     const call=(token:boolean)=>fetch(url+'/api/batteries',{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':key,...token?{Authorization:'Bearer fixture'}:{}},
       body:JSON.stringify({batteryId:id,metadata:{fixture:true}})});
     assert.equal((await call(false)).status,401);
-    const response=await call(true);const firstBody=await response.json();assert.equal(response.status,503,JSON.stringify(firstBody));assert.equal(firstBody.source,'TESTNET');
+    const response=await call(true);const firstBody=await response.json();assert.equal(response.status,202,JSON.stringify(firstBody));assert.equal(firstBody.source,'TESTNET');
     const rows=await f.db.query<{id:string}>("select id from app_private.stellar_operations where deployment_id=$1",[f.deploymentId]);assert.equal(rows.rows.length,1);
     assert.equal(firstBody.operationId,rows.rows[0].id);
-    await call(true);assert.equal((await f.db.query('select * from app_private.stellar_operations')).rows.length,1);
+    assert.equal((await f.db.query('select * from api_private.testnet_work')).rows.length,0);
+    assert.equal((await coordinator.process(firstBody.operationId)).status,503);
+    assert.equal((await call(true)).status,202);assert.equal((await f.db.query('select * from app_private.stellar_operations')).rows.length,1);
     assert.equal((await f.db.query('select * from api_private.mock_runtime')).rows.length,0);
     assert.equal((await f.db.query('select * from api_private.testnet_envelopes')).rows.length,0);
     assert.equal(launched,0);

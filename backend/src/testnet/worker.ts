@@ -1,3 +1,4 @@
+import {ExecutionSupervisor} from '../application/execution-supervisor.ts';
 import { DomainError,ensure } from '../domain.ts';
 import { finalizedBody, signedIdentity, type PreparedBody, type FinalizedBody,
   type Observation, type StateEvidence, type TransactionIdentity, type TransportState } from './identity.ts';
@@ -28,11 +29,11 @@ export function recoveryClassification(w:Work,identity:TransactionIdentity|null)
   return w.state==='PREPARING'?'UNSIGNED_PREPARATION_INTERRUPTED':'NOT_INTERRUPTED';
 }
 export type SqlProjector = (db: Sql, work: Work) => Promise<void>;
-const resolved = (state: TransportState) => ['PROJECTED','CONFIRMED_FAILED','EXPIRED_NOT_APPLIED'].includes(state);
+const resolved = (state: TransportState) => ['PROJECTED','CONFIRMED_FAILED','EXPIRED_NOT_APPLIED','ABORTED_PRE_DISPATCH'].includes(state);
 export class DurableTransactionWorker {
-  readonly store: TransportStore; readonly transport: TransactionTransport; readonly project: SqlProjector;
-  constructor(store: TransportStore, transport: TransactionTransport, project: SqlProjector) {
-    this.store=store;this.transport=transport;this.project=project;
+  readonly store: TransportStore; readonly transport: TransactionTransport; readonly project: SqlProjector; readonly supervisor?:ExecutionSupervisor;
+  constructor(store: TransportStore, transport: TransactionTransport, project: SqlProjector, supervisor?:ExecutionSupervisor) {
+    this.store=store;this.transport=transport;this.project=project;this.supervisor=supervisor;
   }
   async run(id: string, worker: string): Promise<TransportState> {
     return this.execute(id,worker);
@@ -70,16 +71,18 @@ export class DurableTransactionWorker {
         healthy();
         await this.store.preparing(claim);
         const context=await this.store.work(id);
-        const prepared=await this.transport.prepareAndSimulate(context);
+        context.auditPhase=phase=>this.store.phase(claim,phase);
+        const prepared=await this.phase(id,'PREPARING',()=>this.transport.prepareAndSimulate(context));
         if(prepared.simulation)await this.store.prepared(claim,prepared.simulation);
         healthy();
-        const authorized=await this.transport.attachSorobanAuthorization(prepared,context);
+        const authorized=await this.phase(id,'AUTHORIZATION',()=>this.transport.attachSorobanAuthorization(prepared,context));
         healthy();
         const final=finalizedBody(context,authorized); // SDK hash before source signature.
-        const signed=await this.transport.signEnvelope(final,context);
+        const signed=await this.phase(id,'ENVELOPE_SIGNING',()=>this.transport.signEnvelope(final,context));
         healthy();
         identity=signedIdentity(context,final,signed);
-        await this.store.persist(claim,identity); // MUST COMMIT before dispatch intent/send.
+        await this.store.phase(claim,'IDENTITY_PERSIST_START');
+        await this.phase(id,'PERSISTING',()=>this.store.persist(claim,identity!),true); // MUST COMMIT before dispatch intent/send.
         healthy();
       }
       const w=await this.store.work(id);
@@ -91,6 +94,8 @@ export class DurableTransactionWorker {
       }
       return (await this.store.work(id)).state;
     } catch(error){
+      try{await this.store.phase(claim,'PHASE_OUTCOME_UNKNOWN');}catch{ /* A committed START remains UNKNOWN if diagnostics fail. */ }
+      if(error instanceof DomainError&&error.code==='RuntimeStopping'){try{await this.store.phase(claim,'SHUTDOWN_INTERRUPTED');}catch{ /* START/state remains durable. */ }}
       if(error instanceof DomainError&&error.code==='DatabaseConnectionInterrupted'){
         // Best effort diagnostic only. PREPARING itself denies automatic replay,
         // including when the database cannot accept this diagnostic.
@@ -103,8 +108,9 @@ export class DurableTransactionWorker {
       throw error;
     } finally { await this.store.release(claim); }
   }
+  private phase<T>(id:string,name:string,work:()=>Promise<T>,persistence=false){return this.supervisor?this.supervisor.phase(id,name,work,persistence):work();}
   private async dispatch(claim: Claim, identity: TransactionIdentity, reviewed: boolean, decisionId:string|null=null,healthy:()=>void=()=>{}): Promise<void> {
-    healthy();
+    healthy();this.supervisor?.assertAdmission();
     const validity=await this.transport.validity(identity); // external; no SQL lock.
     // Reload committed bytes: never submit a transient prepared/signer object.
     const durable=await this.store.identity(claim.operationId);
@@ -112,6 +118,7 @@ export class DurableTransactionWorker {
     if(!(BigInt(validity.closeTime)<BigInt(durable.maxTime)
       && BigInt(validity.closeTime)>=BigInt(durable.minTime)
       && durable.authorizationExpirations.every(v=>v>validity.ledger)))return;
+    this.supervisor?.assertAdmission();
     await this.store.dispatchIntent(claim,reviewed,decisionId);
     healthy();
     // Intentionally outside the submit catch: drift is a durable reviewed hold,
@@ -123,6 +130,7 @@ export class DurableTransactionWorker {
       throw error;
     }
     healthy();
+    this.supervisor?.assertAdmission();
     try {
       const reply=await this.transport.submit(durable);
       ensure(reply.transactionHash===durable.transactionHash,'SubmitIdentityMismatch');

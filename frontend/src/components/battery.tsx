@@ -217,6 +217,7 @@ export function StateSummary({ battery }: { battery: Battery }) {
 /** Preserve an idempotency key + exact input in memory until a definitive response.
  * No automatic retry of mutations. Different uncertain operations cannot replace it. */
 export function useMutation(onSuccess: () => Promise<void> | void) {
+  const runtime = useWebRuntime();
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
     [uncertain, setUncertain] = useState(false);
@@ -224,7 +225,69 @@ export function useMutation(onSuccess: () => Promise<void> | void) {
     null,
   );
   const running = useRef(false);
-  async function send(path: string, body: unknown = {}) {
+  async function observe(key: string, initialId?: string) {
+    let id = initialId;
+    let hash: string | null = null;
+    const deadline = Date.now() + 120000;
+    while (Date.now() < deadline) {
+      const url = id
+        ? "/api/operations/" + id
+        : "/api/operations/lookup?key=" + encodeURIComponent(key);
+      const status = await request<{
+        operationId: string;
+        source: string;
+        class: string;
+        terminal: boolean;
+        transactionHash: string | null;
+        result: string | null;
+      }>(
+        url,
+        undefined,
+        undefined,
+        AbortSignal.timeout(
+          Math.max(1, Math.min(10000, deadline - Date.now())),
+        ),
+      ).catch(() => null);
+      if (status) {
+        if (
+          status.source !== "TESTNET" ||
+          !/^[a-f0-9-]{36}$/.test(status.operationId) ||
+          (id && status.operationId !== id) ||
+          (hash && status.transactionHash !== hash)
+        )
+          throw Error("La operación requiere revisión.");
+        id = status.operationId;
+        hash = status.transactionHash;
+        if (status.terminal) {
+          operation.current = null;
+          setUncertain(false);
+          setMessage(
+            status.class === "TERMINAL_UNSIGNED"
+              ? "Cerrada antes del envío"
+              : status.result === "SUCCESS"
+                ? "Operación confirmada por la API."
+                : "Operación terminada. Consulta el resultado.",
+          );
+          await onSuccess();
+          return;
+        }
+        if (
+          ["PRE_DISPATCH_INTERRUPTED", "REVIEWED_RESOLUTION_REQUIRED"].includes(
+            status.class,
+          )
+        )
+          break;
+      }
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.min(1000, Math.max(0, deadline - Date.now()))),
+      );
+    }
+    setUncertain(true);
+    setMessage(
+      "La operación requiere revisión. Consulta el estado antes de continuar.",
+    );
+  }
+  async function send(path: string, body: unknown = {}): Promise<void> {
     if (running.current) return;
     if (
       operation.current &&
@@ -236,6 +299,7 @@ export function useMutation(onSuccess: () => Promise<void> | void) {
       );
       return;
     }
+    if (runtime.source === "TESTNET" && operation.current) return retry();
     operation.current ??= { path, body, key: crypto.randomUUID() };
     running.current = true;
     setBusy(true);
@@ -243,7 +307,20 @@ export function useMutation(onSuccess: () => Promise<void> | void) {
     try {
       const result = await request<{
         pendingOperation?: { state: string } | null;
+        operationId?: string;
+        source?: string;
+        statusUrl?: string;
       }>(path, body, operation.current.key);
+      if (
+        result.source === "TESTNET" &&
+        result.operationId &&
+        result.statusUrl
+      ) {
+        if (!/^[a-f0-9-]{36}$/.test(result.operationId))
+          throw Error("La operación requiere revisión.");
+        await observe(operation.current.key, result.operationId);
+        return;
+      }
       if (result.pendingOperation) {
         setUncertain(true);
         setMessage(
@@ -260,16 +337,35 @@ export function useMutation(onSuccess: () => Promise<void> | void) {
       if (e instanceof ApiFailure && e.status < 500) {
         operation.current = null;
         setUncertain(false);
+      } else if (
+        runtime.source === "TESTNET" &&
+        operation.current &&
+        e instanceof ApiFailure &&
+        e.status >= 500
+      ) {
+        await observe(operation.current.key).catch(() => setUncertain(true));
       } else setUncertain(true);
     } finally {
       running.current = false;
       setBusy(false);
     }
   }
-  const retry = () => {
+  async function retry(): Promise<void> {
     const pending = operation.current;
-    if (pending) return send(pending.path, pending.body);
-  };
+    if (!pending || running.current) return;
+    if (runtime.source !== "TESTNET") return send(pending.path, pending.body);
+    running.current = true;
+    setBusy(true);
+    try {
+      await observe(pending.key);
+    } catch {
+      setUncertain(true);
+      setMessage("La operación requiere revisión.");
+    } finally {
+      running.current = false;
+      setBusy(false);
+    }
+  }
   return { send, retry, busy, message, uncertain };
 }
 export function BatteryView({ id }: { id: string }) {

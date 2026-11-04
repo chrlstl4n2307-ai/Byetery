@@ -1,3 +1,5 @@
+import {ExecutionSupervisor} from '../application/execution-supervisor.ts';
+import {operationPresentation} from '../application/operation-status.ts';
 import { createHash } from 'node:crypto';
 import type { ActorRole, Battery, Command, Hash32, ReturnRequest } from '../domain.ts';
 import { DomainError, ensure } from '../domain.ts';
@@ -62,11 +64,11 @@ export class PersistedContextGuard implements ContextGuard {
 
 /** Real implementation, selected explicitly. Its durable worker owns signing/dispatch. */
 export class TestnetStellarService implements StellarService,OperationProcessor {
-  readonly repo:Repository;readonly store:TransportStore;readonly transport:TestnetTransport;readonly worker:DurableTransactionWorker;
-  constructor(repo:Repository,rpcClient:TestnetRpc,signer:PhasedStellarSigner){
-    ensure(repo.mode==='TESTNET','TestnetConfigurationRequired');this.repo=repo;
+  readonly repo:Repository;readonly store:TransportStore;readonly transport:TestnetTransport;readonly worker:DurableTransactionWorker;readonly supervisor:ExecutionSupervisor;
+  constructor(repo:Repository,rpcClient:TestnetRpc,signer:PhasedStellarSigner,supervisor=new ExecutionSupervisor()){
+    ensure(repo.mode==='TESTNET','TestnetConfigurationRequired');this.repo=repo;this.supervisor=supervisor;
     this.store=new TransportStore(new PgTransportDatabase(repo.pool));
-    this.transport=new TestnetTransport(rpcClient,signer,new PersistedContextGuard(repo),id=>this.store.work(id),repo.deploymentId);
+    this.transport=new TestnetTransport(rpcClient,signer,new PersistedContextGuard(repo),id=>this.store.work(id),repo.deploymentId,supervisor);
     this.worker=new DurableTransactionWorker(this.store,this.transport,async(db,w)=>{
       const facts=w.confirmation?.facts??(w.stateEvidence?.outcome==='APPLIED'?JSON.parse(w.stateEvidence.evidence).facts:null);
       ensure(facts,'ProjectionFactsMissing');
@@ -78,7 +80,7 @@ export class TestnetStellarService implements StellarService,OperationProcessor 
         ensure(w.confirmation&&facts.reward,'RewardEvidenceMissing');
         await db.query("update app_private.reward_attempts set state='SUCCEEDED' where operation_id=$1",[w.operationId]);
       }
-    });
+    },supervisor);
   }
   private deployment(d:string){ensure(d===this.repo.deploymentId,'DeploymentMismatch');}
   async getConfig(d:string){this.deployment(d);return this.transport.config();}
@@ -124,6 +126,11 @@ export class TestnetStellarService implements StellarService,OperationProcessor 
   private async processReviewed(id:string,unsignedReview?:ReviewedUnsignedResume):Promise<Reply>{
     const op=await this.repo.transaction(db=>one(db,'select parameters,state,error_code from app_private.stellar_operations where deployment_id=$1 and id=$2',[this.repo.deploymentId,id]));
     ensure(op,'OperationNotFound');
+    if(op.state==='CANCELLED_LOCAL'){
+      ensure(!unsignedReview,'UnsignedRecoveryMismatch');
+      ensure((await this.store.work(id)).state==='ABORTED_PRE_DISPATCH','TransportResolved');
+      return {status:200,body:operationPresentation({id,state:op.state,transport_state:'ABORTED_PRE_DISPATCH',transaction_hash:null,dispatch_attempts:0,review_required:false,interrupted:false})};
+    }
     try{
       const existing=await this.store.database.transaction(async db=>(await db.query('select 1 from api_private.testnet_work where operation_id=$1',[id])).rows.length>0);
       if(!existing){ensure(!unsignedReview,'OriginalWorkRequired');await this.prepare(this.repo.deploymentId,op.parameters as Command);}

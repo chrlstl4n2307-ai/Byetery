@@ -19,6 +19,7 @@ export class PgTransportDatabase implements TransportDatabase {
 export interface Work extends OperationContext {
   /** Original immutable application principal, never supplied by the browser/worker. */
   principal: string;
+  auditPhase?:(phase:string)=>Promise<void>;
   state: TransportState; dispatchAttempts: number;
   confirmation: Confirmation | null; stateEvidence: StateEvidence | null;
 }
@@ -36,6 +37,7 @@ export class TransportStore {
         where o.deployment_id=$1 and o.id=$2 and d.mode='TESTNET' and d.network_id=decode($5,'hex')
         on conflict(operation_id) do nothing`, [deploymentId, operationId, source, JSON.stringify(argumentsXdr), NETWORK_ID]);
       const w = await this.workIn(db, operationId);
+      ensure(w.state!=='ABORTED_PRE_DISPATCH','TransportResolved');
       ensure(w.deploymentId === deploymentId && w.sourceAccount === source
         && JSON.stringify(w.argumentsXdr) === JSON.stringify(argumentsXdr), 'QueueContextConflict');
     });
@@ -63,7 +65,7 @@ export class TransportStore {
     ensure(Number.isSafeInteger(leaseMs) && leaseMs > 0 && leaseMs <= 300_000, 'InvalidLease');
     return this.database.transaction(async db => {
       const w = await this.workIn(db, id);
-      ensure(!['PROJECTED','CONFIRMED_FAILED','EXPIRED_NOT_APPLIED'].includes(w.state), 'TransportResolved');
+      ensure(!['PROJECTED','CONFIRMED_FAILED','EXPIRED_NOT_APPLIED','ABORTED_PRE_DISPATCH'].includes(w.state), 'TransportResolved');
       const r = (await db.query<Row>(`insert into api_private.testnet_source_leases(network_id,source_account,deployment_id,operation_id,worker,generation,lease_until)
         values(decode($1,'hex'),$2,$3,$4,$5,1,clock_timestamp()+$6*interval '1 millisecond')
         on conflict(network_id,source_account) do update set deployment_id=excluded.deployment_id,operation_id=excluded.operation_id,
@@ -71,9 +73,11 @@ export class TransportStore {
         where api_private.testnet_source_leases.lease_until<=clock_timestamp()
           and (api_private.testnet_source_leases.operation_id=excluded.operation_id or exists
             (select 1 from api_private.testnet_work previous where previous.operation_id=api_private.testnet_source_leases.operation_id
-              and previous.state in ('PROJECTED','CONFIRMED_FAILED','EXPIRED_NOT_APPLIED')))
+              and previous.state in ('PROJECTED','CONFIRMED_FAILED','EXPIRED_NOT_APPLIED','ABORTED_PRE_DISPATCH')))
         returning generation`, [w.networkId,w.sourceAccount,w.deploymentId,id,worker,leaseMs])).rows[0];
       ensure(r, 'SourceAccountBusy');
+      const current=await this.workIn(db,id);
+      ensure(current.state!=='ABORTED_PRE_DISPATCH','TransportResolved');
       return {networkId:w.networkId,sourceAccount:w.sourceAccount,operationId:id,worker,generation:String(r.generation)};
     });
   }
@@ -82,7 +86,7 @@ export class TransportStore {
       and operation_id=$3 and worker=$4 and generation=$5 and lease_until>clock_timestamp() for update`,
       [c.networkId,c.sourceAccount,c.operationId,c.worker,c.generation])).rows[0];
     ensure(r, 'StaleClaim');
-    return this.workIn(db,c.operationId);
+    const w=await this.workIn(db,c.operationId);ensure(w.state!=='ABORTED_PRE_DISPATCH','TransportResolved');return w;
   }
   async release(c: Claim): Promise<void> {
     await this.database.transaction(async db => {
@@ -120,6 +124,7 @@ export class TransportStore {
       if(w.state!=='PREPARING'||w.dispatchAttempts!==0)return;
       if((await db.query('select 1 from api_private.testnet_envelopes where operation_id=$1',[w.operationId])).rows.length)return;
       await this.evidence(db,w,'STATE_READ',{classification:'UNSIGNED_PREPARATION_INTERRUPTED',reason:'DatabaseConnectionInterrupted',explicitResumeRequired:true});
+      await this.evidence(db,w,'EXECUTION_PHASE',{schemaVersion:'BYETERY_EXECUTION_PHASE_V1',phase:'PREPARATION_INTERRUPTED',operationId:w.operationId,publicActor:w.sourceAccount,generation:c.generation,attempt:1});
     });
   }
   async reviewedUnsignedResume(c:Claim,contextHash:string,decisionId:string):Promise<void>{
@@ -129,6 +134,11 @@ export class TransportStore {
       ensure(!(await db.query('select 1 from api_private.testnet_envelopes where operation_id=$1',[w.operationId])).rows.length,'SignedIdentityExists');
       await this.evidence(db,w,'STATE_READ',{classification:'REVIEWED_UNSIGNED_RESUME',decisionId,contextHash,generation:c.generation});
     });
+  }
+  async phase(c:Claim,phase:string){
+    ensure(['AUTH_SIGN_START','AUTH_SIGN_RETURNED','ENVELOPE_SIGN_START','ENVELOPE_SIGN_RETURNED','IDENTITY_PERSIST_START','PREPARATION_INTERRUPTED','SHUTDOWN_INTERRUPTED','PHASE_OUTCOME_UNKNOWN'].includes(phase),'InvalidExecutionPhase');
+    await this.database.transaction(async db=>{const w=await this.fence(db,c);await this.evidence(db,w,'EXECUTION_PHASE',{
+      schemaVersion:'BYETERY_EXECUTION_PHASE_V1',phase,operationId:w.operationId,publicActor:w.sourceAccount,generation:c.generation,attempt:1});});
   }
   async persist(c: Claim, i: TransactionIdentity): Promise<void> {
     await this.database.transaction(async db => {
@@ -144,6 +154,7 @@ export class TransportStore {
       await db.query("update api_private.testnet_work set state='SIGNED' where operation_id=$1",[c.operationId]);
       await db.query("update api_private.testnet_work set state='READY' where operation_id=$1",[c.operationId]);
       await db.query("update app_private.stellar_operations set state='READY' where id=$1 and state in ('QUEUED','AWAITING_AUTH')",[c.operationId]);
+      await this.evidence(db,w,'EXECUTION_PHASE',{schemaVersion:'BYETERY_EXECUTION_PHASE_V1',phase:'IDENTITY_PERSIST_COMMITTED',operationId:w.operationId,publicActor:w.sourceAccount,generation:c.generation,attempt:1});
     });
   }
   private async evidence(db: Sql, w: Work, kind: string, evidence: unknown, observation: number|null=null, confirmation: number|null=null, stateRead: number|null=null) {
@@ -206,7 +217,7 @@ export class TransportStore {
   async unknown(c: Claim, kind: 'SUBMIT_RESPONSE'|'RPC_OUTAGE',reply?:{transactionHash:string;status?:string;ledger?:number;sourceCheck?:{sequence:string;balance:string;ledger:number}|null}): Promise<void> {
     await this.database.transaction(async db => {
       const w=await this.fence(db,c);
-      if(['CONFIRMED_SUCCESS','PROJECTED','CONFIRMED_FAILED','EXPIRED_NOT_APPLIED'].includes(w.state))return;
+      if(['CONFIRMED_SUCCESS','PROJECTED','CONFIRMED_FAILED','EXPIRED_NOT_APPLIED','ABORTED_PRE_DISPATCH','ABORTED_PRE_DISPATCH'].includes(w.state))return;
       await db.query("update api_private.testnet_work set state='SUBMITTED_OR_UNKNOWN' where operation_id=$1",[w.operationId]);
       await db.query("update app_private.stellar_operations set state='UNKNOWN' where id=$1 and state='SUBMITTED'",[w.operationId]);
       if(w.command.kind==='pay_reward')await db.query("update app_private.reward_attempts set state='UNKNOWN' where operation_id=$1 and state='SUBMITTED'",[w.operationId]);

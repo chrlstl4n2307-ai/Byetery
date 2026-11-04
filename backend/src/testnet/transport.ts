@@ -1,3 +1,4 @@
+import type {ExecutionSupervisor} from '../application/execution-supervisor.ts';
 import { createHash } from 'node:crypto';
 import { Address, Contract, Networks, StrKey, Transaction, TransactionBuilder, rpc, scValToNative, xdr } from '@stellar/stellar-sdk';
 import { ensure, type Battery, type Command, type Deployment, type ReturnRequest } from '../domain.ts';
@@ -71,9 +72,9 @@ export function rewardFacts(c:Confirmation,b:Battery,r:ReturnRequest,d:Deploymen
 export class TestnetTransport implements TransactionTransport {
   readonly scope='TESTNET' as const;
   readonly rpc:TestnetRpc;readonly signer:PhasedStellarSigner;readonly guard:ContextGuard;
-  readonly load:(id:string)=>Promise<Work>;readonly deploymentId:string;
-  constructor(rpcClient:TestnetRpc,signer:PhasedStellarSigner,guard:ContextGuard,load:(id:string)=>Promise<Work>,deploymentId:string){
-    this.rpc=rpcClient;this.signer=signer;this.guard=guard;this.load=load;this.deploymentId=deploymentId;
+  readonly load:(id:string)=>Promise<Work>;readonly deploymentId:string;readonly supervisor?:ExecutionSupervisor;
+  constructor(rpcClient:TestnetRpc,signer:PhasedStellarSigner,guard:ContextGuard,load:(id:string)=>Promise<Work>,deploymentId:string,supervisor?:ExecutionSupervisor){
+    this.supervisor=supervisor;this.rpc=rpcClient;this.signer=signer;this.guard=guard;this.load=load;this.deploymentId=deploymentId;
   }
   async readiness(){
     await this.rpc.network();const latest=await this.rpc.latest();
@@ -150,7 +151,9 @@ export class TestnetTransport implements TransactionTransport {
     ensure(l.sequence>=body.preparedLedger&&l.sequence-body.preparedLedger<=20&&tx.timeBounds
       &&BigInt(tx.timeBounds.maxTime)>BigInt(l.closeTime)&&BigInt(tx.timeBounds.maxTime)<=BigInt(l.closeTime)+300n,'InvalidSigningWindow');
     return {transactionXdr:body.transactionXdr,method:w.command.kind,expectedSigners:invocation(w.command).signers,
-      networkPassphrase:Networks.TESTNET,currentLedger:l.sequence,expirationLedger:body.preparedLedger+60};
+      networkPassphrase:Networks.TESTNET,currentLedger:l.sequence,expirationLedger:body.preparedLedger+60,
+      audit:w.auditPhase,assertAdmission:()=>this.supervisor?.assertAdmission(),
+      childObserver:this.supervisor?{started:pid=>this.supervisor!.childStarted(pid),closed:pid=>this.supervisor!.childClosed(pid)}:undefined};
   }
   async attachSorobanAuthorization(body:PreparedBody,w:Work){
     const healthy=this.guard.connectionGuard?.()??(()=>{}),request=await this.signingRequest(body,w);healthy();

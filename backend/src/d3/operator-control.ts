@@ -76,6 +76,7 @@ export interface JournalEntry {
   taskId: string; gitSha: string; runId: string; batteryId: string; role: Role;
   operation: string; phase: 'INTENT' | 'RESULT' | 'UNKNOWN' | 'STOP';
   operationId?: string; requestId?: string; httpStatus?: number; domainState?: string;
+  observationClass?:string;
   rewardState?: string; transactionHash?: string; reconciliation?: string; timestamp: string;
 }
 /** Project to a closed DTO; never serialize arbitrary response/error objects. */
@@ -88,6 +89,7 @@ export function sanitizeJournal(value: JournalEntry): JournalEntry {
     phase:/^(INTENT|RESULT|UNKNOWN|STOP)$/, operationId:/^[a-f0-9-]{36}$/,
     requestId:/^[a-f0-9]{64}$/, transactionHash:/^[a-f0-9]{64}$/,
     domainState:/^(REGISTERED|RETURNED|COLLECTED|RECYCLED)$/, rewardState:/^(NOT_ELIGIBLE|PENDING|SENT|FAILED)$/,
+    observationClass:/^(REQUEST_ACK_UNKNOWN|REQUEST_TIMEOUT_PRE_DISPATCH|SIGNED_PRE_DISPATCH|SUBMITTED_RESPONSE_UNCERTAIN)$/,
     reconciliation:/^(CONFIRMED|UNRESOLVED|REJECTED|NOT_ATTEMPTED)$/,
     timestamp:/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/,
   };

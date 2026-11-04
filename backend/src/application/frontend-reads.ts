@@ -43,7 +43,7 @@ export async function profile(
           where t.deployment_id=o.deployment_id and t.operation_id=o.id and t.state='CONFIRMED_FAILED' and t.confirmation is not null)
           then 'CHAIN' else 'APPLICATION' end else null end)
         from app_private.stellar_operations o where o.deployment_id=r.deployment_id and o.battery_id=r.battery_id
-        and o.state in ('CONFIRMED','REJECTED') order by o.created_at desc,o.id desc limit 1) as "latestTerminalOperation"
+        and o.state in ('CONFIRMED','REJECTED','CANCELLED_LOCAL') order by o.created_at desc,o.id desc limit 1) as "latestTerminalOperation"
       from app_private.return_requests r left join chain_private.return_requests c using(deployment_id,request_id)
       left join chain_private.batteries b on b.deployment_id=r.deployment_id and b.battery_id=r.battery_id
       where r.deployment_id=$1 and r.user_id=$2 order by r.created_at desc limit 101`,

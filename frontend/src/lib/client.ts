@@ -8,7 +8,7 @@ export class ApiFailure extends Error {
 }
 export function friendly(status: number, code = "") {
   if (status === 504 || code === "OutcomeUnknown")
-    return "Resultado incierto. Consulta el estado o reintenta la misma operación; no se considera fallida.";
+    return "Resultado incierto. Consulta el estado de la solicitud.";
   if (code === "AuthRejected")
     return "No pudimos autenticarte. Revisa tus datos y confirma tu correo si corresponde.";
   const messages: Record<number, string> = {
@@ -29,6 +29,7 @@ export async function request<T>(
   path: string,
   body?: unknown,
   key?: string,
+  signal?: AbortSignal,
 ): Promise<T> {
   let response: Response;
   try {
@@ -44,7 +45,7 @@ export async function request<T>(
               ...(key ? { "Idempotency-Key": key } : {}),
             },
       body: body === undefined ? undefined : JSON.stringify(body),
-      signal: AbortSignal.timeout(35000),
+      signal: signal ?? AbortSignal.timeout(35000),
     });
   } catch {
     throw new ApiFailure(504, "OutcomeUnknown");

@@ -6,6 +6,9 @@ export interface SigningRequest {
   expirationLedger: number;
   method: string;
   expectedSigners: string[];
+  audit?: (phase:string)=>Promise<void>;
+  assertAdmission?:()=>void;
+  childObserver?:{started(pid:number):void;closed(pid:number):void};
 }
 export interface SigningResult { transactionXdr: string; signers: string[] }
 export interface StellarSigner { sign(request: SigningRequest): Promise<SigningResult> }

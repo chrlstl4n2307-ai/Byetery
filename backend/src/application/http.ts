@@ -1,3 +1,4 @@
+import {operationStatus} from './operation-status.ts';
 import { createServer, type IncomingMessage, type Server } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import type { AddressInfo } from 'node:net';
@@ -7,9 +8,11 @@ import { AppError, requireThat, type Reply } from './errors.ts';
 import { profile, batteryDetail } from './frontend-reads.ts';
 import { batteryHistory } from '../history/read.ts';
 import { RpcHistoryReader, type HistoryChainReader } from '../history/verify.ts';
-interface Route { action?: Action; battery?: string; profile?: boolean; history?: string }
+interface Route { operation?:string; lookup?:boolean; action?: Action; battery?: string; profile?: boolean; history?: string }
 function route(method: string, path: string): Route {
   let m: RegExpExecArray|null;
+  if(method==='GET' && path==='/api/operations/lookup')return {lookup:true};
+  if(method==='GET' && (m=/^\/api\/operations\/([a-f0-9-]{36})$/.exec(path)))return {operation:m[1]};
   if(method==='GET' && path==='/api/me') return {profile:true};
   if(method==='GET' && (m=/^\/api\/batteries\/([^/]+)\/history$/.exec(path))) return {history:m[1]};
   if(method==='POST' && path==='/api/batteries') return {action:{kind:'register'}};
@@ -36,12 +39,13 @@ export function api(auth: SupabaseAuth, coordinator: Coordinator, historyChain: 
       requireThat(!req.headers.origin,403,'BrowserOriginNotEnabled');
       const target=route(req.method??'',(req.url??'').split('?')[0]);
       const identity=await auth.validate(req.headers.authorization);
-      if(target.history) reply={status:200,body:await batteryHistory(coordinator.repo,identity,target.history,historyChain) as unknown as Record<string,unknown>};
+      if(target.operation||target.lookup)reply={status:200,body:await operationStatus(coordinator.repo,identity,target.operation?{id:target.operation}:{key:new URL(req.url!,'http://127.0.0.1').searchParams.get('key')??''})};
+      else if(target.history) reply={status:200,body:await batteryHistory(coordinator.repo,identity,target.history,historyChain) as unknown as Record<string,unknown>};
       else if(target.profile) reply=await profile(coordinator.repo,identity);
       else if(target.battery) reply=await batteryDetail(coordinator.repo,identity,target.battery);
       else {
         const key=req.headers['idempotency-key'];requireThat(typeof key==='string',400,'IdempotencyKeyRequired');
-        reply=await coordinator.mutate(identity,target.action!,await body(req),key);
+        reply=await coordinator.acknowledge(identity,target.action!,await body(req),key);
       }
     } catch(error) {
       const known=error instanceof AppError;

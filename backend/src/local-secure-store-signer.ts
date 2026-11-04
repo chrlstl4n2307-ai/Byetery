@@ -6,7 +6,7 @@ import type { SigningRequest, SigningResult, StellarSigner, PhasedStellarSigner 
 import { DomainError } from './domain.ts';
 
 export interface ProcessResult { exitCode: number|null; stdout: string; stderr: string }
-export type SignerProcess = (input: string) => Promise<ProcessResult>;
+export type SignerProcess = (input: string,observer?:{started(pid:number):void;closed(pid:number):void}) => Promise<ProcessResult>;
 const LIMIT=131072;
 const actors={
   admin:'GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F',
@@ -23,12 +23,14 @@ function fail(code: string): never {throw new DomainError(code);}
 /** No shell, CLI arguments, RPC access, logging or credentials in child env. */
 export function signerProcess(binary: string, timeoutMs=30000): SignerProcess {
   if(!path.isAbsolute(binary)||!Number.isInteger(timeoutMs)||timeoutMs<1||timeoutMs>120000) fail('InvalidSignerConfiguration');
-  return input=>new Promise((resolve,reject)=>{
+  return (input,observer)=>new Promise((resolve,reject)=>{
     if(Buffer.byteLength(input)>LIMIT) return reject(new DomainError('SignerInputTooLarge'));
     const env: NodeJS.ProcessEnv={};
     for(const name of ['SystemRoot','WINDIR','USERPROFILE','APPDATA','LOCALAPPDATA','TEMP','TMP','HOMEDRIVE','HOMEPATH'])
       if(process.env[name]) env[name]=process.env[name];
     const child=spawn(binary,[],{shell:false,windowsHide:true,stdio:['pipe','pipe','pipe'],env});
+    if(child.pid)observer?.started(child.pid);
+    child.once('close',()=>{if(child.pid)observer?.closed(child.pid);});
     let stdout='',stderr='',size=0,done=false;
     const finish=(error?:DomainError,result?:ProcessResult)=>{if(done)return;done=true;clearTimeout(timer);if(error){child.kill();reject(error);}else resolve(result!);};
     const timer=setTimeout(()=>finish(new DomainError('SignerTimeout')),timeoutMs);
@@ -61,7 +63,9 @@ export class LocalSecureStoreSigner implements StellarSigner, PhasedStellarSigne
       current_ledger:request.currentLedger,signature_expiration_ledger:request.expirationLedger,
       ...(phase?{phase,expected_hash:expectedHash??null}:{})});
     let response: ProcessResult;
-    try {response=await this.run(input);}catch(e){if(e instanceof DomainError)throw e;fail('SignerProcessFailed');}
+    const label=phase==='authorize'?'AUTH_SIGN':'ENVELOPE_SIGN';
+    await request.audit?.(label+'_START');request.assertAdmission?.();
+    try {response=await this.run(input,request.childObserver);}catch(e){if(e instanceof DomainError)throw e;fail('SignerProcessFailed');}
     // Do not print or propagate helper output, even on error. Only stable codes leave here.
     if(response.exitCode!==0) fail('SignerProcessFailed');
     if(response.stderr.trim()) fail('SignerUnexpectedStderr');
@@ -112,6 +116,7 @@ export class LocalSecureStoreSigner implements StellarSigner, PhasedStellarSigne
         :xdr.HashIdPreimage.envelopeTypeSorobanAuthorization(new xdr.HashIdPreimageSorobanAuthorization(preimageFields));
       if(!key.verify(createHash('sha256').update(preimage.toXDR()).digest(),Buffer.from(proof.signature)))fail('SignerInvalidAuthSignature');
     }
+    await request.audit?.(label+'_RETURNED');
     return {transactionXdr:encoded,signers:out.signers};
   }
 }

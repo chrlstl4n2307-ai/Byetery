@@ -6,7 +6,7 @@ export const NETWORK_ID = createHash('sha256').update(Networks.TESTNET).digest('
 export const SIGNER_FEE_CAP = 50_000_000n;
 export type TransportState = 'CLAIMED' | 'PREPARING' | 'SIGNED' | 'READY' | 'DISPATCH_INTENT'
   | 'SUBMITTED_OR_UNKNOWN' | 'CONFIRMED_SUCCESS' | 'CONFIRMED_FAILED'
-  | 'EXPIRED_NOT_APPLIED' | 'EXPIRED_UNRESOLVED' | 'PROJECTED';
+  | 'EXPIRED_NOT_APPLIED' | 'EXPIRED_UNRESOLVED' | 'PROJECTED' | 'ABORTED_PRE_DISPATCH';
 /** Internal server objects only; none of these are HTTP response DTOs. */
 export interface OperationContext {
   deploymentId: string; operationId: string; networkId: Hash32;

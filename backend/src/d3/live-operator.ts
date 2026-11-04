@@ -1,3 +1,4 @@
+import {observeOperation,timeoutClassification,type OperationReceipt} from './operation-polling.ts';
 /** Thin LOCAL authenticated API client. No chain, signing or database binding.
  * Importing this module performs no I/O. No CLI auto-start or env activation. */
 import { readFile, open, realpath } from 'node:fs/promises';
@@ -138,10 +139,10 @@ export async function createLocalOperator(options: OperatorOptions) {
     check(f.runId===run!.runId && f.taskId===reviewed.taskId,'ExactRunRequired');
     check(budget.used < reservedCap, 'TxBudgetExceeded');
   }
-  async function api(role: Role, path: string, method = 'GET', body?: unknown, key?: string): Promise<ApiResult> {
+  async function api(role: Role, path: string, method = 'GET', body?: unknown, key?: string, signal?:AbortSignal): Promise<ApiResult> {
     const session = sessions.get(role); check(session, 'RoleSessionRequired');
     try {
-      const r = await fetch(origin + path, {method,redirect:'error',credentials:'omit',signal:AbortSignal.timeout(30_000),
+      const r = await fetch(origin + path, {method,redirect:'error',credentials:'omit',signal:signal??AbortSignal.timeout(30_000),
         headers:{Authorization:'Bearer '+session.bearer(),...(body!==undefined?{'Content-Type':'application/json'}:{}),...(key?{'Idempotency-Key':key}:{})},
         ...(body!==undefined?{body:JSON.stringify(body)}:{})});
       const value = await r.json() as Record<string,unknown>;
@@ -201,17 +202,36 @@ export async function createLocalOperator(options: OperatorOptions) {
         const base={taskId:args.taskId,gitSha:args.expectedSha,runId:run.runId,batteryId:run.batteryId,role,operation};
         const log=async(extra:Partial<JournalEntry>)=>appendJournal(journal,{...base,phase:'RESULT',timestamp:new Date().toISOString(),...extra});
         await log({phase:'INTENT'}); // fsync BEFORE possible API mutation.
-        let result: ApiResult;
-        try { result=await api(role,path,'POST',body,key); }
-        catch { await log({phase:'UNKNOWN',reconciliation:'UNRESOLVED'}); throw new Error('UnknownOriginalOperationRequiresReview'); }
-        const original=identity(result.body);
-        await log({httpStatus:result.status,...(original.operationId?{operationId:original.operationId}:{}),...(original.transactionHash?{transactionHash:original.transactionHash}:{})});
-        // A server 503 can still name durable work. Reconcile that original
-        // operation read-only; never classify the timeout as a failed payment.
-        check(original.operationId && ((result.status>=200 && result.status<300) || result.status===503),'ApplicationRejectedOrUnresolved');
+        let original:OperationIdentity={operationId:null,transactionHash:null};
+        let last:OperationReceipt|undefined;
+        let observedAt=0;
+        try {
+          const result=await api(role,path,'POST',body,key);
+          check(result.status===202,'ApplicationRejectedOrUnresolved');
+          original=identity(result.body);check(original.operationId,'OriginalIdentityUnavailable');
+          await log({httpStatus:202,operationId:original.operationId!});
+        } catch(error) {
+          if(!(error instanceof Error)||error.message!=='ApiResponseUncertain')throw error;
+          await log({phase:'UNKNOWN',observationClass:'REQUEST_ACK_UNKNOWN'});
+        }
+        try{
+          const receipt=await observeOperation(async signal=>{
+            const route=original.operationId?`/api/operations/${original.operationId}`:'/api/operations/lookup?key='+encodeURIComponent(key);
+            const result=await api(role,route,'GET',undefined,undefined,signal);
+            check(result.status===200&&result.body.deploymentId==='5c0cad2f-5f25-4216-8068-6cb9d2d26325','OperationStatusUnavailable');
+            return result.body as unknown as OperationReceipt;
+          },{initialId:original.operationId,initialHash:original.transactionHash,onStatus:status=>{
+            original={operationId:status.operationId,transactionHash:status.transactionHash};last=status;observedAt=Date.now();
+          }});
+          check(receipt.class==='CONFIRMED'&&receipt.result==='SUCCESS'&&receipt.transactionHash,'OriginalOperationNotConfirmed');
+        }catch(error){
+          await log({phase:'UNKNOWN',observationClass:timeoutClassification(Date.now()-observedAt<=5000?last:undefined),reconciliation:'UNRESOLVED',
+            ...(original.operationId?{operationId:original.operationId}:{}),...(original.transactionHash?{transactionHash:original.transactionHash}:{})});
+          throw error;
+        }
         const history=()=>api(role,`/api/batteries/${run.batteryId}/history`).then(r=>{check(r.status===200,'HistoryUnavailable');return r.body;});
         const reconciliation=await reconcileViaHistory(original,history);
-        await log({reconciliation,operationId:original.operationId});
+        await log({reconciliation,operationId:original.operationId!});
         check(reconciliation==='CONFIRMED','UnknownOriginalOperationRequiresReview');
         // Independently verified history gives the original hash even if POST
         // response was pending. It never promotes a local presence to success.
@@ -225,7 +245,7 @@ export async function createLocalOperator(options: OperatorOptions) {
           const own=view.body.ownRequest as Record<string,unknown>|null;
           check(own && typeof own.requestId==='string' && /^[a-f0-9]{64}$/.test(own.requestId),'OriginalRequestRequired'); requestId=own.requestId;
         }
-        const safe:SafeEvidence={operationId:original.operationId,transactionHash:row.transactionHash as string,requestId,batteryId:run.batteryId,operation,confirmedBatteryState:next[operation][0],confirmedRewardState:next[operation][1],confirmationLedger:row.ledger as number,confirmedAt:row.confirmedAt,...(payload?{payload}:{})};
+        const safe:SafeEvidence={operationId:original.operationId!,transactionHash:row.transactionHash as string,requestId,batteryId:run.batteryId,operation,confirmedBatteryState:next[operation][0],confirmedRewardState:next[operation][1],confirmationLedger:row.ledger as number,confirmedAt:row.confirmedAt,...(payload?{payload}:{})};
         await log({domainState:safe.confirmedBatteryState,rewardState:safe.confirmedRewardState,transactionHash:safe.transactionHash,...(requestId?{requestId}:{})});
         evidence.push(safe); step++; return {...safe};
       } catch { stopped=true; throw new Error('OperatorStoppedRequiresReview'); }

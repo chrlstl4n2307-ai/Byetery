@@ -57,7 +57,7 @@ export class Repository {
         where t.deployment_id=o.deployment_id and t.operation_id=o.id and t.state='CONFIRMED_FAILED' and t.confirmation is not null)
         then 'CHAIN' else 'APPLICATION' end else null end as "failureScope"
       from app_private.stellar_operations o where o.deployment_id=$1 and o.battery_id=$2
-      and o.state in ('CONFIRMED','REJECTED') order by o.created_at desc,o.id desc limit 1`,[this.deploymentId,batteryId]);
+      and o.state in ('CONFIRMED','REJECTED','CANCELLED_LOCAL') order by o.created_at desc,o.id desc limit 1`,[this.deploymentId,batteryId]);
     const attempt = await one(db,`select state,attempt_number,error_code from app_private.reward_attempts where deployment_id=$1 and battery_id=$2 order by attempt_number desc limit 1`,[this.deploymentId,batteryId]);
     return { batteryId, confirmedBatteryState:battery?.state ?? null, confirmedRewardState:battery?.reward_state ?? null,
       pendingOperation:pending ?? null, latestTerminalOperation:terminal ?? null, lastAttempt:attempt ?? null, source:this.mode };

@@ -1,3 +1,4 @@
+import {ExecutionSupervisor} from './execution-supervisor.ts';
 import { createHash, randomUUID } from 'node:crypto';
 import { DomainError, newRequestId, type Command, type Evidence } from '../domain.ts';
 import { evidenceCommitment } from '../evidence.ts';
@@ -12,16 +13,27 @@ export interface Action { kind: 'register'|'return'|'cancel'|'collection'|'recyc
 const commandForAction={register:'register_battery',return:'open_return',cancel:'cancel_return',collection:'confirm_collection',recycling:'confirm_recycling',reward:'pay_reward'} as const satisfies Record<Exclude<Action['kind'],'challenge'|'verify'>,ApplicationCommandKind>;
 /** Faults are injectable by server-side tests only. Never read from HTTP or env. */
 export interface Faults { hold?: (command: Command) => boolean; omitSigner?: (signer: string, command: Command) => boolean }
-export interface OperationProcessor { process(id:string):Promise<Reply> }
+export interface OperationProcessor { supervisor?:ExecutionSupervisor;process(id:string):Promise<Reply> }
 const hash=(v: string|Buffer)=>createHash('sha256').update(v).digest();
 export class Coordinator {
   readonly repo: Repository; readonly wallets: WalletService; readonly faults: Faults;
-  readonly processor?:OperationProcessor;
-  constructor(repo: Repository, faults: Faults = {}, wallets = new WalletService(repo),processor?:OperationProcessor) {this.repo=repo;this.faults=faults;this.wallets=wallets;this.processor=processor;}
+  readonly processor?:OperationProcessor;readonly supervisor:ExecutionSupervisor;
+  constructor(repo: Repository, faults: Faults = {}, wallets = new WalletService(repo),processor?:OperationProcessor) {this.repo=repo;this.faults=faults;this.wallets=wallets;this.processor=processor;this.supervisor=processor?.supervisor??new ExecutionSupervisor();}
   async get(identity: Identity, batteryId: string): Promise<Reply> {
     return this.repo.transaction(async db=>{const user=await this.repo.principal(db,identity);await this.repo.role(db,user,'USER');return {status:200,body:await this.repo.view(db,bid(batteryId))};});
   }
-  async mutate(identity: Identity, action: Action, input: unknown, key: string): Promise<Reply> {
+  async mutate(identity:Identity,action:Action,input:unknown,key:string):Promise<Reply>{
+    return this.runMutation(identity,action,input,key,false);
+  }
+  /** HTTP acknowledgement never executes the Testnet processor. */
+  async acknowledge(identity:Identity,action:Action,input:unknown,key:string):Promise<Reply>{
+    return this.runMutation(identity,action,input,key,true);
+  }
+  private async runMutation(identity:Identity,action:Action,input:unknown,key:string,acknowledge:boolean):Promise<Reply>{
+    requireThat(this.supervisor.accepting,503,'RuntimeStopping');
+    return this.supervisor.run('request:'+randomUUID(),()=>this.acceptMutation(identity,action,input,key,acknowledge));
+  }
+  private async acceptMutation(identity:Identity,action:Action,input:unknown,key:string,acknowledge:boolean):Promise<Reply>{
     requireThat(/^[A-Za-z0-9._:-]{8,128}$/.test(key),400,'InvalidIdempotencyKey');
     const inputHash=hash(canonical({action,input}));
     const queued=await this.repo.transaction(async db=>{
@@ -61,6 +73,11 @@ export class Coordinator {
     });
     if(queued.reply) return queued.reply;
     requireThat(queued.id,500,'OperationMissing');
+    if(acknowledge&&this.repo.mode==='TESTNET'){
+      // Acknowledge the committed intent. The status route is the current view.
+      return {status:202,body:{source:'TESTNET',deploymentId:this.repo.deploymentId,operationId:queued.id,
+        class:'ACCEPTED',state:'ACCEPTED',statusUrl:'/api/operations/'+queued.id}};
+    }
     return this.process(queued.id);
   }
   private async evidence(db: Db, user: string, batteryId: string, requestId: string, kind: Evidence['kind'], input: unknown): Promise<Evidence> {
@@ -89,12 +106,14 @@ export class Coordinator {
       if(action.kind==='cancel') requireThat(claim.user_id===user,403,'RequestOwnerRequired');
     } else batteryId=bid(action.kind==='register'?body.batteryId:action.resource);
     if(action.kind==='register'||action.kind==='collection'||action.kind==='recycling')await this.repo.role(db,user,requiredAuthority(commandForAction[action.kind],user).role);
-    const pending=await one(db,`select 1 from app_private.stellar_operations where deployment_id=$1 and battery_id=$2 and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN')`,[d,batteryId]);
-    requireThat(!pending,409,'OperationInProgress');
-    if(action.kind==='register') {
+    if(action.kind==='register'){
       // Server-generated review IDs are reserved for explicit local owner adoption.
       // Namespace exclusion closes the ordinary-registration race without reading intents.
       requireThat(!batteryId.startsWith('BYE-REVIEW-'),409,'ReviewBatteryReserved');
+    }
+    const pending=await one(db,`select 1 from app_private.stellar_operations where deployment_id=$1 and battery_id=$2 and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN')`,[d,batteryId]);
+    requireThat(!pending,409,'OperationInProgress');
+    if(action.kind==='register') {
       requireThat(!await one(db,'select 1 from app_private.battery_records where deployment_id=$1 and battery_id=$2',[d,batteryId]),409,'BatteryAlreadyExists');
       const metadata=body.metadata??{};
       requireThat(metadata!==null && typeof metadata==='object' && !Array.isArray(metadata) && Buffer.byteLength(canonical(metadata))<=8192,400,'InvalidMetadata');
@@ -157,7 +176,7 @@ export class Coordinator {
     return this.finish(db,id,command,commandFailure(code));
   }
   async process(id: string): Promise<Reply> {
-    if(this.processor)return this.processor.process(id);
+    if(this.processor)return this.supervisor.run(id,()=>this.processor!.process(id));
     requireThat(this.repo.mode==='MOCK',503,'TestnetProcessorRequired');
     const submitted=await this.repo.transaction(async db=>{
       const d=this.repo.deploymentId; const op=await one(db,'select * from app_private.stellar_operations where deployment_id=$1 and id=$2',[d,id]);
@@ -217,6 +236,6 @@ export class Coordinator {
   async reconcile(): Promise<void> {
     const ids=await this.repo.transaction(async db=>(await db.query(`select id from app_private.stellar_operations where deployment_id=$1
       and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN') order by created_at`,[this.repo.deploymentId])).rows.map(r=>r.id as string));
-    for(const id of ids) await this.process(id);
+    for(const id of ids){if(!this.supervisor.accepting)break;await this.process(id);}
   }
 }

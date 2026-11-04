@@ -1,8 +1,8 @@
-"""Run the unchanged backend suite on an isolated PG17.6 NOSUPERUSER fixture.
+"""Run verification on an isolated PG17.6 NOSUPERUSER fixture.
 
 Uses existing portable binaries only; no .env, remote URL, installation or service.
 Preserves/restores the stopped legacy cluster and never changes its database roles.
-Run from repository root: python scripts/instaward/local-postgres-fixture.py
+Run from repository root: python scripts/instaward/local-postgres-fixture.py --full-verify
 """
 from pathlib import Path
 import ctypes
@@ -13,6 +13,7 @@ import re
 import socket
 import subprocess
 import uuid
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 LOCAL = ROOT / '.tools/d2-gap2b'
@@ -35,7 +36,14 @@ def short(path):
     return Path(buf.value)
 
 
-def main():
+def main(args=None):
+    args = sys.argv[1:] if args is None else args
+    if args not in ([], ['--root-verify'], ['--source-fix-only'], ['--full-verify'], ['--frontend-verify']):
+        raise RuntimeError('InvalidFixtureVerificationCommand')
+    verification = ('npm run verify' if args in (['--root-verify'], ['--full-verify']) else
+                    'node --experimental-strip-types --test backend/tests/d3-source-fix.test.ts' if args == ['--source-fix-only'] else
+                    'npm --prefix backend run verify')
+    expected_tests = 48 if args == ['--source-fix-only'] else 547
     run_id = uuid.uuid4().hex
     OUT.mkdir(exist_ok=True)
     run = checked(OUT / ('run-' + run_id))
@@ -48,7 +56,10 @@ def main():
     env = {k: v for k, v in os.environ.items()
            if not k.upper().startswith(('PG', 'SUPABASE', 'STELLAR', 'BYETERY'))
            and k not in ('NODE_OPTIONS', 'DATABASE_URL')}
-    env.update(PGCLIENTENCODING='UTF8', PGCONNECT_TIMEOUT='5', PYTHONIOENCODING='utf-8')
+    temp = run / 'temp'
+    temp.mkdir()
+    env.update(TEMP=str(temp), TMP=str(temp), VITEST_MAX_WORKERS='2', NEXT_TELEMETRY_DISABLED='1')
+    env.update(PGCLIENTENCODING='UTF8', PGCONNECT_TIMEOUT='5', PYTHONIOENCODING='utf-8', CARGO_NET_OFFLINE='true')
 
     def command(args, **kwargs):
         return subprocess.run([str(x) for x in args], cwd=ROOT, env=env,
@@ -152,15 +163,33 @@ GRANT anon, authenticated, service_role TO postgres, byetery_gap2b WITH ADMIN TR
                'database': 'postgres', 'reviewUser': 'postgres'}
         config_bytes = (json.dumps(cfg, indent=2) + '\n').encode('utf-8')
         config.write_bytes(config_bytes)
-        with (run / 'backend.log').open('wb') as log:
-            suite = command(['cmd.exe', '/d', '/c', 'npm --prefix backend run verify'],
-                            stdout=log, stderr=subprocess.STDOUT)
-        text = (run / 'backend.log').read_text(encoding='utf-8-sig')
-        counts = {key: int(re.search(r'\b' + key + r' (\d+)', text).group(1))
-                  for key in ('tests', 'pass', 'fail', 'skipped')}
-        result['suite'] = {**counts, 'exit_code': suite.returncode}
-        if suite.returncode or counts != {'tests': 343, 'pass': 343, 'fail': 0, 'skipped': 0}:
-            raise RuntimeError('BackendSuiteNotGreenSTOP')
+        if args != ['--frontend-verify']:
+            with (run / 'backend.log').open('wb') as log:
+                suite = command(['cmd.exe', '/d', '/c', verification], stdout=log, stderr=subprocess.STDOUT)
+            text = (run / 'backend.log').read_text(encoding='utf-8-sig', errors='replace')
+            counts = {key: int(re.search(r'\b' + key + r' (\d+)', text).group(1))
+                      for key in ('tests', 'pass', 'fail', 'skipped')}
+            result['suite'] = {**counts, 'exit_code': suite.returncode}
+            if suite.returncode or counts != {'tests': expected_tests, 'pass': expected_tests, 'fail': 0, 'skipped': 0}:
+                raise RuntimeError('BackendSuiteNotGreenSTOP')
+        if args in (['--full-verify'], ['--frontend-verify']):
+            stage = ROOT / '.tools/d2-b44-prep/workspace/frontend'
+            if not (stage / '.next/BUILD_ID').is_file():
+                raise RuntimeError('RunB44PrepLocalBuildOnlyFirst')
+            env['B44_PREP_BUILD_ROOT'] = str(stage)
+            linked_dependencies = not (ROOT / 'frontend/node_modules').resolve().is_relative_to((ROOT / 'frontend').resolve())
+            build_command = 'npm --prefix frontend run build' + (' -- --webpack' if linked_dependencies else '')
+            web_command = ('npm --prefix frontend run typecheck && npm --prefix frontend run lint && '
+                           'npm --prefix frontend test -- --config ../scripts/instaward/b44-prep-vitest.config.mts && '
+                           + build_command)
+            with (run / 'frontend.log').open('wb') as log:
+                web = command(['cmd.exe', '/d', '/c', web_command], stdout=log, stderr=subprocess.STDOUT)
+            web_text = (run / 'frontend.log').read_text(encoding='utf-8-sig', errors='replace')
+            web_counts = re.search(r'^\s*Tests\s+(\d+) passed \((\d+)\)', web_text, re.MULTILINE)
+            result['frontend'] = {'exit_code': web.returncode, 'pass': int(web_counts[1]) if web_counts else None,
+                                  'tests': int(web_counts[2]) if web_counts else None}
+            if web.returncode or not web_counts or web_counts[1] != web_counts[2]:
+                raise RuntimeError('FrontendSuiteNotGreenSTOP')
         exit_code = 0
     except Exception as exc:
         failed = type(exc).__name__ + ': ' + str(exc)

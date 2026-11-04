@@ -56,7 +56,8 @@ def link_or_copy(src, dst):
 def main():
     OUT.mkdir(exist_ok=True)
     STAGE.resolve().relative_to((ROOT / '.tools').resolve())
-    resume = sys.argv[1:] == ['--resume-build']
+    resume = sys.argv[1:] in (['--resume-build'], ['--resume-build-only'])
+    build_only = sys.argv[1:] in (['--build-only'], ['--resume-build-only'])
     if (STAGE / '.next').exists() and not resume:
         raise RuntimeError('BuiltStageExistsDoNotOverwrite; inspect previous run first')
     STAGE.mkdir(parents=True, exist_ok=True)
@@ -105,6 +106,9 @@ def main():
              '--experimental-strip-types', 'tools/audit-review.mjs'], STAGE, env())
         if any(results[k]['exit_code'] for k in ('typecheck', 'audit', 'existing_review_audit')):
             raise RuntimeError('LocalBuildAuditOrTypecheckFailed')
+        if build_only:
+            results['pass'] = True
+            return
         spec = importlib.util.spec_from_file_location('existing_pg_fixture', ROOT / 'scripts/instaward/local-postgres-fixture.py')
         fixture = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(fixture)
@@ -113,7 +117,9 @@ def main():
         def intercepted(args, **kwargs):
             if list(map(str, args)) == ['cmd.exe', '/d', '/c', 'npm --prefix backend run verify']:
                 # Deny-only instrumentation; no changes to source/tests/SQL/assertions.
-                kwargs['env'] = {**env(), **{k: v for k, v in kwargs['env'].items() if k.startswith('PG')}}
+                backend_env = env()
+                backend_env.pop('CI', None)
+                kwargs['env'] = {**backend_env, **{k: v for k, v in kwargs['env'].items() if k.startswith('PG')}}
                 backend = ORIGINAL_RUN(args, **kwargs)
                 if backend.returncode == 0:
                     fe = env()
@@ -127,7 +133,7 @@ def main():
 
         subprocess.run = intercepted
         try:
-            results['backend_exit_code'] = fixture.main()
+            results['backend_exit_code'] = fixture.main([])
         finally:
             subprocess.run = ORIGINAL_RUN
         if results['backend_exit_code'] or results.get('frontend_tests', {}).get('exit_code', 1):
