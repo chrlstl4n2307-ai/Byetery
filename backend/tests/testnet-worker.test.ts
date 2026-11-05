@@ -28,7 +28,7 @@ test('VOL-003 commit failure prevents broadcast and persisted identity exists be
   assert.equal(f.transport.submitted.length,1);
 });
 test('VOL-003 same source single-flight spans different deployments and unresolved expiry',async()=>{
-  const f=await harness(db);await f.worker.run(f.op,'first');f.transport.closeTime='1301';
+  const f=await harness(db);await f.worker.run(f.op,'first');f.transport.closeTime='1311';f.transport.ledger=30;f.transport.oldestLedger=16;
   await f.worker.run(f.op,'expired');assert.equal((await f.store.work(f.op)).state,'EXPIRED_UNRESOLVED');
   const other=await harness(db,false,f.key);
   await assert.rejects(other.worker.run(other.op,'different-deployment'),/SourceAccountBusy/);
@@ -41,8 +41,8 @@ test('VOL-003 trusted confirmation hash mismatch does not project or replace ide
   assert.equal(f.projectionCount(),0);assert.equal(f.transport.submitted.length,1);
 });
 test('VOL-003 READY envelope expired before first dispatch never submits',async()=>{
-  const f=await harness(db);f.transport.closeTime='1301';f.transport.effect='NOT_APPLIED';
-  assert.equal(await f.worker.run(f.op,'worker'),'EXPIRED_NOT_APPLIED');assert.equal(f.transport.submitted.length,0);
+  const f=await harness(db);f.transport.closeTime='1311';f.transport.ledger=30;f.transport.effect='NOT_APPLIED';
+  assert.equal(await f.worker.run(f.op,'worker'),'READY');assert.equal(f.transport.submitted.length,0);assert.deepEqual(f.transport.observed,[]);
 });
 test('VOL-003 restart after READY or dispatch intent uses original hash, never prepares again',async()=>{
   const f=await harness(db),c=await f.store.claim(f.op,'first');await f.store.preparing(c);
@@ -66,15 +66,18 @@ test('VOL-003 RPC outage preserves identity and later confirmed success projects
   assert.equal(await f.worker.run(f.op,'recovery'),'PROJECTED');await f.worker.run(f.op,'repeat');
   assert.equal(f.projectionCount(),1);assert.equal(f.transport.submitted.length,1);
 });
-for(const effect of ['APPLIED','NOT_APPLIED','UNRESOLVED'] as const)test(`VOL-003 expired NOT_FOUND + state evidence ${effect}`,async()=>{
+for(const effect of ['APPLIED','NOT_APPLIED','UNRESOLVED'] as const)test(`VOL-003 expiry uses sequence proof and never infers a receipt from ${effect}`,async()=>{
   const f=await harness(db,true);await f.worker.run(f.op,'first');
-  f.transport.closeTime='1301';f.transport.effect=effect;
-  const expected=effect==='APPLIED'?'PROJECTED':effect==='NOT_APPLIED'?'EXPIRED_NOT_APPLIED':'EXPIRED_UNRESOLVED';
+  f.transport.closeTime='1311';f.transport.ledger=30;f.transport.effect=effect;
+  f.transport.closureSequence=effect==='NOT_APPLIED'?'0':'1';
+  const expected=effect==='NOT_APPLIED'?'EXPIRED_NOT_APPLIED':'EXPIRED_UNRESOLVED';
   assert.equal(await f.worker.run(f.op,'reconcile'),expected);
   await f.worker.run(f.op,'again');assert.equal(f.transport.submitted.length,1);assert.equal(f.transport.prepareCount,1);
-  assert.equal(f.projectionCount(),effect==='APPLIED'?1:0);
-  const observations=await db.query<{confirmation_ledger:number|null;state_read_ledger:number}>("select * from api_private.testnet_observations where operation_id=$1 and kind='STATE_READ'",[f.op]);
-  assert.equal(observations.rows[0].confirmation_ledger,null);assert.equal(observations.rows[0].state_read_ledger,16);
+  assert.equal(f.projectionCount(),0);
+  const observations=await db.query<{confirmation_ledger:number|null;state_read_ledger:number}>("select * from api_private.testnet_observations where operation_id=$1 and kind='STATE_READ' and evidence->>'outcome'='NOT_APPLIED'",[f.op]);
+  assert.equal(observations.rows.length,effect==='NOT_APPLIED'?1:0);
+  assert.equal(await f.store.requiresReview(f.op),effect!=='NOT_APPLIED');
+  if(observations.rows.length){assert.equal(observations.rows[0].confirmation_ledger,null);assert.equal(observations.rows[0].state_read_ledger,30);}
 });
 test('VOL-003 confirmed failure is terminal, unlike timeout or NOT_FOUND',async()=>{
   const f=await harness(db);f.transport.failChain=true;
@@ -119,7 +122,7 @@ test('VOL-003 reward projection is atomic and duplicate reward work remains proh
   await assert.rejects(f.store.queue(f.d,op,f.key.publicKey(),f.args),/testnet_reward_single_effect/);
 });
 test('VOL-003 expiry proving nonpayment still does not authorize a new reward identity',async()=>{
-  const f=await harness(db,true);await f.worker.run(f.op,'first');f.transport.closeTime='1301';f.transport.effect='NOT_APPLIED';
+  const f=await harness(db,true);await f.worker.run(f.op,'first');f.transport.closeTime='1311';f.transport.ledger=30;f.transport.effect='NOT_APPLIED';
   assert.equal(await f.worker.run(f.op,'expired'),'EXPIRED_NOT_APPLIED');const op=randomUUID();
   await db.query(`insert into app_private.stellar_operations(id,deployment_id,principal,idempotency_key,command,battery_id,parameters,parameters_hash)
     select $1::uuid,deployment_id,principal,$1::text,command,battery_id,parameters,parameters_hash from app_private.stellar_operations where id=$2`,[op,f.op]);

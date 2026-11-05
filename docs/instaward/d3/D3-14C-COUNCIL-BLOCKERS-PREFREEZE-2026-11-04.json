@@ -1,0 +1,1096 @@
+{
+  "task": "D3-14C-COUNCIL-BLOCKERS-PREFREEZE",
+  "reportDateRequested": "2026-11-04",
+  "executionDate": "2026-11-05",
+  "timezone": "America/Santiago",
+  "result": "D3_14C_NEW_CANDIDATE_READY_FOR_COUNCIL_REVIEW",
+  "nextGate": "Council review — NO FREEZE",
+  "origin": {
+    "branch": "instaward/d2-web-mvp",
+    "head": "da541d843632e3ba4bd811ddd13c85b2bea5ccb6",
+    "remoteHeadReadIndependently": "da541d843632e3ba4bd811ddd13c85b2bea5ccb6",
+    "indexEmpty": true
+  },
+  "baselineFingerprint": "f11840d3bf1a433fa1d3f44023da42ae1ec148c61b7287e090e5ea049922874c",
+  "candidateFingerprintUnchanged": false,
+  "newCandidateFingerprint": "e9a75a332489f80cdd748121c95c3fe66ce3425b48926e92d8d22a9fd2e78539",
+  "fingerprintFiles": {
+    "backend/src/application/coordinator.ts": "6345e7d3410362cdbd28f408ac7a8d567eb58b6d395b3378ac47e0f203305f8b",
+    "backend/src/application/deferred-signing.ts": "d48a48fdc98343b6610acef465594fa246d03c5cbfe30db6e3b974135e036940",
+    "backend/src/application/historical-lifecycle.ts": "3777ee8e22d206bd482d0bb06836cf6844412809e5b91c737ec7277a023f9474",
+    "backend/src/application/operation-status.ts": "46a4fa9a43f1e679bfeef92b7297a3d16697d3888f39bdc2f553130e86433683",
+    "backend/src/application/server.ts": "25c0aa0ae0e2bfa73125a830abc13978a763ad3f60175f9816086c9a58227c17",
+    "backend/src/d3/live-operator.ts": "3c1a86245b07b15482bfb18b678860dfcba5d8add3148dcd939699cf0ebfb67b",
+    "backend/src/d3/manifest.ts": "976b55fa16e82abbca6448f647f017f8bc43d2d5385f436f2008a3f4db8e2c71",
+    "backend/src/d3/operation-polling.ts": "89e5471b979a521b4a913c7a28c835b4b2db35206b7759792ad0101a5ba7358d",
+    "backend/src/d3/operator-control.ts": "9e6fe32007d0487752fcde090e82a855ee27a64aad129dbf706e74c4caa27a52",
+    "backend/src/testnet/identity.ts": "5cb7774d39c51edcfb83c1a1756e5f7a30e2f8856d9030c245cc1c48b0a6151e",
+    "backend/src/testnet/rpc.ts": "4c8f9c464741d8e3d0158e1816da15f43efed6e54d11f8c8e9a840974d50c41a",
+    "backend/src/testnet/service.ts": "51c12afda3c04036e89fa2913a22a7a43e84b7541dfdc2f8d1666665bd7fdaa5",
+    "backend/src/testnet/store.ts": "21ec29c81c27d9255422db17ca6565a568c79e16fcf067960372e38abd0d9a54",
+    "backend/src/testnet/transport.ts": "c0e7c6a61d0c6f455b5b0ea3f132269baa697209fea21da0b50a9f6bde4438dc",
+    "backend/src/testnet/worker.ts": "f2deb870e1c58bc5ab8e7a666f5162aa733084b3f3de40696cb656a59699c364",
+    "backend/tests/d2-authority-fixture.ts": "8d8d6ccd96180d4d1d90807520e11156b8ea1144cf48969a8ce0109ac312df5c",
+    "backend/tests/d2-dispatch-authority.test.ts": "48cbdb5cbde6cdd268fc86cf08f72e029cbd85fb91e9d862f0126cf97d5fcdce",
+    "backend/tests/d3-council-prefreeze.test.ts": "38ef3181429417e461309e031aa012665a8b57458ad4755723f8cd2b23e81227",
+    "backend/tests/d3-observation-lineage.test.ts": "e7e45406f00842b0ad8ca9a49633c8a1ee44db56861add49f519865284b4f695",
+    "backend/tests/d3-safe-closure.test.ts": "64c9d303495f8fb4783d23d1ac9209407eac671384b5197b1f437b52f0379f7c",
+    "backend/tests/d3-xdr-identity.test.ts": "afa82d6e7922b5c4a3a5007d40c8ad23ddf965ca2bc2e843418f6b1eefc7b982",
+    "backend/tests/testnet-fixtures.ts": "321733f1aa2a342a00e7278d5c35acd5b935ddbf32a6002786cbbe349cf1bac2",
+    "backend/tests/testnet-real-boundaries.test.ts": "373e82512965594bcf8f59f1b8ace0c34f62242d32389e46014038ae64ff56b0",
+    "backend/tests/testnet-worker.test.ts": "bf886fa2c6230bf750f9d404154608ed6747b53e1103c1e83a724506b3bacae4"
+  },
+  "changedSinceD3_14B": {
+    "backend/src/application/coordinator.ts": "6345e7d3410362cdbd28f408ac7a8d567eb58b6d395b3378ac47e0f203305f8b",
+    "backend/src/application/deferred-signing.ts": "d48a48fdc98343b6610acef465594fa246d03c5cbfe30db6e3b974135e036940",
+    "backend/src/application/historical-lifecycle.ts": "3777ee8e22d206bd482d0bb06836cf6844412809e5b91c737ec7277a023f9474",
+    "backend/src/application/operation-status.ts": "46a4fa9a43f1e679bfeef92b7297a3d16697d3888f39bdc2f553130e86433683",
+    "backend/src/application/server.ts": "25c0aa0ae0e2bfa73125a830abc13978a763ad3f60175f9816086c9a58227c17",
+    "backend/src/testnet/identity.ts": "5cb7774d39c51edcfb83c1a1756e5f7a30e2f8856d9030c245cc1c48b0a6151e",
+    "backend/src/testnet/rpc.ts": "4c8f9c464741d8e3d0158e1816da15f43efed6e54d11f8c8e9a840974d50c41a",
+    "backend/src/testnet/service.ts": "51c12afda3c04036e89fa2913a22a7a43e84b7541dfdc2f8d1666665bd7fdaa5",
+    "backend/src/testnet/store.ts": "21ec29c81c27d9255422db17ca6565a568c79e16fcf067960372e38abd0d9a54",
+    "backend/src/testnet/transport.ts": "c0e7c6a61d0c6f455b5b0ea3f132269baa697209fea21da0b50a9f6bde4438dc",
+    "backend/src/testnet/worker.ts": "f2deb870e1c58bc5ab8e7a666f5162aa733084b3f3de40696cb656a59699c364",
+    "backend/tests/d2-authority-fixture.ts": "8d8d6ccd96180d4d1d90807520e11156b8ea1144cf48969a8ce0109ac312df5c",
+    "backend/tests/d3-council-prefreeze.test.ts": "38ef3181429417e461309e031aa012665a8b57458ad4755723f8cd2b23e81227",
+    "backend/tests/testnet-real-boundaries.test.ts": "373e82512965594bcf8f59f1b8ace0c34f62242d32389e46014038ae64ff56b0"
+  },
+  "checks": {
+    "ATOMIC_RPC_CLOSURE_EVIDENCE": "PASS",
+    "PRE_SIGN_VALIDITY_GUARD": "PASS",
+    "RECONCILIATION_SIGNER_INDEPENDENT": "PASS",
+    "RPC_NETWORK_BOUND": "PASS",
+    "SOURCE_SEQUENCE_EXACT": "PASS",
+    "DISPATCH_ANCHOR_BEFORE_SUBMIT": "PASS",
+    "TERMINAL_OR_HOLD_NO_RETRY": "PASS",
+    "HISTORICAL_PARTIAL_SERVER_BLOCK": "PASS_IMPLEMENTED_OFFLINE"
+  },
+  "atomicRpc": {
+    "endpoint": "https://soroban-testnet.stellar.org",
+    "method": "getTransaction",
+    "fields": [
+      "status",
+      "latestLedger",
+      "latestLedgerCloseTime",
+      "oldestLedger"
+    ],
+    "mechanism": "One HTTP/JSON-RPC response; frozen projected object bound in the owning client WeakMap to the requested hash; cloned/mixed/foreign observations rejected.",
+    "nodeIdentity": "Logical response context, not physical node attestation. No stable physical node ID is exposed by this RPC method.",
+    "network": "getNetwork verifies Testnet before lookup; no fallback endpoint; redirects denied",
+    "incompleteProof": "UNCERTAIN_OPEN, nonterminal; no safe closure",
+    "retention": "min(preparedLedger, firstDispatchLedger)"
+  },
+  "numericPolicy": {
+    "maxTimeMarginSeconds": 10,
+    "rpcMaxStaleSeconds": 30,
+    "rpcMaxFutureSkewSeconds": 60,
+    "transactionHorizonSeconds": 180,
+    "authMinimumSeconds": 90,
+    "envelopeSignatureMinimumSeconds": 50,
+    "dispatchMinimumSeconds": 15
+  },
+  "signer": {
+    "implementationChanged": false,
+    "secretHandlingChanged": false,
+    "compositionChanged": true,
+    "constructorCallsOnRestart": 0,
+    "secureStoreCallsOnRestart": 0,
+    "mechanism": "deferredSigning factory inside application composition; dynamic import/constructor only for authorize/signEnvelope after transport guards; public-only verification."
+  },
+  "historical": {
+    "batteryId": "BYE-D3-R1-20261104-AF7A44A515AC",
+    "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+    "state": "COLLECTED",
+    "reward": "NOT_ELIGIBLE",
+    "classification": "PERMANENTLY_NON_COUNTING",
+    "guard": "Before idempotency cache, in queue, and service prepare/process before worker/simulation.",
+    "ui": "UI unchanged; exact mutation routes used by UI reject. No successful API action path; not a contract-level ban.",
+    "v1ByteSha256": "3d9aa4bd5e7fe76869dd69da25c3d3dfe01190488c1cb41b25f8516df8a1818e",
+    "v1CanonicalDigest": "PASS",
+    "tombstoneReadIndependently": "PRESENT; common Git metadata read with approved process permissions, no write."
+  },
+  "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "wasm": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "tests": {
+    "focused": "129/129 (subset integral final, incluido recovery PostgreSQL)",
+    "d3_14c": "53/53",
+    "d3_14b": "27/27",
+    "d3_14a": "25/25",
+    "d3_13": "19/19",
+    "d3_9bPostgresql": "48/48",
+    "backend": "671/671",
+    "frontend": "323/323",
+    "rootVerify": "PASS",
+    "typescript": "PASS",
+    "lint": "PASS",
+    "isolatedFrontendBuild": "PASS",
+    "isolatedBuildAudits": "PASS",
+    "rustNative": "21/21",
+    "cargoWithWasmTests": "22/22",
+    "releaseWasm": "PASS, identical SHA256",
+    "rustfmt": "PASS",
+    "clippy": "PASS, -D warnings",
+    "python": "4/4",
+    "mockDemo": "REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT",
+    "secretAudit": "PASS, no findings",
+    "diffCheck": "PASS",
+    "sourceTestHashesStable": true,
+    "localFixtureCleanup": {
+      "remaining_fixture_databases": 0,
+      "test_cluster_stopped_retained": true,
+      "legacy_cluster_restored_unmodified": true
+    },
+    "frontendFixtureCleanup": {
+      "remaining_fixture_databases": 0,
+      "test_cluster_stopped_retained": true,
+      "legacy_cluster_restored_unmodified": true
+    },
+    "run": "run-05d880d5a29442e2b1434062713a392b",
+    "frontendRun": "run-dceb2ea3cf074fef879c4dd3fa2ec0c1",
+    "frontendFirstAttempt": "322/323; build audit timed out at 5s after 5.914s; rerun all frontend gates with unchanged default timeout and unchanged candidate"
+  },
+  "scope": {
+    "builder": "No new building behavior; shared parser validates raw type before model normalization.",
+    "signer": "UNCHANGED",
+    "server": "CHANGED: deferred composition",
+    "serviceBusiness": "CHANGED: historical denial and uncertainty",
+    "worker": "CHANGED: persist explicit RPC uncertainty",
+    "transport": "CHANGED: raw guard and coherent NOT_FOUND validation",
+    "rpc": "CHANGED: response context binding",
+    "store": "CHANGED: existing observation JSON only",
+    "identity": "CHANGED: raw type validation",
+    "sql": "Schema and SQL files unchanged; application SELECT/JSON observation logic changed",
+    "migrations": "UNCHANGED",
+    "rls": "UNCHANGED",
+    "auth": "UNCHANGED",
+    "frontend": "UNCHANGED",
+    "vercel": "UNCHANGED",
+    "contract": "UNCHANGED",
+    "wasmBehavior": "UNCHANGED"
+  },
+  "files": {
+    "modified": [
+      "backend/src/application/coordinator.ts",
+      "backend/src/application/operation-status.ts",
+      "backend/src/application/server.ts",
+      "backend/src/d3/live-operator.ts",
+      "backend/src/d3/manifest.ts",
+      "backend/src/d3/operation-polling.ts",
+      "backend/src/d3/operator-control.ts",
+      "backend/src/testnet/identity.ts",
+      "backend/src/testnet/rpc.ts",
+      "backend/src/testnet/service.ts",
+      "backend/src/testnet/store.ts",
+      "backend/src/testnet/transport.ts",
+      "backend/src/testnet/worker.ts",
+      "backend/tests/d2-authority-fixture.ts",
+      "backend/tests/d2-dispatch-authority.test.ts",
+      "backend/tests/testnet-fixtures.ts",
+      "backend/tests/testnet-real-boundaries.test.ts",
+      "backend/tests/testnet-worker.test.ts"
+    ],
+    "newCandidateFiles": [
+      "backend/src/application/deferred-signing.ts",
+      "backend/src/application/historical-lifecycle.ts",
+      "backend/tests/d3-council-prefreeze.test.ts",
+      "backend/tests/d3-observation-lineage.test.ts",
+      "backend/tests/d3-safe-closure.test.ts",
+      "backend/tests/d3-xdr-identity.test.ts"
+    ],
+    "deleted": [],
+    "trackedAddedLines": 559,
+    "trackedDeletedLines": 161,
+    "newCandidateLines": 998
+  },
+  "traceability": [
+    {
+      "condition": "counterexample early",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A counterexample early",
+      "result": "PASS"
+    },
+    {
+      "condition": "counterexample after 120 s",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A counterexample after 120 s",
+      "result": "PASS"
+    },
+    {
+      "condition": "counterexample after 300 s",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A counterexample after 300 s",
+      "result": "PASS"
+    },
+    {
+      "condition": "counterexample last valid ledger",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A counterexample last valid ledger",
+      "result": "PASS"
+    },
+    {
+      "condition": "counterexample absent",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A counterexample absent",
+      "result": "PASS"
+    },
+    {
+      "condition": "before maxTime",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A before maxTime",
+      "result": "PASS"
+    },
+    {
+      "condition": "at maxTime",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A at maxTime",
+      "result": "PASS"
+    },
+    {
+      "condition": "within margin",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A within margin",
+      "result": "PASS"
+    },
+    {
+      "condition": "at margin boundary",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A at margin boundary",
+      "result": "PASS"
+    },
+    {
+      "condition": "stale ledger",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A stale ledger",
+      "result": "PASS"
+    },
+    {
+      "condition": "RPC unavailable",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A RPC unavailable",
+      "result": "PASS"
+    },
+    {
+      "condition": "retention gap",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A retention gap",
+      "result": "PASS"
+    },
+    {
+      "condition": "advanced source sequence",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A advanced source sequence",
+      "result": "PASS"
+    },
+    {
+      "condition": "uncovered source ledger",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A uncovered source ledger",
+      "result": "PASS"
+    },
+    {
+      "condition": "uncovered final lookup",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A uncovered final lookup",
+      "result": "PASS"
+    },
+    {
+      "condition": "valid safe absence",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A valid safe absence",
+      "result": "PASS"
+    },
+    {
+      "condition": "FAILED on the final original-hash read wins over an earlier NOT_FOUND",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A FAILED on the final original-hash read wins over an earlier NOT_FOUND",
+      "result": "PASS"
+    },
+    {
+      "condition": "lost HTTP POST response recovers by the original key then the pinned ID",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A lost HTTP POST response recovers by the original key then the pinned ID",
+      "result": "PASS"
+    },
+    {
+      "condition": "dispatch guard expired",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A dispatch guard expired",
+      "result": "PASS"
+    },
+    {
+      "condition": "dispatch guard too far",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A dispatch guard too far",
+      "result": "PASS"
+    },
+    {
+      "condition": "dispatch guard too little left",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A dispatch guard too little left",
+      "result": "PASS"
+    },
+    {
+      "condition": "rejects absent or zero maxTime null",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A rejects absent or zero maxTime null",
+      "result": "PASS"
+    },
+    {
+      "condition": "rejects absent or zero maxTime 0",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A rejects absent or zero maxTime 0",
+      "result": "PASS"
+    },
+    {
+      "condition": "rejects a persisted XDR metadata mismatch before any closure RPC",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A rejects a persisted XDR metadata mismatch before any closure RPC",
+      "result": "PASS"
+    },
+    {
+      "condition": "signing checkpoints commit before both calls and a missing checkpoint prevents signing",
+      "suite": "D3-14A",
+      "source": "backend/src/testnet/worker.ts: reconcile / dispatch; identity.ts: finalizedBody",
+      "testFile": "backend/tests/d3-safe-closure.test.ts",
+      "test": "D3-14A signing checkpoints commit before both calls and a missing checkpoint prevents signing",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with missing identity stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with missing identity stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with missing XDR stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with missing XDR stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with truncated XDR stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with truncated XDR stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with unreadable XDR stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with unreadable XDR stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with changed signature, same body hash stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with changed signature, same body hash stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with missing signature stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with missing signature stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with wrong signer with correct hint stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with wrong signer with correct hint stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with correct signature with changed hint stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with correct signature with changed hint stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with extra signature stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with extra signature stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with wrong signing passphrase stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with wrong signing passphrase stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with wrong network metadata stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with wrong network metadata stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with wrong durable hash stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with wrong durable hash stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with wrong source stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with wrong source stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with wrong sequence stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with wrong sequence stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with wrong minTime stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with wrong minTime stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with wrong maxTime stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with wrong maxTime stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with unsupported Preconditions V2 stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with unsupported Preconditions V2 stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart with re-signed body and metadata disagree with immutable intent stays UNCERTAIN_OPEN",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B restart with re-signed body and metadata disagree with immutable intent stays UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "valid signature with complete retention proof",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B valid signature with complete retention proof",
+      "result": "PASS"
+    },
+    {
+      "condition": "valid signature with gap before dispatch retention proof",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B valid signature with gap before dispatch retention proof",
+      "result": "PASS"
+    },
+    {
+      "condition": "distinct pre-auth and final Soroban bodies bind final XDR",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B distinct pre-auth and final Soroban bodies bind final XDR",
+      "result": "PASS"
+    },
+    {
+      "condition": "distinct pre-auth and final Soroban bodies reject stale XDR",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B distinct pre-auth and final Soroban bodies reject stale XDR",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign guard rejects unsupported ledger and sequence preconditions",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B pre-sign guard rejects unsupported ledger and sequence preconditions",
+      "result": "PASS"
+    },
+    {
+      "condition": "actual authorized status GET surfaces durable hold without exposing XDR",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B actual authorized status GET surfaces durable hold without exposing XDR",
+      "result": "PASS"
+    },
+    {
+      "condition": "lost POST response and missing durable hash stop as UNCERTAIN_OPEN without replay",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B lost POST response and missing durable hash stop as UNCERTAIN_OPEN without replay",
+      "result": "PASS"
+    },
+    {
+      "condition": "real routing rejects a locally valid signature from an unexpected source",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B real routing rejects a locally valid signature from an unexpected source",
+      "result": "PASS"
+    },
+    {
+      "condition": "post-persist corruption before dispatch cannot create intent or send",
+      "suite": "D3-14B",
+      "source": "backend/src/testnet/identity.ts: assertPersistedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-xdr-identity.test.ts",
+      "test": "D3-14B post-persist corruption before dispatch cannot create intent or send",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign missing timebounds",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign missing timebounds",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign maxTime zero",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign maxTime zero",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign maxTime expired",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign maxTime expired",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign horizon too long",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign horizon too long",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign insufficient time",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign insufficient time",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign V2 ledgerBounds",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign V2 ledgerBounds",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign V2 minSeqNum",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign V2 minSeqNum",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign V2 minSeqAge",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign V2 minSeqAge",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign V2 minSeqLedgerGap",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign V2 minSeqLedgerGap",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign V2 extraSigners",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign V2 extraSigners",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign rejects V0",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign rejects V0",
+      "result": "PASS"
+    },
+    {
+      "condition": "pre-sign rejects fee-bump",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C pre-sign rejects fee-bump",
+      "result": "PASS"
+    },
+    {
+      "condition": "numeric policy and exact signing boundaries",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C numeric policy and exact signing boundaries",
+      "result": "PASS"
+    },
+    {
+      "condition": "authorization refuses 89 seconds without invoking signer",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/transport.ts: signingRequest; identity.ts: readSupportedEnvelope / ENVELOPE_TIME_POLICY",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C authorization refuses 89 seconds without invoking signer",
+      "result": "PASS"
+    },
+    {
+      "condition": "dispatch remaining boundary 14",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: dispatch / execute / recoverDispatched; store.ts: dispatchIntent",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C dispatch remaining boundary 14",
+      "result": "PASS"
+    },
+    {
+      "condition": "dispatch remaining boundary 15",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: dispatch / execute / recoverDispatched; store.ts: dispatchIntent",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C dispatch remaining boundary 15",
+      "result": "PASS"
+    },
+    {
+      "condition": "dispatch remaining boundary 180",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: dispatch / execute / recoverDispatched; store.ts: dispatchIntent",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C dispatch remaining boundary 180",
+      "result": "PASS"
+    },
+    {
+      "condition": "dispatch remaining boundary 181",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: dispatch / execute / recoverDispatched; store.ts: dispatchIntent",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C dispatch remaining boundary 181",
+      "result": "PASS"
+    },
+    {
+      "condition": "RPC freshness boundary 30",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: reconcile / freshLedger",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C RPC freshness boundary 30",
+      "result": "PASS"
+    },
+    {
+      "condition": "RPC freshness boundary 31",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: reconcile / freshLedger",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C RPC freshness boundary 31",
+      "result": "PASS"
+    },
+    {
+      "condition": "RPC freshness boundary -60",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: reconcile / freshLedger",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C RPC freshness boundary -60",
+      "result": "PASS"
+    },
+    {
+      "condition": "RPC freshness boundary -61",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: reconcile / freshLedger",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C RPC freshness boundary -61",
+      "result": "PASS"
+    },
+    {
+      "condition": "atomic RPC closure coherent",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/rpc.ts: transaction / assertTransactionResponse; transport.ts: observe; worker.ts: reconcile",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C atomic RPC closure coherent",
+      "result": "PASS"
+    },
+    {
+      "condition": "atomic RPC closure stale-plus-fresh",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/rpc.ts: transaction / assertTransactionResponse; transport.ts: observe; worker.ts: reconcile",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C atomic RPC closure stale-plus-fresh",
+      "result": "PASS"
+    },
+    {
+      "condition": "atomic RPC closure retention-mixed",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/rpc.ts: transaction / assertTransactionResponse; transport.ts: observe; worker.ts: reconcile",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C atomic RPC closure retention-mixed",
+      "result": "PASS"
+    },
+    {
+      "condition": "atomic RPC closure retention-unavailable",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/rpc.ts: transaction / assertTransactionResponse; transport.ts: observe; worker.ts: reconcile",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C atomic RPC closure retention-unavailable",
+      "result": "PASS"
+    },
+    {
+      "condition": "atomic RPC closure context-unavailable",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/rpc.ts: transaction / assertTransactionResponse; transport.ts: observe; worker.ts: reconcile",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C atomic RPC closure context-unavailable",
+      "result": "PASS"
+    },
+    {
+      "condition": "atomic RPC closure wrong-network",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/rpc.ts: transaction / assertTransactionResponse; transport.ts: observe; worker.ts: reconcile",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C atomic RPC closure wrong-network",
+      "result": "PASS"
+    },
+    {
+      "condition": "atomic RPC closure futurenet",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/rpc.ts: transaction / assertTransactionResponse; transport.ts: observe; worker.ts: reconcile",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C atomic RPC closure futurenet",
+      "result": "PASS"
+    },
+    {
+      "condition": "exact source proof 0",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: reconcile / freshLedger",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C exact source proof 0",
+      "result": "PASS"
+    },
+    {
+      "condition": "exact source proof 1",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: reconcile / freshLedger",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C exact source proof 1",
+      "result": "PASS"
+    },
+    {
+      "condition": "exact source proof 5",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: reconcile / freshLedger",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C exact source proof 5",
+      "result": "PASS"
+    },
+    {
+      "condition": "exact source proof -1",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: reconcile / freshLedger",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C exact source proof -1",
+      "result": "PASS"
+    },
+    {
+      "condition": "exact source proof unreadable",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: reconcile / freshLedger",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C exact source proof unreadable",
+      "result": "PASS"
+    },
+    {
+      "condition": "exact source proof stale",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: reconcile / freshLedger",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C exact source proof stale",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart is independent of signer constructor and Secure Store false",
+      "suite": "D3-14C",
+      "source": "backend/src/application/server.ts; application/deferred-signing.ts: deferredSigning; worker.ts: verifyOriginal / reconcile",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C restart is independent of signer constructor and Secure Store false",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart is independent of signer constructor and Secure Store true",
+      "suite": "D3-14C",
+      "source": "backend/src/application/server.ts; application/deferred-signing.ts: deferredSigning; worker.ts: verifyOriginal / reconcile",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C restart is independent of signer constructor and Secure Store true",
+      "result": "PASS"
+    },
+    {
+      "condition": "composition imports signer only inside deferred signing callback",
+      "suite": "D3-14C",
+      "source": "backend/src/application/server.ts; application/deferred-signing.ts: deferredSigning; worker.ts: verifyOriginal / reconcile",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C composition imports signer only inside deferred signing callback",
+      "result": "PASS"
+    },
+    {
+      "condition": "authenticated status reads durable RPC uncertainty and clears it on a coherent observation",
+      "suite": "D3-14C",
+      "source": "backend/src/application/operation-status.ts: operationStatus / operationPresentation; store.ts: hasRpcUncertainty",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C authenticated status reads durable RPC uncertainty and clears it on a coherent observation",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart boundary before-submit",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: dispatch / execute / recoverDispatched; store.ts: dispatchIntent",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C restart boundary before-submit",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart boundary lost-response",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: dispatch / execute / recoverDispatched; store.ts: dispatchIntent",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C restart boundary lost-response",
+      "result": "PASS"
+    },
+    {
+      "condition": "restart boundary during-reconciliation",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/worker.ts: dispatch / execute / recoverDispatched; store.ts: dispatchIntent",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C restart boundary during-reconciliation",
+      "result": "PASS"
+    },
+    {
+      "condition": "invalid persisted envelope type V0",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/identity.ts: readSupportedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C invalid persisted envelope type V0",
+      "result": "PASS"
+    },
+    {
+      "condition": "invalid persisted envelope type fee-bump",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/identity.ts: readSupportedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C invalid persisted envelope type fee-bump",
+      "result": "PASS"
+    },
+    {
+      "condition": "full-envelope persist digest mismatch is an explicit durable hold",
+      "suite": "D3-14C",
+      "source": "backend/src/testnet/identity.ts: readSupportedEnvelope; worker.ts: verifyOriginal; store.ts: assertPersistedEnvelopeAnchor",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C full-envelope persist digest mismatch is an explicit durable hold",
+      "result": "PASS"
+    },
+    {
+      "condition": "no automatic lifecycle continuation FAILED",
+      "suite": "D3-14C",
+      "source": "backend/src/d3/live-operator.ts: submitAndObserveOperation / runLive; application/coordinator.ts: queue",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C no automatic lifecycle continuation FAILED",
+      "result": "PASS"
+    },
+    {
+      "condition": "no automatic lifecycle continuation EXPIRED_NOT_INCLUDED",
+      "suite": "D3-14C",
+      "source": "backend/src/d3/live-operator.ts: submitAndObserveOperation / runLive; application/coordinator.ts: queue",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C no automatic lifecycle continuation EXPIRED_NOT_INCLUDED",
+      "result": "PASS"
+    },
+    {
+      "condition": "no automatic lifecycle continuation UNCERTAIN_OPEN",
+      "suite": "D3-14C",
+      "source": "backend/src/d3/live-operator.ts: submitAndObserveOperation / runLive; application/coordinator.ts: queue",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C no automatic lifecycle continuation UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "API rejects a new-key replacement FAILED",
+      "suite": "D3-14C",
+      "source": "backend/src/d3/live-operator.ts: submitAndObserveOperation / runLive; application/coordinator.ts: queue",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C API rejects a new-key replacement FAILED",
+      "result": "PASS"
+    },
+    {
+      "condition": "API rejects a new-key replacement EXPIRED_NOT_INCLUDED",
+      "suite": "D3-14C",
+      "source": "backend/src/d3/live-operator.ts: submitAndObserveOperation / runLive; application/coordinator.ts: queue",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C API rejects a new-key replacement EXPIRED_NOT_INCLUDED",
+      "result": "PASS"
+    },
+    {
+      "condition": "API rejects a new-key replacement UNCERTAIN_OPEN",
+      "suite": "D3-14C",
+      "source": "backend/src/d3/live-operator.ts: submitAndObserveOperation / runLive; application/coordinator.ts: queue",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C API rejects a new-key replacement UNCERTAIN_OPEN",
+      "result": "PASS"
+    },
+    {
+      "condition": "historical lifecycle is blocked at real HTTP and service boundaries before all external effects",
+      "suite": "D3-14C",
+      "source": "backend/src/application/historical-lifecycle.ts: assertLifecycleWritable; coordinator.ts: acceptMutation / queue; testnet/service.ts: prepare / processReviewed",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C historical lifecycle is blocked at real HTTP and service boundaries before all external effects",
+      "result": "PASS"
+    },
+    {
+      "condition": "terminal transition between admission reads cannot admit a replacement",
+      "suite": "D3-14C",
+      "source": "backend/src/d3/live-operator.ts: submitAndObserveOperation / runLive; application/coordinator.ts: queue",
+      "testFile": "backend/tests/d3-council-prefreeze.test.ts",
+      "test": "D3-14C terminal transition between admission reads cannot admit a replacement",
+      "result": "PASS"
+    }
+  ],
+  "effects": {
+    "businessTestnetTx": 0,
+    "liveSignatures": 0,
+    "broadcasts": 0,
+    "supabaseWrites": 0,
+    "migrations": 0,
+    "ttlExtensions": 0,
+    "deployments": 0,
+    "commits": 0,
+    "pushes": 0
+  },
+  "budget": {
+    "cap": 18,
+    "consumed": 3,
+    "available": 15,
+    "futureRequired": 15,
+    "freshCompleteLifecycles": "0/3",
+    "margin": 0,
+    "ttlOwnerDecisionPending": true
+  },
+  "project": {
+    "D1": "12/12",
+    "D2": "6/6",
+    "D3": "0/5",
+    "total": "18/23"
+  },
+  "conditionTestIndex": {
+    "Una respuesta RPC; NOT_FOUND + ledger + closeTime + retención": "atomic RPC closure coherent",
+    "Stale NOT_FOUND no toma ledger fresco prestado": "atomic RPC closure stale-plus-fresh",
+    "Retención mezclada / sin contexto / sin retención": "atomic RPC closure retention-mixed; context-unavailable; retention-unavailable",
+    "getNetwork obligatorio; Mainnet y Futurenet rechazados": "atomic RPC closure wrong-network; futurenet",
+    "Margen maxTime 10s estricto": "D3-14A within margin; at margin boundary; valid safe absence",
+    "Frescura 30s / futuro 60s": "RPC freshness boundary 30; 31; -60; -61",
+    "Retención desde preparación y primer despacho": "D3-14B valid signature with gap before dispatch retention proof; complete retention proof",
+    "Secuencia exacta; avanzada, inferior, ilegible, stale": "exact source proof 0; 1; 5; -1; unreadable; stale",
+    "Timebounds ausentes / maxTime0 / expirado / horizonte / poco tiempo": "pre-sign missing timebounds; maxTime zero; maxTime expired; horizon too long; insufficient time",
+    "V0 / fee-bump antes de firma y al restart": "pre-sign rejects V0; fee-bump; invalid persisted envelope type V0; fee-bump",
+    "ledgerBounds / minSeqNum / minSeqAge / minSeqLedgerGap / extraSigners": "pre-sign V2 ledgerBounds; minSeqNum; minSeqAge; minSeqLedgerGap; extraSigners",
+    "Ed25519 offline; firma, firmante, hint, red": "D3-14B restart with changed signature, same body hash; wrong signer with correct hint; correct signature with changed hint; wrong signing passphrase",
+    "Source, seq, minTime, maxTime, body hash": "D3-14B restart with wrong source; wrong sequence; wrong minTime; wrong maxTime; wrong durable hash",
+    "Digest completo": "full-envelope persist digest mismatch is an explicit durable hold",
+    "Signer no cargado / Secure Store no accedido": "restart is independent of signer constructor and Secure Store false; true; composition imports signer only inside deferred signing callback",
+    "Soroban auth / final envelope": "D3-14B distinct pre-auth and final Soroban bodies reject stale XDR; bind final XDR",
+    "Intent/ledger SQL antes de submit; tres reinicios": "restart boundary before-submit; lost-response; during-reconciliation",
+    "Terminal/hold no retry y no replacement por API": "no automatic lifecycle continuation FAILED; EXPIRED_NOT_INCLUDED; UNCERTAIN_OPEN; API rejects a new-key replacement FAILED; EXPIRED_NOT_INCLUDED; UNCERTAIN_OPEN",
+    "Histórico server/API/UI, también caché": "historical lifecycle is blocked at real HTTP and service boundaries before all external effects",
+    "Incertidumbre RPC en GET autenticado": "authenticated status reads durable RPC uncertainty and clears it on a coherent observation"
+  }
+}

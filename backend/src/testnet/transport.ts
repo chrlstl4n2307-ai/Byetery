@@ -6,7 +6,7 @@ import { evidenceCommitment } from '../evidence.ts';
 import type { PhasedStellarSigner, SigningRequest } from '../stellar-signer.ts';
 import type { TransactionTransport } from './worker.ts';
 import type { Work } from './store.ts';
-import { NETWORK_ID, SIGNER_FEE_CAP, type Confirmation, type FinalizedBody, type Observation, type PreparedBody,
+import { NETWORK_ID, SIGNER_FEE_CAP, ENVELOPE_TIME_POLICY, hasSafeValidity, readSupportedEnvelope, type Confirmation, type FinalizedBody, type Observation, type PreparedBody,
   type StateEvidence, type TransactionIdentity } from './identity.ts';
 import { TestnetRpc } from './rpc.ts';
 import { ACTORS, CONTRACT, TOKEN, WASM, invocation, string, bytes } from './abi.ts';
@@ -73,8 +73,10 @@ export class TestnetTransport implements TransactionTransport {
   readonly scope='TESTNET' as const;
   readonly rpc:TestnetRpc;readonly signer:PhasedStellarSigner;readonly guard:ContextGuard;
   readonly load:(id:string)=>Promise<Work>;readonly deploymentId:string;readonly supervisor?:ExecutionSupervisor;
-  constructor(rpcClient:TestnetRpc,signer:PhasedStellarSigner,guard:ContextGuard,load:(id:string)=>Promise<Work>,deploymentId:string,supervisor?:ExecutionSupervisor){
-    this.supervisor=supervisor;this.rpc=rpcClient;this.signer=signer;this.guard=guard;this.load=load;this.deploymentId=deploymentId;
+  private readonly nowSeconds:()=>number;
+  constructor(rpcClient:TestnetRpc,signer:PhasedStellarSigner,guard:ContextGuard,load:(id:string)=>Promise<Work>,deploymentId:string,supervisor?:ExecutionSupervisor,
+    nowSeconds=()=>Math.floor(Date.now()/1000)){
+    this.nowSeconds=nowSeconds;this.supervisor=supervisor;this.rpc=rpcClient;this.signer=signer;this.guard=guard;this.load=load;this.deploymentId=deploymentId;
   }
   async readiness(){
     await this.rpc.network();const latest=await this.rpc.latest();
@@ -132,7 +134,7 @@ export class TestnetTransport implements TransactionTransport {
     const {latest}=await this.readiness(),a=await this.rpc.account(expected.signers[0]);
     const sourceSequence=a.account.sequenceNumber();
     const tx=new TransactionBuilder(a.account,{fee:'10000',networkPassphrase:Networks.TESTNET})
-      .addOperation(new Contract(CONTRACT).call(command.kind,...expected.args)).setTimebounds(0,Number(latest.closeTime)+180).build();
+      .addOperation(new Contract(CONTRACT).call(command.kind,...expected.args)).setTimebounds(0,Number(latest.closeTime)+ENVELOPE_TIME_POLICY.validitySeconds).build();
     const s=await this.rpc.simulate(tx.toXDR());
     ensure(!s.error,'SimulationFailed');ensure(!s.restorePreamble&&s.transactionData,'UnexpectedRestoration');
     const data=xdr.SorobanTransactionData.fromXDR(s.transactionData,'base64');
@@ -145,25 +147,31 @@ export class TestnetTransport implements TransactionTransport {
       simulation:{resourceFee:s.minResourceFee,totalFee:final.fee,authRequirements:expected.signers,
         sourceSequence,sourceBalance:a.balance,ledger:s.latestLedger}};
   }
-  private async signingRequest(body:PreparedBody,w:Work):Promise<SigningRequest>{
+  private async signingRequest(body:PreparedBody,w:Work,minimumSeconds:number):Promise<SigningRequest>{
     await this.guard.validate(w);await this.rpc.network();const l=await this.rpc.latest();
-    const tx=new Transaction(body.transactionXdr,Networks.TESTNET);validateAuth(tx,w.command);
+    const tx=readSupportedEnvelope(body.transactionXdr);validateAuth(tx,w.command);
+    const envelope=tx.toEnvelope();
+    ensure(envelope.type==='envelopeTypeTx'&&envelope.v1.tx.cond.type==='precondTime','UnsupportedEnvelopePreconditions');
     ensure(l.sequence>=body.preparedLedger&&l.sequence-body.preparedLedger<=20&&tx.timeBounds
-      &&BigInt(tx.timeBounds.maxTime)>BigInt(l.closeTime)&&BigInt(tx.timeBounds.maxTime)<=BigInt(l.closeTime)+300n,'InvalidSigningWindow');
+      &&hasSafeValidity(tx.timeBounds.maxTime,l.closeTime,minimumSeconds),'InvalidSigningWindow');
     return {transactionXdr:body.transactionXdr,method:w.command.kind,expectedSigners:invocation(w.command).signers,
       networkPassphrase:Networks.TESTNET,currentLedger:l.sequence,expirationLedger:body.preparedLedger+60,
       audit:w.auditPhase,assertAdmission:()=>this.supervisor?.assertAdmission(),
       childObserver:this.supervisor?{started:pid=>this.supervisor!.childStarted(pid),closed:pid=>this.supervisor!.childClosed(pid)}:undefined};
   }
   async attachSorobanAuthorization(body:PreparedBody,w:Work){
-    const healthy=this.guard.connectionGuard?.()??(()=>{}),request=await this.signingRequest(body,w);healthy();
+    const healthy=this.guard.connectionGuard?.()??(()=>{}),request=await this.signingRequest(body,w,ENVELOPE_TIME_POLICY.minimumBeforeAuthorization);healthy();
     const r=await this.signer.authorize(request);return {...body,transactionXdr:r.transactionXdr};
   }
   async signEnvelope(body:FinalizedBody,w:Work){
-    const healthy=this.guard.connectionGuard?.()??(()=>{}),request=await this.signingRequest(body,w);healthy();
+    const healthy=this.guard.connectionGuard?.()??(()=>{}),request=await this.signingRequest(body,w,ENVELOPE_TIME_POLICY.minimumBeforeEnvelopeSignature);healthy();
     const r=await this.signer.signEnvelope(request,body.transactionHash);return r.transactionXdr;
   }
   async validity(_i:TransactionIdentity){await this.rpc.network();const l=await this.rpc.latest();return {ledger:l.sequence,closeTime:l.closeTime};}
+  async sourceSequenceForClosure(i:TransactionIdentity){
+    const a=await this.rpc.account(i.sourceAccount);
+    return {sequence:a.account.sequenceNumber(),ledger:a.ledger};
+  }
   async assertSourceSequence(i:TransactionIdentity){const a=await this.rpc.account(i.sourceAccount);
     ensure(BigInt(a.account.sequenceNumber())===BigInt(i.sequence)-1n,'REVIEWED_RESOLUTION_REQUIRED');
     return {sequence:a.account.sequenceNumber(),balance:a.balance,ledger:a.ledger};}
@@ -174,7 +182,15 @@ export class TestnetTransport implements TransactionTransport {
   }
   async observe(i:TransactionIdentity):Promise<Observation>{
     await this.rpc.network();const r=await this.rpc.transaction(i.transactionHash);
-    if(r.status==='NOT_FOUND')return {status:'NOT_FOUND',observationLedger:r.latestLedger,ledgerCloseTime:String(r.latestLedgerCloseTime),correlationId:i.operationId};
+    if(r.status==='NOT_FOUND'){
+      this.rpc.assertTransactionResponse(r,i.transactionHash);
+      const close=String(r.latestLedgerCloseTime),age=this.nowSeconds()-Number(close);
+      ensure(Number.isSafeInteger(r.latestLedger)&&r.latestLedger>0&&Number.isSafeInteger(r.oldestLedger)
+        &&r.oldestLedger>0&&r.oldestLedger<=r.latestLedger&&/^\d+$/.test(close)&&Number.isSafeInteger(age)
+        &&age<=ENVELOPE_TIME_POLICY.maxLedgerAgeSeconds&&age>=-ENVELOPE_TIME_POLICY.maxLedgerLeadSeconds,'RpcClosureEvidenceUncertain');
+    }
+    if(r.status==='NOT_FOUND'&&r.txHash)ensure(r.txHash===i.transactionHash,'ConfirmationMismatch');
+    if(r.status==='NOT_FOUND')return {status:'NOT_FOUND',observationLedger:r.latestLedger,ledgerCloseTime:String(r.latestLedgerCloseTime),oldestLedger:r.oldestLedger,correlationId:i.operationId};
     ensure(r.txHash===i.transactionHash&&r.ledger&&r.resultXdr&&r.resultMetaXdr,'ConfirmationMismatch');
     const resultCode=xdr.TransactionResult.fromXDR(r.resultXdr,'base64').result.type;
     ensure((r.status==='SUCCESS')===(resultCode==='txSuccess'),'ConfirmationResultMismatch');

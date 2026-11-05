@@ -9,6 +9,7 @@ import { WalletService } from './wallet.ts';
 import { AppError, commandFailure, failure, jsonSafe, requireThat, type Reply } from './errors.ts';
 import { bid, bytes, canonical, object, rid, text, uuid } from './validation.ts';
 import {requiredAuthority,type ApplicationCommandKind} from './authority.ts';
+import {assertLifecycleWritable,HISTORICAL_DEPLOYMENT} from './historical-lifecycle.ts';
 export interface Action { kind: 'register'|'return'|'cancel'|'collection'|'recycling'|'reward'|'challenge'|'verify'; resource?: string }
 const commandForAction={register:'register_battery',return:'open_return',cancel:'cancel_return',collection:'confirm_collection',recycling:'confirm_recycling',reward:'pay_reward'} as const satisfies Record<Exclude<Action['kind'],'challenge'|'verify'>,ApplicationCommandKind>;
 /** Faults are injectable by server-side tests only. Never read from HTTP or env. */
@@ -51,6 +52,14 @@ export class Coordinator {
         requestOwner=owner.user_id??null;
        }
        await this.repo.role(db,user,requiredAuthority(commandForAction[action.kind],user,requestOwner).role);
+      }
+      if(d===HISTORICAL_DEPLOYMENT&&action.kind!=='challenge'&&action.kind!=='verify'){
+        const target=['cancel','collection','recycling'].includes(action.kind)
+          ?(await one(db,"select battery_id from app_private.return_requests where deployment_id=$1 and request_id=decode($2,'hex')",[d,rid(action.resource)]))?.battery_id
+          :action.kind==='register'?(input as Record<string,unknown>|null)?.batteryId:action.resource;
+        if(typeof target==='string'){
+          try{assertLifecycleWritable(d,target);}catch{throw new AppError(409,'HistoricalLifecyclePermanentlyNonCounting');}
+        }
       }
       const old=await one(db,'select * from api_private.idempotency where deployment_id=$1 and user_id=$2 and key=$3',[d,user,key]);
       if(old) {
@@ -105,13 +114,24 @@ export class Coordinator {
       requireThat(claim,404,'RequestNotFound'); batteryId=claim.battery_id;
       if(action.kind==='cancel') requireThat(claim.user_id===user,403,'RequestOwnerRequired');
     } else batteryId=bid(action.kind==='register'?body.batteryId:action.resource);
+    try{assertLifecycleWritable(d,batteryId);}catch{throw new AppError(409,'HistoricalLifecyclePermanentlyNonCounting');}
+    const stoppedD3=await one(db,`select 1 from app_private.stellar_operations o join api_private.testnet_work w on w.operation_id=o.id
+      where o.deployment_id=$1 and o.battery_id=$2 and o.idempotency_key like 'd3:%'
+      and w.state in ('CONFIRMED_FAILED','EXPIRED_NOT_APPLIED','EXPIRED_UNRESOLVED') limit 1`,[d,batteryId]);
+    requireThat(!stoppedD3,409,'D3LifecycleRequiresOwnerReview');
     if(action.kind==='register'||action.kind==='collection'||action.kind==='recycling')await this.repo.role(db,user,requiredAuthority(commandForAction[action.kind],user).role);
     if(action.kind==='register'){
       // Server-generated review IDs are reserved for explicit local owner adoption.
       // Namespace exclusion closes the ordinary-registration race without reading intents.
       requireThat(!batteryId.startsWith('BYE-REVIEW-'),409,'ReviewBatteryReserved');
     }
-    const pending=await one(db,`select 1 from app_private.stellar_operations where deployment_id=$1 and battery_id=$2 and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN')`,[d,batteryId]);
+    // One snapshot must include both pending work and a D3 terminal/hold. If
+    // reconciliation completes between the previous diagnostic and this read,
+    // it cannot open a window for a new-key replacement.
+    const pending=await one(db,`select 1 from app_private.stellar_operations o where deployment_id=$1 and battery_id=$2
+      and (state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN') or
+        (o.idempotency_key like 'd3:%' and exists(select 1 from api_private.testnet_work w where w.operation_id=o.id
+          and w.state in ('CONFIRMED_FAILED','EXPIRED_NOT_APPLIED','EXPIRED_UNRESOLVED'))))`,[d,batteryId]);
     requireThat(!pending,409,'OperationInProgress');
     if(action.kind==='register') {
       requireThat(!await one(db,'select 1 from app_private.battery_records where deployment_id=$1 and battery_id=$2',[d,batteryId]),409,'BatteryAlreadyExists');

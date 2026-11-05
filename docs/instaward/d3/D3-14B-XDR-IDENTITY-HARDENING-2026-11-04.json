@@ -1,0 +1,213 @@
+{
+  "task": "D3-14B-XDR-IDENTITY-HARDENING",
+  "date": "2026-11-04",
+  "result": "D3_14B_XDR_HARDENING_READY_FOR_COUNCIL_REVIEW",
+  "next": "Council review",
+  "baseline": {
+    "branch": "instaward/d2-web-mvp",
+    "head": "da541d843632e3ba4bd811ddd13c85b2bea5ccb6",
+    "cachedOrigin": "da541d843632e3ba4bd811ddd13c85b2bea5ccb6",
+    "priorFingerprint": "7d9e6f48a5cccecd3f9de00f4d581955c2f0a962472659e5e531086ff98774eb",
+    "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+    "wasm": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6"
+  },
+  "signing": {
+    "transactionSignatures": 1,
+    "extraSignatures": false,
+    "multisig": false,
+    "envelope": "envelopeTypeTx, precondTime",
+    "mapping": {
+      "register_battery": "ADMIN",
+      "open_return": "SERVICE",
+      "cancel_return": "SERVICE",
+      "confirm_collection": "SERVICE",
+      "confirm_recycling": "RECYCLER",
+      "pay_reward": "SERVICE"
+    },
+    "collectionAdditionalAuthorization": "COLLECTOR — Soroban address authorization, embedded before SERVICE signs the final body"
+  },
+  "verification": {
+    "xdrDecode": true,
+    "usesTestnetPassphrase": true,
+    "checkBodyHash": true,
+    "checkSourceSequenceAndTimebounds": true,
+    "checksDurableInvocationAndContext": true,
+    "preconditionsV2": "REJECT",
+    "verifyExpectedSourceEd25519": true,
+    "hintRequiredButInsufficient": true,
+    "signedEnvelopeSha256AtPersistAndDispatch": true,
+    "identityFailurePublicClass": "UNCERTAIN_OPEN",
+    "identityFailureTerminal": false,
+    "identityFailureReachesRpc": false,
+    "additionalSafeClosureGatesRetained": true,
+    "retentionReference": "min(preparedLedger, firstDispatchLedger)",
+    "legacyWithoutEnvelopeAnchor": "Cannot prove terminal non-inclusion; validated original receipts may still reconcile",
+    "reconnectLostCommit": "Valid READY envelope still raises SignedIdentityRequiresReviewedDispatch; no preparation, signing or dispatch on reconnect",
+    "wasmRebuiltIdentical": true,
+    "testRun": "run-33e8cfe39ec64d89ac98615ddea0c8a0",
+    "fixtureCleanup": "PASS",
+    "stagedChanges": 0
+  },
+  "historical": {
+    "id": "BYE-D3-R1-20261104-AF7A44A515AC",
+    "classification": "PERMANENTLY_NON_COUNTING",
+    "v1ByteSha256": "3d9aa4bd5e7fe76869dd69da25c3d3dfe01190488c1cb41b25f8516df8a1818e",
+    "v1Integrity": "PASS",
+    "tombstonePreserved": true,
+    "serverApiUiPreflight": "PENDING",
+    "canonicalDigestVerified": true
+  },
+  "candidate": {
+    "fingerprint": "f11840d3bf1a433fa1d3f44023da42ae1ec148c61b7287e090e5ea049922874c",
+    "hashes": {
+      "backend/src/application/operation-status.ts": "1d79ec5a38cbb3ffe16aa972f897d2114a8adceda71813676cc95b3f30fb9b8c",
+      "backend/src/d3/live-operator.ts": "3c1a86245b07b15482bfb18b678860dfcba5d8add3148dcd939699cf0ebfb67b",
+      "backend/src/d3/manifest.ts": "976b55fa16e82abbca6448f647f017f8bc43d2d5385f436f2008a3f4db8e2c71",
+      "backend/src/d3/operation-polling.ts": "89e5471b979a521b4a913c7a28c835b4b2db35206b7759792ad0101a5ba7358d",
+      "backend/src/d3/operator-control.ts": "9e6fe32007d0487752fcde090e82a855ee27a64aad129dbf706e74c4caa27a52",
+      "backend/src/testnet/identity.ts": "7bef528152c6b72721b1ca6d51b1f415a3cdbf9fc657c441b4838ab2bfeae64b",
+      "backend/src/testnet/rpc.ts": "10688249c12d764bb3ab64f3162b27fb88fd3c0c670dd281d18920f0bf081f64",
+      "backend/src/testnet/service.ts": "54abbdb86e7e3351fde1c9b24a160468447b9f24cccbf46e4ffb1b14017be111",
+      "backend/src/testnet/store.ts": "b437ed936b7da2c0a13bbb22f79564659d4dff1496216b932ddf986f744cb16f",
+      "backend/src/testnet/transport.ts": "507fcbbab03377f1bde00f6fe1f2845d0a35c1109102f7d6406f3cc5d8a5a04f",
+      "backend/src/testnet/worker.ts": "a01bd701a4688be7a2813f0d0b8d634bb84910d5ef5b2bf4e1b679c122cdb815",
+      "backend/tests/d2-dispatch-authority.test.ts": "48cbdb5cbde6cdd268fc86cf08f72e029cbd85fb91e9d862f0126cf97d5fcdce",
+      "backend/tests/d3-observation-lineage.test.ts": "e7e45406f00842b0ad8ca9a49633c8a1ee44db56861add49f519865284b4f695",
+      "backend/tests/d3-safe-closure.test.ts": "64c9d303495f8fb4783d23d1ac9209407eac671384b5197b1f437b52f0379f7c",
+      "backend/tests/d3-xdr-identity.test.ts": "afa82d6e7922b5c4a3a5007d40c8ad23ddf965ca2bc2e843418f6b1eefc7b982",
+      "backend/tests/testnet-fixtures.ts": "321733f1aa2a342a00e7278d5c35acd5b935ddbf32a6002786cbbe349cf1bac2",
+      "backend/tests/testnet-real-boundaries.test.ts": "6b8c590f8372eadcb2c11bf10d09bf3c5483f064d6f108d6b95b428eeef0b598",
+      "backend/tests/testnet-worker.test.ts": "bf886fa2c6230bf750f9d404154608ed6747b53e1103c1e83a724506b3bacae4"
+    },
+    "tracked": [
+      "backend/src/application/operation-status.ts",
+      "backend/src/d3/live-operator.ts",
+      "backend/src/d3/manifest.ts",
+      "backend/src/d3/operation-polling.ts",
+      "backend/src/d3/operator-control.ts",
+      "backend/src/testnet/identity.ts",
+      "backend/src/testnet/rpc.ts",
+      "backend/src/testnet/service.ts",
+      "backend/src/testnet/store.ts",
+      "backend/src/testnet/transport.ts",
+      "backend/src/testnet/worker.ts",
+      "backend/tests/d2-dispatch-authority.test.ts",
+      "backend/tests/testnet-fixtures.ts",
+      "backend/tests/testnet-real-boundaries.test.ts",
+      "backend/tests/testnet-worker.test.ts"
+    ],
+    "untracked": [
+      "backend/tests/d3-observation-lineage.test.ts",
+      "backend/tests/d3-safe-closure.test.ts",
+      "backend/tests/d3-xdr-identity.test.ts"
+    ],
+    "trackedPlus": 479,
+    "trackedMinus": 145,
+    "newLines": 594
+  },
+  "files": {
+    "modified": [
+      "backend/src/application/operation-status.ts",
+      "backend/src/d3/live-operator.ts",
+      "backend/src/d3/manifest.ts",
+      "backend/src/d3/operation-polling.ts",
+      "backend/src/d3/operator-control.ts",
+      "backend/src/testnet/identity.ts",
+      "backend/src/testnet/rpc.ts",
+      "backend/src/testnet/service.ts",
+      "backend/src/testnet/store.ts",
+      "backend/src/testnet/transport.ts",
+      "backend/src/testnet/worker.ts",
+      "backend/tests/d2-dispatch-authority.test.ts",
+      "backend/tests/testnet-fixtures.ts",
+      "backend/tests/testnet-real-boundaries.test.ts",
+      "backend/tests/testnet-worker.test.ts"
+    ],
+    "added": [
+      "backend/tests/d3-observation-lineage.test.ts",
+      "backend/tests/d3-safe-closure.test.ts",
+      "backend/tests/d3-xdr-identity.test.ts",
+      "docs/instaward/d3/D3-14B-XDR-IDENTITY-HARDENING-2026-11-04.md",
+      "docs/instaward/d3/D3-14B-XDR-IDENTITY-HARDENING-2026-11-04.json"
+    ],
+    "deleted": []
+  },
+  "effects": {
+    "businessTestnetTx": 0,
+    "liveSignatures": 0,
+    "broadcasts": 0,
+    "supabaseWrites": 0,
+    "migrations": 0,
+    "ttlExtensions": 0,
+    "deployments": 0,
+    "commits": 0,
+    "pushes": 0
+  },
+  "status": {
+    "used": 3,
+    "cap": 18,
+    "available": 15,
+    "freshLifecycles": "0/3",
+    "d1": "12/12",
+    "d2": "6/6",
+    "d3": "0/5",
+    "total": "18/23",
+    "ttlOwnerDecisionPending": true
+  },
+  "regressionAttempts": {
+    "first": {
+      "backendPassed": 617,
+      "backendTotal": 618,
+      "failure": "Lost COMMIT acknowledgement: explicit reconnect refusal was missing; no dispatch occurred."
+    },
+    "rerunSetup": {
+      "failure": "Portable initdb stalled at the shared-buffers probe in the default sandbox; the two fixture processes were stopped and the harness restored the original cluster. The approved loopback harness was restarted using the process permissions of the first run."
+    }
+  },
+  "testCaseNames": [
+    "D3-14B restart with missing identity stays UNCERTAIN_OPEN",
+    "D3-14B restart with missing XDR stays UNCERTAIN_OPEN",
+    "D3-14B restart with truncated XDR stays UNCERTAIN_OPEN",
+    "D3-14B restart with unreadable XDR stays UNCERTAIN_OPEN",
+    "D3-14B restart with changed signature, same body hash stays UNCERTAIN_OPEN",
+    "D3-14B restart with missing signature stays UNCERTAIN_OPEN",
+    "D3-14B restart with wrong signer with correct hint stays UNCERTAIN_OPEN",
+    "D3-14B restart with correct signature with changed hint stays UNCERTAIN_OPEN",
+    "D3-14B restart with extra signature stays UNCERTAIN_OPEN",
+    "D3-14B restart with wrong signing passphrase stays UNCERTAIN_OPEN",
+    "D3-14B restart with wrong network metadata stays UNCERTAIN_OPEN",
+    "D3-14B restart with wrong durable hash stays UNCERTAIN_OPEN",
+    "D3-14B restart with wrong source stays UNCERTAIN_OPEN",
+    "D3-14B restart with wrong sequence stays UNCERTAIN_OPEN",
+    "D3-14B restart with wrong minTime stays UNCERTAIN_OPEN",
+    "D3-14B restart with wrong maxTime stays UNCERTAIN_OPEN",
+    "D3-14B restart with unsupported Preconditions V2 stays UNCERTAIN_OPEN",
+    "D3-14B restart with re-signed body and metadata disagree with immutable intent stays UNCERTAIN_OPEN",
+    "D3-14B valid signature with complete retention proof",
+    "D3-14B valid signature with gap before dispatch retention proof",
+    "D3-14B distinct pre-auth and final Soroban bodies bind final XDR",
+    "D3-14B distinct pre-auth and final Soroban bodies reject stale XDR",
+    "D3-14B pre-sign guard rejects unsupported ledger and sequence preconditions",
+    "D3-14B actual authorized status GET surfaces durable hold without exposing XDR",
+    "D3-14B lost POST response and missing durable hash stop as UNCERTAIN_OPEN without replay",
+    "D3-14B real routing rejects a locally valid signature from an unexpected source",
+    "D3-14B post-persist corruption before dispatch cannot create intent or send"
+  ],
+  "tests": {
+    "D3-14B: firma, identidad, reinicio y estado público": "27/27 PASS",
+    "D3-14A: cierre seguro, precedencia y contraejemplo t=110/140/320/305": "25/25 PASS",
+    "D3-13: polling, no replay y manifiestos": "19/19 PASS",
+    "D3-9B: PostgreSQL 17.6 local": "48/48 PASS",
+    "Regresión focalizada final, incluido COMMIT perdido": "57/57 PASS",
+    "Backend completo y TypeScript": "618/618 PASS, 0 omitidas",
+    "Frontend completo, TypeScript, lint y build": "323/323 PASS",
+    "Build aislado y sus dos auditorías": "PASS",
+    "Verificación desde la raíz": "PASS",
+    "Rust native con cargo test --locked": "21/21 PASS",
+    "Cargo con feature wasm-tests": "22/22 PASS, incluye prueba del WASM",
+    "rustfmt, build WASM release y Clippy con -D warnings": "PASS",
+    "Python y demo MOCK": "4/4 PASS; REGISTERED → RETURNED → COLLECTED → RECYCLED → SENT",
+    "SQL y tests durante la corrida": "Sin cambios; 0 bases de fixture restantes",
+    "git diff --check, índice vacío y auditoría de secretos": "PASS; sin hallazgos"
+  }
+}

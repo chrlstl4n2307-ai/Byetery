@@ -72,12 +72,12 @@ test('GAP2B proactive hold uses the original required role, not every revoked si
  }finally{await db.close();}
 });
 
-test('GAP2B reviewed first-dispatch NOT_FOUND remains pre-boundary and can resolve revoked',async()=>{
+test('GAP2B reviewed first-dispatch stays pre-boundary and can resolve revoked',async()=>{
  const db=await localDb();try{
   const f=await harness(db),identity=await signedReady(f),w=await f.store.work(f.op);
   await db.query('update api_private.memberships set enabled=false where deployment_id=$1 and user_id=$2',[f.d,w.principal]);
   await assert.rejects(f.worker.retrySameHash({operationId:f.op,transactionHash:identity.transactionHash,decisionId:'reviewed-first'},'gap2b-first'),{code:'AuthorizationRevoked'});
-  assert.equal((await f.store.work(f.op)).state,'SUBMITTED_OR_UNKNOWN');
+  assert.equal((await f.store.work(f.op)).state,'READY');
   assert.equal((await f.store.work(f.op)).dispatchAttempts,0);assert.equal(f.transport.submitted.length,0);
   f.transport.closeTime='1301';f.transport.ledger=31;f.transport.effect='NOT_APPLIED';
   assert.equal(await f.worker.run(f.op,'gap2b-reviewed-terminal'),'EXPIRED_NOT_APPLIED');

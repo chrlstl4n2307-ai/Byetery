@@ -1,0 +1,128 @@
+{
+  "task": "D3-13-FIX",
+  "result": "D3_13_FIX_READY_FOR_FREEZE",
+  "date": "2026-11-04",
+  "nextGate": "D3-14-FREEZE",
+  "baseline": {
+    "sha": "da541d843632e3ba4bd811ddd13c85b2bea5ccb6",
+    "branch": "instaward/d2-web-mvp",
+    "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+    "wasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+    "deployment": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+    "migration": "20261104022000_d3_reviewed_pre_dispatch_close.sql",
+    "migrationSha256": "889b5e851f96ec14ec347018869642e7ffd6aa1c93eb3e0707e0fca06fc58e52",
+    "schemaChanged": false,
+    "migrationCreated": false,
+    "contractChanged": false,
+    "frontendFunctionalChange": false,
+    "wasmChanged": false
+  },
+  "observation": {
+    "initialWindowSeconds": 120,
+    "maximumTotalSeconds": 300,
+    "maxGetSeconds": 10,
+    "durableDispatchRequired": true,
+    "sameOperationId": true,
+    "sameHash": true,
+    "postReplay": false,
+    "reprepare": false,
+    "resign": false,
+    "replacement": false,
+    "secondSubmit": false,
+    "projectionRequired": true,
+    "abortable": true
+  },
+  "manifest": {
+    "schema": "BYETERY_D3_RUN_V2",
+    "reconciledPositions": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "appendOnly": true,
+    "canonicalDigest": "PASS",
+    "originalLineagePreserved": true,
+    "continuationFromStep": false
+  },
+  "historical": {
+    "batteryId": "BYE-D3-R1-20261104-AF7A44A515AC",
+    "classification": "PERMANENTLY_NON_COUNTING",
+    "lifecycle": "COLLECTED",
+    "reward": "NOT_ELIGIBLE",
+    "counted": false,
+    "d3OperatorMutationBlocked": true,
+    "tombstonePreserved": true,
+    "manifestUnchanged": true,
+    "manifestFileSha256": "3d9aa4bd5e7fe76869dd69da25c3d3dfe01190488c1cb41b25f8516df8a1818e",
+    "support": "SUPPORTING_D3_3_UNCERTAIN_RESPONSE_EVIDENCE",
+    "collectionOperationId": "78646fea-b225-496a-8540-0ae8d90bd983",
+    "collectionHash": "32ba94f9da05b52f44813e26e576cc994fd694f1df9132dd14d67557aa0ddd06",
+    "observationExpiredAt": "2026-11-04T20:00:03.839Z",
+    "projectedAt": "2026-11-04T20:00:04.715Z",
+    "dispatchAttempts": 1,
+    "postRetries": 0,
+    "replacements": 0
+  },
+  "effects": {
+    "testnetBusinessTx": 0,
+    "operationalSignatures": 0,
+    "broadcasts": 0,
+    "deployments": 0,
+    "remoteMigrations": 0,
+    "commits": 0,
+    "pushes": 0,
+    "ttlExtensions": 0
+  },
+  "project": {
+    "successfulBusinessTxUsed": 3,
+    "cap": 18,
+    "remaining": 15,
+    "spare": 0,
+    "completedFreshLifecycles": "0/3",
+    "d1": "12/12",
+    "d2": "6/6",
+    "d3": "0/5",
+    "total": "18/23"
+  },
+  "files": {
+    "modified": [
+      "backend/src/d3/live-operator.ts",
+      "backend/src/d3/manifest.ts",
+      "backend/src/d3/operation-polling.ts",
+      "backend/src/d3/operator-control.ts"
+    ],
+    "added": [
+      "backend/tests/d3-observation-lineage.test.ts",
+      "docs/instaward/d3/D3-13-FIX-2026-11-04.md",
+      "docs/instaward/d3/D3-13-FIX-2026-11-04.json"
+    ],
+    "deleted": [],
+    "trackedDiff": "4 archivos, +154/−52 líneas"
+  },
+  "candidate": {
+    "algorithm": "SHA-256(sorted UTF-8 path TAB lowercase file SHA-256 LF)",
+    "fingerprint": "d6dd1bc7c8a39472394028d595980f78951dd3210bde0693f78c1816c764a510",
+    "files": {
+      "backend/src/d3/live-operator.ts": "5b7d4a4a77f68b0c2d2d4e61df6bb9abe17d2bf33d97ff4c4f236023b642507d",
+      "backend/src/d3/manifest.ts": "976b55fa16e82abbca6448f647f017f8bc43d2d5385f436f2008a3f4db8e2c71",
+      "backend/src/d3/operation-polling.ts": "579bd663586ebfd75e155d0a765adbe99b73b7eb0e5f46b1fe05d4d9db625612",
+      "backend/src/d3/operator-control.ts": "a4248ae1997542f113fbf8b972188a7ae96abe243d13554241d02663dc82d216",
+      "backend/tests/d3-observation-lineage.test.ts": "dc7c6803af998c4f24bdfad95b4b53ebdee1e5dbfc1cfdcfc2708de6253a2360"
+    }
+  },
+  "tests": {
+    "Nuevas pruebas D3-13": "19/19 PASS; incluyen proyección tardía con worker local, no replay y las cinco posiciones.",
+    "D3 existentes": "PASS en suite completa, incluidas las 48 pruebas D3-9B. Corrida focalizada de manifiesto/observación: 57/57.",
+    "Backend y TypeScript": "566/566 PASS; 0 fallos u omitidos; tsc PASS.",
+    "PostgreSQL 17.6 real": "PASS: 2 carreras de despacho, 3 de cierre y controles de adopción. Solo loopback; roles efímeros NOSUPERUSER.",
+    "Frontend": "323/323 PASS (22 suites); TypeScript y lint PASS.",
+    "Build y auditoría frontend": "PASS en copia aislada sin .env; auditoría de rutas y assets sin hallazgos.",
+    "Root verify": "PASS: rustfmt, tests Rust nativos y WASM, release wasm32v1-none, Clippy, backend, Python 4/4 y demo MOCK hasta SENT.",
+    "Auditoría de secretos": "PASS; sin coincidencias.",
+    "git diff --check": "PASS; índice vacío.",
+    "Control de integridad del arnés": "PASS en repetición D3-9B: 48/48, hashes de SQL/pruebas idénticos y 0 bases de fixture restantes."
+  },
+  "verificationNote": "La corrida completa ejecutó todas las suites correctamente. Su control final de hashes detectó únicamente una edición de la prueba nueva antes de que se ejecutara. La versión final pasó la suite focalizada de 57 pruebas; la repetición D3-9B cerró con el control de hashes y la limpieza en PASS."
+}

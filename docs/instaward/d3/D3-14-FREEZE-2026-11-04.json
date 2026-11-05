@@ -1,0 +1,228 @@
+{
+  "task": "D3-14-FREEZE",
+  "attempt": "COUNCIL_RETRY",
+  "date": "2026-11-04",
+  "result": "BLOCKED_XDR_IDENTITY_BINDING",
+  "stoppedAtPhase": 3,
+  "origin": {
+    "clean": true,
+    "branch": "instaward/d2-web-mvp",
+    "localHead": "da541d843632e3ba4bd811ddd13c85b2bea5ccb6",
+    "remoteHead": "da541d843632e3ba4bd811ddd13c85b2bea5ccb6",
+    "indexEmpty": true,
+    "diffCheck": "PASS"
+  },
+  "candidate": {
+    "fingerprint": "7d9e6f48a5cccecd3f9de00f4d581955c2f0a962472659e5e531086ff98774eb",
+    "modified": [
+      "backend/src/application/operation-status.ts",
+      "backend/src/d3/live-operator.ts",
+      "backend/src/d3/manifest.ts",
+      "backend/src/d3/operation-polling.ts",
+      "backend/src/d3/operator-control.ts",
+      "backend/src/testnet/identity.ts",
+      "backend/src/testnet/rpc.ts",
+      "backend/src/testnet/store.ts",
+      "backend/src/testnet/transport.ts",
+      "backend/src/testnet/worker.ts",
+      "backend/tests/d2-dispatch-authority.test.ts",
+      "backend/tests/testnet-fixtures.ts",
+      "backend/tests/testnet-real-boundaries.test.ts",
+      "backend/tests/testnet-worker.test.ts"
+    ],
+    "added": [
+      "backend/tests/d3-observation-lineage.test.ts",
+      "backend/tests/d3-safe-closure.test.ts"
+    ],
+    "reports": [
+      "docs/instaward/d3/D3-13-FIX-2026-11-04.md",
+      "docs/instaward/d3/D3-13-FIX-2026-11-04.json",
+      "docs/instaward/d3/D3-14-FREEZE-2026-11-04.md",
+      "docs/instaward/d3/D3-14-FREEZE-2026-11-04.json",
+      "docs/instaward/d3/D3-14A-SAFE-CLOSURE-FIX-2026-11-04.md",
+      "docs/instaward/d3/D3-14A-SAFE-CLOSURE-FIX-2026-11-04.json"
+    ],
+    "numstat": [
+      "6\t3\tbackend/src/application/operation-status.ts",
+      "55\t25\tbackend/src/d3/live-operator.ts",
+      "44\t10\tbackend/src/d3/manifest.ts",
+      "51\t15\tbackend/src/d3/operation-polling.ts",
+      "6\t3\tbackend/src/d3/operator-control.ts",
+      "31\t1\tbackend/src/testnet/identity.ts",
+      "3\t2\tbackend/src/testnet/rpc.ts",
+      "43\t7\tbackend/src/testnet/store.ts",
+      "12\t7\tbackend/src/testnet/transport.ts",
+      "98\t40\tbackend/src/testnet/worker.ts",
+      "2\t2\tbackend/tests/d2-dispatch-authority.test.ts",
+      "7\t6\tbackend/tests/testnet-fixtures.ts",
+      "1\t1\tbackend/tests/testnet-real-boundaries.test.ts",
+      "13\t10\tbackend/tests/testnet-worker.test.ts"
+    ],
+    "match": true,
+    "deleted": [],
+    "trackedInsertions": 372,
+    "trackedDeletions": 132,
+    "newTestLines": 351
+  },
+  "xdrIdentityBinding": "FAIL",
+  "test": {
+    "scope": "inline local PGlite matrix, persisted identity fault injected on read",
+    "controls": [
+      [
+        "XDR original desde estado durable",
+        "`EXPIRED_NOT_INCLUDED` con el fixture de prueba completa",
+        "Control positivo"
+      ],
+      [
+        "Firma alterada dentro del XDR",
+        "`EXPIRED_NOT_INCLUDED` pese a que el SDK rechazó la firma",
+        "FAIL"
+      ],
+      [
+        "XDR ausente",
+        "`DispatchWithoutIdentity` y estado público `SUBMITTED_UNKNOWN`",
+        "FAIL de clasificación"
+      ],
+      [
+        "XDR ilegible",
+        "`XdrError` y estado público `SUBMITTED_UNKNOWN`",
+        "FAIL de clasificación"
+      ],
+      [
+        "Hash, maxTime, secuencia o red inconsistentes",
+        "`PersistedEnvelopeMetadataMismatch` y estado público `SUBMITTED_UNKNOWN`",
+        "FAIL de clasificación"
+      ]
+    ],
+    "changedSignatureSdkValid": false,
+    "changedSignatureSameTestnetHash": true,
+    "changedSignatureWorkerResult": "EXPIRED_NOT_APPLIED",
+    "changedSignatureDto": "EXPIRED_NOT_INCLUDED",
+    "mismatchedIdentityDto": "SUBMITTED_UNKNOWN",
+    "replay": false
+  },
+  "laterPhases": "NOT_RUN — stopped at phase 3",
+  "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "expectedWasm": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "commit": null,
+  "push": null,
+  "executionSha": null,
+  "effects": {
+    "testnetBusinessTx": 0,
+    "liveSignatures": 0,
+    "broadcasts": 0,
+    "supabaseWrites": 0,
+    "remoteMigrations": 0,
+    "ttlExtensions": 0,
+    "deploymentsInitiated": 0
+  },
+  "cap": {
+    "used": 3,
+    "maximum": 18,
+    "available": 15,
+    "required": 15,
+    "freshCompleted": "0/3"
+  },
+  "acceptance": {
+    "d1": "12/12",
+    "d2": "6/6",
+    "d3": "0/5",
+    "total": "18/23"
+  },
+  "ttlOwnerDecisionPending": true,
+  "previousAttempt": {
+    "task": "D3-14-FREEZE",
+    "date": "2026-11-04",
+    "result": "BLOCKED_MAXTIME_UNSAFE",
+    "stoppedAtPhase": 4,
+    "originClean": true,
+    "branch": "instaward/d2-web-mvp",
+    "baseSha": "da541d843632e3ba4bd811ddd13c85b2bea5ccb6",
+    "remoteBaselineSha": "da541d843632e3ba4bd811ddd13c85b2bea5ccb6",
+    "candidateFingerprint": "d6dd1bc7c8a39472394028d595980f78951dd3210bde0693f78c1816c764a510",
+    "candidateFingerprintMatch": true,
+    "expectedCandidateFiles": 7,
+    "deletedCandidateFiles": 0,
+    "diffScopeExact": true,
+    "council": {
+      "maxTimeBoundSafe": false,
+      "txCannotLandAfterTerminalStop": false,
+      "initialObservationSeconds": 120,
+      "totalObservationSeconds": 300,
+      "minTime": 0,
+      "maxTimePolicy": "latest ledger close time at preparation + 180 seconds",
+      "signatureValidationMaxFromSignerLedgerSeconds": 300,
+      "guaranteedMarginSeconds": null,
+      "finalReadAfterMaxTime": false,
+      "noHashGate": "NOT_RUN",
+      "readOnlyGate": "NOT_RUN",
+      "manifestV1Compatible": "NOT_RUN",
+      "manifestV2AppendOnly": "NOT_RUN",
+      "historicalIdOperatorBlock": "NOT_RUN",
+      "serverApiUiBlockVerificationPendingForPreflight": true
+    },
+    "counterexample": {
+      "clock": "synthetic offline, seconds relative to observation start",
+      "preparationAt": 110,
+      "preparationLedgerCloseTime": 140,
+      "durableDispatchVisibleAt": 115,
+      "extensionAt": 120,
+      "lastStatusReadAt": 299,
+      "localStopAt": 300,
+      "laterPossibleLedgerCloseTime": 305,
+      "maxTime": 320,
+      "remainingValidityOnExampleLedgerSeconds": 15,
+      "deterministicTest": "PASS — reproduced the unsafe boundary"
+    },
+    "regression": {
+      "d3_13Historical": "19/19",
+      "backendHistorical": "566/566",
+      "frontendHistorical": "323/323",
+      "d3_9bHistorical": "48/48",
+      "thisGate": "NOT_RUN — stopped at phase 4",
+      "secretAuditThisGate": "NOT_RUN",
+      "gitDiffCheck": "PASS"
+    },
+    "git": {
+      "commit": null,
+      "push": null,
+      "newExecutionSha": null
+    },
+    "contract": {
+      "id": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+      "expectedWasmSha256": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+      "rebuild": "NOT_RUN"
+    },
+    "effects": {
+      "testnetTx": 0,
+      "signatures": 0,
+      "broadcasts": 0,
+      "supabaseWrites": 0,
+      "migrations": 0,
+      "deploymentsInitiated": 0
+    },
+    "cap": {
+      "used": 3,
+      "total": 18,
+      "available": 15,
+      "needed": 15,
+      "freshLifecycles": "0/3",
+      "onAnyNewPartial": "STOP — NO RETRY OR REUSE; OWNER DECISION REQUIRED"
+    },
+    "acceptance": {
+      "d1": "12/12",
+      "d2": "6/6",
+      "d3": "0/5",
+      "total": "18/23"
+    },
+    "ttl": {
+      "ownerDecisionPending": true,
+      "planningLifetimeDaysApprox": 7,
+      "reviewerTargetDays": 14,
+      "options": [
+        "Explicit maintenance extension outside the business cap",
+        "Immediate capture of ledger entries, result XDR and transaction and ledger evidence, documenting retention"
+      ]
+    }
+  }
+}

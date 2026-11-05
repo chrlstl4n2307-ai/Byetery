@@ -3,9 +3,10 @@ import { resolve,relative,isAbsolute } from 'node:path';
 import { canonical } from '../application/validation.ts';
 import { verifyEvidenceV1 } from '../evidence-verifier.ts';
 import type { BatteryState,RewardState } from '../domain.ts';
+import type { ConfirmationMode } from './operation-polling.ts';
 import { ACTORS,AMOUNT,CONTRACT,ISSUER,NETWORK_ID,OPERATIONS,TOKEN,WASM,check,hash,noSecrets,obj,plan,sha, type Operation,type PlanInput } from './model.ts';
 export interface State {lifecycle:BatteryState|null;reward:RewardState|null}
-export interface OperationEvidence {operation:Operation;operationId:string;transactionHash:string|null;ledger:number|null;timestamp:string|null;result:'SUCCESS'|'FAILED'|'UNKNOWN'|'NOT_SUBMITTED';before:State;after:State;requestId:string|null;source:string;authorizers:string[]}
+export interface OperationEvidence {operation:Operation;operationId:string;transactionHash:string|null;ledger:number|null;timestamp:string|null;result:'SUCCESS'|'FAILED'|'UNKNOWN'|'NOT_SUBMITTED';before:State;after:State;requestId:string|null;source:string;authorizers:string[];confirmationMode?:ConfirmationMode|'RECONCILED_SAME_HASH'|'NOT_CONFIRMED'}
 export interface IntegrityRecord {kind:'REGISTRATION'|'COLLECTION'|'RECYCLING';revision:number;manifestBase64:string;payloadHash:string;commitment:string}
 export interface RewardEvidence {recipient:string;assetCode:'GREENTEST';issuer:string;sac:string;amountBaseUnits:string;recipientBefore:string;recipientAfter:string;payerBefore:string;payerAfter:string;stateBefore:'PENDING';stateAfter:'SENT';successfulPayments:number;receiptMatched:boolean;transferMatched:boolean;beforeLedger:number;afterLedger:number;otherActivity:boolean}
 export interface RecoveryEvidence {uncertainResponse:boolean;originalHash:string|null;reconciledHash:string|null;result:'NOT_ENCOUNTERED'|'UNRESOLVED'|'SUCCESS';identityCount:number;broadcastCount:number}
@@ -23,17 +24,18 @@ function recovery(value:unknown,ops:OperationEvidence[],source:unknown){
  if(r.uncertainResponse){
   if(source==='OFFLINE_MOCK')check(r.originalHash===null&&r.reconciledHash===null&&r.identityCount===1&&r.broadcastCount===0,'MockCannotClaimTestnetReceipt');
   else {check(r.originalHash!==null&&r.identityCount===1&&r.broadcastCount===1,'RecoveryIdentityMissing');
-   if(r.result==='SUCCESS')check(r.originalHash===r.reconciledHash&&ops.at(-1)?.transactionHash===r.originalHash,'RecoveryIdentityMismatch');}
+   if(r.result==='SUCCESS')check(r.originalHash===r.reconciledHash&&ops.some(o=>o.transactionHash===r.originalHash&&o.result==='SUCCESS'),'RecoveryIdentityMismatch');}
  }
  if(!r.uncertainResponse)check(r.result==='NOT_ENCOUNTERED'&&r.originalHash===null&&r.reconciledHash===null,'InvalidRecovery');
  return r as unknown as RecoveryEvidence;
 }
-export function exportManifest(input:PlanInput,runId:string,raw:unknown){
+// A successor must reference a verified prior snapshot and preserve its full prefix.
+export function exportManifest(input:PlanInput,runId:string,raw:unknown,previous?:ManifestSnapshot){
  const p=plan(input),run=p.input.runs.find(r=>r.runId===runId);check(run&&run.recipient,'RecipientDecisionRequired');
- const v=obj(raw,['source','operations','records','reward','recovery']);check(['OFFLINE_MOCK','TESTNET'].includes(v.source as string),'InvalidEvidenceSource');
- check(Array.isArray(v.operations)&&v.operations.length<=10,'InvalidOperationEvidence');
+ const v=obj(raw,['source','operations','records','reward','recovery']);check(v.source==='OFFLINE_MOCK'||v.source==='TESTNET','InvalidEvidenceSource');
+ check(Array.isArray(v.operations)&&v.operations.length<=OPERATIONS.length,'InvalidOperationEvidence');
  const ops:OperationEvidence[]=v.operations.map((value,i)=>{
-  const o=obj(value,['operation','operationId','transactionHash','ledger','timestamp','result','before','after','requestId','source','authorizers']);
+  const o=obj(value,['operation','operationId','transactionHash','ledger','timestamp','result','before','after','requestId','source','authorizers','confirmationMode']);
   check(OPERATIONS[i]===o.operation,'OperationOrderOrDuplicate');safeId(o.operationId);state(o.before);state(o.after);
   check(['SUCCESS','FAILED','UNKNOWN','NOT_SUBMITTED'].includes(o.result as string),'InvalidResult');
   if(o.requestId!==null)hash(o.requestId);check(i!==0||o.requestId===null,'RegistrationRequestNotApplicable');
@@ -46,7 +48,8 @@ export function exportManifest(input:PlanInput,runId:string,raw:unknown){
   if(['UNKNOWN','NOT_SUBMITTED'].includes(o.result as string))check(o.ledger===null,'UnconfirmedLedger');
   if(o.result==='NOT_SUBMITTED')check(o.transactionHash===null,'UnsubmittedHash');
   if(o.timestamp!==null)check(typeof o.timestamp==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(o.timestamp)&&Number.isFinite(Date.parse(o.timestamp)),'InvalidTimestamp');
-  return structuredClone(o) as unknown as OperationEvidence;
+  const terminal=o.result==='SUCCESS'||o.result==='FAILED';
+  return {...structuredClone(o),confirmationMode:o.confirmationMode??(terminal?'OBSERVED':'NOT_CONFIRMED')} as unknown as OperationEvidence;
  });
  check(new Set(ops.map(o=>o.operationId)).size===ops.length,'DuplicateOperation');
  const hashes=ops.flatMap(o=>o.transactionHash?[o.transactionHash]:[]);check(new Set(hashes).size===hashes.length,'DuplicateTransaction');
@@ -87,17 +90,48 @@ export function exportManifest(input:PlanInput,runId:string,raw:unknown){
   reward=structuredClone(r) as unknown as RewardEvidence;
  }
  check(!ops.some(o=>o.after.reward==='SENT')||reward!==null,'SentWithoutSuccessfulPayment');
+ for(const op of ops){
+  const terminal=op.result==='SUCCESS'||op.result==='FAILED';
+  check(terminal
+    ? op.confirmationMode==='OBSERVED'||(v.source==='TESTNET'&&(op.confirmationMode==='RECONCILED_AFTER_OBSERVATION_EXPIRY'||op.confirmationMode==='RECONCILED_SAME_HASH'))
+    : op.confirmationMode==='NOT_CONFIRMED','InvalidConfirmationMode');
+ }
  const rec=recovery(v.recovery,ops,v.source);check(!reward||rec.result!=='UNRESOLVED','UncertaintyNotReconciled');
+ // Legacy summaries are still readable input; do not infer that they expired
+ // the local window unless the observer explicitly recorded that fact.
+ if(v.source==='TESTNET'&&rec.result==='SUCCESS'){
+  const op=ops.find(o=>o.transactionHash===rec.originalHash)!;
+  if(op.confirmationMode==='OBSERVED')op.confirmationMode='RECONCILED_SAME_HASH';
+ }
+ check(ops.every(op=>op.confirmationMode!=='RECONCILED_SAME_HASH'||(v.source==='TESTNET'&&rec.result==='SUCCESS'&&
+  op.transactionHash===rec.originalHash&&op.result==='SUCCESS')),'RecoveryIdentityMismatch');
  const complete=ops.length===5&&ops.every(o=>o.result==='SUCCESS')&&reward!==null;
  if(complete)check(records.length===3,'CompletedRunMissingRecords');
- const body={schemaVersion:'BYETERY_D3_RUN_V1',runId:run.runId,batteryId:run.batteryId,requestId:rid,gitSha:p.input.gitSha,network:'TESTNET',networkId:NETWORK_ID,contractId:CONTRACT,wasmSha256:WASM,source:v.source,
+ const body={schemaVersion:'BYETERY_D3_RUN_V2' as const,runId:run.runId,batteryId:run.batteryId,requestId:rid,gitSha:p.input.gitSha,network:'TESTNET',networkId:NETWORK_ID,contractId:CONTRACT,wasmSha256:WASM,source:v.source,
   evidenceClass:v.source==='OFFLINE_MOCK'?'LOCAL_OFFLINE_FIXTURE_NOT_D3_COMPLETION':'DECLARED_TESTNET_EVIDENCE_REQUIRES_INDEPENDENT_REVIEW',
-  validationScope:'OFFLINE_CONSISTENCY_ONLY',complete,actors:{USER:run.recipient,ADMIN:ACTORS.admin,SERVICE:ACTORS.service,COLLECTOR:ACTORS.collector,RECYCLER:ACTORS.recycler,rewardRecipient:run.recipient},operations:ops,records:records.sort((a,b)=>String(a.kind).localeCompare(String(b.kind))),reward,recovery:rec,planHash:p.planHash,
+  validationScope:'OFFLINE_CONSISTENCY_ONLY',complete,actors:{USER:run.recipient,ADMIN:ACTORS.admin,SERVICE:ACTORS.service,COLLECTOR:ACTORS.collector,RECYCLER:ACTORS.recycler,rewardRecipient:run.recipient},operations:ops,previousManifestSha256:previous?.integrityRelevantSha256??null,records:records.sort((a,b)=>String(a.kind).localeCompare(String(b.kind))),reward,recovery:rec,planHash:p.planHash,
   claimLimit:'Digital evidence does not independently prove physical recycling'};
+ if(previous)validateAppend(previous,body);
  const content=canonical(body);noSecrets(content);return {...body,integrityRelevantSha256:sha(content)};
 }
+interface ManifestSnapshot {
+ schemaVersion:'BYETERY_D3_RUN_V2';runId:string;batteryId:string;gitSha:string;planHash:string;source:string;
+ complete:boolean;operations:OperationEvidence[];records:IntegrityRecord[];reward:RewardEvidence|null;
+ recovery:RecoveryEvidence;integrityRelevantSha256:string;
+}
+function validateAppend(previous:ManifestSnapshot,next:Omit<ManifestSnapshot,'integrityRelevantSha256'>){
+ const {integrityRelevantSha256,...body}=previous;
+ check(sha(canonical(body))===integrityRelevantSha256,'PreviousManifestIntegrityMismatch');
+ check(previous.schemaVersion===next.schemaVersion&&previous.runId===next.runId&&previous.batteryId===next.batteryId&&
+  previous.planHash===next.planHash&&previous.gitSha===next.gitSha&&previous.source===next.source,'ManifestLineageMismatch');
+ check(!previous.complete&&previous.operations.length<next.operations.length,'ManifestAppendRequired');
+ check(canonical(previous.operations)===canonical(next.operations.slice(0,previous.operations.length)),'HistoricalOperationChanged');
+ check(previous.records.every(r=>next.records.some(candidate=>canonical(candidate)===canonical(r))),'HistoricalRecordChanged');
+ check(!previous.reward||canonical(previous.reward)===canonical(next.reward),'HistoricalRewardChanged');
+ check(previous.recovery.result==='NOT_ENCOUNTERED'||canonical(previous.recovery)===canonical(next.recovery),'HistoricalRecoveryChanged');
+}
 export async function writeManifest(directory:string,manifest:ReturnType<typeof exportManifest>){
- obj(manifest,['schemaVersion','runId','batteryId','requestId','gitSha','network','networkId','contractId','wasmSha256','source','evidenceClass','validationScope','complete','actors','operations','records','reward','recovery','planHash','claimLimit','integrityRelevantSha256']);
+ obj(manifest,['schemaVersion','runId','batteryId','requestId','gitSha','network','networkId','contractId','wasmSha256','source','evidenceClass','validationScope','complete','actors','operations','records','reward','recovery','planHash','previousManifestSha256','claimLimit','integrityRelevantSha256']);
  const {integrityRelevantSha256,...body}=manifest;check(sha(canonical(body))===integrityRelevantSha256,'ManifestChangedAfterValidation');noSecrets(canonical(manifest));
  check(/^RUN[123]$/.test(manifest.runId),'InvalidRunId');
  await mkdir(directory,{recursive:true});const root=await realpath(directory);const file=resolve(root,manifest.runId+'.json');

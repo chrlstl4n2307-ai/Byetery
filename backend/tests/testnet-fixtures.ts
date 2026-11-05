@@ -22,14 +22,14 @@ export class FakeTransport implements FixtureTransport {
   readonly scope='LOCAL_FAKE' as const;
   readonly key: Keypair; readonly outside:()=>void;
   prepareCount=0;signCount=0;submitted:TransactionIdentity[]=[];observed:string[]=[];
-  loseSubmit=false;outage=false;failChain=false;success=false;closeTime='1100';ledger=15;
+  loseSubmit=false;outage=false;failChain=false;success=false;closeTime='1120';envelopeMaxTime=1300;ledger=15;oldestLedger=1;closureSequence='0';
   effect:StateEvidence['outcome']='UNRESOLVED';
   constructor(key:Keypair,outside:()=>void){this.key=key;this.outside=outside;}
   async prepareAndSimulate(w:Work):Promise<PreparedBody>{
     this.outside();this.prepareCount++;
     const args=w.argumentsXdr.map(a=>xdr.ScVal.fromXDR(a,'base64'));
     const tx=new TransactionBuilder(new Account(w.sourceAccount,'0'),{fee:'10000',networkPassphrase:Networks.TESTNET})
-      .addOperation(new Contract(w.contractAddress).call(w.command.kind,...args)).setTimebounds(1000,1300).build();
+      .addOperation(new Contract(w.contractAddress).call(w.command.kind,...args)).setTimebounds(1000,this.envelopeMaxTime).build();
     return {transactionXdr:tx.toXDR(),preparedLedger:1};
   }
   async attachSorobanAuthorization(p:PreparedBody){this.outside();return p;}
@@ -46,11 +46,12 @@ export class FakeTransport implements FixtureTransport {
     return this.success||this.failChain?{status:this.success?'SUCCESS':'FAILED',confirmation:{transactionHash:i.transactionHash,
       observationLedger:this.ledger,confirmationLedger:12,resultXdr:'synthetic-result',resultMetaXdr:'synthetic-meta',
       events:[],sorobanResult:null,correlationId:'local-fixture'}}
-      :{status:'NOT_FOUND',observationLedger:this.ledger,ledgerCloseTime:this.closeTime,correlationId:'local-fixture'};
+      :{status:'NOT_FOUND',observationLedger:this.ledger,ledgerCloseTime:this.closeTime,oldestLedger:this.oldestLedger,correlationId:'local-fixture'};
   }
+  async sourceSequenceForClosure(){this.outside();return {sequence:this.closureSequence,ledger:this.ledger};}
   async inspectExpiredEffect():Promise<StateEvidence>{this.outside();return {outcome:this.effect,stateReadLedger:this.ledger+1,evidence:'synthetic-authoritative-state',correlationId:'local-state-fixture'};}
 }
-export async function harness(db:PGlite, reward=false, sourceKey?:Keypair,collection=false) {
+export async function harness(db:PGlite, reward=false, sourceKey?:Keypair,collection=false,idempotencyKey?:string) {
   const d=randomUUID(),op=randomUUID(),u=randomUUID(),w=randomUUID();
   const battery='BYE-'+randomUUID().replaceAll('-','').slice(0,20).toUpperCase();
   const key=sourceKey??Keypair.random();let inTransaction=0,projectionCount=0,projectionFails=false;
@@ -78,10 +79,10 @@ export async function harness(db:PGlite, reward=false, sourceKey?:Keypair,collec
   const ev={version:1 as const,batteryId:battery,requestId:h(10),kind:'COLLECTION' as const,payloadHash};
   const commitment=evidenceCommitment({...config,deploymentId:d,contractAddress},ev);
   if(collection)await db.query(`insert into app_private.evidence_versions(deployment_id,battery_id,request_id,kind,revision,format_version,manifest_bytes,payload_hash,commitment,object_path,created_by)
-    values($1,$2,decode($3,'hex'),'COLLECTION',1,1,decode($4,'hex'),decode($5,'hex'),decode($6,'hex'),'fixture-only',$7)`,[d,battery,h(10),raw.toString('hex'),payloadHash,commitment,u]);
+    values($1,$2,decode($3,'hex'),'COLLECTION',1,1,decode($4,'hex'),decode($5,'hex'),decode($6,'hex'),$8,$7)`,[d,battery,h(10),raw.toString('hex'),payloadHash,commitment,u,'fixture-only/'+battery]);
   const command:Command=collection?{kind:'confirm_collection',batteryId:battery,requestId:h(10),collector,evidence:ev}:reward?{kind:'pay_reward',batteryId:battery}:{kind:'register_battery',batteryId:battery,registrationHash:h(1)};
   await db.query(`insert into app_private.stellar_operations(id,deployment_id,principal,idempotency_key,command,battery_id,parameters,parameters_hash,request_id)
-    values($1::uuid,$2,$8,$1::text,$3,$4,$5,decode($6,'hex'),decode($7,'hex'))`,[op,d,command.kind,battery,JSON.stringify(command),h(1),collection?h(10):null,u]);
+    values($1::uuid,$2,$8,$9,$3,$4,$5,decode($6,'hex'),decode($7,'hex'))`,[op,d,command.kind,battery,JSON.stringify(command),h(1),collection?h(10):null,u,idempotencyKey??op]);
   await db.query('insert into api_private.memberships(deployment_id,user_id,role,actor_address) values($1,$2,$3,$4)',[d,u,collection?'COLLECTOR':reward?'USER':'ADMIN',collection?collector:null]);
   if(reward)await db.query(`insert into app_private.reward_attempts(deployment_id,battery_id,request_id,operation_id,attempt_number) values($1,$2,decode($3,'hex'),$4,1)`,[d,battery,h(10),op]);
   const adapter:TransportDatabase={transaction: async work=>db.transaction(async tx=>{
@@ -106,7 +107,7 @@ export async function harness(db:PGlite, reward=false, sourceKey?:Keypair,collec
     }
     projectionCount++;
   };
-  const worker=new LocalTransactionWorker(store,transport,project);
+  const worker=new LocalTransactionWorker(store,transport,project,()=>Number(transport.closeTime));
   return {d,op,battery,key,args,store,transport,worker,adapter,project,command,
     projectionCount:()=>projectionCount,failProjection:(v:boolean)=>{projectionFails=v;}};
 }

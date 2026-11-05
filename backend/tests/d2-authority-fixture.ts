@@ -6,8 +6,8 @@ import {Repository} from '../src/application/repository.ts';
 import {ACTORS,CONTRACT,TOKEN,WASM} from '../src/testnet/abi.ts';
 import {NETWORK_ID} from '../src/testnet/identity.ts';
 // All writes below are ephemeral PGlite fixtures. No RPC, signer or remote database.
-export async function permissionFixture(mode:'MOCK'|'TESTNET'='TESTNET'){
- const db=await localDb(),deploymentId=randomUUID(),session=randomUUID();
+export async function permissionFixture(mode:'MOCK'|'TESTNET'='TESTNET',deploymentId=randomUUID()){
+ const db=await localDb(),session=randomUUID();
  const users={USER:randomUUID(),ADMIN:randomUUID(),COLLECTOR:randomUUID(),RECYCLER:randomUUID()};
  await db.exec('create table auth.sessions(id uuid primary key,user_id uuid,not_after timestamptz)');
  await db.query(`insert into chain_private.deployments(id,mode,network_id,contract_address,wasm_hash,schema_version,admin,service,reward_token,reward_amount)

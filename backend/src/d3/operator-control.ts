@@ -10,6 +10,7 @@ import { ACTORS, CONTRACT, WASM, NETWORK_ID, TOKEN, AMOUNT, check, publicKey, no
  * NOT a signing policy. Runtime/secure helper remain authoritative. */
 export const REVIEWED_RUNTIME_FEE_CAP = 50_000_000n;
 export const LIVE_TASK = 'D3-9-RUN1';
+export const HISTORICAL_NON_COUNTING_BATTERY = 'BYE-D3-R1-20261104-AF7A44A515AC';
 export type Role = 'USER' | 'ADMIN' | 'COLLECTOR' | 'RECYCLER';
 export interface LocalArguments { live: boolean; taskId: string; expectedSha: string }
 export function activationArguments(argv: readonly string[]): LocalArguments {
@@ -32,6 +33,7 @@ export function activation(p: Plan, args: LocalArguments, git: GitObservation, e
   check(git.clean === true, 'CleanWorktreeRequired');
   check(p.input.network === 'TESTNET', 'TestnetOnly');
   check(!p.blockers.length, 'RecipientDecisionRequired');
+  check(p.input.runs.every(run=>run.batteryId!==HISTORICAL_NON_COUNTING_BATTERY),'HistoricalBatteryPermanentlyNonCounting');
 }
 
 /** Public review observations only, never credentials or executable authority.
@@ -76,7 +78,7 @@ export interface JournalEntry {
   taskId: string; gitSha: string; runId: string; batteryId: string; role: Role;
   operation: string; phase: 'INTENT' | 'RESULT' | 'UNKNOWN' | 'STOP';
   operationId?: string; requestId?: string; httpStatus?: number; domainState?: string;
-  observationClass?:string;
+  observationClass?:string; confirmationMode?:string;
   rewardState?: string; transactionHash?: string; reconciliation?: string; timestamp: string;
 }
 /** Project to a closed DTO; never serialize arbitrary response/error objects. */
@@ -89,7 +91,8 @@ export function sanitizeJournal(value: JournalEntry): JournalEntry {
     phase:/^(INTENT|RESULT|UNKNOWN|STOP)$/, operationId:/^[a-f0-9-]{36}$/,
     requestId:/^[a-f0-9]{64}$/, transactionHash:/^[a-f0-9]{64}$/,
     domainState:/^(REGISTERED|RETURNED|COLLECTED|RECYCLED)$/, rewardState:/^(NOT_ELIGIBLE|PENDING|SENT|FAILED)$/,
-    observationClass:/^(REQUEST_ACK_UNKNOWN|REQUEST_TIMEOUT_PRE_DISPATCH|SIGNED_PRE_DISPATCH|SUBMITTED_RESPONSE_UNCERTAIN)$/,
+    observationClass:/^(REQUEST_ACK_UNKNOWN|REQUEST_TIMEOUT_PRE_DISPATCH|SIGNED_PRE_DISPATCH|SUBMITTED_RESPONSE_UNCERTAIN|OBSERVATION_WINDOW_EXPIRED|UNCERTAIN_OPEN|OBSERVATION_ABORTED)$/,
+    confirmationMode:/^(OBSERVED|RECONCILED_AFTER_OBSERVATION_EXPIRY)$/,
     reconciliation:/^(CONFIRMED|UNRESOLVED|REJECTED|NOT_ATTEMPTED)$/,
     timestamp:/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/,
   };
@@ -134,7 +137,7 @@ export class Budget {
 }
 export interface RunDecision { batteryId: string; sha: string; status: 'COMPLETED' | 'FAILED_ATTEMPT / NON_COUNTING'; countable: boolean }
 export function runDecision(batteryId: string, frozenSha: string, finalSha: string, fullPreflight: boolean, completed: boolean, sourceChanged: boolean): RunDecision {
-  const countable = /^[a-f0-9]{40}$/.test(frozenSha) && frozenSha === finalSha && fullPreflight && completed && !sourceChanged;
+  const countable = batteryId!==HISTORICAL_NON_COUNTING_BATTERY && /^[a-f0-9]{40}$/.test(frozenSha) && frozenSha === finalSha && fullPreflight && completed && !sourceChanged;
   return { batteryId, sha: frozenSha, status: countable ? 'COMPLETED' : 'FAILED_ATTEMPT / NON_COUNTING', countable };
 }
 /** Durable tombstone is written before the first request, including failed attempts. */

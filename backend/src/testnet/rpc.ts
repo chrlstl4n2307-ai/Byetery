@@ -7,6 +7,7 @@ export interface AccountObservation {account:Account;balance:string;ledger:numbe
 /** Fixed endpoint, bounded transport. Provider diagnostics/envelopes never escape errors. */
 export class TestnetRpc {
   readonly transport:typeof fetch;
+  private readonly transactionResponses=new WeakMap<object,string>();
   constructor(transport:typeof fetch=fetch){this.transport=transport;}
   private async call<T>(method:string,params:object={}):Promise<T>{
     try {
@@ -32,7 +33,8 @@ export class TestnetRpc {
     const key=xdr.LedgerKey.account(new xdr.LedgerKeyAccount({accountId:Keypair.fromPublicKey(address).xdrAccountId()}));
     const r=await this.entries([key]);const entry=r.entries?.find(e=>e.key===key.toXDR('base64'));
     ensure(entry,'SourceAccountUnavailable');const value=xdr.LedgerEntryData.fromXDR(entry.xdr,'base64');
-    ensure(value.type==='account','InvalidAccount');
+    ensure(value.type==='account'&&value.account.accountId.toXDR('base64')===Keypair.fromPublicKey(address).xdrAccountId().toXDR('base64')
+      &&Number.isSafeInteger(r.latestLedger)&&r.latestLedger>0,'InvalidAccount');
     return {account:new Account(address,value.account.seqNum.toString()),balance:value.account.balance.toString(),ledger:r.latestLedger};
   }
   simulate(transaction:string){return this.call<rpc.Api.RawSimulateTransactionResponse>('simulateTransaction',{transaction,authMode:'record'});}
@@ -45,8 +47,15 @@ export class TestnetRpc {
     const r=await this.call<rpc.Api.RawGetTransactionResponse>('getTransaction',{hash});
     ensure(['SUCCESS','FAILED','NOT_FOUND'].includes(r.status),'InvalidTransactionResponse');
     // Intentionally omit envelopeXdr and diagnostic/auth material.
-    return {status:r.status,txHash:r.txHash,ledger:r.ledger,createdAt:r.createdAt,latestLedger:r.latestLedger,
-      latestLedgerCloseTime:r.latestLedgerCloseTime,resultXdr:r.resultXdr,resultMetaXdr:r.resultMetaXdr,
-      events:r.events?.contractEventsXdr??[]};
+    const observation=Object.freeze({status:r.status,txHash:r.txHash,ledger:r.ledger,createdAt:r.createdAt,latestLedger:r.latestLedger,
+      latestLedgerCloseTime:r.latestLedgerCloseTime,oldestLedger:r.oldestLedger,resultXdr:r.resultXdr,resultMetaXdr:r.resultMetaXdr,
+      events:r.events?.contractEventsXdr??[]});
+    // All closure fields originate in this single HTTP/JSON-RPC response.
+    // A reconstructed object or an observation from another client has no context.
+    this.transactionResponses.set(observation,hash);
+    return observation;
+  }
+  assertTransactionResponse(observation:object,hash:string):void{
+    ensure(this.transactionResponses.get(observation)===hash,'RpcResponseContextUnavailable');
   }
 }

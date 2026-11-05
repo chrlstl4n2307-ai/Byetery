@@ -2,7 +2,7 @@ import type { Pool } from 'pg';
 import { DomainError, ensure, type Command } from '../domain.ts';
 import {assertPersistedAuthority} from '../application/persisted-authority.ts';
 import {authorizationHold,reviewEvidence} from './review.ts';
-import { NETWORK_ID, type OperationContext, type TransportState, type TransactionIdentity, type Confirmation, type StateEvidence } from './identity.ts';
+import { NETWORK_ID, preparedIdentity, signedEnvelopeDigest, type OperationContext, type TransportState, type TransactionIdentity, type Confirmation, type StateEvidence } from './identity.ts';
 import {databaseHealth,databaseTransaction} from '../application/database.ts';
 
 export interface Sql { query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<{ rows: T[] }> }
@@ -19,6 +19,7 @@ export class PgTransportDatabase implements TransportDatabase {
 export interface Work extends OperationContext {
   /** Original immutable application principal, never supplied by the browser/worker. */
   principal: string;
+  idempotencyKey?: string;
   auditPhase?:(phase:string)=>Promise<void>;
   state: TransportState; dispatchAttempts: number;
   confirmation: Confirmation | null; stateEvidence: StateEvidence | null;
@@ -43,11 +44,11 @@ export class TransportStore {
     });
   }
   private async workIn(db: Sql, id: string): Promise<Work> {
-    const r = (await db.query<Row>(`select w.*,o.parameters,o.principal from api_private.testnet_work w
+    const r = (await db.query<Row>(`select w.*,o.parameters,o.principal,o.idempotency_key from api_private.testnet_work w
       join app_private.stellar_operations o on o.id=w.operation_id and o.deployment_id=w.deployment_id where w.operation_id=$1`, [id])).rows[0];
     ensure(r, 'TransportWorkMissing');
     return { deploymentId:r.deployment_id, operationId:r.operation_id, networkId:Buffer.from(r.network_id).toString('hex'),
-      contractAddress:r.contract_address, sourceAccount:r.source_account, command:r.parameters as Command, principal:r.principal,
+      contractAddress:r.contract_address, sourceAccount:r.source_account, command:r.parameters as Command, principal:r.principal, idempotencyKey:r.idempotency_key,
       contextHash:Buffer.from(r.context_hash).toString('hex'), argumentsXdr:r.arguments_xdr,
       state:r.state, dispatchAttempts:r.dispatch_attempts, confirmation:r.confirmation, stateEvidence:r.state_evidence };
   }
@@ -154,20 +155,81 @@ export class TransportStore {
       await db.query("update api_private.testnet_work set state='SIGNED' where operation_id=$1",[c.operationId]);
       await db.query("update api_private.testnet_work set state='READY' where operation_id=$1",[c.operationId]);
       await db.query("update app_private.stellar_operations set state='READY' where id=$1 and state in ('QUEUED','AWAITING_AUTH')",[c.operationId]);
-      await this.evidence(db,w,'EXECUTION_PHASE',{schemaVersion:'BYETERY_EXECUTION_PHASE_V1',phase:'IDENTITY_PERSIST_COMMITTED',operationId:w.operationId,publicActor:w.sourceAccount,generation:c.generation,attempt:1});
+      await this.evidence(db,w,'EXECUTION_PHASE',{schemaVersion:'BYETERY_EXECUTION_PHASE_V1',phase:'IDENTITY_PERSIST_COMMITTED',operationId:w.operationId,publicActor:w.sourceAccount,generation:c.generation,attempt:1,envelopeSha256:signedEnvelopeDigest(i.envelopeBytes)});
     });
   }
   private async evidence(db: Sql, w: Work, kind: string, evidence: unknown, observation: number|null=null, confirmation: number|null=null, stateRead: number|null=null) {
     await db.query(`insert into api_private.testnet_observations(deployment_id,operation_id,kind,evidence,observation_ledger,confirmation_ledger,state_read_ledger)
       values($1,$2,$3,$4::jsonb,$5,$6,$7)`,[w.deploymentId,w.operationId,kind,JSON.stringify(evidence),observation,confirmation,stateRead]);
   }
-  async dispatchIntent(c: Claim, reviewedSameHashRetry: boolean, decisionId: string|null=null): Promise<void> {
+  async assertPersistedEnvelopeAnchor(i:TransactionIdentity):Promise<void>{
+    await this.database.transaction(async db=>{
+      const row=(await db.query<{digest:string|null}>(`select evidence->>'envelopeSha256' as digest
+        from api_private.testnet_observations where deployment_id=$1 and operation_id=$2
+        and kind='EXECUTION_PHASE' and evidence->>'phase'='IDENTITY_PERSIST_COMMITTED'
+        order by id limit 1`,[i.deploymentId,i.operationId])).rows[0];
+      if(row?.digest!==null&&row?.digest!==undefined)
+        ensure(row.digest===signedEnvelopeDigest(i.envelopeBytes),'PersistedEnvelopeDigestMismatch');
+    });
+  }
+  async hasIdentityHold(id:string):Promise<boolean>{
+    return this.database.transaction(async db=>(await db.query(`select 1 from api_private.testnet_observations
+      where operation_id=$1 and kind='STATE_READ' and evidence->>'classification'='DURABLE_IDENTITY_UNCERTAIN' limit 1`,[id])).rows.length>0);
+  }
+  async hasRpcUncertainty(id:string):Promise<boolean>{
+    return this.database.transaction(async db=>(await db.query<{classification:string}>(`select evidence->>'classification' as classification from api_private.testnet_observations
+      where operation_id=$1 and kind in ('RPC_OUTAGE','NOT_FOUND','SUCCESS','FAILED','STATE_READ') order by id desc limit 1`,[id])).rows[0]?.classification==='UNCERTAIN_OPEN_RPC');
+  }
+  async holdUnverifiedIdentity(c:Claim):Promise<void>{
+    await this.database.transaction(async db=>{
+      const w=await this.fence(db,c);
+      const prior=(await db.query(`select 1 from api_private.testnet_observations where operation_id=$1
+        and kind='STATE_READ' and evidence->>'classification'='DURABLE_IDENTITY_UNCERTAIN' limit 1`,[w.operationId])).rows[0];
+      if(!prior)await this.evidence(db,w,'STATE_READ',{classification:'DURABLE_IDENTITY_UNCERTAIN',reason:'DurableEnvelopeUnverified'});
+    });
+  }
+  /** The earliest intent is a conservative lower bound on any inclusion ledger. */
+  async firstDispatchLedger(i:TransactionIdentity):Promise<number|null>{
+    return this.database.transaction(async db=>{
+      const row=(await db.query<Row>(`select observation_ledger,evidence from api_private.testnet_observations
+        where deployment_id=$1 and operation_id=$2 and kind='DISPATCH_INTENT' order by id limit 1`,
+      [i.deploymentId,i.operationId])).rows[0];
+      const ledger=Number(row?.observation_ledger);
+      const e=row?.evidence;
+      if(typeof e?.envelopeSha256!=='string')return null; // Historical intents have no full-envelope anchor.
+      ensure(Number.isSafeInteger(ledger)&&ledger>=i.preparedLedger&&e.attempt===1
+        &&e.transactionHash===i.transactionHash&&e.minTime===i.minTime&&e.maxTime===i.maxTime
+        &&e.sequence===i.sequence&&e.sourceAccount===i.sourceAccount
+        &&e.envelopeSha256===signedEnvelopeDigest(i.envelopeBytes),'DispatchIdentityMismatch');
+      return ledger;
+    });
+  }
+  async signingIdentity(c:Claim,stage:'AUTHORIZATION'|'ENVELOPE',body:import('./identity.ts').FinalizedBody){
+    const identity=preparedIdentity(body);
+    await this.database.transaction(async db=>{
+      const w=await this.fence(db,c);
+      ensure(w.state==='PREPARING'&&w.sourceAccount===identity.sourceAccount,'IdentityContextMismatch');
+      await this.evidence(db,w,'EXECUTION_PHASE',{phase:'SIGNING_IDENTITY_VALIDATED',stage,...identity},body.preparedLedger);
+    });
+  }
+  async dispatchIntent(c: Claim, reviewedSameHashRetry: boolean, decisionId: string|null=null,
+    reference?:{ledger:number;identity:TransactionIdentity}): Promise<void> {
     const allowed=await this.database.transaction(async db => {
       const w=await this.fence(db,c);
       ensure(w.state==='READY' || (reviewedSameHashRetry && w.state==='SUBMITTED_OR_UNKNOWN'),'DispatchRequiresReview');
       ensure(!reviewedSameHashRetry || !!decisionId?.trim(),'RetryReviewRequired');
       ensure(w.dispatchAttempts<2,'RetryLimit');
-      ensure((await db.query('select 1 from api_private.testnet_envelopes where operation_id=$1',[w.operationId])).rows[0],'IdentityNotDurable');
+      const envelope=(await db.query<Row>('select * from api_private.testnet_envelopes where operation_id=$1',[w.operationId])).rows[0];
+      ensure(envelope,'IdentityNotDurable');
+      if(reference){
+        const i=reference.identity;
+        ensure(i.operationId===w.operationId&&i.deploymentId===w.deploymentId
+          &&i.transactionHash===Buffer.from(envelope.transaction_hash).toString('hex')
+          &&i.minTime===String(envelope.min_time)&&i.maxTime===String(envelope.max_time)&&i.sequence===String(envelope.sequence)
+          &&Buffer.from(i.envelopeBytes).equals(Buffer.from(envelope.signed_envelope))
+          &&i.sourceAccount===envelope.source_account&&Number.isSafeInteger(reference.ledger)
+          &&reference.ledger>=Number(envelope.prepared_ledger),'DispatchIdentityMismatch');
+      }
       if(w.dispatchAttempts===0){
         if(await authorizationHold(db,w.operationId))return false;
         try{await assertPersistedAuthority(db,w,true);}
@@ -179,7 +241,11 @@ export class TransportStore {
       await db.query("update api_private.testnet_work set state='DISPATCH_INTENT',dispatch_attempts=dispatch_attempts+1 where operation_id=$1",[w.operationId]);
       await db.query("update app_private.stellar_operations set state='SUBMITTED' where id=$1 and state='READY'",[w.operationId]);
       if(w.command.kind==='pay_reward')await db.query("update app_private.reward_attempts set state='SUBMITTED' where operation_id=$1 and state='QUEUED'",[w.operationId]);
-      await this.evidence(db,w,'DISPATCH_INTENT',{attempt:w.dispatchAttempts+1,reviewedSameHashRetry,decisionId});
+      const i=reference?.identity;
+      await this.evidence(db,w,'DISPATCH_INTENT',{attempt:w.dispatchAttempts+1,reviewedSameHashRetry,decisionId,
+        ...(i?{transactionHash:i.transactionHash,minTime:i.minTime,maxTime:i.maxTime,sequence:i.sequence,
+          sourceAccount:i.sourceAccount,envelopeSha256:signedEnvelopeDigest(i.envelopeBytes)}:{})},
+      reference?.ledger??null);
       return true;
     });
     // Throw AFTER commit so the hold evidence and membership serialization survive.
@@ -214,14 +280,15 @@ export class TransportStore {
       await this.evidence(db,w,'STATE_READ',{...e,classification:'AUTHORIZATION_REVOKED',error:'AuthorizationRevoked',terminal:true},o.observationLedger,null,e.stateReadLedger);
     });
   }
-  async unknown(c: Claim, kind: 'SUBMIT_RESPONSE'|'RPC_OUTAGE',reply?:{transactionHash:string;status?:string;ledger?:number;sourceCheck?:{sequence:string;balance:string;ledger:number}|null}): Promise<void> {
+  async unknown(c: Claim, kind: 'SUBMIT_RESPONSE'|'RPC_OUTAGE',reply?:{transactionHash:string;classification?:'UNCERTAIN_OPEN';status?:string;ledger?:number;sourceCheck?:{sequence:string;balance:string;ledger:number}|null}): Promise<void> {
     await this.database.transaction(async db => {
       const w=await this.fence(db,c);
       if(['CONFIRMED_SUCCESS','PROJECTED','CONFIRMED_FAILED','EXPIRED_NOT_APPLIED','ABORTED_PRE_DISPATCH','ABORTED_PRE_DISPATCH'].includes(w.state))return;
-      await db.query("update api_private.testnet_work set state='SUBMITTED_OR_UNKNOWN' where operation_id=$1",[w.operationId]);
+      if(w.state!=='EXPIRED_UNRESOLVED')
+        await db.query("update api_private.testnet_work set state='SUBMITTED_OR_UNKNOWN' where operation_id=$1",[w.operationId]);
       await db.query("update app_private.stellar_operations set state='UNKNOWN' where id=$1 and state='SUBMITTED'",[w.operationId]);
       if(w.command.kind==='pay_reward')await db.query("update app_private.reward_attempts set state='UNKNOWN' where operation_id=$1 and state='SUBMITTED'",[w.operationId]);
-      await this.evidence(db,w,kind,{classification:'UNKNOWN',...(reply?{transactionHash:reply.transactionHash,status:reply.status??null,ledger:reply.ledger??null,sourceCheck:reply.sourceCheck??null}:{})});
+      await this.evidence(db,w,kind,{classification:reply?.classification==='UNCERTAIN_OPEN'?'UNCERTAIN_OPEN_RPC':'UNKNOWN',...(reply?{transactionHash:reply.transactionHash,status:reply.status??null,ledger:reply.ledger??null,sourceCheck:reply.sourceCheck??null}:{})});
     });
   }
   async observed(c: Claim, state: TransportState, kind: 'NOT_FOUND'|'SUCCESS'|'FAILED'|'STATE_READ', data: Confirmation|StateEvidence|Record<string,unknown>): Promise<void> {

@@ -35,7 +35,7 @@ function fixture(){
   }
   let signs=0,guards=0;const client=new FakeRpc();
   const transport=new TestnetTransport(client,{authorize:async()=>{signs++;throw Error();},signEnvelope:async()=>{signs++;throw Error();}},
-    {validate:async()=>{guards++;}},async()=>w,'test');
+    {validate:async()=>{guards++;}},async()=>w,'test',undefined,()=>1020);
   transport.readiness=async()=>({latest:await client.latest(),config:d});
   return {c,w,raw,client,transport,signs:()=>signs,guards:()=>guards};
 }
@@ -105,7 +105,11 @@ test('real observation retains actual confirmation ledger and distinguishes SUCC
   f.transport.battery=async()=>({value:{state:'REGISTERED',rewardState:'NOT_ELIGIBLE',registrationHash:h,requestId:null,collector:null,collectionHash:null,recycler:null,recyclingHash:null},ledger:12});
   for(const status of [rpc.Api.GetTransactionStatus.SUCCESS,rpc.Api.GetTransactionStatus.FAILED,rpc.Api.GetTransactionStatus.NOT_FOUND]){
     const result=new xdr.TransactionResult({feeCharged:1000n,result:status==='SUCCESS'?xdr.TransactionResultResult.txSuccess([]):xdr.TransactionResultResult.txFailed([]),ext:xdr.TransactionResultExt.v0()}).toXDR('base64');
-    f.client.transaction=async input=>{assert.equal(input,hash);return {status,txHash:hash,ledger:11,createdAt:1010,latestLedger:12,latestLedgerCloseTime:1020,resultXdr:result,resultMetaXdr:meta,events:[]};};
+    Object.defineProperty(f.client,'transport',{value:async(_url:unknown,init:RequestInit)=>{
+      assert.equal(JSON.parse(String(init.body)).params.hash,hash);
+      return new Response(JSON.stringify({jsonrpc:'2.0',id:1,result:{status,txHash:hash,ledger:11,createdAt:1010,latestLedger:12,
+        oldestLedger:1,latestLedgerCloseTime:'1020',resultXdr:result,resultMetaXdr:meta,events:{contractEventsXdr:[]}}}));
+    },configurable:true});
     const observed=await f.transport.observe(identity);assert.equal(observed.status,status);
     if(observed.status!=='NOT_FOUND'){assert.equal(observed.confirmation.confirmationLedger,11);assert.equal(observed.confirmation.observationLedger,12);
       if(status==='SUCCESS')assert.equal(observed.confirmation.facts?.battery.state,'REGISTERED');}

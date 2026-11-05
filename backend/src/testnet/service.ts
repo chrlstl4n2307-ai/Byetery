@@ -18,6 +18,7 @@ import {databaseHealth} from '../application/database.ts';
 import { string } from './abi.ts';
 import { Address, xdr } from '@stellar/stellar-sdk';
 import {assertPersistedAuthority} from '../application/persisted-authority.ts';
+import {assertLifecycleWritable} from '../application/historical-lifecycle.ts';
 
 const hash=(c:unknown)=>createHash('sha256').update(canonical(c)).digest('hex');
 /** Reads committed logical state immediately before each signing phase. */
@@ -91,7 +92,8 @@ export class TestnetStellarService implements StellarService,OperationProcessor 
   async getRewardBalance(d:string){this.deployment(d);return BigInt((await this.transport.read('balance',[new Address(CONTRACT).toScVal()],TOKEN)).value);}
   /** A real preparation must reference an already authenticated durable logical operation. */
   async prepare(d:string,command:Command):Promise<PreparedOperation>{
-    this.deployment(d);const op=await this.repo.transaction(db=>one(db,`select id from app_private.stellar_operations
+    this.deployment(d);if('batteryId' in command)assertLifecycleWritable(d,command.batteryId);
+    const op=await this.repo.transaction(db=>one(db,`select id from app_private.stellar_operations
       where deployment_id=$1 and parameters_hash=decode($2,'hex') and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN')
       order by created_at desc limit 1`,[d,hash(command)]));
     ensure(op,'DurableLogicalOperationRequired');const v=invocation(command);
@@ -126,6 +128,10 @@ export class TestnetStellarService implements StellarService,OperationProcessor 
   private async processReviewed(id:string,unsignedReview?:ReviewedUnsignedResume):Promise<Reply>{
     const op=await this.repo.transaction(db=>one(db,'select parameters,state,error_code from app_private.stellar_operations where deployment_id=$1 and id=$2',[this.repo.deploymentId,id]));
     ensure(op,'OperationNotFound');
+    if('batteryId' in (op.parameters as Command)){
+      try{assertLifecycleWritable(this.repo.deploymentId,(op.parameters as Exclude<Command,{kind:'set_role'}>).batteryId);}
+      catch{return {status:409,body:{source:'TESTNET',error:{code:'HistoricalLifecyclePermanentlyNonCounting'}}};}
+    }
     if(op.state==='CANCELLED_LOCAL'){
       ensure(!unsignedReview,'UnsignedRecoveryMismatch');
       ensure((await this.store.work(id)).state==='ABORTED_PRE_DISPATCH','TransportResolved');
@@ -143,9 +149,12 @@ export class TestnetStellarService implements StellarService,OperationProcessor 
     }
     const w=await this.store.work(id),i=await this.store.identity(id),review=await this.store.requiresReview(id);
     const revoked=w.dispatchAttempts===0&&await this.store.authorizationRevoked(id);
+    const identityUncertain=await this.store.hasIdentityHold(id)||await this.store.hasRpcUncertainty(id);
     return this.repo.transaction(async db=>{
       const view=await this.repo.view(db,(op.parameters as Exclude<Command,{kind:'set_role'}>).batteryId);
-      const body={...view,operationId:id,transactionHash:i?.transactionHash??null,transportState:review&&w.state!=='EXPIRED_NOT_APPLIED'?'REVIEWED_RESOLUTION_REQUIRED':w.state,
+      const body={...view,operationId:id,transactionHash:i?.transactionHash??null,
+        ...(identityUncertain?{class:'UNCERTAIN_OPEN',reviewRequired:true,terminal:false}:{}),
+        transportState:identityUncertain?'UNCERTAIN_OPEN':review&&w.state!=='EXPIRED_NOT_APPLIED'?'REVIEWED_RESOLUTION_REQUIRED':w.state,
         ...(revoked?{error:{code:'AuthorizationRevoked'}}:{}),
         confirmationLedger:w.confirmation?.confirmationLedger??null,...('requestId' in w.command?{requestId:w.command.requestId}:{}),
         ...(w.confirmation?.facts?.reward?{reward:{state:'SENT',...w.confirmation.facts.reward}}:{})};

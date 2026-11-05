@@ -1,4 +1,4 @@
-import {observeOperation,timeoutClassification,type OperationReceipt} from './operation-polling.ts';
+import {observeOperation,timeoutClassification,type OperationReceipt,type ConfirmationMode,type ObservationOptions} from './operation-polling.ts';
 /** Thin LOCAL authenticated API client. No chain, signing or database binding.
  * Importing this module performs no I/O. No CLI auto-start or env activation. */
 import { readFile, open, realpath } from 'node:fs/promises';
@@ -52,7 +52,7 @@ export interface OperationIdentity { operationId: string | null; transactionHash
 export interface SafeEvidence {
   operationId: string; transactionHash: string; requestId: string | null;
   batteryId: string; operation: Operation; confirmedBatteryState: string; confirmedRewardState: string;
-  confirmationLedger: number; confirmedAt: string;
+  confirmationLedger: number; confirmedAt: string; confirmationMode: ConfirmationMode;
   /** Exact submitted attestation bytes, not an envelope or auth entry. Further
    * receipt/balance facts must come from separately approved authoritative reads. */
   payload?: { manifestBase64: string; payloadHash: string };
@@ -88,6 +88,24 @@ function identity(body: Record<string,unknown>): OperationIdentity {
   return {operationId:typeof body.operationId==='string'&&/^[a-f0-9-]{36}$/.test(body.operationId)?body.operationId:null,
     transactionHash:typeof body.transactionHash==='string'&&/^[a-f0-9]{64}$/.test(body.transactionHash)?body.transactionHash:null};
 }
+/** The only submission callback runs once, before the observer gets control.
+ * A null acknowledgement permits read-only lookup by the existing key. */
+export async function submitAndObserveOperation(
+  post:()=>Promise<OperationIdentity|null>,
+  get:(operationId:string|null,signal:AbortSignal)=>Promise<OperationReceipt>,
+  acknowledged:(identity:OperationIdentity|null)=>Promise<void>,
+  options:Omit<ObservationOptions,'initialId'|'initialHash'>={},
+){
+  if(options.signal?.aborted)throw Error('OBSERVATION_ABORTED');
+  const accepted=await post();
+  if(accepted)check(accepted.operationId,'OriginalIdentityUnavailable');
+  await acknowledged(accepted);
+  let id=accepted?.operationId??null;
+  const receipt=await observeOperation(signal=>get(id,signal),{...options,
+    initialId:id,initialHash:accepted?.transactionHash,onStatus:status=>{id=status.operationId;options.onStatus?.(status);}});
+  return receipt;
+}
+
 /** Read only: existing GET history invokes independent verification. No POST
  * replay, new idempotency key, replacement operation or forced worker dispatch. */
 export async function reconcileViaHistory(original: OperationIdentity, getHistory: () => Promise<Record<string,unknown>>): Promise<'CONFIRMED'|'UNRESOLVED'> {
@@ -108,6 +126,7 @@ export interface OperatorOptions {
   /** Fresh local owner-reviewed READ observations, not authority from plan JSON.
    * Must be supplied under the future preflight task, never sourced from env. */
   readPreflight: () => Promise<Preflight>; credentials: CredentialInput;
+  observationSignal?: AbortSignal;
 }
 /** No invocations in D3-5. The future local entrypoint supplies CLI args and
  * no-echo credentials; no password CLI/env/file option is exposed here. */
@@ -133,7 +152,7 @@ export async function createLocalOperator(options: OperatorOptions) {
   let activeRun: string | null = null; let step = 0; let requestId: string | null = null; let walletLinkId: string | null = null;
   const evidence: SafeEvidence[] = [];
   async function fresh() {
-    check(!closed && !stopped, 'OperatorStopped'); await lock.assertHeld(); assertLocalRuntime();
+    check(!closed && !stopped && !options.observationSignal?.aborted, 'OperatorStopped'); await lock.assertHeld(); assertLocalRuntime();
     const f = await options.readPreflight(); f.git = await observeGit(options.root);
     preflight(p,args,f,process.env); reservedCap = Math.min(reservedCap,f.successfulTxCap);
     check(f.runId===run!.runId && f.taskId===reviewed.taskId,'ExactRunRequired');
@@ -204,38 +223,49 @@ export async function createLocalOperator(options: OperatorOptions) {
         await log({phase:'INTENT'}); // fsync BEFORE possible API mutation.
         let original:OperationIdentity={operationId:null,transactionHash:null};
         let last:OperationReceipt|undefined;
-        let observedAt=0;
-        try {
-          const result=await api(role,path,'POST',body,key);
-          check(result.status===202,'ApplicationRejectedOrUnresolved');
-          original=identity(result.body);check(original.operationId,'OriginalIdentityUnavailable');
-          await log({httpStatus:202,operationId:original.operationId!});
-        } catch(error) {
-          if(!(error instanceof Error)||error.message!=='ApiResponseUncertain')throw error;
-          await log({phase:'UNKNOWN',observationClass:'REQUEST_ACK_UNKNOWN'});
-        }
+        let confirmationMode: ConfirmationMode;
         try{
-          const receipt=await observeOperation(async signal=>{
-            const route=original.operationId?`/api/operations/${original.operationId}`:'/api/operations/lookup?key='+encodeURIComponent(key);
+          const receipt=await submitAndObserveOperation(async()=>{
+            try {
+              const result=await api(role,path,'POST',body,key);
+              check(result.status===202,'ApplicationRejectedOrUnresolved');
+              return identity(result.body);
+            }catch(error){
+              if(error instanceof Error&&error.message==='ApiResponseUncertain')return null;
+              throw error;
+            }
+          },async (id,signal)=>{
+            const route=id?`/api/operations/${id}`:'/api/operations/lookup?key='+encodeURIComponent(key);
             const result=await api(role,route,'GET',undefined,undefined,signal);
             check(result.status===200&&result.body.deploymentId==='5c0cad2f-5f25-4216-8068-6cb9d2d26325','OperationStatusUnavailable');
             return result.body as unknown as OperationReceipt;
-          },{initialId:original.operationId,initialHash:original.transactionHash,onStatus:status=>{
-            original={operationId:status.operationId,transactionHash:status.transactionHash};last=status;observedAt=Date.now();
-          }});
+          },async accepted=>{
+            if(accepted){original=accepted;await log({httpStatus:202,operationId:accepted.operationId!});}
+            else await log({phase:'UNKNOWN',observationClass:'REQUEST_ACK_UNKNOWN'});
+          },{signal:options.observationSignal,onStatus:status=>{
+            original={operationId:status.operationId,transactionHash:status.transactionHash};last=status;
+          },onReconciliation: submitted=>log({observationClass:'OBSERVATION_WINDOW_EXPIRED',...submitted})});
+          confirmationMode=receipt.confirmationMode;
+          if((receipt.class==='CONFIRMED'&&receipt.result==='FAILED')||receipt.result==='NOT_APPLIED'){
+            await log({phase:'STOP',reconciliation:'REJECTED',confirmationMode,operationId:receipt.operationId,transactionHash:receipt.transactionHash!});
+          }
           check(receipt.class==='CONFIRMED'&&receipt.result==='SUCCESS'&&receipt.transactionHash,'OriginalOperationNotConfirmed');
         }catch(error){
-          await log({phase:'UNKNOWN',observationClass:timeoutClassification(Date.now()-observedAt<=5000?last:undefined),reconciliation:'UNRESOLVED',
+          if(last?.terminal)throw error;
+          const reason=error instanceof Error?error.message:'';
+          const observationClass=['UNCERTAIN_OPEN','OBSERVATION_ABORTED'].includes(reason)?reason:timeoutClassification(last);
+          await log({phase:'UNKNOWN',observationClass,reconciliation:'UNRESOLVED',
             ...(original.operationId?{operationId:original.operationId}:{}),...(original.transactionHash?{transactionHash:original.transactionHash}:{})});
           throw error;
         }
-        const history=()=>api(role,`/api/batteries/${run.batteryId}/history`).then(r=>{check(r.status===200,'HistoryUnavailable');return r.body;});
-        const reconciliation=await reconcileViaHistory(original,history);
-        await log({reconciliation,operationId:original.operationId!});
+        const history=await api(role,`/api/batteries/${run.batteryId}/history`);
+        check(history.status===200,'HistoryUnavailable');
+        const reconciliation=await reconcileViaHistory(original,async()=>history.body);
+        await log({reconciliation,confirmationMode,operationId:original.operationId!,transactionHash:original.transactionHash!});
         check(reconciliation==='CONFIRMED','UnknownOriginalOperationRequiresReview');
         // Independently verified history gives the original hash even if POST
         // response was pending. It never promotes a local presence to success.
-        const h=await history(); const row=(h.entries as Record<string,unknown>[]).find(e=>e.operationId===original.operationId)!;
+        const h=history.body; const row=(h.entries as Record<string,unknown>[]).find(e=>e.operationId===original.operationId)!;
         check(row && row.verification==='CONFIRMED' && row.chainResult==='SUCCESS','HistoryConfirmationRequired');
         const expectedKind={register_battery:'REGISTERED',open_return:'RETURNED',confirm_collection:'COLLECTED',confirm_recycling:'RECYCLED',pay_reward:'REWARD'}[operation];
         check(h.batteryId===run.batteryId && row.kind===expectedKind && row.category===(operation==='pay_reward'?'REWARD':'LIFECYCLE') && Number.isSafeInteger(row.ledger) && (row.ledger as number)>0 && typeof row.confirmedAt==='string' && Number.isFinite(Date.parse(row.confirmedAt)),'HistoryContextMismatch');
@@ -245,8 +275,8 @@ export async function createLocalOperator(options: OperatorOptions) {
           const own=view.body.ownRequest as Record<string,unknown>|null;
           check(own && typeof own.requestId==='string' && /^[a-f0-9]{64}$/.test(own.requestId),'OriginalRequestRequired'); requestId=own.requestId;
         }
-        const safe:SafeEvidence={operationId:original.operationId!,transactionHash:row.transactionHash as string,requestId,batteryId:run.batteryId,operation,confirmedBatteryState:next[operation][0],confirmedRewardState:next[operation][1],confirmationLedger:row.ledger as number,confirmedAt:row.confirmedAt,...(payload?{payload}:{})};
-        await log({domainState:safe.confirmedBatteryState,rewardState:safe.confirmedRewardState,transactionHash:safe.transactionHash,...(requestId?{requestId}:{})});
+        const safe:SafeEvidence={operationId:original.operationId!,transactionHash:row.transactionHash as string,requestId,batteryId:run.batteryId,operation,confirmedBatteryState:next[operation][0],confirmedRewardState:next[operation][1],confirmationLedger:row.ledger as number,confirmedAt:row.confirmedAt,confirmationMode,...(payload?{payload}:{})};
+        await log({confirmationMode,domainState:safe.confirmedBatteryState,rewardState:safe.confirmedRewardState,transactionHash:safe.transactionHash,...(requestId?{requestId}:{})});
         evidence.push(safe); step++; return {...safe};
       } catch { stopped=true; throw new Error('OperatorStoppedRequiresReview'); }
       finally { busy=false; }
