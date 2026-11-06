@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Future maintenance creation metadata \u2014 no account creation authority",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "BYETERY_TTL_CREATION_V1"
+    },
+    "mode": {
+      "enum": [
+        "SYNTHETIC_OFFLINE",
+        "CAPTURED_OFFLINE_REVIEW"
+      ]
+    },
+    "maintenancePublicKey": {
+      "type": "string",
+      "pattern": "^G[A-Z2-7]{55}$"
+    },
+    "network": {
+      "const": "TESTNET"
+    },
+    "networkId": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "creationLedger": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "creationTransactionHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "S0": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,18})$"
+    },
+    "masterSigner": {
+      "type": "string",
+      "pattern": "^G[A-Z2-7]{55}$"
+    },
+    "masterWeight": {
+      "const": 1
+    },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "properties": {
+        "low": {
+          "const": 0
+        },
+        "medium": {
+          "const": 0
+        },
+        "high": {
+          "const": 0
+        }
+      }
+    },
+    "sponsorship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "numSponsored",
+        "numSponsoring",
+        "sponsor"
+      ],
+      "properties": {
+        "numSponsored": {
+          "const": 0
+        },
+        "numSponsoring": {
+          "const": 0
+        },
+        "sponsor": {
+          "type": "null"
+        }
+      }
+    },
+    "creationTimestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "fundingSource": {
+      "const": "Friendbot"
+    },
+    "ownerApprovalRef": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "identities": {
+      "type": "object",
+      "required": [
+        "businessSha",
+        "businessFingerprint",
+        "evidenceCommit",
+        "evidenceSubtree",
+        "ttlCommit",
+        "ttlRoot",
+        "ttlSubtree"
+      ]
+    }
+  },
+  "required": [
+    "schema",
+    "mode",
+    "maintenancePublicKey",
+    "network",
+    "networkId",
+    "creationLedger",
+    "creationTransactionHash",
+    "S0",
+    "masterSigner",
+    "masterWeight",
+    "thresholds",
+    "sponsorship",
+    "creationTimestamp",
+    "fundingSource",
+    "ownerApprovalRef",
+    "identities"
+  ]
+}

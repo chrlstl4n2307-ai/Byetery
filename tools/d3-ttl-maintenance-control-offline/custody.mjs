@@ -1,0 +1,26 @@
+import {createRequire} from 'node:module';
+import {existsSync} from 'node:fs';
+import {isAbsolute,resolve,relative,dirname} from 'node:path';
+import {ROOT,check,clean,canonical} from './core.mjs';
+// Reuse the installed public TypeScript parser API, not frontend runtime code.
+const require=createRequire(new URL('../../frontend/package.json',import.meta.url));
+const ts=require('typescript');
+check(typeof ts.createSourceFile==='function','STATIC_PARSER_UNAVAILABLE');
+const roles=['BUSINESS','MAINTENANCE'];
+const ports=new WeakMap();
+
+// Synthetic scoped ports only. No real store provider, signing or seed API.
+export function syntheticPort(role,metadata){check(roles.includes(role),'INVALID_CUSTODY_ROLE');const token=Object.freeze({kind:'SYNTHETIC_SCOPED_PORT'});ports.set(token,{role,providerId:metadata.providerId,namespace:metadata.namespace});return token;}
+export function readScopedHandle(role,port,namespace){const scope=ports.get(port);check(scope&&scope.role===role&&scope.namespace===namespace,'CUSTODY_ACCESS_DENIED');return Object.freeze({kind:'SYNTHETIC_OPAQUE_HANDLE_NOT_A_KEY',role,providerId:scope.providerId});}
+export function custodyModel(model){clean(model);check(model?.schema==='BYETERY_CUSTODY_METADATA_V1'&&model.operationallyProven===false,'CUSTODY_MODEL_REQUIRED');
+ for(const role of roles){const c=model[role];check(c&&c.owner===role&&typeof c.providerId==='string'&&typeof c.namespace==='string'&&c.scope===role&&c.enumerateNamespaces===false&&c.exportAllowed===false,'UNRESTRICTED_SECRET_ACCESSOR');check(c.location?.kind==='OWNER_CONTROLLED_LOCAL_STORE'&&isAbsolute(c.location.path)&&typeof c.osPrincipal==='string','UNSAFE_SECRET_LOCATION');const path=resolve(c.location.path),rel=relative(ROOT,path);check((rel.startsWith('..')||isAbsolute(rel))&&!/vercel|supabase|slack|frontend|\.env|fixtures|node_modules|[\\/]\.git(?:[\\/]|$)/i.test(path),'UNSAFE_SECRET_LOCATION');let ancestor=path;while(true){check(!existsSync(resolve(ancestor,'.git')),'UNSAFE_SECRET_LOCATION');const parent=dirname(ancestor);if(parent===ancestor)break;ancestor=parent;}check(c.network==='TESTNET'&&c.accessAllowedTo===role,'UNRESTRICTED_SECRET_ACCESSOR');}
+ check(model.BUSINESS.providerId!==model.MAINTENANCE.providerId&&model.BUSINESS.namespace!==model.MAINTENANCE.namespace&&model.BUSINESS.osPrincipal!==model.MAINTENANCE.osPrincipal,'CUSTODY_PROVIDER_NOT_ISOLATED');return {status:'CUSTODY_ISOLATION_DESIGNED',operationallyProven:false};}
+
+export function parseImports(source,name='module.mjs'){const ast=ts.createSourceFile(name,source,ts.ScriptTarget.Latest,true);check(ast.parseDiagnostics.length===0,'INVALID_IMPORT_GRAPH_SOURCE');const imports=[];const walk=n=>{if(ts.isImportDeclaration(n)||ts.isExportDeclaration(n)){if(n.moduleSpecifier){check(ts.isStringLiteralLike(n.moduleSpecifier),'DYNAMIC_IMPORT_DENIED');imports.push(n.moduleSpecifier.text);}}if(ts.isCallExpression(n)&&(n.expression.kind===ts.SyntaxKind.ImportKeyword||ts.isIdentifier(n.expression)&&n.expression.text==='require')){check(n.arguments.length===1&&ts.isStringLiteralLike(n.arguments[0]),'DYNAMIC_IMPORT_DENIED');imports.push(n.arguments[0].text);}ts.forEachChild(n,walk);};walk(ast);return imports;}
+export function auditIsolation(nodes,edges){check(Array.isArray(nodes)&&Array.isArray(edges),'IMPORT_GRAPH_REQUIRED');const byId=new Map(nodes.map(n=>[n.id,n]));check(byId.size===nodes.length,'DUPLICATE_MODULE');for(const n of nodes){check(roles.includes(n.role)||n.role==='SCOPED_HELPER','UNKNOWN_MODULE_ROLE');check(n.genericUnrestricted!==true,'UNRESTRICTED_SECRET_ACCESSOR');if(n.role==='SCOPED_HELPER')check(n.requiresExplicitScope===true&&n.canEnumerateNamespaces===false,'UNRESTRICTED_SECRET_ACCESSOR');}
+ for(const [from,to] of edges){const a=byId.get(from),b=byId.get(to);check(a&&b,'UNRESOLVED_IMPORT_GRAPH_EDGE');check(!(roles.includes(a.role)&&roles.includes(b.role)&&a.role!==b.role),'CUSTODY_CROSS_IMPORT');}
+ for(const root of nodes.filter(n=>roles.includes(n.role))){const seen=new Set(),queue=[root.id];while(queue.length){const id=queue.pop();if(seen.has(id))continue;seen.add(id);const n=byId.get(id);check(n.role==='SCOPED_HELPER'||n.role===root.role,'CUSTODY_CROSS_IMPORT');for(const [a,b] of edges)if(a===id)queue.push(b);}}
+ return {status:'CUSTODY_IMPORT_ISOLATION_PASS',modules:nodes.length,edges:edges.length};}
+export function auditSourceGraph(sources,definitions){const nodes=definitions.map(d=>({...d})),ids=new Set(nodes.map(n=>n.id)),edges=[];for(const n of nodes){check(typeof sources[n.id]==='string','MODULE_SOURCE_MISSING');check(!/\b(?:eval|Function)\s*\(|\.\s*(?:getSecret|loadSecret|readSecret|getPassword|listSecrets|listNamespaces)\s*\(/.test(sources[n.id]),'UNRESTRICTED_SECRET_ACCESSOR');for(const dep of parseImports(sources[n.id],n.id)){if(dep.startsWith('.')){const resolved=resolve('/offline-graph',n.id,'..',dep).replaceAll('\\','/').split('/offline-graph/').at(-1);check(ids.has(resolved),'UNRESOLVED_IMPORT_GRAPH_EDGE');edges.push([n.id,resolved]);}else check(dep==='node:assert/strict','EXTERNAL_SECRET_ACCESSOR_DENIED');}}return auditIsolation(nodes,edges);}
+export function loadSyntheticBusiness(port,namespace){return readScopedHandle('BUSINESS',port,namespace);}
+export function loadSyntheticMaintenance(port,namespace){return readScopedHandle('MAINTENANCE',port,namespace);}

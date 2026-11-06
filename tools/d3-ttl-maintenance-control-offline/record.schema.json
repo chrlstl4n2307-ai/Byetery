@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Append-only TTL attempt record, canonical hash without recordHash",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "recordId": {},
+    "previousRecordHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "recordHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "action": {},
+    "runIds": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "RUN1",
+          "RUN2",
+          "RUN3"
+        ]
+      },
+      "uniqueItems": true,
+      "maxItems": 3
+    },
+    "ownerGateRef": {},
+    "scopeHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "simulationReservationId": {},
+    "extendReservationId": {},
+    "transactionHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "status": {},
+    "businessRemaining": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 15
+    },
+    "simulationsUsed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3
+    },
+    "extendAttemptsUsed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3
+    },
+    "includedExtendsCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3
+    },
+    "sequenceObserved": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,18})$"
+    },
+    "S0": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,18})$"
+    },
+    "networkId": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "toolingIdentities": {},
+    "creationManifestHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "detail": {}
+  },
+  "required": [
+    "recordId",
+    "previousRecordHash",
+    "recordHash",
+    "index",
+    "timestamp",
+    "action",
+    "runIds",
+    "ownerGateRef",
+    "scopeHash",
+    "simulationReservationId",
+    "extendReservationId",
+    "transactionHash",
+    "status",
+    "businessRemaining",
+    "simulationsUsed",
+    "extendAttemptsUsed",
+    "includedExtendsCount",
+    "sequenceObserved",
+    "S0",
+    "networkId",
+    "toolingIdentities",
+    "creationManifestHash",
+    "detail"
+  ],
+  "$comment": "State transitions, counter reconstruction, hashes, owner gates and independently retained checkpoint are enforced by journal.mjs; schema alone proves neither append-only integrity nor provenance."
+}

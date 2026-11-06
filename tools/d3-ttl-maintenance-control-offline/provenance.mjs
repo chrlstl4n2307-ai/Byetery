@@ -1,0 +1,30 @@
+import {X,address,identity,native} from '../d3-evidence-capture/xdr-reader.mjs';
+import {verifyTx} from '../d3-evidence-capture/verifier.mjs';
+import {execFileSync} from 'node:child_process';
+import {classifyKey,keyBytes} from '../d3-ttl-maintenance-offline/scope.mjs';
+import {SPEC,ROOT,check,digest,hash,clean,isHash,canonical} from './core.mjs';
+
+// This validates captured bytes and bindings offline, never fetches chain data.
+// Synthetic unsigned fixtures can never produce a live-authenticated result.
+export function whitelistProvenance(review,bundle,mode='CAPTURED_OFFLINE_REVIEW'){
+ clean({review,bundle});check(mode==='CAPTURED_OFFLINE_REVIEW'||mode==='SYNTHETIC_OFFLINE','OFFLINE_ONLY');
+ check(review?.source==='REVIEWED_COMMITTED_CHAIN_BUNDLE'&&isHash(review.ownerGateRef)&&isHash(review.committedBundleSha256)&&review.committedBundleSha256===digest(bundle),'COMMITTED_BUNDLE_HASH_MISMATCH');
+ check(review.run?.retired===false&&/^RUN[123]$/.test(review.run.runId)&&Array.isArray(review.run.operationIds)&&review.run.operationIds.includes(bundle.operationId)&&review.run.batteryId===bundle.batteryId&&review.run.requestId===bundle.requestId,'UNREVIEWED_OR_HISTORICAL_RUN');
+ check(bundle.source==='RPC_AND_HORIZON_CAPTURE'&&bundle.networkId===SPEC.networkId&&bundle.contractId===SPEC.contract&&bundle.status==='SUCCESS'&&bundle.rpc?.status==='SUCCESS'&&bundle.horizon?.successful===true&&bundle.rpc.transactionHash===bundle.transactionHash&&bundle.horizon.transactionHash===bundle.transactionHash&&bundle.rpc.ledger===bundle.horizon.ledger&&bundle.rpc.ledger===bundle.headerLedger,'UNCONFIRMED_RUN_TRANSACTION');
+ check(isHash(bundle.transactionHash)&&Number.isSafeInteger(bundle.headerLedger)&&bundle.headerLedger>0&&bundle.ledgerHeaderXdr&&bundle.resultXdr,'CONFIRMED_CAPTURE_BYTES_REQUIRED');
+ let env,result;try{env=X.TransactionEnvelope.fromXDR(bundle.envelopeXdr,'base64');result=X.TransactionResult.fromXDR(bundle.resultXdr,'base64');}catch{check(false,'CONFIRMED_CAPTURE_BYTES_REQUIRED');}
+ const header=Buffer.from(bundle.ledgerHeaderXdr,'base64');check(header.length>=36&&header.toString('base64')===bundle.ledgerHeaderXdr&&hash(header)===bundle.ledgerHeaderHash&&result.result.type==='txSuccess','UNCONFIRMED_RUN_TRANSACTION');
+ check(env.type==='envelopeTypeTx'&&env.v1.tx.operations.length===1&&env.v1.tx.operations[0].body.type==='invokeHostFunction','RUN_ENVELOPE_MISMATCH');const tx=env.v1.tx,op=tx.operations[0].body.invokeHostFunctionOp;
+ check(op.hostFunction.type==='hostFunctionTypeInvokeContract'&&address(op.hostFunction.invokeContract.contractAddress)===SPEC.contract,'RUN_ENVELOPE_MISMATCH');
+ const txHash=hash(new X.TransactionSignaturePayload({networkId:Buffer.from(SPEC.networkId,'hex'),taggedTransaction:X.TransactionSignaturePayloadTaggedTransaction.envelopeTypeTx(tx)}).toXDR());check(txHash===bundle.transactionHash,'RUN_ENVELOPE_HASH_MISMATCH');
+ const method=op.hostFunction.invokeContract.functionName.toString();
+ const args=op.hostFunction.invokeContract.args.map(native);check(SPEC.methods.includes(method)&&args[0]===review.run.batteryId&&(method==='register_battery'||method==='pay_reward'||args[1]===review.run.requestId),'RUN_ENVELOPE_MISMATCH');
+ if(mode==='CAPTURED_OFFLINE_REVIEW'){identity(bundle.envelopeXdr,{networkPassphrase:SPEC.network,networkId:SPEC.networkId,hash:txHash,method,batteryId:review.run.batteryId,requestId:review.run.requestId});check(bundle.capture?.rpc?.envelopeXdr===bundle.envelopeXdr&&bundle.capture.rpc.resultXdr===bundle.resultXdr&&bundle.capture.horizonLedger?.header_xdr===bundle.ledgerHeaderXdr&&bundle.capture.horizonLedger.hash===bundle.ledgerHeaderHash,'AUTHENTICATED_CAPTURE_REQUIRED');const verified=verifyTx(bundle.capture);check(verified.id.hash===txHash&&verified.verification.ledger===bundle.headerLedger&&verified.verification.inclusion==='SERVICE_CORROBORATED_INCLUSION','AUTHENTICATED_CAPTURE_REQUIRED');verifyCommittedBundle(review,bundle);}
+ else check(env.v1.signatures.length===0&&bundle.synthetic===true,'SYNTHETIC_FIXTURE_LABEL_REQUIRED');
+ check(tx.ext.type==='sorobanData','RUN_FOOTPRINT_REQUIRED');const fp=tx.ext.sorobanData.resources.footprint,observed=[...fp.readOnly,...fp.readWrite].map(k=>k.toXDR('base64'));
+ check(Array.isArray(bundle.selectedKeys)&&bundle.selectedKeys.length>0&&new Set(bundle.selectedKeys).size===bundle.selectedKeys.length,'RUN_FOOTPRINT_REQUIRED');
+ const eligible=[];for(const keyXdr of bundle.selectedKeys){keyBytes(keyXdr);check(observed.includes(keyXdr),'KEY_ABSENT_FROM_CONFIRMED_FOOTPRINT');const kind=classifyKey(keyXdr,review.run);check(kind.eligible,'NON_LIFECYCLE_KEY_IN_PROVENANCE');eligible.push(keyXdr);}
+ check(digest({envelopeXdr:bundle.envelopeXdr,resultXdr:bundle.resultXdr,ledgerHeaderXdr:bundle.ledgerHeaderXdr})===review.captureBytesSha256,'CAPTURE_COMMITMENT_MISMATCH');
+ return {status:'ONCHAIN_WHITELIST_PROVENANCE_MODEL_PASS_OFFLINE',mode,executionAuthorized:false,signatureVerification:mode==='SYNTHETIC_OFFLINE'?'NOT_GENERATED_SYNTHETIC_FIXTURE':'EXISTING_PUBLIC_SIGNATURE_VERIFIED',transportAuthenticity:'Future authenticated capture adapter required; supplied service labels alone are not chain provenance',runId:review.run.runId,bundleHash:digest(bundle),keys:eligible,keysHash:hash(Buffer.from(canonical(eligible)))};
+}
+export function verifyCommittedBundle(review,bundle){check(/^[a-f0-9]{40}$/.test(review.bundleGitCommit??'')&&/^docs\/instaward\/d3\/evidence\/[A-Za-z0-9_./-]+\.json$/.test(review.bundlePath??'')&&!review.bundlePath.split('/').includes('..')&&isHash(review.bundleRawFileSha256),'COMMITTED_BUNDLE_REFERENCE_REQUIRED');let raw;try{raw=execFileSync('git',['show',review.bundleGitCommit+':'+review.bundlePath],{cwd:ROOT,windowsHide:true,stdio:['ignore','pipe','ignore']});}catch{check(false,'COMMITTED_BUNDLE_UNAVAILABLE');}check(hash(raw)===review.bundleRawFileSha256,'COMMITTED_BUNDLE_HASH_MISMATCH');let decoded;try{decoded=JSON.parse(raw.toString('utf8'));}catch{check(false,'COMMITTED_BUNDLE_INVALID');}check(canonical(decoded)===canonical(bundle),'COMMITTED_BUNDLE_HASH_MISMATCH');return true;}
