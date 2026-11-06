@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:byetery:ttl-maintenance:evidence:v1",
+  "title": "Offline maintenance evidence; no execution authorization",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "classification",
+    "executionAuthorized",
+    "observationMode",
+    "businessAndToolingIdentity",
+    "maintenanceGuardIdentity",
+    "maintenanceAccount",
+    "runIds",
+    "sourceManifests",
+    "operationIds",
+    "baselineLedgerKeys",
+    "baselineWhitelistHash",
+    "readOnly",
+    "readWrite",
+    "effectiveWhitelistHash",
+    "excluded",
+    "alreadyAboveTarget",
+    "scopeHash",
+    "cadence",
+    "targetUtc",
+    "targetAbsoluteLedger",
+    "simulationLedger",
+    "extendTo",
+    "maxEntryTTL",
+    "networkConfigSnapshot",
+    "simulationCapture",
+    "minResourceFee",
+    "margin",
+    "finalTxFee",
+    "unsignedEnvelopeSha256",
+    "signedEnvelopeHash",
+    "transactionHash",
+    "transactionHashSource",
+    "preLiveUntil",
+    "postLiveUntil",
+    "capCounters",
+    "simulatedSnapshot",
+    "status",
+    "postcheck"
+  ],
+  "properties": {
+    "schema": {
+      "const": "BYETERY_TTL_MAINTENANCE_EVIDENCE_V1"
+    },
+    "classification": {
+      "const": "NON_BUSINESS_TTL_MAINTENANCE"
+    },
+    "executionAuthorized": {
+      "const": false
+    },
+    "observationMode": {},
+    "businessAndToolingIdentity": {},
+    "maintenanceGuardIdentity": {},
+    "maintenanceAccount": {
+      "type": "string",
+      "pattern": "^G[A-Z2-7]{55}$"
+    },
+    "runIds": {
+      "type": "array"
+    },
+    "sourceManifests": {
+      "type": "array"
+    },
+    "operationIds": {
+      "type": "array"
+    },
+    "baselineLedgerKeys": {
+      "type": "array",
+      "maxItems": 30
+    },
+    "baselineWhitelistHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "readOnly": {
+      "type": "array",
+      "maxItems": 30
+    },
+    "readWrite": {
+      "type": "array",
+      "maxItems": 0
+    },
+    "effectiveWhitelistHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "excluded": {
+      "type": "array"
+    },
+    "alreadyAboveTarget": {
+      "type": "array"
+    },
+    "scopeHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "cadence": {},
+    "targetUtc": {
+      "const": "2026-11-30T23:59:00Z"
+    },
+    "targetAbsoluteLedger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4294967295
+    },
+    "simulationLedger": {},
+    "extendTo": {},
+    "maxEntryTTL": {},
+    "networkConfigSnapshot": {},
+    "simulationCapture": {},
+    "minResourceFee": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9]+$"
+    },
+    "margin": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9]+$"
+    },
+    "finalTxFee": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9]+$"
+    },
+    "unsignedEnvelopeSha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signedEnvelopeHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "transactionHash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "transactionHashSource": {},
+    "preLiveUntil": {
+      "type": "array"
+    },
+    "postLiveUntil": {},
+    "capCounters": {},
+    "simulatedSnapshot": {},
+    "status": {},
+    "postcheck": {}
+  },
+  "$comment": "Relational/XDR/fee/cap/custody rules are enforced by the offline guards, not by this descriptive shape alone. No validator dependency installed."
+}

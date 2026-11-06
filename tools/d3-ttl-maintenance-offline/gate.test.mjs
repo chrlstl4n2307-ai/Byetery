@@ -1,0 +1,80 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {SPEC,hash,bytes} from '../d3-evidence-capture/common.mjs';
+import {X} from '../d3-evidence-capture/xdr-reader.mjs';
+import {makeFixture,excludedKey,lifecycleKey,setManifest,rewriteFootprint,historical,entryFor} from './fixtures.mjs';
+import {evaluateOffline,evidenceManifest,postExecutionCheck} from './gate.mjs';
+import {deriveWhitelist,keyBytes,selectLiveSubset} from './scope.mjs';
+import {POLICY,targetPlan,fees,reserveSimulation,reserveExtend,observeResult,relativeExtend} from './policy.mjs';
+const clone=v=>structuredClone(v);
+function bad(number,name,mutate,pattern){test(String(number).padStart(2,'0')+' '+name,()=>{const i=makeFixture();mutate(i);assert.throws(()=>evaluateOffline(i),e=>e?.code&&pattern.test(e.code));});}
+function data(i,fn){const d=X.SorobanTransactionData.fromXDR(i.simulation.sorobanDataXdr,'base64');fn(d);i.simulation.sorobanDataXdr=d.toXDR('base64');}
+function envelope(i,fn){const result=evaluateOffline(i),e=X.TransactionEnvelope.fromXDR(result.unsignedEnvelopeXdr,'base64');fn(e);i.unsignedEnvelopeXdr=e.toXDR('base64');}
+for(const [n,address] of [...Object.values(SPEC.actors),...SPEC.wallets].entries())bad(n+1,'maintenance account cannot equal '+['ADMIN','SERVICE','COLLECTOR','RECYCLER','Wallet A','Wallet B'][n],i=>{i.expectedMaintenanceAddress=i.account.address=address;},/MAINTENANCE_ACCOUNT_NOT_DEDICATED/);
+bad(7,'extra signer',i=>i.account.signers.push({...i.account.signers[0],key:SPEC.wallets[0]}),/UNEXPECTED_MAINTENANCE_SIGNERS/);
+bad(8,'wrong thresholds',i=>{i.account.thresholds.medium=1;},/UNEXPECTED_MAINTENANCE_THRESHOLDS/);
+bad(9,'sponsored account',i=>{i.account.numSponsored=1;},/UNEXPECTED_ACCOUNT_MUTATION_OR_SPONSORSHIP/);
+bad(10,'wrong network',i=>{i.identities.networkPassphrase='WRONG';},/WRONG_NETWORK/);
+bad(11,'wrong business SHA',i=>{i.identities.businessSha='a'.repeat(40);},/BUSINESS_IDENTITY_MISMATCH/);
+bad(12,'wrong tooling commit',i=>{i.identities.toolingCommit='a'.repeat(40);},/TOOLING_IDENTITY_MISMATCH/);
+bad(13,'wrong tooling subtree',i=>{i.identities.toolingSubtree='a'.repeat(40);},/TOOLING_IDENTITY_MISMATCH/);
+bad(14,'SQL deployment listing cannot define whitelist',i=>{i.review.source='SQL_DEPLOYMENT_ROWS';},/WHITELIST_SOURCE_NOT_REVIEWED_MANIFESTS/);
+bad(15,'historical operation excluded even under same deployment',i=>setManifest(i,0,m=>{m.operations[0].transactionHash=historical[0].expected.hash;}),/HISTORICAL_OR_UNCONFIRMED_OPERATION_EXCLUDED/);
+bad(16,'unknown LedgerKey',i=>{i.captures[0].readOnly.push(excludedKey('UNKNOWN'));rewriteFootprint(i.captures[0]);},/UNKNOWN_TTL_LEDGER_KEY/);
+for(const [n,kind] of [[17,'SAC'],[18,'INSTANCE'],[19,'CODE'],[20,'TEMPORARY']])bad(n,kind+' key in maintenance simulation',i=>data(i,d=>d.resources.footprint.readOnly.push(keyBytes(excludedKey(kind)).key)),/SIMULATION_FOOTPRINT_MISMATCH/);
+bad(21,'readWrite must be empty',i=>data(i,d=>d.resources.footprint.readWrite.push(d.resources.footprint.readOnly[0])),/SIMULATION_FOOTPRINT_MISMATCH/);
+bad(22,'simulation adds key',i=>data(i,d=>d.resources.footprint.readOnly.push(keyBytes(lifecycleKey('Battery','TTL-UNREVIEWED-KEY')).key)),/SIMULATION_FOOTPRINT_MISMATCH/);
+bad(23,'simulation removes key',i=>data(i,d=>{d.resources.footprint.readOnly.pop();}),/SIMULATION_FOOTPRINT_MISMATCH/);
+bad(24,'simulation reorders canonical set',i=>data(i,d=>d.resources.footprint.readOnly.reverse()),/SIMULATION_FOOTPRINT_MISMATCH/);
+bad(25,'operation count greater than one',i=>envelope(i,e=>e.v1.tx.operations.push(e.v1.tx.operations[0])),/MAINTENANCE_OPERATION_COUNT/);
+bad(26,'non-Extend operation',i=>envelope(i,e=>{e.v1.tx.operations[0].body=X.OperationBody.bumpSequence(new X.BumpSequenceOp({bumpTo:X.Int64.fromString('1')}));}),/MAINTENANCE_OPERATION_TYPE_FORBIDDEN/);
+bad(27,'memo present',i=>envelope(i,e=>{e.v1.tx.memo=X.Memo.memoId(X.Uint64.fromString('1'));}),/MAINTENANCE_MEMO_FORBIDDEN/);
+test('28 valid fee bump envelope rejected',()=>{const i=makeFixture(),e=X.TransactionEnvelope.fromXDR(evaluateOffline(i).unsignedEnvelopeXdr,'base64');const bump=new X.FeeBumpTransaction({feeSource:e.v1.tx.sourceAccount,fee:X.Int64.fromString('1000000'),innerTx:X.FeeBumpTransactionInnerTx.envelopeTypeTx(e.v1),ext:X.FeeBumpTransactionExt.v0()});i.unsignedEnvelopeXdr=X.TransactionEnvelope.envelopeTypeTxFeeBump(new X.FeeBumpTransactionEnvelope({tx:bump,signatures:[]})).toXDR('base64');assert.throws(()=>evaluateOffline(i),/MAINTENANCE_NORMAL_V1_REQUIRED/);});
+bad(29,'invokeHostFunction forbidden',i=>envelope(i,e=>{e.v1.tx.operations[0].body=X.TransactionEnvelope.fromXDR(historical[0].rpc.envelopeXdr,'base64').v1.tx.operations[0].body;}),/MAINTENANCE_OPERATION_TYPE_FORBIDDEN/);
+bad(30,'payment forbidden',i=>envelope(i,e=>{e.v1.tx.operations[0].body=X.OperationBody.payment(new X.PaymentOp({destination:e.v1.tx.sourceAccount,asset:X.Asset.assetTypeNative(),amount:X.Int64.fromString('1')}));}),/MAINTENANCE_OPERATION_TYPE_FORBIDDEN/);
+bad(31,'restore forbidden',i=>envelope(i,e=>{e.v1.tx.operations[0].body=X.OperationBody.restoreFootprint(new X.RestoreFootprintOp({ext:X.ExtensionPoint.v0()}));}),/MAINTENANCE_OPERATION_TYPE_FORBIDDEN/);
+bad(32,'maxTime beyond 120 seconds',i=>envelope(i,e=>{e.v1.tx.cond.timeBounds.maxTime=X.Uint64.fromString(String(i.current.signingTime+121));}),/MAINTENANCE_TIMEBOUNDS_INVALID/);
+bad(33,'missing timebounds',i=>envelope(i,e=>{e.v1.tx.cond=X.Preconditions.precondNone();}),/MAINTENANCE_TIMEBOUNDS_REQUIRED/);
+bad(34,'source sequence changes at final re-read',i=>{i.account.finalSequence='123457';},/MAINTENANCE_SEQUENCE_CHANGED/);
+bad(35,'worker not quiet',i=>{i.quiescence.workerQuiet=false;},/WORKER_NOT_QUIESCENT/);
+bad(36,'archived key cannot be restored automatically',i=>{i.entries[0].status='ARCHIVED';},/TTL_KEY_ARCHIVED_OWNER_DECISION_REQUIRED/);
+bad(37,'extendTo exceeds maxEntryTTL minus one',i=>{i.config.maxEntryTTL=100;},/TARGET_EXCEEDS_MAX_ENTRY_TTL/);
+bad(38,'network config unavailable',i=>{i.config.available=false;},/NETWORK_CONFIG_UNAVAILABLE/);
+bad(39,'fee greater than one XLM',i=>{i.simulation.minResourceFee='10000000';},/MAINTENANCE_FEE_CAP_EXCEEDED/);
+bad(40,'fee accounting mismatch',i=>envelope(i,e=>{e.v1.tx.fee++;}),/MAINTENANCE_FEE_ACCOUNTING_MISMATCH/);
+bad(41,'more than three simulations',i=>{i.budget.simulationsUsed=4;},/MAINTENANCE_BUDGET_EXCEEDED/);
+bad(42,'more than three extends',i=>{i.budget.extendsUsed=4;},/MAINTENANCE_BUDGET_EXCEEDED/);
+bad(43,'retry or replacement forbidden',i=>{i.request.retry=true;},/RETRY_REPLACEMENT_REBROADCAST_FORBIDDEN/);
+bad(44,'uncertainty cannot cause rebroadcast',i=>{i.request.rebroadcast=true;},/RETRY_REPLACEMENT_REBROADCAST_FORBIDDEN/);
+test('45 post liveUntil below target',()=>{const i=makeFixture(),r=evaluateOffline(i),m={transactionHash:r.verification.transactionHash,readOnly:r.subset.readOnly,targetAbsoluteLedger:r.target.TARGET_ABSOLUTE_LEDGER},proof={requestRebroadcast:false,requestReplacement:false,transactionHash:m.transactionHash,rpcHash:m.transactionHash,status:'SUCCESS',headerLedger:6000001,confirmationLedger:6000001,inclusion:'SERVICE_CORROBORATED_INCLUSION',existingMasterSignatureVerified:true,entries:m.readOnly.map(keyXdr=>({keyXdr,status:'PRESENT',liveUntilLedgerSeq:m.targetAbsoluteLedger-1}))};assert.throws(()=>postExecutionCheck(proof,m),/POST_TTL_BELOW_TARGET_OR_SCOPE_MISMATCH/);});
+bad(46,'invalid cadence sample',i=>{i.cadence[1].closeTime=i.cadence[0].closeTime;},/INVALID_TARGET_OR_CADENCE/);
+test('47 zero effective keys cannot produce a transaction',()=>{const i=makeFixture(1,true);i.unsignedEnvelopeXdr=evaluateOffline(makeFixture()).unsignedEnvelopeXdr;assert.throws(()=>evaluateOffline(i),/EMPTY_EFFECTIVE_MAINTENANCE_SET/);});
+bad(48,'operation not present in reviewed manifest',i=>i.captures.push({...i.captures[0],operationId:'OFFLINE-UNREVIEWED-OP'}),/SCOPE_OPERATION_NOT_IN_RUN_MANIFEST/);
+
+test('POS A single reviewed RUN has exactly two eligible keys',()=>{const r=evaluateOffline(makeFixture());assert.equal(r.subset.readOnly.length,2);assert.equal(r.status,'OFFLINE_GATE_PASS_NO_EXECUTION_AUTHORITY');assert.equal(r.executionAuthorized,false);});
+test('POS B three RUNs use exact deduplicated observed set of six keys',()=>{const r=evaluateOffline(makeFixture(3));assert.equal(r.scope.operationIds.length,15);assert.equal(r.scope.readOnly.length,6);assert.equal(r.subset.readOnly.length,6);});
+test('POS C already-above-target keys excluded and recorded before simulation',()=>{const i=makeFixture(),scope=deriveWhitelist(i.review,i.sources,i.captures),target=targetPlan(i.current,i.cadence).TARGET_ABSOLUTE_LEDGER;i.entries[0].liveUntilLedgerSeq=target+1;const sub=selectLiveSubset(scope,i.entries,i.current.ledger,target);data(i,d=>{d.resources.footprint.readOnly=sub.readOnly.map(k=>keyBytes(k).key);});const prototype=X.TransactionEnvelope.fromXDR(i.simulation.inputEnvelopeXdr,'base64');prototype.v1.tx.ext.sorobanData.resources.footprint.readOnly=sub.readOnly.map(k=>keyBytes(k).key);i.simulation.inputEnvelopeXdr=prototype.toXDR('base64');const r=evaluateOffline(i);assert.equal(r.subset.readOnly.length,1);assert.equal(r.subset.alreadyAboveTarget[0].status,'ALREADY_ABOVE_TARGET');});
+test('POS D valid unsigned ExtendFootprintTtl below fee cap with relative target',()=>{const i=makeFixture(),r=evaluateOffline(i),e=X.TransactionEnvelope.fromXDR(r.unsignedEnvelopeXdr,'base64');assert.equal(e.v1.signatures.length,0);assert.equal(e.v1.tx.operations[0].body.type,'extendFootprintTtl');assert.equal(r.verification.extendTo,r.target.TARGET_ABSOLUTE_LEDGER-i.simulation.ledger);assert.equal(r.verification.fee.txFee,'150100');assert.equal(evidenceManifest(i,r).signedEnvelopeHash,null);});
+test('POS E three separately reviewed lifecycle needs, no retries, independent cap',()=>{let b={businessConsumed:3,businessRemaining:15,extendsUsed:0,simulationsUsed:0,attempts:[],stopped:false};for(let n=1;n<=3;n++){const req={id:'OFFLINE-MAINT-'+n,scopeHash:hash(Buffer.from('OFFLINE_SCOPE_'+n)),ownerGateRef:hash(Buffer.from('OFFLINE_GATE_'+n)),runIds:['RUN'+n],retry:false,replacement:false,rebroadcast:false};b=reserveSimulation(b,req);b=reserveExtend(b,req.id);b=observeResult(b,req.id,'CONFIRMED_SUCCESS',hash(Buffer.from('OFFLINE_HASH_'+n)));}assert.equal(b.extendsUsed,3);assert.equal(b.simulationsUsed,3);assert.equal(b.businessRemaining,15);assert.equal(b.businessConsumed,3);});
+test('POS F no-maintenance path: zero transactions and zero simulations',()=>{const r=evaluateOffline(makeFixture(3,true));assert.equal(r.status,'MAINTENANCE_NOT_REQUIRED');assert.equal(r.unsignedEnvelopeXdr,null);assert.equal(r.txToSign,0);assert.equal(r.budgetUnchanged.simulationsUsed,0);});
+
+bad(49,'business signer cannot load maintenance key',i=>{i.account.businessSignerCanLoadKey=true;},/KEY_CUSTODY_SEPARATION_UNPROVEN/);
+bad(50,'maintenance signer cannot load business keys',i=>{i.account.maintenanceSignerCanLoadBusinessKeys=true;},/KEY_CUSTODY_SEPARATION_UNPROVEN/);
+bad(51,'no app role for maintenance account',i=>i.account.appRoles.push('ADMIN'),/KEY_CUSTODY_SEPARATION_UNPROVEN/);
+bad(52,'unknown maxEntryTTL',i=>{delete i.config.maxEntryTTL;},/NETWORK_CONFIG_UNAVAILABLE/);
+bad(53,'current network footprint limit enforced',i=>{i.config.maxReadEntries=1;},/MAINTENANCE_NETWORK_RESOURCE_LIMIT/);
+bad(54,'pre-sign entry must match exact parent key',i=>{i.entries[0].entryDataXdr=i.entries[1].entryDataXdr;},/PRE_SIGN_LEDGER_ENTRY_MISMATCH/);
+bad(55,'simulation unexpected auth',i=>i.simulation.auth.push('OFFLINE_UNEXPECTED_AUTH'),/SIMULATION_REQUIRES_OWNER_REVIEW/);
+bad(56,'restore preamble is not an allowed second path',i=>{i.simulation.restorePreamble={};},/SIMULATION_REQUIRES_OWNER_REVIEW/);
+bad(57,'simulation input cannot contain a business invocation',i=>{const e=X.TransactionEnvelope.fromXDR(i.simulation.inputEnvelopeXdr,'base64');e.v1.tx.operations[0].body=X.TransactionEnvelope.fromXDR(historical[0].rpc.envelopeXdr,'base64').v1.tx.operations[0].body;i.simulation.inputEnvelopeXdr=e.toXDR('base64');},/SIMULATION_INPUT_IDENTITY_MISMATCH/);
+test('58 expired relative target requires no extension and is never clamped',()=>{assert.equal(relativeExtend(10,11,{maxEntryTTL:100}),0);assert.throws(()=>relativeExtend(200,10,{maxEntryTTL:100}),/TARGET_EXCEEDS_MAX_ENTRY_TTL/);});
+test('59 uncertain result holds same identity and forbids later attempt automatically',()=>{const i=makeFixture();let b=reserveExtend(i.budget,i.request.id);const h=hash(Buffer.from('OFFLINE_UNCERTAIN'));b=observeResult(b,i.request.id,'UNCERTAIN',h);assert.equal(b.stopped,true);assert.throws(()=>observeResult(b,i.request.id,'CONFIRMED_SUCCESS','a'.repeat(64)),/ORIGINAL_HASH_REQUIRED/);const resolved=observeResult(b,i.request.id,'CONFIRMED_SUCCESS',h);assert.equal(resolved.stopped,true);assert.throws(()=>reserveSimulation(resolved,{...i.request,id:'OFFLINE-SECOND',runIds:['RUN2']}),/MAINTENANCE_STOP_REQUIRES_OWNER/);});
+test('60 fee margin rounded upward using integer stroops',()=>{assert.equal(fees('500001','100').margin,'100001');assert.equal(fees('1','100').margin,'100000');});
+bad(61,'stale latest ledger close time rejected',i=>{i.current.closeTime-=60;i.cadence.at(-1).closeTime-=60;},/STALE_MAINTENANCE_OBSERVATION/);
+bad(62,'current maxFootprintEntries enforced independently of read limit',i=>{i.config.maxFootprintEntries=1;},/MAINTENANCE_NETWORK_RESOURCE_LIMIT/);
+test('63 distinct reviewed RUNs cannot share one Request key',()=>{const i=makeFixture(3);i.review.runs[1].requestId=i.review.runs[0].requestId;assert.throws(()=>evaluateOffline(i),/DUPLICATE_REVIEWED_RUN/);});
+
+function postFixture(){const i=makeFixture(),r=evaluateOffline(i),m={transactionHash:r.verification.transactionHash,readOnly:r.subset.readOnly,targetAbsoluteLedger:r.target.TARGET_ABSOLUTE_LEDGER};return {m,proof:{requestRebroadcast:false,requestReplacement:false,transactionHash:m.transactionHash,rpcHash:m.transactionHash,status:'SUCCESS',headerLedger:6000001,confirmationLedger:6000001,inclusion:'SERVICE_CORROBORATED_INCLUSION',existingMasterSignatureVerified:true,entries:m.readOnly.map(k=>entryFor(k,6000001,i.current.signingTime+5,m.targetAbsoluteLedger))}};}
+test('64 supplied independently verified post-proof must match every parent key and target',()=>{const {m,proof}=postFixture();assert.equal(postExecutionCheck(proof,m).status,'MAINTENANCE_POSTCHECK_PASS');assert.equal(postExecutionCheck(proof,m).mayRebroadcast,false);});
+test('65 post-proof from before confirmation is rejected',()=>{const {m,proof}=postFixture();proof.entries[0].observationLedger=6000000;assert.throws(()=>postExecutionCheck(proof,m),/MAINTENANCE_POST_OBSERVATION_UNVERIFIED/);});
+test('66 same-hash uncertain post-proof can never authorize rebroadcast',()=>{const {m,proof}=postFixture();proof.status='UNCERTAIN';assert.deepEqual(postExecutionCheck(proof,m),{status:'STOP_OWNER_REVIEW_REQUIRED',originalHash:m.transactionHash,mayRebroadcast:false});proof.transactionHash='a'.repeat(64);assert.throws(()=>postExecutionCheck(proof,m),/ORIGINAL_HASH_REQUIRED/);});
