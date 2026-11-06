@@ -1,0 +1,70 @@
+{
+  "version": "BYETERY_D3_EVIDENCE_V1",
+  "businessSha": "c6ba2e837ed0f7b81373655b8106b58ecb86a8cd",
+  "fingerprint": "e9a75a332489f80cdd748121c95c3fe66ce3425b48926e92d8d22a9fd2e78539",
+  "network": "Test SDF Network ; September 2015",
+  "networkId": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+  "deployment": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+  "contract": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+  "token": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+  "wasm": "c2bc80b26d3a1a265a1d4d1923b503f6558fdd7c1489f81b0de8f5ee18f6ceb6",
+  "asset": "GREENTEST",
+  "issuer": "GCHROKHXHL4L635J6Y6DWFFD5DDHABOAF4BP5TEUZDZQMW4XYS6DIDL7",
+  "actors": {
+    "admin": "GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F",
+    "service": "GBOOUYTB4MUH3JQUMOQ6LUEALEPUQ5SREYYIJ5WGR26BI3NCVPNG7WIX",
+    "collector": "GB4YAMSPXTDDUD7FNDE72BD3BKW57BEDM7D7HTX6OFWEFRBO65Z3UO6V",
+    "recycler": "GBIAVN4O4HJSPZJKFPPQZPLPXBELLBGYAJLTEGOGLJG2FRW2C5P35TF2"
+  },
+  "wallets": [
+    "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+    "GCE35NEN2O3EYK5A7SROTLFOCSAIGLN2BPVQBFS4UG52BY2P7K6VC6DB"
+  ],
+  "methods": [
+    "register_battery",
+    "open_return",
+    "confirm_collection",
+    "confirm_recycling",
+    "pay_reward"
+  ],
+  "retiredBattery": "BYE-D3-R1-20261104-AF7A44A515AC",
+  "planning": {
+    "deadline": "2026-11-13",
+    "reviewLiveTarget": "2026-11-27",
+    "bufferThrough": "2026-11-30",
+    "safetyLeadDays": 2,
+    "absoluteLedgerTarget": null
+  },
+  "maxBytes": 12582912,
+  "ownerExport": {
+    "option": "A",
+    "schema": "BYETERY_OWNER_EXPORT_V1",
+    "querySha256": "d4e82f4221d187aecdee7440b8331ebbe54e96d0b7400d06bc1430b8d793c9f1",
+    "database": "SUPABASE_DEV",
+    "projectRef": "aemxuqnnwfclzrwwiqfd",
+    "maxOperations": 15,
+    "normalizedStates": [
+      "CONFIRMED_SUCCESS",
+      "CONFIRMED_FAILED"
+    ],
+    "projectedStateMapping": "PROJECTED with persisted SUCCESS receipt -> CONFIRMED_SUCCESS; original durable_state retained",
+    "credentialsAccepted": false
+  },
+  "gates": {
+    "policy": "OPTION_A_CHAIN_BETWEEN_RUNS_SQL_BEFORE_HANDOFF",
+    "chainRequiredBetweenRuns": true,
+    "sqlRequiredBeforeHandoff": true,
+    "handoffDeadline": "2026-11-13",
+    "automaticChaining": false
+  },
+  "sacPool": {
+    "durability": "persistent",
+    "knownLiveUntilLedgerSeq": 6703017,
+    "maintenanceRequired": false,
+    "observationReference": "D3-EVIDENCE-CAPTURE-FREEZE-2026-11-05; observed 2026-11-06",
+    "futureNormalMaintenanceCandidates": [
+      "Battery(id)",
+      "Request(rid)"
+    ]
+  }
+}

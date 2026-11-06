@@ -1,0 +1,346 @@
+{
+  "task": "D3-EVIDENCE-OWNER-EXPORT-A",
+  "date": "2026-11-06",
+  "timezone": "America/Santiago",
+  "preparedAt": "2026-11-06T04:19:15.025327+00:00",
+  "result": "OPTION_A_TOOLING_GATES_PASS_PUBLICATION_CANDIDATE",
+  "successAfterVerifiedPush": "D3_EVIDENCE_TOOLING_PUBLISHED_OPTION_A",
+  "BUSINESS_EXECUTION_SHA": "c6ba2e837ed0f7b81373655b8106b58ecb86a8cd",
+  "BUSINESS_FINGERPRINT_UNCHANGED": "YES",
+  "businessFingerprint": "e9a75a332489f80cdd748121c95c3fe66ce3425b48926e92d8d22a9fd2e78539",
+  "OWNER_EXPORT_OPTION": "A",
+  "OWNER_EXPORT_QUERY_SHA256": "d4e82f4221d187aecdee7440b8331ebbe54e96d0b7400d06bc1430b8d793c9f1",
+  "SCRIPT_SHA256": "14819fb97af37b77581fb5ff7956acd80b66474d33d7caa4330cabec83bcfc20",
+  "CHAIN_GATE_READY": "YES â€” implementation tested; no actual future RUN cleared",
+  "SQL_RPC_GATE_READY_FOR_OWNER_EXPORT": "YES â€” parser/comparator/query tested; live SQL integrity PENDING_OWNER_EXPORT",
+  "CHAIN_GATE_REQUIRED_BETWEEN_RUNS": "YES",
+  "SQL_RPC_GATE_REQUIRED_BEFORE_HANDOFF": "YES",
+  "READY_FOR_COUNCIL_TOOL_REVIEW": "YES",
+  "D3_EVIDENCE_DATABASE": "SUPABASE_DEV",
+  "databaseLocation": {
+    "projectRef": "aemxuqnnwfclzrwwiqfd",
+    "deploymentId": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+    "localPostgresIsBusinessEvidenceTarget": false,
+    "bothDatabases": false,
+    "configPathDependent": true,
+    "validDatabaseTargetConfigurableOutsideSupabaseDev": false,
+    "configurationInspectionOnly": true,
+    "existingHistoricalConfigMatches": true,
+    "runtimeStarted": false,
+    "trace": [
+      {
+        "file": "backend/src/application/config.ts",
+        "lines": "10â€“30",
+        "finding": "settings reads BYETERY_CONFIG_FILE or root .env; process overrides; validates DEV/project URL and rejects any DATABASE_URL outside exact project Supabase host/pooler; TESTNET deployment selected explicitly."
+      },
+      {
+        "file": "backend/src/application/server.ts",
+        "lines": "12â€“19",
+        "finding": "settings -> Repository -> TestnetStellarService, same Repository object."
+      },
+      {
+        "file": "backend/src/application/repository.ts",
+        "lines": "14â€“19",
+        "finding": "Repository owns new Pool(config.database)."
+      },
+      {
+        "file": "backend/src/testnet/service.ts",
+        "lines": "67â€“73",
+        "finding": "TransportStore(new PgTransportDatabase(repo.pool)); no independent local evidence pool."
+      },
+      {
+        "file": "backend/src/testnet/store.ts",
+        "lines": "11â€“16, 294â€“308, 312â€“327",
+        "finding": "Transport database uses the same pool; observed writes Confirmation/state_evidence and terminal observations there; projection advances worker state to PROJECTED."
+      },
+      {
+        "file": ".tools/d3-11-run1/context.mjs (local only, not selected)",
+        "lines": "8, 19â€“22",
+        "finding": "Historical launcher selects sibling Byetery-testnet/.env and frozen settings; credential-free inspection confirms that file targets approved Supabase DEV/TESTNET deployment. No launcher import/execution."
+      }
+    ]
+  },
+  "ownerExport": {
+    "queryFile": "tools/d3-evidence-capture/sql/owner-export.sql",
+    "schema": "BYETERY_OWNER_EXPORT_V1",
+    "scope": "exact deployment + 1â€“15 existing reviewed operation UUIDs; independently supplied expected hash/command/battery mapping",
+    "sort": "UUID text COLLATE C; terminal receipts observation ID; events retain order",
+    "states": [
+      "CONFIRMED_SUCCESS",
+      "CONFIRMED_FAILED"
+    ],
+    "projectedMapping": "PROJECTED + retained SUCCESS receipt -> normalized CONFIRMED_SUCCESS; durable/logical states retained and validated",
+    "manualInstructions": "tools/d3-evidence-capture/OWNER-EXPORT.md",
+    "executedForOwner": false,
+    "credentialsAccepted": false,
+    "databaseDriverLoaded": false,
+    "remoteSqlExecuted": false,
+    "liveSqlIntegrity": "PENDING_OWNER_EXPORT",
+    "authenticity": "Owner-asserted read-only execution/export metadata, not a server/database cryptographic attestation. Scope/file hash/controlled manual provenance require owner/Council review. Fixtures are never live SQL proof."
+  },
+  "comparisonPolicy": {
+    "resultXdr": "Canonical TransactionResult decode/roundtrip + exact same-representation retained SQL/RPC string equality",
+    "resultMetaXdr": "Canonical TransactionMeta decode/roundtrip + exact same-representation retained SQL/RPC string equality",
+    "events": "Ordered canonical ContractEvent binary validation + exact ordered retained events; never sort/deduplicate",
+    "header": "Wrapper-aware RPC LedgerHeaderHistoryEntry hash + exact Horizon LedgerHeader + ext.v0; unsupported extension STOP",
+    "envelope": "Canonical TransactionEnvelope binary equality after documented base64 wrapping removal; hash/network/source/existing signatures checked",
+    "facts": "Exact changed getter facts vs captured meta with read ledger bounded; original SUCCESS copies exact",
+    "stateEvidence": "APPLIED predicate/facts/read ledger compared to captured meta. Historical non-success state assertions retained/hash-recorded, never used as receipt success."
+  },
+  "gates": {
+    "policy": "OPTION_A_CHAIN_BETWEEN_RUNS_SQL_BEFORE_HANDOFF",
+    "chainBetweenRuns": [
+      "signed envelope",
+      "network-bound hash",
+      "existing signatures",
+      "RPC receipt/result/meta/events",
+      "ledger header",
+      "Horizon corroboration",
+      "verified/sanitized inventory",
+      "matching committed artifact bytes",
+      "owner/Council decision"
+    ],
+    "sqlBeforeHandoff": [
+      "approved manual export query",
+      "recorded exact export file SHA-256",
+      "exact scope and metadata validation",
+      "RPC/SQL comparator PASS",
+      "all 15 rows covered"
+    ],
+    "handoffDeadline": "2026-11-13",
+    "chainMayBeReadyWithSqlPending": true,
+    "historicalRunEligible": false,
+    "noRpcRefetchDependency": true,
+    "noAutomaticChaining": true,
+    "standaloneLimitation": "Checker cannot grant/authenticate owner authority from JSON or stop unrelated runners; no frozen runtime enforcement is claimed."
+  },
+  "tests": {
+    "command": "node --test --test-concurrency=1 tools/d3-evidence-capture/tooling.test.mjs tools/d3-evidence-capture/owner-export.test.mjs",
+    "baseline": 42,
+    "additional": 28,
+    "total": 70,
+    "pass": 70,
+    "fail": 0,
+    "skipped": 0,
+    "queryValidation": "PostgreSQL WASM, SELECT-only relational CTE fixtures; no CREATE/INSERT or remote SQL. Original query body and bind points validated against known column types; real remote owner export not executed.",
+    "all12NewRequiredCasesCovered": true,
+    "all9HistoricalParserComparatorCasesCovered": true,
+    "businessSuiteRun": false,
+    "businessSuiteReason": "User restricts task to evidence tooling with no signing; broad backend tests generate signatures (e.g. backend/tests/d3-xdr-identity.test.ts:57,68,73). Frozen files validated by hashes instead. This is a tooling/docs publication, not a business execution checkpoint.",
+    "syntaxCheck": "PASS"
+  },
+  "secretPiiScan": {
+    "status": "PASS",
+    "reviewedFalsePositives": [
+      {
+        "file": "tools/d3-evidence-capture/owner-export.test.mjs",
+        "line": 38,
+        "kind": "EMAIL",
+        "lineSha256": "bd62961727680c54bf9531b3d360ba478392dd4b6d5065df6b6dd00f03e0d88a",
+        "review": "REVIEWED_NONFUNCTIONAL_NEGATIVE_TEST_VECTOR"
+      },
+      {
+        "file": "tools/d3-evidence-capture/tooling.test.mjs",
+        "line": 35,
+        "kind": "JWT",
+        "lineSha256": "cbd14cd6c27993abb90af67f8acbe24735cb1a017389d184f72b7cf71489da5c",
+        "review": "REVIEWED_NONFUNCTIONAL_NEGATIVE_TEST_VECTOR"
+      },
+      {
+        "file": "tools/d3-evidence-capture/tooling.test.mjs",
+        "line": 36,
+        "kind": "EMAIL",
+        "lineSha256": "2cf6c7cef5f37a6b0927ff07e9f76adf32191d4c3ce7a6d3871379bc06af1813",
+        "review": "REVIEWED_NONFUNCTIONAL_NEGATIVE_TEST_VECTOR"
+      },
+      {
+        "file": "tools/d3-evidence-capture/tooling.test.mjs",
+        "line": 36,
+        "kind": "AUTH_ID",
+        "lineSha256": "2cf6c7cef5f37a6b0927ff07e9f76adf32191d4c3ce7a6d3871379bc06af1813",
+        "review": "REVIEWED_NONFUNCTIONAL_NEGATIVE_TEST_VECTOR"
+      },
+      {
+        "file": "tools/d3-evidence-capture/tooling.test.mjs",
+        "line": 46,
+        "kind": "EMAIL",
+        "lineSha256": "f33d04360352c3583e8a4fdb50619180c539898ad55a1443e156dc17db7446a7",
+        "review": "REVIEWED_NONFUNCTIONAL_NEGATIVE_TEST_VECTOR"
+      }
+    ],
+    "unresolved": [],
+    "publicationCandidates": 24,
+    "liveOwnerExportSelected": false,
+    "historicalRawZipSelected": false
+  },
+  "historicalBundle": {
+    "path": ".tools/d3-evidence-capture-final-live-2026-11-06",
+    "sha256": "42aab997fc7df0440f6f54807b54148f3aed850ae88200ef117b1aa0840b9e45",
+    "verification": "PASS, unchanged",
+    "runStatus": "RUN_RETIRED_OR_STOPPED",
+    "counting": false,
+    "liveSqlCompared": false
+  },
+  "sourceFreeze": {
+    "status": "PASS",
+    "sourceTestFiles": 24,
+    "allFrozenCommitFilesMatch": 34,
+    "fingerprint": "e9a75a332489f80cdd748121c95c3fe66ce3425b48926e92d8d22a9fd2e78539",
+    "trackedDiffEmpty": true,
+    "indexEmpty": true
+  },
+  "toolFileSha256": {
+    "tools/d3-evidence-capture/audit-imports.mjs": "cb165fff7f631960b517f59f1721d710b3f3d35cfc11f54cfaa5c76a18caef0b",
+    "tools/d3-evidence-capture/business-files.json": "03e6b57dbf8b391ac914fad410c14fa2e2eb9a3ee701d00cd8754c206c11bee4",
+    "tools/d3-evidence-capture/capture.mjs": "dc11bf7bf884d09e217a0a8cccb0f0391a025a088b6e4685e9bb02682b9ddd52",
+    "tools/d3-evidence-capture/cli.mjs": "14819fb97af37b77581fb5ff7956acd80b66474d33d7caa4330cabec83bcfc20",
+    "tools/d3-evidence-capture/common.mjs": "eb6af16139068ebbc70f063bd3fc3b2c6767d9cb75958aea7b5af7f97814a13a",
+    "tools/d3-evidence-capture/comparison.mjs": "b2d3e20d7e10dc4150c558b066ee94fc948ee65b9de9f99faf64d911d7a54cdd",
+    "tools/d3-evidence-capture/fixtures/historical.json": "88d9afef51042422716dd0b7c00498bf3ec3f41a22f69ee904ea9c9ed1e4ca6e",
+    "tools/d3-evidence-capture/gate.mjs": "97272b70cc84f19491a70c0d0020bdc9edeeaff4500f3d7ae0b10c1ea7b38cbd",
+    "tools/d3-evidence-capture/inventory.mjs": "18335d82fc91e5f18b285ce61ee6595caa2dee4b587b7c7596eafdf4e91cb6e8",
+    "tools/d3-evidence-capture/network.mjs": "20c7c1958348530b7b35e86d8d610afb604d1b205fc96d27e8108cb8b4a2a346",
+    "tools/d3-evidence-capture/OWNER-EXPORT.md": "4f1348822379ff11dffa71bfaaf417d43e59c724e4ff8caec3544b3119f76a93",
+    "tools/d3-evidence-capture/owner-export.mjs": "4701928cd42bd83960cf5c60b9e2530b42ea71a24c756102cd2fa387c3e92876",
+    "tools/d3-evidence-capture/owner-export.test.mjs": "288970e07838f8a2657538a6b3b7f45dd91408af76fdee9b9afbae6a6b227485",
+    "tools/d3-evidence-capture/pins.mjs": "7e5c1819fb344fdb645104f22df530585e6586681f41f165a2ec1c7b6e3afd9b",
+    "tools/d3-evidence-capture/README.md": "41eea5515de2d6adb6cd08dfec10d2a2c7c58d3859de020a4f8ee59a8f352661",
+    "tools/d3-evidence-capture/sanitizer.mjs": "13da258cd2139506d0bdb36e66200c003d9a99842d5c8c047e046edd23fc2f32",
+    "tools/d3-evidence-capture/spec.json": "f1bb259efbf1f605eff08bd5c9a2f46dd96b61630254179352e00b330985e08d",
+    "tools/d3-evidence-capture/sql/owner-export.sql": "d4e82f4221d187aecdee7440b8331ebbe54e96d0b7400d06bc1430b8d793c9f1",
+    "tools/d3-evidence-capture/sql-readonly.mjs": "e8baaf2bd7bce41e238baa9b0988043cf0e3980295b8eafa2097b309663151d6",
+    "tools/d3-evidence-capture/tooling.test.mjs": "17dcd2783e03bd15590126f14916870a574c4d54b71d7b90dbd06cd1dd868ab9",
+    "tools/d3-evidence-capture/verifier.mjs": "503fb31362830bef112348d086151d0f6b524f0aa481eaf0bd6b4f70c2846b5b",
+    "tools/d3-evidence-capture/xdr-reader.mjs": "692cfd7f2b6ad96e38bdabfec2ee661c3e33d356de9075393c704f612e2d4d14"
+  },
+  "publication": {
+    "candidatePaths": [
+      "tools/d3-evidence-capture/audit-imports.mjs",
+      "tools/d3-evidence-capture/business-files.json",
+      "tools/d3-evidence-capture/capture.mjs",
+      "tools/d3-evidence-capture/cli.mjs",
+      "tools/d3-evidence-capture/common.mjs",
+      "tools/d3-evidence-capture/comparison.mjs",
+      "tools/d3-evidence-capture/fixtures/historical.json",
+      "tools/d3-evidence-capture/gate.mjs",
+      "tools/d3-evidence-capture/inventory.mjs",
+      "tools/d3-evidence-capture/network.mjs",
+      "tools/d3-evidence-capture/OWNER-EXPORT.md",
+      "tools/d3-evidence-capture/owner-export.mjs",
+      "tools/d3-evidence-capture/owner-export.test.mjs",
+      "tools/d3-evidence-capture/pins.mjs",
+      "tools/d3-evidence-capture/README.md",
+      "tools/d3-evidence-capture/sanitizer.mjs",
+      "tools/d3-evidence-capture/spec.json",
+      "tools/d3-evidence-capture/sql/owner-export.sql",
+      "tools/d3-evidence-capture/sql-readonly.mjs",
+      "tools/d3-evidence-capture/tooling.test.mjs",
+      "tools/d3-evidence-capture/verifier.mjs",
+      "tools/d3-evidence-capture/xdr-reader.mjs",
+      "docs/instaward/d3/D3-EVIDENCE-OWNER-EXPORT-A-2026-11-06.md",
+      "docs/instaward/d3/D3-EVIDENCE-OWNER-EXPORT-A-2026-11-06.json"
+    ],
+    "excludedExistingUntracked": [
+      "docs/instaward/d3/D3-14-FREEZE-2026-11-05.json",
+      "docs/instaward/d3/D3-14-FREEZE-2026-11-05.md",
+      "docs/instaward/d3/D3-15-PREFLIGHT-2026-11-05.json",
+      "docs/instaward/d3/D3-15-PREFLIGHT-2026-11-05.md",
+      "docs/instaward/d3/D3-EVIDENCE-CAPTURE-FREEZE-2026-11-05.json",
+      "docs/instaward/d3/D3-EVIDENCE-CAPTURE-FREEZE-2026-11-05.md",
+      "docs/instaward/d3/D3-TTL-READONLY-DESIGN-CHECK-2026-11-05.json",
+      "docs/instaward/d3/D3-TTL-READONLY-DESIGN-CHECK-2026-11-05.md",
+      "docs/instaward/d3/evidence/D3-TTL-READONLY-DESIGN-CHECK-2026-11-05-HISTORICAL.zip"
+    ],
+    "localOnly": [
+      ".tools/**",
+      "live owner export until sanitized/reviewed",
+      "historical raw ZIP/unselected reports"
+    ],
+    "neverPublish": [
+      "credentials",
+      "database URLs",
+      "Auth/session material",
+      "PII",
+      "private keys/seeds",
+      "Secure Store material"
+    ],
+    "maximumCommits": 1,
+    "maximumFastForwardPushes": 1,
+    "branch": "instaward/d2-web-mvp",
+    "expectedParent": "c6ba2e837ed0f7b81373655b8106b58ecb86a8cd",
+    "TOOLING_PUBLICATION_SHA": "Resolve the commit containing this report: git log -1 --format=%H -- docs/instaward/d3/D3-EVIDENCE-OWNER-EXPORT-A-2026-11-06.md",
+    "commitPushResult": "Prepared only after all local tooling gates pass; exact immutable commit and verified push receipt returned in task final response and ignored .tools/evidence-owner-a-publication-receipt.json. This report cannot embed its own enclosing Git commit hash.",
+    "mainMerged": false,
+    "tagsChanged": false,
+    "vercelAutoDeploymentBarrierUnchanged": true
+  },
+  "ttl": {
+    "SAC_POOL_TTL_MAINTENANCE_REQUIRED": "NO",
+    "pool": {
+      "entry": {
+        "kind": "reward balance",
+        "contract": "CB2RBZCH2DKLB2KFTKKEIDJBK53WKT2FQBQRTAN2JKJVEBAMCDEY6D7G",
+        "holder": "CDMGW6M3A56EHHEQPP5A3NGTWWETFP7LOMB3CU5S67374VT3BPVCNWON",
+        "durability": "persistent",
+        "ttlEligible": true,
+        "keyXdr": "AAAABgAAAAF1EORH0NSw6UWalEQNIVd3ZU9FgGEZgbpKk1IEDBDJjwAAABAAAAABAAAAAgAAAA8AAAAHQmFsYW5jZQAAAAASAAAAAdhreZsHfEOckHv6DbTTtYkyv+tzA7FTsvf3/lZ7C+omAAAAAQ==",
+        "entryXdr": "AAAABgAAAAAAAAABdRDkR9DUsOlFmpREDSFXd2VPRYBhGYG6SpNSBAwQyY8AAAAQAAAAAQAAAAIAAAAPAAAAB0JhbGFuY2UAAAAAEgAAAAHYa3mbB3xDnJB7+g2007WJMr/rcwOxU7L39/5WewvqJgAAAAEAAAARAAAAAQAAAAMAAAAPAAAABmFtb3VudAAAAAAACgAAAAAAAAAAAAAAACm5JwAAAAAPAAAACmF1dGhvcml6ZWQAAAAAAAAAAAABAAAADwAAAAhjbGF3YmFjawAAAAAAAAAA",
+        "lastModifiedLedgerSeq": 5351746,
+        "liveUntilLedgerSeq": 6703017,
+        "observationLedger": 5582183,
+        "observedAt": "2026-11-06T03:09:21.276Z",
+        "status": "PRESENT",
+        "value": {
+          "amount": "700000000",
+          "authorized": true,
+          "clawback": false
+        }
+      },
+      "provenance": {
+        "source": "RPC",
+        "url": "https://soroban-testnet.stellar.org",
+        "method": "POST",
+        "http": 200,
+        "observedAt": "2026-11-06T03:09:21.276Z",
+        "contentType": "application/json"
+      }
+    },
+    "normalFutureCandidates": [
+      "Battery(id)",
+      "Request(rid)"
+    ],
+    "deriveFromActualFutureFootprints": true,
+    "maintenancePerformed": false,
+    "futureAbsoluteLedgerTarget": null,
+    "reviewTarget": "2026-11-27",
+    "bufferThrough": "2026-11-30",
+    "safetyLeadDays": 2
+  },
+  "effects": {
+    "businessTx": 0,
+    "maintenanceTx": 0,
+    "liveSimulations": 0,
+    "newSignatures": 0,
+    "broadcasts": 0,
+    "Friendbot": 0,
+    "newAccounts": 0,
+    "secureStoreMutations": 0,
+    "supabaseWrites": 0,
+    "remoteSqlReads": 0,
+    "DDL": 0,
+    "rlsChanges": 0,
+    "roleGrantChanges": 0,
+    "ttlChanges": 0,
+    "deployments": 0,
+    "runIdsConsumed": 0,
+    "businessSourceTestChanges": 0,
+    "newDependencyInstalls": 0
+  },
+  "project": {
+    "D1": "12/12",
+    "D2": "6/6",
+    "D3": "0/5",
+    "total": "18/23"
+  },
+  "stop": "No simulation, maintenance, account creation or RUN1. Next action is owner/Council tool review and, when separately ready, the manual approved export. Publication does not authorize business execution."
+}
