@@ -11,10 +11,14 @@ import {assertOwnerQuery,parseOwnerExport,compareOwnerExport,observationsFromBun
 import {assertHandoff,assertCommittedBundle} from './gate.mjs';
 import {read,bytes,hash,outputDirectory} from './common.mjs';
 import {writeFileSync} from 'node:fs';
+import {verifyInstalledTooling} from './tooling-identity.mjs';
+import {retentionPolicy} from './retention.mjs';
 export async function main(argv){local();check(argv[0]==='--local','EXPLICIT_LOCAL_REQUIRED');const [command,...rest]=argv.slice(1);const dir=dirname(fileURLToPath(import.meta.url));auditDirectory(dir);
  assertBusinessFingerprint();assertOwnerQuery();const flags={};for(let i=0;i<rest.length;i+=2){check(/^--[a-z][a-z0-9-]*$/.test(rest[i])&&typeof rest[i+1]==='string'&&!flags[rest[i]],'INVALID_ARGUMENTS');flags[rest[i]]=rest[i+1];}
  const ownerFlags=['--export','--sha256','--scope','--bundle','--bundles','--out','--evidence-commits'];
- const allowed={'status':[],'verify-owner-export':ownerFlags,'check-handoff':ownerFlags,'verify-bundle':['--bundle'],'scan-bundle':['--bundle'],'check-next-run':['--next-run','--bundle','--evidence-commit','--owner-decision'],'capture-tx':['--input','--out'],'capture-run':['--input','--fixtures','--out']};check(allowed[command]&&Object.keys(flags).every(f=>allowed[command].includes(f)),'INVALID_ARGUMENTS');
+ const allowed={'status':[],'tooling-identity':['--identity'],'retention-check':['--bundle'],'verify-owner-export':ownerFlags,'check-handoff':ownerFlags,'verify-bundle':['--bundle'],'scan-bundle':['--bundle'],'check-next-run':['--next-run','--bundle','--evidence-commit','--owner-decision'],'capture-tx':['--input','--out'],'capture-run':['--input','--fixtures','--out']};check(allowed[command]&&Object.keys(flags).every(f=>allowed[command].includes(f)),'INVALID_ARGUMENTS');
+ if(command==='tooling-identity'){check(flags['--identity'],'INCOMPLETE_TOOLING_IDENTITY');return verifyInstalledTooling(json(flags['--identity']));}
+ if(command==='retention-check'){check(flags['--bundle'],'INVALID_ARGUMENTS');const v=verifyPortable(flags['--bundle']);const step=v.inventory.summary.steps[0];check(step?.confirmed,'ORIGINAL_RPC_EVIDENCE_REQUIRED');const name='01-'+step.method+'/rpc-transaction.json';return retentionPolicy(json(resolve(flags['--bundle'],name)),v.inventory.artifacts.find(a=>a.path===name).observedAt,SPEC.retention.reserveLedgers);}
  if(command==='status')return {businessExecutionSha:SPEC.businessSha,readOnlyTool:true,ownerExportOption:'A',querySha256:SPEC.ownerExport.querySha256,databaseCredentialsAccepted:false,sqlIntegrity:'PENDING_OWNER_EXPORT_REQUIRED_BEFORE_HANDOFF',chainGateRequiredBetweenRuns:true,sqlGateRequiredBeforeHandoff:true,canStartRun:false,planning:SPEC.planning};
  if(command==='verify-owner-export'||command==='check-handoff'){
   check(flags['--export']&&flags['--sha256']&&flags['--scope']&&Boolean(flags['--bundle'])!==Boolean(flags['--bundles']),'INVALID_OWNER_EXPORT_ARGUMENTS');

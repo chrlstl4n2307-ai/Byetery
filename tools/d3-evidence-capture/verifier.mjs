@@ -3,6 +3,7 @@ import {identity,metadata,X} from './xdr-reader.mjs';
 import {scanRaw} from './sanitizer.mjs';
 import {native,strkey} from './xdr-reader.mjs';
 import {decodedXdr,orderedEvents} from './comparison.mjs';
+import {assertTestnetNetwork} from './network-identity.mjs';
 export function rewardContent(meta,events){const r=meta.returnNative;check(r&&r.token===SPEC.token&&r.amount==='100000000'&&SPEC.wallets.includes(r.recipient)&&canonical(r.reward_state)==='["Sent"]','REWARD_RETURN_MISSING');
  const transfer=events.some(encoded=>{const e=X.ContractEvent.fromXDR(encoded,'base64');if(!e.contractId||strkey(e.contractId.toBytes(),16)!==SPEC.token)return false;const t=e.body.value.topics.map(native);return t[0]==='transfer'&&t[1]===SPEC.contract&&t[2]===r.recipient&&native(e.body.value.data)==='100000000';});check(transfer,'REWARD_TRANSFER_MISSING');
  const before=meta.balances.find(b=>b.kind==='SAC_POOL'&&b.change==='ledgerEntryState'),after=meta.balances.find(b=>b.kind==='SAC_POOL'&&b.change==='ledgerEntryUpdated'),wb=meta.balances.find(b=>b.account===r.recipient&&b.change==='ledgerEntryState'),wa=meta.balances.find(b=>b.account===r.recipient&&b.change==='ledgerEntryUpdated');
@@ -21,7 +22,7 @@ export function crosscheck(rpc,sql,meta){check(sql&&sql.confirmation&&sql.succes
  if(sql.command==='pay_reward'){const r=meta.returnNative;check(r&&r.token===SPEC.token&&r.amount==='100000000'&&SPEC.wallets.includes(r.recipient),'REWARD_RETURN_MISSING');same('facts.reward',{recipient:r.recipient,token:r.token,amount:r.amount},c.facts.reward);}
  return {status:'PASS',rawFieldsCompared:Object.keys(fields),factsCompared:Object.keys(meta.after),factsReadLedger:c.facts.stateReadLedger,successEvidenceExact:true,operationId:sql.operation_id};
 }
-export function verifyTx(input){provenance(input.provenance);check(input.network.passphrase===SPEC.network,'WRONG_NETWORK');
+export function verifyTx(input){provenance(input.provenance);assertTestnetNetwork(input.network.passphrase,input.network.networkId);
  const r=input.rpc;check(['SUCCESS','FAILED','NOT_FOUND'].includes(r.status),'UNKNOWN_RPC_STATUS');check(r.status==='SUCCESS','UNCONFIRMED_TRANSACTION');check(r.txHash===input.expected.hash,'WRONG_TX_HASH');
  const id=identity(r.envelopeXdr,{...input.expected,networkPassphrase:input.network.passphrase});
  const h=input.horizon,l=input.horizonLedger;

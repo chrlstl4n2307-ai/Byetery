@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {SPEC,hash} from './common.mjs';
+import {X,identity} from './xdr-reader.mjs';
+import {verifyTx} from './verifier.mjs';
+import {TESTNET_PASSPHRASE,networkIdFromPassphrase,assertTestnetNetwork} from './network-identity.mjs';
+import {RATIFIED_TOOLING,identityAtCommit,compareIdentity} from './tooling-identity.mjs';
+import {retentionPolicy} from './retention.mjs';
+const f=JSON.parse(readFileSync(new URL('./fixtures/historical.json',import.meta.url),'utf8')).items;
+const clone=v=>structuredClone(v);
+const wrongPassphrase='Public Global Stellar Network ; September 2015';
+function digest(envelope,passphrase){const e=X.TransactionEnvelope.fromXDR(envelope,'base64');return hash(new X.TransactionSignaturePayload({networkId:Buffer.from(networkIdFromPassphrase(passphrase),'hex'),taggedTransaction:X.TransactionSignaturePayloadTaggedTransaction.envelopeTypeTx(e.v1.tx)}).toXDR());}
+
+test('I01 Testnet network ID is SHA256 of exact UTF8 canonical passphrase',()=>{assert.equal(networkIdFromPassphrase(TESTNET_PASSPHRASE),'cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472');assert.equal(assertTestnetNetwork(SPEC.network,SPEC.networkId),SPEC.networkId);});
+test('I02 wrong Testnet passphrase rejected including trailing LF',()=>{assert.throws(()=>assertTestnetNetwork(TESTNET_PASSPHRASE+'\n',SPEC.networkId),/WRONG_NETWORK/);});
+test('I03 wrong captured network_id rejected',()=>{const d=clone(f[0]);d.network.networkId='a'.repeat(64);assert.throws(()=>verifyTx(d),/WRONG_NETWORK_ID/);});
+test('I04 correct historical envelope on wrong network rejected',()=>{assert.throws(()=>identity(f[0].rpc.envelopeXdr,{...f[0].expected,networkPassphrase:wrongPassphrase}),/WRONG_NETWORK/);});
+test('I05 tx hash recomputed with wrong network cannot validate under Testnet',()=>{const d=f[0],wrong=digest(d.rpc.envelopeXdr,wrongPassphrase);assert.notEqual(wrong,d.expected.hash);assert.throws(()=>identity(d.rpc.envelopeXdr,{...d.expected,hash:wrong,networkPassphrase:TESTNET_PASSPHRASE}),/WRONG_TX_HASH/);});
+test('I06 all historical payload hashes match captured RPC and expected fixture hashes without signing',()=>{for(const d of f){const h=digest(d.rpc.envelopeXdr,TESTNET_PASSPHRASE);assert.equal(h,d.expected.hash);assert.equal(h,d.rpc.txHash);assert.equal(identity(d.rpc.envelopeXdr,{...d.expected,networkPassphrase:TESTNET_PASSPHRASE,networkId:SPEC.networkId}).hash,h);}});
+test('I07 ratified immutable commit/tree pair exactly matches real Git objects',()=>{const a=identityAtCommit(RATIFIED_TOOLING.commit);assert.equal(a.TOOLING_TREE_HASH,RATIFIED_TOOLING.tree);assert.equal(compareIdentity(a,a),true);});
+test('I08 tooling tree hash mismatch rejects',()=>{const a=identityAtCommit(RATIFIED_TOOLING.commit);assert.throws(()=>compareIdentity({...a,TOOLING_TREE_HASH:'a'.repeat(40)},a),/BLOCKED_TOOLING_TREE_IDENTITY_MISMATCH/);});
+test('I09 tooling commit mismatch rejects',()=>{const a=identityAtCommit(RATIFIED_TOOLING.commit);assert.throws(()=>compareIdentity({...a,TOOLING_PUBLICATION_SHA:SPEC.businessSha},a),/TOOLING_COMMIT_MISMATCH/);});
+test('I10 business fingerprint mismatch rejects',()=>{const a=identityAtCommit(RATIFIED_TOOLING.commit);assert.throws(()=>compareIdentity({...a,BUSINESS_FINGERPRINT:'a'.repeat(64)},a),/BUSINESS_FINGERPRINT_MISMATCH/);});
+test('I11 CLI file hash alone is not a complete tooling identity',()=>{assert.throws(()=>compareIdentity({SCRIPT_SHA256:'a'.repeat(64)},{}),/INCOMPLETE_TOOLING_IDENTITY/);});
+test('I12 retention scheduling bound uses actual ledger window and explicit reserve, no seven-day assumption',()=>{const r=retentionPolicy({ledger:1000,oldestLedger:900,latestLedger:1100},'2026-11-06T00:00:00Z',20);assert.equal(r.observedWindowLedgers,201);assert.equal(r.SQL_RPC_CROSSCHECK_LATEST_SAFE_LEDGER,1180);assert.equal(r.assumedDays,null);assert.equal(r.providerGuarantee,false);});
+test('I13 missing retention indicator stops planning instead of inventing a window',()=>{const r=retentionPolicy({ledger:1000,latestLedger:1100},'2026-11-06T00:00:00Z');assert.equal(r.status,'REVIEW_REQUIRED_RETENTION_INDICATOR_UNAVAILABLE');assert.equal(r.SQL_RPC_CROSSCHECK_LATEST_SAFE_LEDGER,null);});
+test('I14 outside-window receipt requires review and never means not applied',()=>{const r=retentionPolicy({ledger:1000,oldestLedger:1001,latestLedger:1100},'2026-11-06T00:00:00Z');assert.equal(r.status,'REVIEW_REQUIRED_ORIGINAL_RECEIPT_OUTSIDE_CURRENT_WINDOW');assert.equal(r.SQL_RPC_CROSSCHECK_LATEST_SAFE_LEDGER,null);});
+test('I15 retention reserve exhausted requires review; no expiration refetch dependency',()=>{const r=retentionPolicy({ledger:1000,oldestLedger:999,latestLedger:1100},'2026-11-06T00:00:00Z',20);assert.equal(r.status,'REVIEW_REQUIRED_CAPTURE_DEADLINE_REACHED');assert.equal(r.requiresCommittedOriginalRpcEvidence,true);assert.equal(r.refetchExpiredReceiptAllowed,false);});
+test('I16 malformed retention ledger ranges reject',()=>{assert.throws(()=>retentionPolicy({ledger:1000,oldestLedger:1200,latestLedger:1100},'2026-11-06T00:00:00Z'),/INVALID_RETENTION_OBSERVATION/);});

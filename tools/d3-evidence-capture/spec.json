@@ -66,5 +66,31 @@
       "Battery(id)",
       "Request(rid)"
     ]
+  },
+  "identityPolicy": {
+    "policy": "COMMIT_PLUS_TREE_HASH",
+    "requiredCompanionManifestFields": [
+      "BUSINESS_EXECUTION_SHA",
+      "BUSINESS_FINGERPRINT",
+      "TOOLING_PUBLICATION_SHA",
+      "TOOLING_TREE_HASH",
+      "OWNER_EXPORT_QUERY_SHA256"
+    ],
+    "ratifiedBaseCommit": "2c6fb3c9e749eddfd61a2f217e9292cb880dc9e2",
+    "ratifiedBaseTreeHash": "dc83d7071f049e298c3d8deca671d0934029935d",
+    "cliFileHashInformationalOnly": true,
+    "businessManifestSchemaChanged": false,
+    "futureToolingIdentity": "Exact reviewed Git commit plus its tools/d3-evidence-capture Git tree; never a self-embedded tree hash"
+  },
+  "retention": {
+    "source": "Original first RUN1 getTransaction receipt oldestLedger/latestLedger/ledger plus recorded observation time",
+    "reserveLedgers": 120,
+    "formula": "inclusionLedger + (latestLedger - oldestLedger + 1) - 1 - reserveLedgers",
+    "fixedDaysAssumed": null,
+    "projectionIsProviderGuarantee": false,
+    "captureAndCommitOriginalBeforeEviction": true,
+    "unknownOrExhaustedWindow": "STOP_AND_REVIEW",
+    "handoffRequiresCommittedOriginals": true,
+    "expiredRefetchDependencyAllowed": false
   }
 }

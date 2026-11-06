@@ -148,6 +148,54 @@ replacement, continuation, larger cap or later run is authorized by this tool.
 
 ## Execution and tooling SHAs are separate
 
+Owner ratification on 2026-11-06 confirms the published pair:
+commit `2c6fb3c9e749eddfd61a2f217e9292cb880dc9e2`, exact Git subtree
+`dc83d7071f049e298c3d8deca671d0934029935d` for tools/d3-evidence-capture.
+The identity policy is **COMMIT_PLUS_TREE_HASH**, not the CLI file hash alone.
+Legitimate later tooling changes require a new reviewed pair; they do not
+redefine the frozen business execution SHA/fingerprint.
+
+Before any separately authorized future D3 execution, its companion evidence
+manifest/preflight record must cite all five fields:
+BUSINESS_EXECUTION_SHA, BUSINESS_FINGERPRINT, TOOLING_PUBLICATION_SHA,
+TOOLING_TREE_HASH, OWNER_EXPORT_QUERY_SHA256. Keep this in an evidence sidecar;
+the frozen business manifest schema/runtime is unchanged. The owner/Council must
+review that pair; computing a new local HEAD does not grant execution authority.
+
+    node tools/d3-evidence-capture/cli.mjs --local tooling-identity --identity .tools/reviewed-tooling-identity.json
+
+The supplied record has exactly those five uppercase keys. The command compares
+HEAD's real Git commit/subtree objects and every installed tooling file against
+committed bytes, rejects uncommitted drift, and rechecks the business fingerprint
+and pinned query. Do not embed a tree hash inside the same tree it describes.
+
+### RPC retention checkpoint
+
+For the first RUN1 transaction, retain its original RPC getTransaction response:
+inclusion ledger, oldestLedger, latestLedger, and capture observation time. The
+raw RPC artifact already preserves these fields. Derive the planning checkpoint
+from observed ledger retention, not an assumed seven-day/calendar window:
+
+SQL_RPC_CROSSCHECK_LATEST_SAFE_LEDGER = inclusionLedger +
+(latestLedger - oldestLedger + 1) - 1 - reserveLedgers.
+
+The internal scheduling reserve is 120 ledgers; it is not a protocol lifetime or
+provider guarantee. Retention can change. Missing/invalid indicators, an expired
+receipt or a reached checkpoint require STOP/review; never silently invent a date.
+Capture/verify/sanitize and commit the original receipt immediately. At the
+checkpoint, finish any planned live comparison or review the preserved originals
+with owner/Council. Final SQL integrity can compare offline against those already
+committed exact bytes; it must not depend on re-fetching an expired receipt.
+If originals were not captured/committed before eviction, STOP. Calendar deadline
+2026-11-13 remains an additional handoff constraint, not a retention guarantee.
+
+    node tools/d3-evidence-capture/cli.mjs --local retention-check --bundle .tools/already-captured-chain-bundle
+
+This command reads only local captured artifacts. The existing check-handoff
+verifies exact committed artifacts; merely having an uncommitted export/report
+does not close the original-RPC evidence gate. No first fresh RUN1 receipt exists
+in this task, so no fresh absolute retention ledger is assigned.
+
 A future tooling/docs commit may move repository HEAD. The tool explicitly
 pins and checks the 24 frozen source/test file hashes. It does not make a new
 HEAD the approved business execution SHA. The existing operator checks exact

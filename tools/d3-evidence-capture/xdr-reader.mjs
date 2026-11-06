@@ -2,6 +2,7 @@ import {createRequire} from 'node:module';
 import {createPublicKey,verify as verifyEd25519} from 'node:crypto';
 import {SPEC,ROOT,check,hash,local,canonical} from './common.mjs';
 import {scanRaw} from './sanitizer.mjs';
+import {assertTestnetNetwork} from './network-identity.mjs';
 local();
 // Only official pure XDR types: never import the SDK root, keypair, transaction,
 // RPC client, application module, wallet, or a signing implementation.
@@ -30,11 +31,11 @@ export function classify(k){if(k.type==='contractCode'){const h=Buffer.from(k.co
  throw Error('UNKNOWN_LEDGER_KEY');
 }
 function publicVerify(key,msg,sig){return verifyEd25519(null,msg,createPublicKey({key:Buffer.concat([Buffer.from('302a300506032b6570032100','hex'),Buffer.from(key)]),format:'der',type:'spki'}),Buffer.from(sig));}
-export function identity(encoded,expected){check(expected.networkPassphrase===SPEC.network,'WRONG_NETWORK');let env;try{env=X.TransactionEnvelope.fromXDR(encoded,'base64');}catch{throw Error('INVALID_ENVELOPE');}
+export function identity(encoded,expected){const networkId=assertTestnetNetwork(expected.networkPassphrase,expected.networkId);let env;try{env=X.TransactionEnvelope.fromXDR(encoded,'base64');}catch{throw Error('INVALID_ENVELOPE');}
  check(env.type==='envelopeTypeTx'&&env.v1.tx.operations.length===1,'UNSUPPORTED_ENVELOPE');
  const tx=env.v1.tx;check(tx.sourceAccount.type==='keyTypeEd25519'&&tx.memo.type==='memoNone','UNSUPPORTED_ENVELOPE');
  const sourceKey=tx.sourceAccount.ed25519.toBytes(),source=strkey(sourceKey,48);
- const digest=hash(new X.TransactionSignaturePayload({networkId:Buffer.from(SPEC.networkId,'hex'),taggedTransaction:X.TransactionSignaturePayloadTaggedTransaction.envelopeTypeTx(tx)}).toXDR());
+ const digest=hash(new X.TransactionSignaturePayload({networkId:Buffer.from(networkId,'hex'),taggedTransaction:X.TransactionSignaturePayloadTaggedTransaction.envelopeTypeTx(tx)}).toXDR());
  check(digest===expected.hash,'WRONG_TX_HASH');
  const operation=tx.operations[0];check(operation.sourceAccount===null&&operation.body.type==='invokeHostFunction','WRONG_OPERATION');
  const op=operation.body.invokeHostFunctionOp;check(op.hostFunction.type==='hostFunctionTypeInvokeContract','WRONG_OPERATION');

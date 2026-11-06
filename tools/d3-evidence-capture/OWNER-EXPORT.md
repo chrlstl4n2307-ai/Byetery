@@ -88,6 +88,12 @@ review, never made run/handoff-ready.
    file separately. Do not use a partial/empty export. Do not run other queries
    or connect/disconnect under another role to make this export succeed.
 
+   **Windows path STOP rule:** the documented path contains `Christián`. If
+   `\o` fails (including Unicode/path/permission errors), **STOP**. Do not
+   silently switch to another path or an ASCII alias. Record any explicitly
+   approved new output path before using it, then record the new export file's
+   SHA-256. Preserve the original attempt; never substitute an output silently.
+
 4. Compute and retain the exact file hash **before** formatting or sanitizing:
 
    ```powershell
@@ -194,6 +200,17 @@ never be presented as live exports. Service corroboration is not validator-grade
 inclusion proof and digital attestations do not prove physical recycling.
 
 ## Separate gates
+
+Option A may use an existing **owner-capable session**; that does not make the
+credential intrinsically SELECT-only. Safety depends on BOTH
+`BEGIN TRANSACTION READ ONLY` and the **exact pinned SELECT-only query SHA**.
+
+`NO OTHER QUERIES DURING EXPORT SESSION`
+
+Permitted SQL is limited to BEGIN READ ONLY, the required SHOW, the exact pinned
+SELECT, and ROLLBACK. psql output/encoding controls are local client commands.
+If `SHOW transaction_read_only != on`, STOP. If the query hash differs, STOP.
+No administrative MCP fallback, privilege change or query substitution.
 
 `CHAIN_GATE_REQUIRED_BETWEEN_RUNS = YES`
 

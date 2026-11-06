@@ -69,7 +69,7 @@ export function verifyPortable(dir){const verified=verifyBundle(dir),inv=verifie
   const sql=existsSync(sqlPath)?load('sql-confirmation.json'):null;
   const sqlSource=sql?load('sql-provenance.json'):null;
   const rl=load('rpc-ledger.json');
-  const data={network:{passphrase:tx.networkPassphrase},rpc:load('rpc-transaction.json'),horizon:load('horizon-transaction.json'),horizonLedger:load('horizon-ledger.json'),rpcLedger:rl?.status==='NOT_CAPTURED'?null:rl,expected:tx.expected,provenance:{source:'LOCAL_HISTORICAL',observedAt:inv.artifacts.find(a=>a.path===p).observedAt},sql,sqlProvenance:sqlSource};
+  const data={network:{passphrase:tx.networkPassphrase,networkId:tx.networkId},rpc:load('rpc-transaction.json'),horizon:load('horizon-transaction.json'),horizonLedger:load('horizon-ledger.json'),rpcLedger:rl?.status==='NOT_CAPTURED'?null:rl,expected:tx.expected,provenance:{source:'LOCAL_HISTORICAL',observedAt:inv.artifacts.find(a=>a.path===p).observedAt},sql,sqlProvenance:sqlSource};
   const result=verifyTx(data);
   const row={method:data.expected.method,batteryId:data.expected.batteryId,confirmed:true,requestId:result.id.method==='register_battery'?null:(result.id.args[1]??result.meta.after.battery?.requestId??null),hash:result.id.hash,sqlCrosscheck:result.verification.sqlCrosscheck,rpcLedger:result.verification.rpcLedgerCorroboration};
   check(canonical(row)===canonical(steps[i]),'VERIFICATION_SUMMARY_MISMATCH');observed.push(row);

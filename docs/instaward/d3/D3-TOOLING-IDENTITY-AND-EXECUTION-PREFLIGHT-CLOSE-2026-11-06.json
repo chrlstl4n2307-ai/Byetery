@@ -1,0 +1,430 @@
+{
+  "task": "D3-TOOLING-IDENTITY-AND-EXECUTION-PREFLIGHT-CLOSE",
+  "date": "2026-11-06",
+  "timezone": "America/Santiago",
+  "preparedAt": "2026-11-06T04:58:17.628060+00:00",
+  "result": "D3_TOOLING_IDENTITY_AND_PREFLIGHT_CLOSED",
+  "TOOLING_HEAD_RATIFIED": "PASS",
+  "BUSINESS_EXECUTION_SHA": "c6ba2e837ed0f7b81373655b8106b58ecb86a8cd",
+  "BUSINESS_FINGERPRINT": "e9a75a332489f80cdd748121c95c3fe66ce3425b48926e92d8d22a9fd2e78539",
+  "BUSINESS_FINGERPRINT_UNCHANGED": "YES",
+  "ratifiedPublishedIdentity": {
+    "TOOLING_PUBLICATION_SHA": "2c6fb3c9e749eddfd61a2f217e9292cb880dc9e2",
+    "TOOLING_TREE_HASH": "dc83d7071f049e298c3d8deca671d0934029935d",
+    "TOOLING_TREE_HASH_MATCH": "YES",
+    "CLI_SHA256_INFORMATIONAL": "14819fb97af37b77581fb5ff7956acd80b66474d33d7caa4330cabec83bcfc20"
+  },
+  "newToolingIdentity": {
+    "TOOLING_HEAD": "Resolve the one local commit containing this report; exact SHA supplied by final local receipt/response",
+    "TOOLING_TREE_HASH": "cccda6b882bba85f848064ef70d086588c65608b",
+    "treeObjectSource": "git write-tree then git rev-parse <index-tree>:tools/d3-evidence-capture; real Git object, not a custom directory approximation",
+    "treeObjectComputedBeforeCommit": true,
+    "publication": "Not pushed by this task; last ratified publicly published pair remains 2c6fb3c9/dc83d707",
+    "CLI_SHA256_INFORMATIONAL": "7fcf09d8d14e63d48541922490787f2cbdb6d206db71ea2b4e9735ce921cc1c0"
+  },
+  "TOOLING_IDENTITY_POLICY": "COMMIT_PLUS_TREE_HASH",
+  "requiredFutureCompanionFields": [
+    "BUSINESS_EXECUTION_SHA",
+    "BUSINESS_FINGERPRINT",
+    "TOOLING_PUBLICATION_SHA",
+    "TOOLING_TREE_HASH",
+    "OWNER_EXPORT_QUERY_SHA256"
+  ],
+  "businessManifestSchemaChanged": false,
+  "ownerRatification": {
+    "OptionA": "ACCEPTED",
+    "businessExecutionAuthority": "c6ba2e837ed0f7b81373655b8106b58ecb86a8cd",
+    "publishedToolingCommitRatified": "2c6fb3c9e749eddfd61a2f217e9292cb880dc9e2",
+    "publishedTreeCouncilComputed": "dc83d7071f049e298c3d8deca671d0934029935d",
+    "scriptHashAloneSufficient": false
+  },
+  "gitOrigin": {
+    "branch": "instaward/d2-web-mvp",
+    "entryHead": "2c6fb3c9e749eddfd61a2f217e9292cb880dc9e2",
+    "entryParent": "c6ba2e837ed0f7b81373655b8106b58ecb86a8cd",
+    "versusBusinessAtEntry": {
+      "ahead": 1,
+      "behind": 0
+    },
+    "versusPublishedRemoteAtEntry": {
+      "ahead": 0,
+      "behind": 0
+    },
+    "trackedDiffIndexEmptyAtEntry": true,
+    "allFrozenCommitFilesUnchanged": 34,
+    "sourceTestFilesUnchanged": 24,
+    "fingerprintExact": true
+  },
+  "OWNER_EXPORT_QUERY_SHA256": "d4e82f4221d187aecdee7440b8331ebbe54e96d0b7400d06bc1430b8d793c9f1",
+  "ownerQueryBytesChanged": false,
+  "FRESH_D3_DEPLOYMENT_ID": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+  "freshDeploymentProof": {
+    "configuration": {
+      "configSource": "../Byetery-testnet/.env (existing approved local source)",
+      "mode": "TESTNET",
+      "testnetDeployment": "5c0cad2f-5f25-4216-8068-6cb9d2d26325",
+      "deploymentMatches": true,
+      "devProjectMatches": true,
+      "databaseIsApprovedProject": true,
+      "databaseIsLocal": false,
+      "configurationSelectorOverridePresent": false,
+      "configurationInspectionOnly": true,
+      "runtimeStarted": false,
+      "remoteSqlQueries": 0
+    },
+    "trace": [
+      {
+        "file": "backend/src/d3/operator-control.ts:55-59",
+        "finding": "Each fresh operator preflight requires TESTNET/network/contract/WASM and exact deployment 5c0cad2f-5f25-4216-8068-6cb9d2d26325; wrong value fails before signing."
+      },
+      {
+        "file": "backend/src/d3/live-operator.ts:154-160",
+        "finding": "fresh() obtains new readPreflight state and invokes that exact preflight for each step. All RUN1/RUN2/RUN3 use this path."
+      },
+      {
+        "file": "backend/src/application/config.ts:12-30",
+        "finding": "Existing approved BYETERY_CONFIG_FILE source selects TESTNET and BYETERY_TESTNET_DEPLOYMENT_ID; validates exact Supabase DEV project."
+      },
+      {
+        "file": "backend/src/application/server.ts:12-19; repository.ts:18",
+        "finding": "One Repository(config) owns Pool(config.database) and deploymentId; passed unchanged to TestnetStellarService."
+      },
+      {
+        "file": "backend/src/testnet/service.ts:67-73",
+        "finding": "TransportStore(new PgTransportDatabase(repo.pool)); deployment context is repo.deploymentId."
+      },
+      {
+        "file": "backend/src/testnet/store.ts:33-56",
+        "finding": "queue filters SQL by the supplied deployment and TESTNET network; context mapping preserves/validates deployment, source and operation."
+      },
+      {
+        "file": "tools/d3-evidence-capture/sql/owner-export.sql",
+        "finding": "Pinned SELECT filters exactly the same deployment. No query modification."
+      }
+    ],
+    "scope": "Proof for the existing approved configuration and frozen operator/API path; no fresh launcher/run executed or ID allocated. A later changed/missing config fails its own preflight and must be re-reviewed. It does not authorize another runner to bypass the operator."
+  },
+  "TESTNET_NETWORK_ID": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+  "NETWORK_ID_BINDING": "PASS",
+  "networkDerivation": {
+    "passphrase": "Test SDF Network ; September 2015",
+    "encoding": "UTF-8, exact bytes, no newline",
+    "algorithm": "SHA-256"
+  },
+  "NETWORK_BOUND_TX_HASH_VERIFICATION": "PASS",
+  "transactionHashAlgorithm": "Decode canonical TransactionEnvelope v1; SHA256(XDR(TransactionSignaturePayload { networkId=SHA256(UTF8(Testnet passphrase)), taggedTransaction=envelopeTypeTx(original tx body) })); signatures excluded from tx hash but existing signatures verified separately.",
+  "historicalNetworkProof": [
+    {
+      "method": "register_battery",
+      "recomputedHash": "5d7fff5457e19ad337e50398a07d403e68a054dbf58d8a5959c826c540b3d937",
+      "fixtureHash": "5d7fff5457e19ad337e50398a07d403e68a054dbf58d8a5959c826c540b3d937",
+      "capturedRpcHash": "5d7fff5457e19ad337e50398a07d403e68a054dbf58d8a5959c826c540b3d937",
+      "storedBundleHash": "5d7fff5457e19ad337e50398a07d403e68a054dbf58d8a5959c826c540b3d937",
+      "exportComparator": "Validated against synthetic owner-export fixtures only; no live owner export claimed",
+      "networkId": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+      "allHashesMatch": true,
+      "existingSignatures": "PASS",
+      "newSignatures": 0
+    },
+    {
+      "method": "open_return",
+      "recomputedHash": "3e8a0482e3f32ea314c7df0da7ef6a8d3394b8aef354fa291fd7d6cd06007c15",
+      "fixtureHash": "3e8a0482e3f32ea314c7df0da7ef6a8d3394b8aef354fa291fd7d6cd06007c15",
+      "capturedRpcHash": "3e8a0482e3f32ea314c7df0da7ef6a8d3394b8aef354fa291fd7d6cd06007c15",
+      "storedBundleHash": "3e8a0482e3f32ea314c7df0da7ef6a8d3394b8aef354fa291fd7d6cd06007c15",
+      "exportComparator": "Validated against synthetic owner-export fixtures only; no live owner export claimed",
+      "networkId": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+      "allHashesMatch": true,
+      "existingSignatures": "PASS",
+      "newSignatures": 0
+    },
+    {
+      "method": "confirm_collection",
+      "recomputedHash": "32ba94f9da05b52f44813e26e576cc994fd694f1df9132dd14d67557aa0ddd06",
+      "fixtureHash": "32ba94f9da05b52f44813e26e576cc994fd694f1df9132dd14d67557aa0ddd06",
+      "capturedRpcHash": "32ba94f9da05b52f44813e26e576cc994fd694f1df9132dd14d67557aa0ddd06",
+      "storedBundleHash": "32ba94f9da05b52f44813e26e576cc994fd694f1df9132dd14d67557aa0ddd06",
+      "exportComparator": "Validated against synthetic owner-export fixtures only; no live owner export claimed",
+      "networkId": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+      "allHashesMatch": true,
+      "existingSignatures": "PASS",
+      "newSignatures": 0
+    }
+  ],
+  "historicalProofBoundary": "Captured RPC JSON and stored local transaction artifact plus fixture expectations match. Owner-export network/hash comparisons are covered by explicitly synthetic historical SQL fixtures. No live owner export or new SQL read is claimed.",
+  "EMPTY_OWNER_EXPORT_REJECTED": "YES",
+  "emptyPartialExtraRules": {
+    "requestedScopeMustBeNonempty": true,
+    "exactRequestedRowsRequired": true,
+    "emptyRowsRejected": true,
+    "missingRequestedOperationsRejected": true,
+    "partialMetadataScopeRejected": true,
+    "internallyConsistentPartialExportAgainstFullChainBundleRejected": true,
+    "extraRowsRejected": true,
+    "wrongDeploymentRejected": true
+  },
+  "requiredNegativeCases": {
+    "wrongTestnetPassphrase": "I02",
+    "wrongNetworkId": "I03",
+    "correctEnvelopeWrongNetwork": "I04",
+    "wrongNetworkRecomputedTxHash": "I05",
+    "exportedNetworkIdMismatch": "A32",
+    "emptyOwnerExport": "A29",
+    "partialOwnerExport": "A30/A33",
+    "toolingTreeMismatch": "I08",
+    "toolingCommitMismatch": "I09",
+    "businessFingerprintMismatch": "I10"
+  },
+  "RPC_RETENTION_POLICY_READY": "YES",
+  "retentionPolicy": {
+    "captureFromFirstFreshRun1Tx": [
+      "inclusion ledger",
+      "oldestLedger / retention indicator",
+      "latestLedger",
+      "observation time"
+    ],
+    "formula": "SQL_RPC_CROSSCHECK_LATEST_SAFE_LEDGER = inclusionLedger + (latestLedger - oldestLedger + 1) - 1 - reserveLedgers",
+    "reserveLedgers": 120,
+    "fixedDaysAssumed": null,
+    "providerFutureWindowGuaranteed": false,
+    "currentFreshRun1AbsoluteSafeLedger": null,
+    "historicalExampleOnly": {
+      "inclusionLedger": 5559684,
+      "oldestAvailableRpcLedger": 5461163,
+      "latestLedger": 5582122,
+      "observedAt": "2026-11-06T03:04:13.954Z",
+      "reserveLedgers": 120,
+      "providerGuarantee": false,
+      "assumedDays": null,
+      "requiresCommittedOriginalRpcEvidence": true,
+      "refetchExpiredReceiptAllowed": false,
+      "observedWindowLedgers": 120960,
+      "SQL_RPC_CROSSCHECK_LATEST_SAFE_LEDGER": 5680523,
+      "status": "OBSERVED_WINDOW_SCHEDULING_BOUND",
+      "formula": "inclusionLedger + (latestLedger - oldestAvailableRpcLedger + 1) - 1 - reserveLedgers",
+      "beforeHandoff": "Verify original captured RPC bytes and matching evidence commit; compare SQL offline. If not already committed before eviction, STOP. Recheck actual retention before any planned live comparison.",
+      "counting": false,
+      "freshRunTarget": false
+    },
+    "unknownOrReachedBoundary": "STOP/review, do not invent seven days or a calendar substitute",
+    "captureCommitRule": "Immediately capture/verify/sanitize/commit originals before eviction; before final handoff assert exact committed RPC artifacts. Compare owner SQL offline if receipt expires. If originals were not committed in time, STOP.",
+    "freshRunsOriginalEvidenceCommitted": "NOT_APPLICABLE — no fresh runs exist; no handoff was passed here",
+    "handoffDeadline": "2026-11-13",
+    "gateImplementation": "Existing check-handoff verifies each original bundle and its evidence commit with assertCommittedBundle; no future RPC refetch dependency."
+  },
+  "OWNER_EXPORT_PATH_STOP_RULE": "PRESENT",
+  "ownerSessionSafety": {
+    "mayBeOwnerCapable": true,
+    "requiredTogether": [
+      "BEGIN TRANSACTION READ ONLY",
+      "exact pinned SELECT-only query SHA"
+    ],
+    "manualRule": "NO OTHER QUERIES DURING EXPORT SESSION",
+    "sqlWhitelist": [
+      "BEGIN READ ONLY",
+      "required SHOW transaction_read_only",
+      "exact pinned SELECT",
+      "ROLLBACK"
+    ],
+    "showNotOn": "STOP",
+    "queryHashMismatch": "STOP",
+    "outputPathContainsAccentedName": true,
+    "outputFailure": "If \\o fails, STOP; no silent path/ASCII alias switch; record any approved new path and new export file SHA-256",
+    "adminMcpFallback": false
+  },
+  "tests": {
+    "baseline": 70,
+    "added": 21,
+    "pass": 91,
+    "fail": 0,
+    "skipped": 0,
+    "command": "node --test --test-concurrency=1 tools/d3-evidence-capture/tooling.test.mjs tools/d3-evidence-capture/owner-export.test.mjs tools/d3-evidence-capture/identity-preflight.test.mjs",
+    "syntaxCheck": "PASS",
+    "businessTestsChanged": false,
+    "broadBusinessSuiteRerun": false,
+    "reason": "Tooling-only task forbids new signatures; broad business tests generate test signatures. Frozen 24 source/test and all 34 frozen commit file hashes checked instead."
+  },
+  "imports": {
+    "static": {
+      "status": "PASS",
+      "files": [
+        "capture.mjs",
+        "cli.mjs",
+        "common.mjs",
+        "comparison.mjs",
+        "gate.mjs",
+        "inventory.mjs",
+        "network-identity.mjs",
+        "network.mjs",
+        "owner-export.mjs",
+        "pins.mjs",
+        "retention.mjs",
+        "sanitizer.mjs",
+        "sql-readonly.mjs",
+        "tooling-identity.mjs",
+        "verifier.mjs",
+        "xdr-reader.mjs"
+      ],
+      "externalDependencies": [
+        "official @stellar/stellar-sdk/xdr pure serializers"
+      ],
+      "databaseDriverImports": 0,
+      "databaseCredentialsAccepted": false,
+      "businessImports": 0,
+      "fullSdkRootImports": 0
+    },
+    "transitive": {
+      "status": "PASS",
+      "cachedCjsModules": 465,
+      "loadedSdkEntry": "@stellar/stellar-sdk/xdr",
+      "allowedPublicEncodingHelpers": 3,
+      "fullSdkRootImports": 0,
+      "signerOrWorkerImports": 0,
+      "sqlDriverLoaded": false
+    }
+  },
+  "secretPiiScan": {
+    "status": "PASS",
+    "unresolved": [],
+    "reviewedNonfunctionalNegativeVectors": [
+      {
+        "file": "tools/d3-evidence-capture/owner-export.test.mjs",
+        "line": 38,
+        "kind": "EMAIL",
+        "lineSha256": "bd62961727680c54bf9531b3d360ba478392dd4b6d5065df6b6dd00f03e0d88a",
+        "review": "REVIEWED_NONFUNCTIONAL_NEGATIVE_TEST_VECTOR"
+      },
+      {
+        "file": "tools/d3-evidence-capture/tooling.test.mjs",
+        "line": 35,
+        "kind": "JWT",
+        "lineSha256": "cbd14cd6c27993abb90af67f8acbe24735cb1a017389d184f72b7cf71489da5c",
+        "review": "REVIEWED_NONFUNCTIONAL_NEGATIVE_TEST_VECTOR"
+      },
+      {
+        "file": "tools/d3-evidence-capture/tooling.test.mjs",
+        "line": 36,
+        "kind": "EMAIL",
+        "lineSha256": "2cf6c7cef5f37a6b0927ff07e9f76adf32191d4c3ce7a6d3871379bc06af1813",
+        "review": "REVIEWED_NONFUNCTIONAL_NEGATIVE_TEST_VECTOR"
+      },
+      {
+        "file": "tools/d3-evidence-capture/tooling.test.mjs",
+        "line": 36,
+        "kind": "AUTH_ID",
+        "lineSha256": "2cf6c7cef5f37a6b0927ff07e9f76adf32191d4c3ce7a6d3871379bc06af1813",
+        "review": "REVIEWED_NONFUNCTIONAL_NEGATIVE_TEST_VECTOR"
+      },
+      {
+        "file": "tools/d3-evidence-capture/tooling.test.mjs",
+        "line": 46,
+        "kind": "EMAIL",
+        "lineSha256": "f33d04360352c3583e8a4fdb50619180c539898ad55a1443e156dc17db7446a7",
+        "review": "REVIEWED_NONFUNCTIONAL_NEGATIVE_TEST_VECTOR"
+      }
+    ],
+    "scope": "All 26 tooling files plus current two reports; no old raw archives or live owner export"
+  },
+  "gitDiffCheck": "PASS",
+  "toolFilesSha256": {
+    "tools/d3-evidence-capture/audit-imports.mjs": "cb165fff7f631960b517f59f1721d710b3f3d35cfc11f54cfaa5c76a18caef0b",
+    "tools/d3-evidence-capture/business-files.json": "03e6b57dbf8b391ac914fad410c14fa2e2eb9a3ee701d00cd8754c206c11bee4",
+    "tools/d3-evidence-capture/capture.mjs": "ea907f235b595df2e840777c635437a5a1542ff604857cdd47a282b7728b20f5",
+    "tools/d3-evidence-capture/cli.mjs": "7fcf09d8d14e63d48541922490787f2cbdb6d206db71ea2b4e9735ce921cc1c0",
+    "tools/d3-evidence-capture/common.mjs": "eb6af16139068ebbc70f063bd3fc3b2c6767d9cb75958aea7b5af7f97814a13a",
+    "tools/d3-evidence-capture/comparison.mjs": "b2d3e20d7e10dc4150c558b066ee94fc948ee65b9de9f99faf64d911d7a54cdd",
+    "tools/d3-evidence-capture/fixtures/historical.json": "88d9afef51042422716dd0b7c00498bf3ec3f41a22f69ee904ea9c9ed1e4ca6e",
+    "tools/d3-evidence-capture/gate.mjs": "97272b70cc84f19491a70c0d0020bdc9edeeaff4500f3d7ae0b10c1ea7b38cbd",
+    "tools/d3-evidence-capture/identity-preflight.test.mjs": "9adf8d750c23c7a8ebb6b920e149a22292aba1561cc66a29203f8a1890929e7a",
+    "tools/d3-evidence-capture/inventory.mjs": "18335d82fc91e5f18b285ce61ee6595caa2dee4b587b7c7596eafdf4e91cb6e8",
+    "tools/d3-evidence-capture/network-identity.mjs": "068af4dfb32599820c245751d7d9ab377f5a484a1b602680e1b148bbd355f4b7",
+    "tools/d3-evidence-capture/network.mjs": "20c7c1958348530b7b35e86d8d610afb604d1b205fc96d27e8108cb8b4a2a346",
+    "tools/d3-evidence-capture/OWNER-EXPORT.md": "e4a37ae077ab50eb4aa80e7da540f9f3c810aabffad610d251bbfd82b38c6380",
+    "tools/d3-evidence-capture/owner-export.mjs": "4c157679b12eefd65894c791fe958ae0dc46a211784895baa4c3b48538d989f5",
+    "tools/d3-evidence-capture/owner-export.test.mjs": "c610307fc1e800c2a49793e88764cf81d035832c8c54898704296dd49f83a460",
+    "tools/d3-evidence-capture/pins.mjs": "7e5c1819fb344fdb645104f22df530585e6586681f41f165a2ec1c7b6e3afd9b",
+    "tools/d3-evidence-capture/README.md": "0f21f29b8a140971b54b4387ff9a6fd63a029fc2d5e2f93c7b8b9f73ff10822f",
+    "tools/d3-evidence-capture/retention.mjs": "c697f6f7f8152a3a045be51569e3f83663711223292e01c90e37b65a6a6957a5",
+    "tools/d3-evidence-capture/sanitizer.mjs": "13da258cd2139506d0bdb36e66200c003d9a99842d5c8c047e046edd23fc2f32",
+    "tools/d3-evidence-capture/spec.json": "9a95a0e394514727ecbc85726ffced168b297813b5f7a4a9acc8e0fbe675f7ca",
+    "tools/d3-evidence-capture/sql/owner-export.sql": "d4e82f4221d187aecdee7440b8331ebbe54e96d0b7400d06bc1430b8d793c9f1",
+    "tools/d3-evidence-capture/sql-readonly.mjs": "e8baaf2bd7bce41e238baa9b0988043cf0e3980295b8eafa2097b309663151d6",
+    "tools/d3-evidence-capture/tooling-identity.mjs": "5f3918c1c793bd2c2521538a6fd186561d13f48f2eddc165e69d53c726a9399b",
+    "tools/d3-evidence-capture/tooling.test.mjs": "17dcd2783e03bd15590126f14916870a574c4d54b71d7b90dbd06cd1dd868ab9",
+    "tools/d3-evidence-capture/verifier.mjs": "10636a9d3dc07c29c2cd46d65bbc7639b5a7992b3ec1c366bc6972438152d7d6",
+    "tools/d3-evidence-capture/xdr-reader.mjs": "66748a402b495f98034aed5c3919859916acdcab89ac98ea12db3af830bd0953"
+  },
+  "NEW_TOOLING_COMMIT_REQUIRED": "YES",
+  "commitDecision": {
+    "reason": "Missing explicit identity/network/empty/partial negative tests and documented retention/path/privileged-session rules require tooling/docs changes. Query and business code untouched.",
+    "maximumCommits": 1,
+    "message": "chore(instaward): pin D3 evidence tooling identity",
+    "parent": "2c6fb3c9e749eddfd61a2f217e9292cb880dc9e2",
+    "changedToolingPaths": [
+      "tools/d3-evidence-capture/OWNER-EXPORT.md",
+      "tools/d3-evidence-capture/README.md",
+      "tools/d3-evidence-capture/capture.mjs",
+      "tools/d3-evidence-capture/cli.mjs",
+      "tools/d3-evidence-capture/identity-preflight.test.mjs",
+      "tools/d3-evidence-capture/network-identity.mjs",
+      "tools/d3-evidence-capture/owner-export.mjs",
+      "tools/d3-evidence-capture/owner-export.test.mjs",
+      "tools/d3-evidence-capture/retention.mjs",
+      "tools/d3-evidence-capture/spec.json",
+      "tools/d3-evidence-capture/tooling-identity.mjs",
+      "tools/d3-evidence-capture/verifier.mjs",
+      "tools/d3-evidence-capture/xdr-reader.mjs"
+    ],
+    "newReportPaths": [
+      "docs/instaward/d3/D3-TOOLING-IDENTITY-AND-EXECUTION-PREFLIGHT-CLOSE-2026-11-06.md",
+      "docs/instaward/d3/D3-TOOLING-IDENTITY-AND-EXECUTION-PREFLIGHT-CLOSE-2026-11-06.json"
+    ],
+    "pushAuthorizedByThisTask": false,
+    "pushAttempted": false,
+    "mainMerged": false,
+    "tagsChanged": false,
+    "resolveNewHead": "git log -1 --format=%H -- docs/instaward/d3/D3-TOOLING-IDENTITY-AND-EXECUTION-PREFLIGHT-CLOSE-2026-11-06.md",
+    "postCommitReceipt": ".tools/d3-identity-close-receipt.json"
+  },
+  "SAC_POOL_TTL_MAINTENANCE_REQUIRED": "NO",
+  "maintenancePlanning": {
+    "knownSacPoolPersistentLiveUntilLedgerSeq": 6703017,
+    "newObservation": false,
+    "futureNormalCandidates": [
+      "Battery(id)",
+      "Request(rid)"
+    ],
+    "derivedFromActualFutureFootprints": true,
+    "accountCreated": false,
+    "budgetDecisionExecuted": false
+  },
+  "nextOwnerGate": "TTL_MAINTENANCE_ACCOUNT_AND_BUDGET_DECISION",
+  "READY_FOR_TTL_MAINTENANCE_ACCOUNT_AND_BUDGET_GATE": "YES",
+  "effects": {
+    "businessTx": 0,
+    "maintenanceTx": 0,
+    "simulateTransaction": 0,
+    "newSignatures": 0,
+    "broadcasts": 0,
+    "sendTransaction": 0,
+    "Friendbot": 0,
+    "newAccounts": 0,
+    "secureStoreMutations": 0,
+    "supabaseWrites": 0,
+    "remoteSqlQueries": 0,
+    "DDL": 0,
+    "rlsChanges": 0,
+    "roleGrantChanges": 0,
+    "ttlChanges": 0,
+    "deployments": 0,
+    "runIdsConsumed": 0,
+    "businessSourceTestChanges": 0
+  },
+  "project": {
+    "D1": "12/12",
+    "D2": "6/6",
+    "D3": "0/5",
+    "total": "18/23"
+  },
+  "stop": "No step-1 simulation, maintenance account, TTL extension or RUN1. Next gate is a decision only, not automatically executed."
+}

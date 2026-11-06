@@ -5,6 +5,7 @@ import {SPEC,check,read,json,hash,bytes,canonical} from './common.mjs';
 import {scanRaw} from './sanitizer.mjs';
 import {sameDecodedXdr,decodedXdr} from './comparison.mjs';
 import {verifyTx} from './verifier.mjs';
+import {assertTestnetNetwork} from './network-identity.mjs';
 
 export const OWNER_QUERY_SHA256='d4e82f4221d187aecdee7440b8331ebbe54e96d0b7400d06bc1430b8d793c9f1';
 export const OWNER_QUERY_URL=new URL('./sql/owner-export.sql',import.meta.url);
@@ -59,7 +60,7 @@ export function parseOwnerExport(raw,expectedHash,scope){
   check(row.confirmation,'MISSING_CONFIRMATION');confirm(row.confirmation);
   const env=row.envelope;shape(env,['transaction_hash','signed_envelope','network_id','contract_address']);
   check(env.transaction_hash===target.transaction_hash&&row.confirmation.transactionHash===target.transaction_hash&&row.confirmation.correlationId===row.operation_id,'OWNER_OPERATION_MAPPING_MISMATCH');
-  check(env.network_id===SPEC.networkId&&env.contract_address===SPEC.contract&&Object.values(SPEC.actors).includes(row.source_account),'OWNER_ENVELOPE_IDENTITY_MISMATCH');decodedXdr('TransactionEnvelope',env.signed_envelope);
+  assertTestnetNetwork(SPEC.network,env.network_id);check(env.contract_address===SPEC.contract&&Object.values(SPEC.actors).includes(row.source_account),'OWNER_ENVELOPE_IDENTITY_MISMATCH');decodedXdr('TransactionEnvelope',env.signed_envelope);
   if(row.state_evidence!==null){shape(row.state_evidence,['outcome','stateReadLedger','evidence','correlationId']);check(row.state_evidence.correlationId===row.operation_id&&Number.isSafeInteger(row.state_evidence.stateReadLedger)&&typeof row.state_evidence.evidence==='string','INVALID_STATE_EVIDENCE');}
   const list=row.terminal_evidence;check(Array.isArray(list)&&list.length>0&&list.length<=64,'MISSING_TERMINAL_EVIDENCE');
   for(const t of list){shape(t,['kind','evidence','observation_ledger','confirmation_ledger','state_read_ledger']);check(t.kind===(row.state==='CONFIRMED_SUCCESS'?'SUCCESS':'FAILED'),'INCONSISTENT_TERMINAL_EVIDENCE');confirm(t.evidence);check(canonical(t.evidence)===canonical(row.confirmation)&&t.confirmation_ledger===row.confirmation.confirmationLedger&&t.observation_ledger===row.confirmation.observationLedger&&t.state_read_ledger===null,'TERMINAL_EVIDENCE_MISMATCH');}
@@ -94,5 +95,5 @@ export function compareOwnerExport(parsed,observations){
 // Read an already frozen portable chain bundle; no network or SQL access.
 export function observationsFromBundle(dir,inventory){return inventory.summary.steps.filter(s=>s.confirmed).map((s,i)=>{
  const prefix=String(i+1).padStart(2,'0')+'-'+s.method;const load=n=>json(resolve(dir,prefix,n));const tx=load('transaction.json');
- const rl=load('rpc-ledger.json');return {network:{passphrase:tx.networkPassphrase},rpc:load('rpc-transaction.json'),horizon:load('horizon-transaction.json'),horizonLedger:load('horizon-ledger.json'),rpcLedger:rl?.status==='NOT_CAPTURED'?null:rl,expected:tx.expected,provenance:{source:'LOCAL_HISTORICAL',observedAt:inventory.artifacts.find(x=>x.path===prefix+'/rpc-transaction.json').observedAt}};
+ const rl=load('rpc-ledger.json');return {network:{passphrase:tx.networkPassphrase,networkId:tx.networkId},rpc:load('rpc-transaction.json'),horizon:load('horizon-transaction.json'),horizonLedger:load('horizon-ledger.json'),rpcLedger:rl?.status==='NOT_CAPTURED'?null:rl,expected:tx.expected,provenance:{source:'LOCAL_HISTORICAL',observedAt:inventory.artifacts.find(x=>x.path===prefix+'/rpc-transaction.json').observedAt}};
  });}
