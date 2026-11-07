@@ -1,0 +1,87 @@
+{
+  "task": "RUN1_CAPTURE_FIX",
+  "status": "RUN1_CAPTURE_FIX_READY_FOR_COUNCIL_REVIEW",
+  "businessExecutionSha": "c6ba2e837ed0f7b81373655b8106b58ecb86a8cd",
+  "businessFingerprint": "e9a75a332489f80cdd748121c95c3fe66ce3425b48926e92d8d22a9fd2e78539",
+  "businessFingerprintUnchanged": true,
+  "tx1Hash": "fb159fc9e1646f257414f30034220876f14033ce7b92109102cc9ca530da68c1",
+  "tx1OperationId": "2201faa3-980a-4250-8578-ec024272a022",
+  "tx1Ledger": 5599273,
+  "batteryId": "BYE-D3-R1-20261106-9470F35DF6B1",
+  "stoppedBundleSha256": "a926783d15bb509410ba00f8466ffc281e4104ace43d65bfed9e35e6695c83eb",
+  "stoppedBundleImmutable": true,
+  "originalRootCause": "ROOT_CAUSE_NOT_PROVEN",
+  "rootCauseProven": false,
+  "rawSqlPersistedBeforeCompare": true,
+  "rawRpcPersistedBeforeCompare": true,
+  "canonicalXdrCompare": true,
+  "boundedReadonlyConvergence": true,
+  "maxAttempts": 3,
+  "maxElapsedSeconds": 20,
+  "readTimeoutMs": 3000,
+  "CAPTURE_TOOLING_NETWORK_MUTATION_PATHS": 0,
+  "rebroadcastPath": "NONE",
+  "replacementPath": "NONE",
+  "tests": {
+    "new": 34,
+    "existingEvidence": 91,
+    "passed": 125,
+    "failed": 0,
+    "skipped": 0,
+    "signaturesCreated": 0
+  },
+  "diagnosticRecapture": {
+    "status": "DURABLE_RECEIPT_MISMATCH_PRESERVED",
+    "reason": "CANONICAL_BYTES_MISMATCH",
+    "attempts": 3,
+    "readCount": 6,
+    "elapsedMs": 8020,
+    "inventorySha256": "02d3d5c96253d327ae418f270d7f0ac81fdf424293b91e2d13bb8fe5006d2fb2",
+    "observations": [
+      "SQL read unavailable/timeout preserved, RPC terminal; no evidence of actual SQL projection lag",
+      "terminal SQL/RPC decoded metadata mismatch preserved on attempts 2 and 3"
+    ],
+    "canonicalDifferencePaths": [
+      {
+        "path": "/v4/diagnosticEvents/17/event/body/v0/data/u64/xdrInteger",
+        "sql": "413596",
+        "rpc": "412826"
+      }
+    ],
+    "normalizationOrRepairPerformed": false,
+    "interpretation": "Current independent discrepancy is preserved, not proof of the original failure cause or authorization to resume."
+  },
+  "batteryTtl": {
+    "observedAt": "2026-11-07T03:31:42.655Z",
+    "state": "Registered",
+    "rewardState": "NotEligible",
+    "observationLedger": 5599731,
+    "currentLedger": 5599731,
+    "liveUntilLedgerSeq": 5720232,
+    "remainingLedgers": 120501,
+    "estimatedSeconds": 602505,
+    "estimatedDays": 6.9734375,
+    "cadenceSeconds": 5,
+    "BATTERY_TTL_MARGIN_FOR_RESUME": "PASS"
+  },
+  "readyForCouncilReview": true,
+  "tx2Authorized": false,
+  "newBusinessTransactions": 0,
+  "signatures": 0,
+  "broadcasts": 0,
+  "liveSimulations": 0,
+  "ttlMutations": 0,
+  "restore": 0,
+  "remoteWrites": 0,
+  "pushes": 0,
+  "d3Accepted": "0/5",
+  "auxiliaryFileSha256": {
+    "tools/d3-receipt-capture/audit.mjs": "63df8fd85dcb93b5f174627cf617410f4459196682e7e782b8d09911ae4fe727",
+    "tools/d3-receipt-capture/capture.mjs": "263344b4dc4bd14652d071ad92e6d56defec7465cef8665e265ac19c4fc1efc8",
+    "tools/d3-receipt-capture/capture.test.mjs": "a1345a6ba7830a46408d08973ff3840146c0bb2517c2e2ca11777b38739732e8",
+    "tools/d3-receipt-capture/fixtures/tx1-public-meta-variant.json": "704c62c2b137f5e1d68d2b96b421784ccb8370f40629ae3d344e69ef1741085a",
+    "tools/d3-receipt-capture/fixtures/tx1-public-values.json": "634baa968eb661a31b83c6c5500fb7ba5a6f4207093cd3f7260fb2d879db0491",
+    "tools/d3-receipt-capture/README.md": "1eb3315fd919e7a29028d76d2fb1b29aaacd6b24fb9683161e1399e2b7c45dc0",
+    "tools/d3-receipt-capture/sources.mjs": "05b2f83e10ef7526e84c0bfc07530d45069810f88beab65dea9d079753b7bf4c"
+  }
+}
