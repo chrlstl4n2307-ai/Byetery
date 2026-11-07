@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { plan } from '../../backend/src/d3/model.ts';
 import {
   RUN1, ROLES, SESSION_PER_STEP_SECONDS, SESSION_SAFETY_MARGIN_SECONDS,
-  MAX_RECAPTURE_ATTEMPTS_AFTER_INITIAL_CAPTURE, checkLiveActivation, createReadPreflight, createRuntimeCredentials, createSessionDeadline, requireThat,
+  MAX_RECAPTURE_ATTEMPTS_AFTER_INITIAL_CAPTURE, admitLiveOnce, checkLiveActivation, checkLiveSessionConfig,
+  createReadPreflight, createRuntimeCredentials, createSessionDeadline, requireThat,
 } from './boundaries.mjs';
 
 export const ROOT = fileURLToPath(new URL('../../', import.meta.url));
@@ -166,19 +167,46 @@ export function replayLauncher(options) {
   return runSingleOperator(options, 'OFFLINE_SYNTHETIC');
 }
 
-// Live orchestration has an explicit hard seal in this review revision. Future
-// integration must supply the verified owner grant, frozen factory, secure
-// credential store and trusted read ports without altering the frozen runtime.
-export async function launchLive(activation, runtime) {
-  await checkLiveActivation(activation);
-  const bindings = Object.freeze({
-    readPreflight: createReadPreflight(runtime.readSources, { now: runtime.now, retain: runtime.retain }),
-    credentials: createRuntimeCredentials(runtime.secureStore),
-  });
-  return runSingleOperator({
-    ...runtime,
-    operatorFactory: () => runtime.createFrozenOperator({ ...bindings, identity: RUN1 }),
-  }, 'LIVE');
+// A trusted, owner-reviewed runtime supplies these ports at composition time.
+// The invocation only supplies the pinned identity and a future owner grant.
+export function createLiveLauncher({ verifyOwnerGrant, readAuthConfig, runtime } = {}) {
+  return async function launchLive(activation) {
+    const grantExpiry = await checkLiveActivation(activation, verifyOwnerGrant);
+    let observed;
+    try {
+      observed = await readAuthConfig();
+    } catch {
+      throw new Error('SESSION_CONFIGURATION_UNAVAILABLE');
+    }
+    checkLiveSessionConfig(observed);
+    const sessionConfig = Object.freeze({ ...observed });
+    const checkStart = () => {
+      const now = Date.now();
+      requireThat(grantExpiry > now, 'FUTURE_OWNER_AUTHORIZATION_REJECTED');
+      checkLiveSessionConfig(sessionConfig, now);
+    };
+    checkStart();
+    requireThat([runtime?.createFrozenOperator, runtime?.readSources, runtime?.secureStore?.resolve,
+      runtime?.observeSessions, runtime?.preserve, runtime?.capture, runtime?.verifyCorroboration]
+      .every(port => typeof port === 'function'), 'LIVE_RUNTIME_BINDING_REQUIRED');
+    const bindings = Object.freeze({
+      readPreflight: createReadPreflight(runtime.readSources, { retain: runtime.retain }),
+      credentials: createRuntimeCredentials(runtime.secureStore),
+    });
+    return runSingleOperator({
+      ...runtime,
+      now: Date.now,
+      sessionConfig,
+      admitOnce: () => {
+        checkStart();
+        return admitLiveOnce(ROOT);
+      },
+      operatorFactory: () => {
+        checkStart();
+        return runtime.createFrozenOperator({ ...bindings, identity: RUN1 });
+      },
+    }, 'LIVE');
+  };
 }
 
 async function runSingleOperator({
@@ -187,7 +215,7 @@ async function runSingleOperator({
   let operator;
   const captureClassification = mode === 'LIVE' ? 'LIVE_READONLY_SQL_AND_TESTNET_RPC' : 'OFFLINE_SYNTHETIC';
   const accepted = [];
-  let stop = 'STOP_OFFLINE_PREFLIGHT';
+  let stop = mode === 'LIVE' ? 'STOP_LIVE_PREFLIGHT' : 'STOP_OFFLINE_PREFLIGHT';
   let previous;
   const seenOperations = new Set();
   const seenHashes = new Set();
@@ -244,7 +272,7 @@ async function runSingleOperator({
       stop = 'STOP_OPERATOR_DECISION';
       const decision = await operator.countingDecision();
       requireThat(decision?.batteryId === BATTERY_ID && decision.sha === FROZEN_SHA && decision.status === 'COMPLETED' && decision.countable === true, 'OPERATOR_DECISION_REJECTED');
-      stop = 'OFFLINE_CAPTURE_COMPLETE';
+      stop = mode === 'LIVE' ? 'LIVE_CAPTURE_COMPLETE' : 'OFFLINE_CAPTURE_COMPLETE';
     }
   } catch {
     // Stop at the current gate. Never emit arbitrary callback errors.
