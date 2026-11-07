@@ -1,20 +1,62 @@
 # D3-17-RUN1 review launcher
 
-This package isolates RUN1 orchestration from the frozen operator. Its only CLI mode is `--offline-replay`. The live entry point requires explicit composition through `createLiveLauncher` with a trusted owner-grant verifier and Auth configuration reader. The invocation supplies only the exact RUN1 identity and a future owner grant. The verified grant must bind all six identity fields, the 5,400-second JWT policy and an unexpired authorization. The default CLI stays offline. This package ships without an operational grant, verifier binding, Auth reader binding, or real operator factory.
+This package isolates RUN1 orchestration from the frozen operator. The only CLI is `replay.mjs --offline-replay`. The versioned F1 composition root is `launcher.mjs`, with `launchRun1` as its sole live entry. It imports the pinned Ed25519 verifier directly. The public-key and fingerprint slots in `owner-grant-key.mjs` are deliberately empty. This version refuses all live grants before reading runtime ports.
+
+A future owner-reviewed local invocation must supply the exact signed grant and the existing trusted fresh-read, runtime credential, read-only SQL, and loopback API inputs. It must load the frozen operator from a separate clean linked worktree at the pinned business SHA in the same Git common directory. The two checkouts use the same local admission and frozen operator control directory. The composition checks its own current Git commit and execution-critical paths, verifies both ratified capture subtrees, and checks the frozen checkout again before admission and factory invocation. Runtime inputs cannot select a verifier, capture implementation, session observer, operator factory, or composition SHA. The library ships no unversioned runtime wrapper and no live CLI.
 
 ## C1 and C2
 
-The same operator handle owns all five steps and the final counting decision. Admission is exclusive and persists after a startup or step failure. A live launch uses a fixed RUN1 marker in the Git common directory, shared by linked worktrees. The frozen operator retains its independent lock and exclusive journal. Synthetic replay uses an isolated marker. A failed frozen step is terminal for this run even if later reads recover its transaction.
+The same operator handle owns all five steps and the final counting decision. Admission is exclusive and persists after a startup or step failure. A live launch stores the signed nonce in the fixed RUN1 marker in the Git common directory, shared by linked worktrees. This rejects the same grant and any replacement grant after the first admission. After a stop, preserve the marker and return to the owner and Council for review. The frozen operator retains its independent lock and exclusive journal. Synthetic replay uses an isolated marker. A failed frozen step is terminal for this run even if later reads recover its transaction.
 
-After a step confirms, the launcher persists the original identity before starting capture in a separate process. The replay child inherits an empty environment. A pending capture allows one read-only recapture of the same identity while the handle stays open. A terminal mismatch, integrity failure, or inconclusive recapture stops advancement. The parent re-hashes the inventory files. The live orchestration also requires a trusted independent API/SQL/chain verifier before advancement. No capture observation creates an operation or changes the frozen step.
+After a step confirms, the launcher persists the original identity before starting capture in a separate process. The replay child inherits an empty environment. A pending capture allows one read-only recapture of the same identity while the handle stays open. A terminal mismatch, integrity failure, or inconclusive recapture stops advancement. The parent re-hashes the inventory files. The live capture child has an empty environment and receives only the operation identity. Its SQL requests are served by the ratified read-only receipt reader. The parent verifies the sealed inventory and corroborates the API outcome with SQL, RPC and public Horizon evidence before advancement. No capture observation creates an operation or changes the frozen step.
 
 The read-preflight port invokes its source for each request and verifies a fresh request binding and timestamps. It retains only source, timestamp and ledger metadata. It rejects cached responses and has no fallback on a read failure. A future runner must supply the approved source adapter that performs those reads. The credential port resolves each allowed role once at runtime through the secure-store interface. Only the frozen operator may consume the resulting credentials. Errors at the credential boundary use fixed messages.
 
-## Session policy
+## Owner grant and session policy
 
-The policy consumes the project-specific access-token validity and its observation time. Before startup it derives the deadline as `operatorStart + configuredValidity - 120 seconds`. The 120 seconds cover clock differences and last-step cleanup. The startup allowance is 180 seconds. Each remaining step budgets 600 seconds for frozen observation, 120 for other API/preflight reads, and 60 for the initial capture and one recapture. It checks again before each step and after capture. It also checks the four original sessions and rejects changes to the recorded session identities or expiry. The runtime has no refresh or replacement path.
+The grant is an exact `{ grant, signature }` object. The signature is 64 bytes encoded as unpadded base64url. The separately ratified public key will use unpadded base64url Ed25519 SPKI DER and its lowercase hex SHA-256 fingerprint. Production reads both pins from the versioned placeholder module. Public test vectors cannot substitute for those pins.
 
-The live policy accepts exactly **5,400 seconds** from a trusted, read-only observation of the real Supabase DEV project within ten minutes of operator start. The observation contains only the project reference, source, UTC timestamp in milliseconds and expiry in seconds. The launcher rechecks its freshness and grant expiry just before startup. The effective window is **5,280 seconds**, which must be strictly greater than the **4,080-second** budget. A JWT expiry of **4,200 seconds** equals that budget after the margin and fails. The earlier owner observation was **3,600 seconds**. The 5,400-second test inputs are synthetic. The current project setting requires fresh evidence before any later execution.
+Sign the UTF-8 bytes starting with `BYETERY-D3-RUN1-OWNER-GRANT-V1` and a single LF. Append one `field=value` line per field in this exact order, including an LF after the last field:
+
+```text
+schemaVersion
+action
+taskId
+runId
+businessSha
+planHash
+batteryId
+recipient
+jwtExpirySeconds
+jwtObservedAt
+compositionRootSha
+nonce
+issuedAt
+expiresAt
+```
+
+Use schema version `1`, action `AUTHORIZE_D3_17_RUN1_EXECUTION`, lowercase hex commit hashes and a 32-byte nonce encoded as lowercase hex. Times are integer Unix milliseconds. The grant is issued only after Council ratifies the F1 commit and must bind the exact checkout SHA. The issue clock may be ahead by at most 30 seconds. Expiry is exclusive and at most two hours after issue. The owner-observed JWT timestamp must be at or before issue and must be no more than ten minutes old at live start. The live target is exactly 5,400 seconds.
+
+The frozen operator obtains its role sessions after the recorded start boundary. F1 derives the conservative deadline from `operatorStart + 5400 - 120 seconds`, giving 5,280 seconds. The unchanged budget is 180 seconds for startup plus five steps of 780 seconds each, for 4,080 seconds. Admission requires strictly more time than the budget. The deadline is checked before each step and after capture or recapture. The live composition relies on the frozen operator's own authenticated role checks and has no session observer, token inspection, refresh or Supabase Management API dependency.
+
+## Post-run Auth evidence
+
+A successful future capture starts with `RUN_EVIDENCE_VALID = PENDING_OWNER_OBSERVATION`. The owner separately attests to the post-run policy and eventual restoration. The verifier checks the same pinned Ed25519 key over a distinct canonical header `BYETERY-D3-RUN1-POST-RUN-AUTH-V1` followed by LF and these ordered `field=value` lines:
+
+```text
+schemaVersion
+compositionRootSha
+grantNonce
+jwtExpiryBefore
+jwtObservedAtBefore
+jwtExpiryAfter
+jwtObservedAtAfter
+changedDuringRun
+jwtExpiryRestored
+jwtObservedAtRestored
+```
+
+The before observation must equal the signed grant, and the after observation must be at or after recorded completion. Both must attest to 5,400 seconds. A changed value during the run or at the after observation yields `RUN_EVIDENCE_VALID = NO`. The owner must attest whether the value changed during the run, even if it was later restored. The restoration fields are both `null` while pending and later record 3,600 seconds and its observed time. The consistency check uses the trusted execution timestamps and the grant nonce. F1 does not modify Auth or attempt automatic recovery.
 
 ## Historical read boundary
 

@@ -1,12 +1,17 @@
 import { createHash } from 'node:crypto';
 import { lstat, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { plan } from '../../backend/src/d3/model.ts';
+import { assertLocalRuntime } from '../../backend/src/d3/operator-guard.ts';
+import { checkedOutCommit, checkCaptureCheckout, checkSharedGitDirectory, frozenOperatorPath } from './f1-checkout.mjs';
+import { bindLiveEvidence, verifyLiveCorroboration } from './f1-evidence.mjs';
+import { exactRecord } from './grant-schema.mjs';
+import { OWNER_GRANT_KEY_STATUS, verifyOwnerGrant } from './grant-verifier.mjs';
 import {
   RUN1, ROLES, SESSION_PER_STEP_SECONDS, SESSION_SAFETY_MARGIN_SECONDS,
-  MAX_RECAPTURE_ATTEMPTS_AFTER_INITIAL_CAPTURE, admitLiveOnce, checkLiveActivation, checkLiveSessionConfig,
+  MAX_RECAPTURE_ATTEMPTS_AFTER_INITIAL_CAPTURE, admitLiveOnce, checkLiveSessionConfig,
   createReadPreflight, createRuntimeCredentials, createSessionDeadline, requireThat,
 } from './boundaries.mjs';
 
@@ -140,13 +145,19 @@ export async function verifyCaptureInventory(directory, expected, classification
     Number.isInteger(result.attempts) && result.attempts > 0 && result.attempts <= 3, 'CAPTURE_SCOPE_REJECTED');
   const attempt = String(result.attempts).padStart(2, '0');
   const final = result.finalObservations;
+  let receipt;
   if (result.status === converged) {
     requireThat(final?.terminalSql === true && final.terminalRpc === true && final.chainResult === 'SUCCESS' &&
       final.status === result.reason && goodReasons.has(result.reason) &&
       final.rawSqlSha256 === sha(sealed.get(attempt + '-sql.raw.utf8')) &&
       final.rawRpcSha256 === sha(sealed.get(attempt + '-rpc.raw.utf8')), 'CAPTURE_PASS_REJECTED');
+    if (classification === 'LIVE_READONLY_SQL_AND_TESTNET_RPC') {
+      receipt = Object.freeze({ sql: JSON.parse(sealed.get(attempt + '-sql.raw.utf8')),
+        rpc: JSON.parse(sealed.get(attempt + '-rpc.raw.utf8')).result });
+    }
   }
-  return Object.freeze({ status: result.status, reason: result.reason, inventorySha256: digest });
+  return Object.freeze({ status: result.status, reason: result.reason, inventorySha256: digest,
+    ...(receipt ? { receipt } : {}) });
 }
 
 async function observeCapture({ output, unavailable }, scope, classification) {
@@ -167,52 +178,65 @@ export function replayLauncher(options) {
   return runSingleOperator(options, 'OFFLINE_SYNTHETIC');
 }
 
-// A trusted, owner-reviewed runtime supplies these ports at composition time.
-// The invocation only supplies the pinned identity and a future owner grant.
-export function createLiveLauncher({ verifyOwnerGrant, readAuthConfig, runtime } = {}) {
-  return async function launchLive(activation) {
-    const grantExpiry = await checkLiveActivation(activation, verifyOwnerGrant);
-    let observed;
-    try {
-      observed = await readAuthConfig();
-    } catch {
-      throw new Error('SESSION_CONFIGURATION_UNAVAILABLE');
-    }
-    checkLiveSessionConfig(observed);
-    const sessionConfig = Object.freeze({ ...observed });
-    const checkStart = () => {
-      const now = Date.now();
-      requireThat(grantExpiry > now, 'FUTURE_OWNER_AUTHORIZATION_REJECTED');
-      checkLiveSessionConfig(sessionConfig, now);
-    };
-    checkStart();
-    requireThat([runtime?.createFrozenOperator, runtime?.readSources, runtime?.secureStore?.resolve,
-      runtime?.observeSessions, runtime?.preserve, runtime?.capture, runtime?.verifyCorroboration]
-      .every(port => typeof port === 'function'), 'LIVE_RUNTIME_BINDING_REQUIRED');
-    const bindings = Object.freeze({
-      readPreflight: createReadPreflight(runtime.readSources, { retain: runtime.retain }),
-      credentials: createRuntimeCredentials(runtime.secureStore),
-    });
-    return runSingleOperator({
-      ...runtime,
-      now: Date.now,
-      sessionConfig,
-      admitOnce: () => {
-        checkStart();
-        return admitLiveOnce(ROOT);
-      },
-      operatorFactory: () => {
-        checkStart();
-        return runtime.createFrozenOperator({ ...bindings, identity: RUN1 });
-      },
-    }, 'LIVE');
+// The only live composition. Runtime supplies the existing fresh source and
+// credential ports, never the verifier, a session observer or an operator factory.
+export async function launchRun1(ownerGrant, runtime) {
+  assertLocalRuntime();
+  requireThat(OWNER_GRANT_KEY_STATUS === 'PINNED', 'OWNER_GRANT_KEY_PLACEHOLDER');
+  const compositionSha = await checkedOutCommit(ROOT);
+  const grant = verifyOwnerGrant(ownerGrant, compositionSha);
+  const sessionConfig = Object.freeze({
+    projectRef: 'aemxuqnnwfclzrwwiqfd', source: 'SUPABASE_PROJECT_AUTH_CONFIG',
+    jwtExpirySeconds: grant.jwtExpirySeconds, observedAt: grant.jwtObservedAt,
+  });
+  requireThat(exactRecord(runtime, ['apiOrigin', 'frozenRoot', 'publishableKey', 'readSources', 'secureStore', 'sqlPool']) &&
+    typeof runtime.apiOrigin === 'string' && typeof runtime.frozenRoot === 'string' &&
+    typeof runtime.publishableKey === 'string' && typeof runtime.readSources === 'function' &&
+    typeof runtime.secureStore?.resolve === 'function' && typeof runtime.sqlPool?.connect === 'function',
+  'LIVE_RUNTIME_BINDING_REQUIRED');
+  const { apiOrigin, frozenRoot, publishableKey, readSources, secureStore, sqlPool } = runtime;
+  const argv = ['--live', '--task-id', RUN1.runId, '--expected-sha', RUN1.businessSha];
+  requireThat(process.argv.slice(2).join('\0') === argv.join('\0'), 'ACTUAL_LOCAL_CLI_REQUIRED');
+  await checkSharedGitDirectory(ROOT, frozenRoot);
+  const pinnedOperator = await frozenOperatorPath(frozenRoot);
+  await checkCaptureCheckout(ROOT, compositionSha);
+  const checkStart = async () => {
+    await checkSharedGitDirectory(ROOT, frozenRoot);
+    requireThat(await checkedOutCommit(ROOT) === compositionSha &&
+      await frozenOperatorPath(frozenRoot) === pinnedOperator, 'EXECUTION_CHECKOUT_CHANGED');
+    requireThat(grant.expiresAt > Date.now(), 'GRANT_LIFETIME_REJECTED');
+    checkLiveSessionConfig(sessionConfig);
   };
+  const readPreflight = createReadPreflight(readSources);
+  const credentials = createRuntimeCredentials(secureStore);
+  const evidence = bindLiveEvidence(sqlPool, CAPTURE_CHILD_TIMEOUT_MS);
+  return runSingleOperator({
+    ...evidence,
+    now: Date.now,
+    sessionConfig,
+    verifyCorroboration: verifyLiveCorroboration,
+    admitOnce: async () => {
+      await checkStart();
+      await admitLiveOnce(ROOT, grant.nonce);
+    },
+    operatorFactory: async () => {
+      await checkStart();
+      const { createLocalOperator } = await import(pathToFileURL(pinnedOperator).href);
+      checkLiveSessionConfig(sessionConfig);
+      requireThat(grant.expiresAt > Date.now(), 'GRANT_LIFETIME_REJECTED');
+      return createLocalOperator({ root: frozenRoot, argv,
+        publicPlanFile: join(ROOT, 'docs/instaward/d3/review/D3-17-FRESH-3RUN/new-plan.json'),
+        apiOrigin, publishableKey, readPreflight, credentials });
+    },
+  }, 'LIVE');
 }
 
 async function runSingleOperator({
   operatorFactory, admitOnce, sessionConfig, observeSessions, preserve, capture, verifyCorroboration, now, onPause = () => {},
 }, mode) {
   let operator;
+  let operatorStart;
+  let completedAt;
   const captureClassification = mode === 'LIVE' ? 'LIVE_READONLY_SQL_AND_TESTNET_RPC' : 'OFFLINE_SYNTHETIC';
   const accepted = [];
   let stop = mode === 'LIVE' ? 'STOP_LIVE_PREFLIGHT' : 'STOP_OFFLINE_PREFLIGHT';
@@ -222,21 +246,30 @@ async function runSingleOperator({
   try {
     await reviewedPlan();
     stop = 'STOP_SESSION_GATE';
-    const sessionDeadline = createSessionDeadline(sessionConfig, { operatorStart: now(), now });
+    let sessionDeadline = createSessionDeadline(sessionConfig, { operatorStart: now(), now });
     sessionDeadline.check(steps.length, true);
     stop = 'STOP_RUN_ADMISSION';
     await admitOnce();
     stop = 'STOP_SESSION_GATE';
     sessionDeadline.check(steps.length, true);
     stop = 'STOP_OPERATOR_START_REQUIRES_REVIEW';
+    if (mode === 'LIVE') {
+      // The frozen factory issues its role logins after this timestamp.
+      operatorStart = now();
+      sessionDeadline = createSessionDeadline(sessionConfig, { operatorStart, now });
+      sessionDeadline.check(steps.length, true);
+    }
     operator = await operatorFactory();
     stop = 'STOP_SESSION_GATE';
-    const startup = await observeSessions();
-    const checkWindow = sessionWindow(startup, now);
-    checkWindow(startup, steps.length);
+    let checkWindow;
+    if (mode === 'OFFLINE_SYNTHETIC') {
+      const startup = await observeSessions();
+      checkWindow = sessionWindow(startup, now);
+      checkWindow(startup, steps.length);
+    }
     for (const [index, [operation]] of steps.entries()) {
       stop = 'STOP_SESSION_GATE';
-      checkWindow(await observeSessions(), steps.length - index);
+      if (checkWindow) checkWindow(await observeSessions(), steps.length - index);
       sessionDeadline.check(steps.length - index);
       stop = 'STOP_OPERATOR_REQUIRES_REVIEW';
       const evidence = await operator.step(operation);
@@ -265,13 +298,14 @@ async function runSingleOperator({
       }
       accepted.push(Object.freeze({ ...scope, inventorySha256: proof.inventorySha256 }));
       stop = 'STOP_SESSION_GATE';
-      checkWindow(await observeSessions(), steps.length - index - 1);
+      if (checkWindow) checkWindow(await observeSessions(), steps.length - index - 1);
       sessionDeadline.check(steps.length - index - 1);
     }
     if (accepted.length === steps.length) {
       stop = 'STOP_OPERATOR_DECISION';
       const decision = await operator.countingDecision();
       requireThat(decision?.batteryId === BATTERY_ID && decision.sha === FROZEN_SHA && decision.status === 'COMPLETED' && decision.countable === true, 'OPERATOR_DECISION_REJECTED');
+      if (mode === 'LIVE') completedAt = now();
       stop = mode === 'LIVE' ? 'LIVE_CAPTURE_COMPLETE' : 'OFFLINE_CAPTURE_COMPLETE';
     }
   } catch {
@@ -283,7 +317,8 @@ async function runSingleOperator({
       stop = 'STOP_OPERATOR_CLOSE_REQUIRES_REVIEW';
     }
   }
-  return Object.freeze({ mode, status: stop, accepted, executionAuthority: false });
+  return Object.freeze({ mode, status: stop, accepted, executionAuthority: false,
+    ...(completedAt === undefined ? {} : { operatorStart, completedAt, RUN_EVIDENCE_VALID: 'PENDING_OWNER_OBSERVATION' }) });
 }
 
 export const isDirect = (moduleUrl) => Boolean(process.argv[1]) && resolve(process.argv[1]) === fileURLToPath(moduleUrl);

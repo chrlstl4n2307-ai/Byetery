@@ -1,17 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
-import { mkdir, readdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
   MAX_RECAPTURE_ATTEMPTS_AFTER_INITIAL_CAPTURE, RUN1, admitLiveOnce,
-  checkLiveActivation, checkLiveSessionConfig, createReadPreflight, createRuntimeCredentials, createSessionDeadline,
+  checkLiveSessionConfig, createReadPreflight, createRuntimeCredentials, createSessionDeadline,
   createSingleAdmission, SESSION_SAFETY_MARGIN_SECONDS,
 } from './boundaries.mjs';
-import { createLiveLauncher, replayLauncher } from './launcher.mjs';
+import { replayLauncher } from './launcher.mjs';
 import { fixture, outputDirectory } from './replay.mjs';
 
 const exec = promisify(execFile);
@@ -19,86 +19,9 @@ const nowMs = 1_800_000_000_000;
 const cli = fileURLToPath(new URL('./replay.mjs', import.meta.url));
 const config = { source: 'SUPABASE_PROJECT_AUTH_CONFIG', projectRef: 'aemxuqnnwfclzrwwiqfd',
   jwtExpirySeconds: 5400, observedAt: nowMs };
-const approve = async () => ({
-  action: 'AUTHORIZE_D3_17_RUN1_EXECUTION', identity: RUN1, jwtExpirySeconds: 5400, expiresAt: Date.now() + 60_000,
-});
-
 test('default CLI fails closed with no output or network activation', async () => {
   await assert.rejects(exec(process.execPath, [cli], { env: {} }), { code: 2, stdout: '', stderr: 'OFFLINE_REPLAY_ONLY\n' });
   await assert.rejects(exec(process.execPath, [cli, '--live'], { env: {} }), { code: 2, stdout: '' });
-});
-
-test('future owner authorization missing rejects before reading Auth configuration or touching runtime', async () => {
-  let reads = 0;
-  const launch = createLiveLauncher({ verifyOwnerGrant: approve, readAuthConfig: () => { reads++; },
-    runtime: new Proxy({}, { get() { throw new Error('UNREACHABLE_RUNTIME'); } }) });
-  await assert.rejects(launch({ identity: RUN1 }), /FUTURE_OWNER_AUTHORIZATION_REQUIRED/);
-  await assert.rejects(launch({ identity: RUN1, ownerGrant: false, verifyOwnerGrant: approve }),
-    /FUTURE_OWNER_AUTHORIZATION_REQUIRED/);
-  assert.equal(reads, 0);
-});
-
-test('invocation cannot install its own owner verifier or Auth reader', async () => {
-  let calls = 0;
-  const launch = createLiveLauncher();
-  await assert.rejects(launch({ identity: RUN1, ownerGrant: {}, verifyOwnerGrant: () => { calls++; },
-    readAuthConfig: () => { calls++; } }), /FUTURE_OWNER_AUTHORIZATION_REQUIRED/);
-  const composed = createLiveLauncher({ verifyOwnerGrant: approve, readAuthConfig: () => { calls++; } });
-  await assert.rejects(composed({ identity: RUN1, ownerGrant: {}, jwtExpirySeconds: 3600 }),
-    /LIVE_ACTIVATION_INPUT_REJECTED/);
-  assert.equal(calls, 0);
-});
-
-for (const key of Object.keys(RUN1)) {
-  test('wrong ' + key + ' rejects before reading the owner grant', async () => {
-    let reads = 0;
-    await assert.rejects(checkLiveActivation({ identity: { ...RUN1, [key]: 'OTHER' }, ownerGrant: {} },
-      () => { reads++; }), /RUN_IDENTITY_REJECTED/);
-    assert.equal(reads, 0);
-  });
-}
-
-for (const runId of ['D3-17-RUN2', 'D3-17-RUN3']) {
-  test(runId + ' rejected', async () => {
-    await assert.rejects(checkLiveActivation({ identity: { ...RUN1, runId } }), /RUN_IDENTITY_REJECTED/);
-  });
-}
-
-test('future grant must independently bind all identity fields and the exact JWT policy', async () => {
-  const invocation = { identity: RUN1, ownerGrant: {} };
-  await assert.rejects(checkLiveActivation(invocation, async () =>
-    ({ ...(await approve()), identity: { ...RUN1, batteryId: 'OTHER' } })), /RUN_IDENTITY_REJECTED/);
-  for (const jwtExpirySeconds of [undefined, 4200, 5401]) {
-    await assert.rejects(checkLiveActivation(invocation, async () =>
-      ({ ...(await approve()), jwtExpirySeconds })), /FUTURE_OWNER_AUTHORIZATION_REJECTED/);
-  }
-  await assert.rejects(checkLiveActivation(invocation, async () =>
-    ({ ...(await approve()), expiresAt: Date.now() })), /FUTURE_OWNER_AUTHORIZATION_REJECTED/);
-  assert.ok(await checkLiveActivation(invocation, approve) > Date.now());
-});
-
-test('wrong, unavailable, stale or unsanitized Auth observations stop before touching runtime', async () => {
-  const current = { ...config, observedAt: Date.now() };
-  const runtime = new Proxy({}, { get() { throw new Error('UNREACHABLE_RUNTIME'); } });
-  for (const [observation, rejection] of [
-    [{ ...current, jwtExpirySeconds: 3600 }, /LIVE_JWT_EXPIRY_REJECTED/],
-    [{ ...current, jwtExpirySeconds: 4200 }, /LIVE_JWT_EXPIRY_REJECTED/],
-    [{ ...current, jwtExpirySeconds: 5401 }, /LIVE_JWT_EXPIRY_REJECTED/],
-    [{ ...current, observedAt: Date.now() - 600_001 }, /SESSION_CONFIGURATION_UNAVAILABLE/],
-    [{ ...current, projectRef: 'other' }, /SESSION_CONFIGURATION_UNAVAILABLE/],
-    [{ ...current, source: 'LOCAL_FIXTURE' }, /SESSION_CONFIGURATION_UNAVAILABLE/],
-    [{ ...current, extra: 'unexpected' }, /SESSION_CONFIGURATION_UNAVAILABLE/],
-    [undefined, /SESSION_CONFIGURATION_UNAVAILABLE/],
-  ]) {
-    const launch = createLiveLauncher({ verifyOwnerGrant: approve, readAuthConfig: () => observation, runtime });
-    await assert.rejects(launch({ identity: RUN1, ownerGrant: {} }), rejection);
-  }
-});
-
-test('valid simulated grant and config still require a complete future runtime binding', async () => {
-  const launch = createLiveLauncher({ verifyOwnerGrant: approve,
-    readAuthConfig: () => ({ ...config, observedAt: Date.now() }) });
-  await assert.rejects(launch({ identity: RUN1, ownerGrant: {} }), /LIVE_RUNTIME_BINDING_REQUIRED/);
 });
 
 test('fresh 5400 observation passes, including exactly ten minutes', () => {
@@ -122,11 +45,13 @@ test('live claim is fixed to the Git common directory and refuses duplicate invo
   await exec('git', ['init', '--quiet', directory]);
   const nested = join(directory, 'nested');
   await mkdir(nested);
-  const results = await Promise.allSettled([admitLiveOnce(directory), admitLiveOnce(nested)]);
+  const nonce = 'b'.repeat(64);
+  const results = await Promise.allSettled([admitLiveOnce(directory, nonce), admitLiveOnce(nested, nonce)]);
   assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
   assert.match(results.find(result => result.status === 'rejected').reason.message,
     /RUN_ALREADY_CLAIMED_OR_ADMISSION_UNAVAILABLE/);
-  assert.ok((await readdir(join(directory, '.git'))).includes('byetery-d3-17-run1.launcher-admission'));
+  assert.equal(await readFile(join(directory, '.git/byetery-d3-17-run1.launcher-admission'), 'utf8'), nonce + '\n');
+  await assert.rejects(admitLiveOnce(directory, 'a'.repeat(64)), /RUN_ALREADY_CLAIMED/);
 });
 
 function preflightFixture({ requestId, requestedAt }, ledger = 7, pendingDispatches = 0) {

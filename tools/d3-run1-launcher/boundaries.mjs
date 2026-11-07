@@ -28,29 +28,6 @@ export function requireThat(condition, code) {
   if (!condition) throw new Error(code);
 }
 
-export function verifyIdentity(identity) {
-  requireThat(identity && Object.keys(identity).length === Object.keys(RUN1).length &&
-    Object.entries(RUN1).every(([key, value]) => Object.hasOwn(identity, key) && identity[key] === value), 'RUN_IDENTITY_REJECTED');
-}
-
-export async function checkLiveActivation(activation = {}, verifyOwnerGrant) {
-  const { identity, ownerGrant } = activation;
-  verifyIdentity(identity);
-  requireThat(ownerGrant && typeof verifyOwnerGrant === 'function', 'FUTURE_OWNER_AUTHORIZATION_REQUIRED');
-  requireThat(Object.keys(activation).sort().join(',') === 'identity,ownerGrant', 'LIVE_ACTIVATION_INPUT_REJECTED');
-  let approval;
-  try {
-    approval = await verifyOwnerGrant(ownerGrant);
-  } catch {
-    throw new Error('FUTURE_OWNER_AUTHORIZATION_REJECTED');
-  }
-  requireThat(approval?.action === 'AUTHORIZE_D3_17_RUN1_EXECUTION' &&
-    approval.jwtExpirySeconds === LIVE_JWT_EXPIRY_SECONDS &&
-    Number.isSafeInteger(approval.expiresAt) && approval.expiresAt > Date.now(), 'FUTURE_OWNER_AUTHORIZATION_REJECTED');
-  verifyIdentity(approval.identity);
-  return approval.expiresAt;
-}
-
 // Source must perform the underlying observations within the requested window.
 // A new request binding plus source timestamps reject a reused result.
 export function createReadPreflight(readSources, { now = Date.now, retain = () => {} } = {}) {
@@ -145,11 +122,12 @@ export function createSessionDeadline(config, { operatorStart, now = Date.now })
 }
 
 // The exclusive admission survives process exit. Never release it on failure.
-export function createSingleAdmission(claimFile) {
+export function createSingleAdmission(claimFile, nonce) {
   return async function admitOnce() {
     try {
       const file = await open(claimFile, 'wx', 0o600);
       try {
+        if (nonce !== undefined) await file.writeFile(nonce + '\n');
         await file.sync();
       } finally {
         await file.close();
@@ -162,9 +140,10 @@ export function createSingleAdmission(claimFile) {
 
 // All linked worktrees use the same claim. The frozen operator still owns
 // its independent lock and journal.
-export async function admitLiveOnce(workspace) {
+export async function admitLiveOnce(workspace, nonce) {
+  requireThat(typeof nonce === 'string' && /^[a-f0-9]{64}$/.test(nonce), 'LIVE_GRANT_NONCE_REJECTED');
   const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key)));
   const { stdout } = await promisify(execFile)('git', ['rev-parse', '--path-format=absolute', '--git-common-dir'],
     { cwd: workspace, env, windowsHide: true });
-  await createSingleAdmission(join(stdout.trim(), 'byetery-d3-17-run1.launcher-admission'))();
+  await createSingleAdmission(join(stdout.trim(), 'byetery-d3-17-run1.launcher-admission'), nonce)();
 }
