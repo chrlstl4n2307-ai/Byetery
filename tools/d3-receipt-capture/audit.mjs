@@ -4,17 +4,21 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {SQL_RECEIPT_QUERY} from './sources.mjs';
+import {NORMALIZED_DIAGNOSTIC_TOPICS,NORMALIZED_DIAGNOSTIC_METRIC} from './meta-normalization.mjs';
 
 const root=dirname(fileURLToPath(import.meta.url));
 const require=createRequire(new URL('../../frontend/package.json',import.meta.url));
 const ts=require('typescript');
-const production=['capture.mjs','sources.mjs'];
-const allowed=new Set(['node:fs/promises','node:path','node:crypto','node:perf_hooks','node:timers/promises','../d3-evidence-capture/comparison.mjs','../d3-evidence-capture/xdr-reader.mjs','./sources.mjs']);
+const production=['capture.mjs','sources.mjs','meta-normalization.mjs'];
+const allowed=new Set(['node:fs/promises','node:path','node:crypto','node:perf_hooks','node:timers/promises','../d3-evidence-capture/comparison.mjs','../d3-evidence-capture/xdr-reader.mjs','./sources.mjs','./meta-normalization.mjs']);
 const forbidden=new Set(['sign','signEnvelope','authorize','sendTransaction','simulateTransaction','broadcast','prepareAndSimulate','prepareReplacement','runMutation','mutate','step','exec','execFile','execFileSync','spawn','spawnSync','eval','Function','TransactionBuilder','Keypair']);
 export function auditCaptureSource(text,name='capture.mjs'){
  const tree=ts.createSourceFile(name,text,ts.ScriptTarget.ESNext,true,ts.ScriptKind.JS);
  function fail(){throw Error('CAPTURE_MUTATION_OR_UNKNOWN_CAPABILITY');}
  function visit(node){
+  if(ts.isIdentifier(node)&&node.text==='process')fail();
+  if(name==='meta-normalization.mjs'&&(node.kind===ts.SyntaxKind.RegularExpressionLiteral||
+     (ts.isIdentifier(node)&&['RegExp','startsWith','endsWith','includes','match','search','replace'].includes(node.text))))fail();
   if(ts.isImportDeclaration(node)){if(!ts.isStringLiteral(node.moduleSpecifier)||!allowed.has(node.moduleSpecifier.text))fail();}
   if(ts.isCallExpression(node)||ts.isNewExpression(node)){
    const e=node.expression,n=ts.isIdentifier(e)?e.text:ts.isPropertyAccessExpression(e)?e.name.text:null;
@@ -44,7 +48,10 @@ export function auditCaptureTooling(){
  for(const name of helperPaths){const text=readFileSync(resolve(root,'../d3-evidence-capture',name),'utf8');
   if(/\.\s*(?:sign|signEnvelope|authorize|sendTransaction|simulateTransaction|broadcast)\s*\(/.test(text)||/from\s+['"][^'"]*backend\/src/.test(text))throw Error('READONLY_HELPER_DRIFT');
  }
+ if(!Object.isFrozen(NORMALIZED_DIAGNOSTIC_TOPICS)||JSON.stringify(NORMALIZED_DIAGNOSTIC_TOPICS)!=='["core_metrics","invoke_time_nsecs"]'||
+    NORMALIZED_DIAGNOSTIC_METRIC!=='core_metrics/invoke_time_nsecs')throw Error('NORMALIZATION_ALLOWLIST_DRIFT');
  return {status:'PASS',CAPTURE_TOOLING_NETWORK_MUTATION_PATHS:0,productionFiles:production,sqlQuerySha256:createHash('sha256').update(SQL_RECEIPT_QUERY).digest('hex'),
+  NORMALIZED_DIAGNOSTIC_ALLOWLIST_SIZE:1,normalizationAllowlist:[NORMALIZED_DIAGNOSTIC_METRIC],
   rpcMethods:['getTransaction'],fixedRpc:'https://soroban-testnet.stellar.org',sqlStatements:['BEGIN TRANSACTION READ ONLY','fixed parameterized SELECT','ROLLBACK'],
   arbitrarySql:false,fullSdkRoot:false,signer:false,transactionBuilder:false,childProcesses:false,scope:'Reviewed module graph and immutable source adapters; assumes trusted Node/OS and the existing pool. Not protection against replacement of the runtime or a malicious supplied pool.'};
 }

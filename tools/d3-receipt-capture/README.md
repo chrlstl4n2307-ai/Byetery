@@ -23,7 +23,7 @@ const result = await captureDurableReceipt({
   readers: createReadOnlyReaders(existingObserverPool),
   outputDirectory: freshDiagnosticDirectory,
 });
-// Stop unless status === 'DURABLE_RECEIPT_CONVERGED'.
+// Stop unless status === 'DURABLE_RECEIPT_CONVERGED_NORMALIZED'.
 // Even that result never authorizes the next business action.
 ```
 
@@ -57,20 +57,35 @@ text. The projection excludes principals/Auth identities and credentials. The
 observation and canonical-input files jointly preserve source, operation/hash,
 ledger/status, timestamp, index, original text, decoded representation and hashes.
 
-The existing official pure XDR serializers validate both base64 and a byte-exact
-XDR decode/encode round trip. Only ASCII base64 whitespace differences are
-accepted as representation differences. Missing padding, invalid alphabet/pad
-bits and trailing/noncanonical XDR bytes fail closed. `TransactionResult` and
-`TransactionMeta` bytes are compared **independently**. Equal bytes with different
-text return `ENCODING_REPRESENTATION_DIFFERENCE`; differing bytes are never
-silently normalized or stripped, including diagnostic events.
+The existing official pure XDR serializers validate base64 and a byte-exact
+XDR decode/encode round trip. ASCII base64 whitespace is preserved in the source
+and may account for a representation difference. Missing padding, invalid
+alphabet or pad bits, and trailing or noncanonical XDR bytes fail closed.
+`TransactionResult` must match byte for byte after decoding. A terminal result
+disagreement stops before any metadata normalization or further read.
 
-Both sources must be terminal with final result/meta, ledger and exact identity.
+After those checks, the tool makes a fresh comparison copy of each
+`TransactionMeta`. In the observed v4 diagnostic vector, it matches exactly two
+ordered XDR symbols, `core_metrics` and `invoke_time_nsecs`, by their bytes. The
+event must be a successful Core diagnostic without a contract ID, with v0 body
+and extension and a `u64` value. Its value is set to `0` in the comparison copy.
+The event, its position, its topics, and every other field are retained.
+Duplicate matches and exact topics with an unproven event shape stop. Other
+metadata versions are compared byte for byte.
+
+The comparison uses canonical binary XDR for the entire resulting metadata.
+`*-normalized-meta.json` stores the comparison XDR and its
+`normalizedMetaSha256` separately from each `rawMetaSha256`. The raw metadata
+hash covers the unmodified XDR bytes, and the raw-source hash covers the full
+SQL or RPC UTF-8 source. Original base64 and decoded raw metadata remain in the
+source and canonical-input artifacts. The normalized artifact is saved after
+the raw inputs and before the decision. Its hash is a comparison value.
+
+Both sources must report `SUCCESS` with final result/meta, ledger and exact identity.
 SQL also needs a terminal application/durable-state pair and its receipt hash.
 `PROJECTED` is accepted only as confirmed SQL projection. SQL incomplete while
-RPC terminal is `PROJECTION_NOT_TERMINAL`, never immediate business failure.
-`FAILED` receipt agreement is not lifecycle success; returned chain result is
-retained. A matching SUCCESS label must also agree with the decoded result tag.
+RPC terminal is `PROJECTION_NOT_TERMINAL`. A matching `FAILED` pair stops and
+preserves the reported chain result. Each decoded result tag must be `txSuccess`.
 
 ## Fixed bounds and results
 
@@ -86,10 +101,14 @@ retained. A matching SUCCESS label must also agree with the decoded result tag.
 - `readCount` records source reads actually initiated; `sourceObservationCount`
   includes a saved error observation if a source could not be started in time.
 
-Success: `DURABLE_RECEIPT_CONVERGED`, exact attempts/reads/elapsed and observation
-hashes. Exhausted mismatch: `DURABLE_RECEIPT_MISMATCH_PRESERVED`, all indexed raw
-and canonical inputs. Wrong identity or malformed XDR stops immediately after
-preserving the pair. Persistence errors propagate without returning PASS.
+`DURABLE_RECEIPT_CONVERGED_NORMALIZED` records attempts, reads, elapsed time, raw
+metadata equality, normalized equality, and per-source hashes. The reason
+`APPROVED_DIAGNOSTIC_VARIANCE` indicates raw bytes differed and normalized bytes
+matched. `DURABLE_RECEIPT_NORMALIZED_MISMATCH` stops immediately on any difference
+that survives normalization or any ambiguous allowlisted event. Incomplete
+observations can be reread within budget. Wrong identity, malformed XDR, or
+exhausted reads return `DURABLE_RECEIPT_MISMATCH_PRESERVED`. Persistence errors
+propagate without returning PASS.
 
 `priorStoppedBundleSha256` is mandatory metadata with the existing incident hash
 `a926783d15bb509410ba00f8466ffc281e4104ace43d65bfed9e35e6695c83eb`.
@@ -102,7 +121,7 @@ From the repository root, using existing dependencies:
 
 ```text
 node tools/d3-receipt-capture/audit.mjs
-node --test --test-concurrency=1 tools/d3-receipt-capture/capture.test.mjs
+node --test --test-concurrency=1 tools/d3-receipt-capture/capture.test.mjs tools/d3-receipt-capture/meta-normalization.test.mjs
 node --test --test-concurrency=1 tools/d3-evidence-capture/tooling.test.mjs tools/d3-evidence-capture/owner-export.test.mjs tools/d3-evidence-capture/identity-preflight.test.mjs
 ```
 
@@ -114,12 +133,20 @@ Dynamic offline tests verify exact SQL statements and RPC method/scope. This
 assumes a trusted Node/OS and existing pool, not an adversary replacing the
 runtime or passing a malicious pool object.
 
-Public XDR fixture values come from the preserved TX1 receipt. Delayed SQL and
-other invalid/intermediate states are synthetic. The public metadata variant
-comes from the new read-only recapture; it must not be reported as proof of the
-original incident's cause. **ROOT_CAUSE_NOT_PROVEN** remains authoritative.
+The two public TX1 fixtures are byte-exact XDR observations. The regression
+test reproduces the difference in the Core invocation timer (`413596` versus
+`412826` nanoseconds). Their normalized XDR is identical. Tests mutate the
+neighboring metrics, ledger changes, Soroban return value, contract events and
+diagnostic ordering to verify those differences still stop capture. Delayed
+SQL and other invalid or intermediate cases are synthetic. The classified
+variance concerns the preserved observations. The original comparison inputs
+were not saved, and the original incident retains `ROOT_CAUSE_NOT_PROVEN`.
 
 The existing ratified `tools/d3-evidence-capture` verifier, including its stricter
 SQL/RPC crosscheck policy, is unchanged. This module supplies preserved receipt
 observations; it does not replace the broader identity/signature/header/contract
 verification or final owner-export comparison.
+
+Stellar documents the [transaction RPC fields](https://developers.stellar.org/docs/data/apis/rpc/api-reference/methods/getTransaction),
+the [role of diagnostic events](https://developers.stellar.org/docs/learn/fundamentals/stellar-data-structures/events),
+and the [Core host invocation timer](https://github.com/stellar/stellar-core/blob/master/docs/metrics.md).

@@ -6,6 +6,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {decodedXdr} from '../d3-evidence-capture/comparison.mjs';
 import {X} from '../d3-evidence-capture/xdr-reader.mjs';
 import {isReadOnlyReaders} from './sources.mjs';
+import {normalizeTransactionMeta} from './meta-normalization.mjs';
 
 export const MAX_RECEIPT_READ_ATTEMPTS=3;
 export const MAX_RECEIPT_CONVERGENCE_SECONDS=20;
@@ -75,7 +76,7 @@ export async function captureDurableReceipt(options){
  const scope=expectedScope(options.expected),readers=options.readers;requireThat(isReadOnlyReaders(readers),'READONLY_READERS_REQUIRED');
  const directory=await newOutput(options.outputDirectory),inventory=[];const start=now(),deadline=start+MAX_RECEIPT_CONVERGENCE_SECONDS*1000;
  const elapsed=()=>Math.max(0,Math.ceil(now()-start));let attempts=0,readCount=0,index=0,reason='NO_CONVERGENCE',lastPair=null;
- await durable(directory,'capture-scope.json',{schema:'BYETERY_DURABLE_RECEIPT_CAPTURE_V1',expected:scope,priorStoppedBundleSha256:PRIOR_STOPPED_BUNDLE_SHA256,
+ await durable(directory,'capture-scope.json',{schema:'BYETERY_DURABLE_RECEIPT_CAPTURE_V2',expected:scope,priorStoppedBundleSha256:PRIOR_STOPPED_BUNDLE_SHA256,
   classification:readers.classification,rootCause:'ROOT_CAUSE_NOT_PROVEN',maxAttempts:MAX_RECEIPT_READ_ATTEMPTS,maxElapsedMs:MAX_RECEIPT_CONVERGENCE_SECONDS*1000,
   readTimeoutMs:RECEIPT_READ_TIMEOUT_MS,grantsExecutionAuthority:false},inventory);
  async function read(source,attempt){
@@ -99,7 +100,7 @@ export async function captureDurableReceipt(options){
   return {raw,view,saved,name};
  }
  async function finish(status){
-  const result={schema:'BYETERY_DURABLE_RECEIPT_RESULT_V1',status,reason,attempts,readCount,sourceObservationCount:index,elapsedMs:elapsed(),expected:scope,
+  const result={schema:'BYETERY_DURABLE_RECEIPT_RESULT_V2',status,reason,attempts,readCount,sourceObservationCount:index,elapsedMs:elapsed(),expected:scope,
    priorStoppedBundleSha256:PRIOR_STOPPED_BUNDLE_SHA256,rootCause:'ROOT_CAUSE_NOT_PROVEN',finalObservations:lastPair,
    grantsExecutionAuthority:false,nextLifecycleOperation:false,networkMutationPaths:0};
   await durable(directory,'result.json',result,inventory);
@@ -121,24 +122,50 @@ export async function captureDurableReceipt(options){
   const terminalSql=terminal(sql.view,'SQL'),terminalRpc=terminal(rpc.view,'RPC');
   const wrong=identityError(sql.view,scope)??identityError(rpc.view,scope);
   const malformed=[left,right].some(v=>Object.values(v).some(f=>f.status==='MALFORMED_XDR'))||sql.view.decodeError||rpc.view.decodeError;
-  let status;
+  let status,comparison=null;
   if(wrong)status=wrong;
   else if(malformed)status='MALFORMED_XDR';
   else if(!terminalSql)status='PROJECTION_NOT_TERMINAL';
   else if(!terminalRpc)status='RPC_NOT_TERMINAL';
   else if(sql.view.status!==rpc.view.status)status='TERMINAL_RESULT_MISMATCH';
-  else if((rpc.view.status==='SUCCESS')!==(right.resultXdr.resultTag==='txSuccess'))status='RESULT_STATUS_MISMATCH';
-  else if(!Buffer.from(left.resultXdr.canonicalBase64,'base64').equals(Buffer.from(right.resultXdr.canonicalBase64,'base64'))||
-          !Buffer.from(left.resultMetaXdr.canonicalBase64,'base64').equals(Buffer.from(right.resultMetaXdr.canonicalBase64,'base64')))status='CANONICAL_BYTES_MISMATCH';
-  else status=(sql.view.resultXdr!==rpc.view.resultXdr||sql.view.resultMetaXdr!==rpc.view.resultMetaXdr)?'ENCODING_REPRESENTATION_DIFFERENCE':'CANONICAL_BYTES_MATCH';
+  else if(rpc.view.status!=='SUCCESS')status='TRANSACTION_NOT_SUCCESS';
+  else if(right.resultXdr.resultTag!=='txSuccess'||left.resultXdr.resultTag!=='txSuccess')status='RESULT_STATUS_MISMATCH';
+  else if(left.resultXdr.canonicalBase64!==right.resultXdr.canonicalBase64)status='CANONICAL_BYTES_MISMATCH';
+  else {
+   const rawMetaEqual=left.resultMetaXdr.canonicalBase64===right.resultMetaXdr.canonicalBase64;
+   const rawMetaSha256={sql:left.resultMetaXdr.decodedBytesSha256,rpc:right.resultMetaXdr.decodedBytesSha256};
+   comparison={resultXdrEqual:true,resultXdrTextEqual:sql.view.resultXdr===rpc.view.resultXdr,rawMetaEqual,rawMetaSha256};
+   let sqlMeta,rpcMeta;
+   try {
+    sqlMeta=normalizeTransactionMeta(Buffer.from(left.resultMetaXdr.canonicalBase64,'base64'));
+    rpcMeta=normalizeTransactionMeta(Buffer.from(right.resultMetaXdr.canonicalBase64,'base64'));
+   }catch(error){
+    comparison.normalizationError=['AMBIGUOUS_DIAGNOSTIC_METRIC','UNPROVEN_DIAGNOSTIC_METRIC_SHAPE'].includes(error.message)?
+     error.message:'NORMALIZED_XDR_ENCODING_FAILED';
+   }
+   if(comparison.normalizationError)status='DURABLE_RECEIPT_NORMALIZED_MISMATCH';
+   else {
+    const normalizedMetaEqual=sqlMeta.normalizedBytes.equals(rpcMeta.normalizedBytes);
+    const normalizedMetaSha256={sql:sqlMeta.normalizedMetaSha256,rpc:rpcMeta.normalizedMetaSha256};
+    const normalizationApplied={sql:sqlMeta.normalizationApplied,rpc:rpcMeta.normalizationApplied};
+    const normalized=await durable(directory,String(attempt).padStart(2,'0')+'-normalized-meta.json',{
+     rawMetaSha256,normalizedMetaSha256,normalizationApplied,
+     sqlNormalizedXdr:sqlMeta.normalizedBytes.toString('base64'),rpcNormalizedXdr:rpcMeta.normalizedBytes.toString('base64')},inventory);
+    Object.assign(comparison,{normalizedMetaEqual,normalizedMetaSha256,normalizationApplied,normalizedArtifactSha256:normalized.sha256});
+    if(!normalizedMetaEqual)status='DURABLE_RECEIPT_NORMALIZED_MISMATCH';
+    else if(!rawMetaEqual)status='APPROVED_DIAGNOSTIC_VARIANCE';
+    else status=(sql.view.resultXdr!==rpc.view.resultXdr||sql.view.resultMetaXdr!==rpc.view.resultMetaXdr)?'ENCODING_REPRESENTATION_DIFFERENCE':'CANONICAL_BYTES_MATCH';
+   }
+  }
   const decision={attempt,status,terminalSql,terminalRpc,chainResult:rpc.view.status??null,elapsedMs:elapsed(),
-   rawSqlSha256:sql.saved.sha256,rawRpcSha256:rpc.saved.sha256,canonicalInputsSha256:decoded.sha256,
+   rawSqlSha256:sql.saved.sha256,rawRpcSha256:rpc.saved.sha256,canonicalInputsSha256:decoded.sha256,comparison,
    sqlDecodedHashes:{resultXdr:left.resultXdr.decodedBytesSha256??null,resultMetaXdr:left.resultMetaXdr.decodedBytesSha256??null},
    rpcDecodedHashes:{resultXdr:right.resultXdr.decodedBytesSha256??null,resultMetaXdr:right.resultMetaXdr.decodedBytesSha256??null}};
   await durable(directory,String(attempt).padStart(2,'0')+'-decision.json',decision,inventory);lastPair=decision;reason=status;
   if(now()>=deadline){reason='CONVERGENCE_TIME_LIMIT';break;}
-  if(['CANONICAL_BYTES_MATCH','ENCODING_REPRESENTATION_DIFFERENCE'].includes(status))return finish('DURABLE_RECEIPT_CONVERGED');
-  if(wrong||malformed)break;
+  if(['CANONICAL_BYTES_MATCH','ENCODING_REPRESENTATION_DIFFERENCE','APPROVED_DIAGNOSTIC_VARIANCE'].includes(status))return finish('DURABLE_RECEIPT_CONVERGED_NORMALIZED');
+  if(status==='DURABLE_RECEIPT_NORMALIZED_MISMATCH')return finish(status);
+  if(!['PROJECTION_NOT_TERMINAL','RPC_NOT_TERMINAL'].includes(status))break;
   if(attempt<MAX_RECEIPT_READ_ATTEMPTS&&now()<deadline)await delay(Math.min(RECEIPT_REREAD_INTERVAL_MS,Math.max(0,deadline-now())));
  }
  return finish('DURABLE_RECEIPT_MISMATCH_PRESERVED');
