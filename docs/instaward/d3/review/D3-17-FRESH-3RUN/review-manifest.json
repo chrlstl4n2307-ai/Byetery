@@ -1,0 +1,55 @@
+{
+  "WalletBPublicAddress": "GCE35NEN2O3EYK5A7SROTLFOCSAIGLN2BPVQBFS4UG52BY2P7K6VC6DB",
+  "businessSha": "c6ba2e837ed0f7b81373655b8106b58ecb86a8cd",
+  "captureToolingSha": "84f1bdd145269c306008f2ae4a1c3648864dd347",
+  "files": [
+    {
+      "bytes": 6116,
+      "path": "REVIEW.md",
+      "sha256": "f48d501418652e3eb47a4e0a525c37d84ccf560e237bbd79d67e4f76c52dd26c"
+    },
+    {
+      "bytes": 488,
+      "path": "external-project-ledger.checkpoint.json",
+      "sha256": "fb97bc1cc4bfea7bc5c18cd7a1f9e60bf486abb1aaf78668810aec8fc5d3072f"
+    },
+    {
+      "bytes": 5392,
+      "path": "external-project-ledger.jsonl",
+      "sha256": "a45ed3d36a12c08d64df0ad6f50338e58404526eb1983530a191174bc18b2633"
+    },
+    {
+      "bytes": 784,
+      "path": "historical-deny-summary.json",
+      "sha256": "55409194f1d04c96e507a694194d107b4ad5d40dee709ea16b9bed28fb835ac9"
+    },
+    {
+      "bytes": 1007,
+      "path": "new-plan.canonical.json",
+      "sha256": "3788fd5b0ce1e07cb91720a7fb16cf8d9a81f1ee86e2eb29b289c56f4fc15c1e"
+    },
+    {
+      "bytes": 1246,
+      "path": "new-plan.json",
+      "sha256": "43df7d0b469238dbfcf62294fb8e6d38bf1c7a74614de19a22e83e2550d42a20"
+    },
+    {
+      "bytes": 726,
+      "path": "old-control-seal-public.json",
+      "sha256": "5768024c791b0484301eefb9750f3c5f9bf489b7de2e0055574da4a552917019"
+    },
+    {
+      "bytes": 1195,
+      "path": "plan-validation-public.json",
+      "sha256": "2492eaf70dd8f5f57ec55dd2e8e2c8d95eabd6691aa0720faa3c02bd14239f03"
+    },
+    {
+      "bytes": 997,
+      "path": "wallet-readiness-public.json",
+      "sha256": "4bf90709f9d3a142081805c21d125b7f14a44b0504bd91f2f4a3f4c53f38a6db"
+    }
+  ],
+  "ledgerHead": "27a286e968e83c3ed815ffc848df5f2160712cb990126fc4bad918feb8051f02",
+  "planHash": "3788fd5b0ce1e07cb91720a7fb16cf8d9a81f1ee86e2eb29b289c56f4fc15c1e",
+  "schemaVersion": "BYETERY_D3_REVIEW_MANIFEST_V1"
+}

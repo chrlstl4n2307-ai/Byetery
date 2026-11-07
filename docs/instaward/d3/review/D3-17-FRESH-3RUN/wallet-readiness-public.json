@@ -1,0 +1,30 @@
+{
+  "source": "READ_ONLY_TESTNET_AND_APPLICATION_OBSERVATION",
+  "walletBRecipientReady": true,
+  "wallets": [
+    {
+      "alias": "A",
+      "assetCode": "GREENTEST",
+      "balance": "20.0000000",
+      "balanceBaseUnits": "200000000",
+      "issuer": "GCHROKHXHL4L635J6Y6DWFFD5DDHABOAF4BP5TEUZDZQMW4XYS6DIDL7",
+      "observedAt": "2026-11-07T05:31:53.191Z",
+      "publicAddress": "GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS",
+      "trustlineAuthorized": true,
+      "trustlinePresent": true,
+      "walletLinkReadiness": "PASS"
+    },
+    {
+      "alias": "B",
+      "assetCode": "GREENTEST",
+      "balance": "0.0000000",
+      "balanceBaseUnits": "0",
+      "issuer": "GCHROKHXHL4L635J6Y6DWFFD5DDHABOAF4BP5TEUZDZQMW4XYS6DIDL7",
+      "observedAt": "2026-11-07T05:31:53.292Z",
+      "publicAddress": "GCE35NEN2O3EYK5A7SROTLFOCSAIGLN2BPVQBFS4UG52BY2P7K6VC6DB",
+      "trustlineAuthorized": true,
+      "trustlinePresent": true,
+      "walletLinkReadiness": "PASS"
+    }
+  ]
+}

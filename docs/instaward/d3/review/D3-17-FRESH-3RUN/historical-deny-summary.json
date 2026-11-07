@@ -1,0 +1,24 @@
+{
+  "candidateCollisionCount": 0,
+  "historicalBatteryIdsIncluded": [
+    "BYE-D3-R1-20261103-18551C1AB983",
+    "BYE-D3-R1-20261104-AF7A44A515AC",
+    "BYE-D3-R1-20261106-9470F35DF6B1"
+  ],
+  "historicalTestnetExhaustiveAbsence": "NOT_PROVEN_NON_BLOCKING",
+  "priorPlanHashesChecked": [
+    "39f8dddfbbe21feda0df533ee64e3d9b3d99bd4904c618a06fead44f4f4fca9c",
+    "83c033f3d0e47c3adec980f51d8c0f4931292c64f5bfacd04c6010dcd7e3a0f3",
+    "d3c43f505e83cfe21e2591ccec5ca003f8f81905b62ad1ad41c9c888adc4f2e2",
+    "f28ad450053d09ead61162a9b47f979fd3df72bbb21fa26fbfa289db33939a3d"
+  ],
+  "reviewedDenySetCount": 75,
+  "scannedLocalArtifactCount": 720,
+  "scopes": [
+    "SQL",
+    "CONSUMED_MARKERS",
+    "LOCAL_HISTORICAL_ARTIFACTS",
+    "PREVIOUS_PLANS",
+    "ACTIVE_TESTNET_STATE"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "BYETERY_EXTERNAL_PROJECT_LEDGER_V1",
+  "entries": 5,
+  "headSha256": "27a286e968e83c3ed815ffc848df5f2160712cb990126fc4bad918feb8051f02",
+  "ledgerFileSha256": "a45ed3d36a12c08d64df0ad6f50338e58404526eb1983530a191174bc18b2633",
+  "planHash": "3788fd5b0ce1e07cb91720a7fb16cf8d9a81f1ee86e2eb29b289c56f4fc15c1e",
+  "canonicalInputSha256": "3788fd5b0ce1e07cb91720a7fb16cf8d9a81f1ee86e2eb29b289c56f4fc15c1e",
+  "txAuthorized": false,
+  "status": "PREPARED_NOT_RATIFIED"
+}

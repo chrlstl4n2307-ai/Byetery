@@ -1,0 +1,40 @@
+{
+  "applicationCollisionCount": 0,
+  "canonicalInputSha256": "3788fd5b0ce1e07cb91720a7fb16cf8d9a81f1ee86e2eb29b289c56f4fc15c1e",
+  "commitAuthorized": false,
+  "cosmeticNoncePresent": false,
+  "frozenSchema": "BYETERY_D3_PLAN_V1",
+  "futureOperationIdsOrTxHashesPresent": false,
+  "historicalTestnetExhaustiveAbsence": "NOT_PROVEN_NON_BLOCKING",
+  "internalBudgetPrestate": 0,
+  "ledgerObserved": 5601216,
+  "liveLedgerCollisionCount": 0,
+  "opOrder": [
+    "register_battery",
+    "open_return",
+    "confirm_collection",
+    "confirm_recycling",
+    "pay_reward"
+  ],
+  "planHash": "3788fd5b0ce1e07cb91720a7fb16cf8d9a81f1ee86e2eb29b289c56f4fc15c1e",
+  "planHashDerivedFromMeaningfulContent": true,
+  "poolBalanceBaseUnits": "700000000",
+  "pushAuthorized": false,
+  "recipientDiversity": "PASS",
+  "recipientUniqueCount": 2,
+  "rpcReady": "YES",
+  "runtimeTasks": [
+    "D3-17-RUN1",
+    "D3-17-RUN2",
+    "D3-17-RUN3"
+  ],
+  "selectedIds": [
+    "BYE-D3-R1-20261107-5FB1AED9DA08",
+    "BYE-D3-R2-20261107-9A1AA193FFC7",
+    "BYE-D3-R3-20261107-E239CD5AC755"
+  ],
+  "status": "PREPARED_NOT_RATIFIED",
+  "taskId": "D3-17-FRESH-3RUN",
+  "txAuthorized": false,
+  "walletBRecipientReady": true
+}

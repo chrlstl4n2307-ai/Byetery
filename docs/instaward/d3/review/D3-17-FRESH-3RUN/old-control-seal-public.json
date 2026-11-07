@@ -1,0 +1,15 @@
+{
+  "budgetCount": 1,
+  "budgetSha256": "04e5f4d7bcbc17826843089c834db6e139dfa7cf5d70aeaa71ee1a99ce2d0703",
+  "future_tx_allowed": false,
+  "journalSha256": "d0398192c9742589f0f8e4606998030c216891f659668e531088e969f08540f9",
+  "oldPlanHash": "83c033f3d0e47c3adec980f51d8c0f4931292c64f5bfacd04c6010dcd7e3a0f3",
+  "operationId": "2201faa3-980a-4250-8578-ec024272a022",
+  "projectConfirmedConsumed": 4,
+  "retiredBattery": "BYE-D3-R1-20261106-9470F35DF6B1",
+  "retiredTxHash": "fb159fc9e1646f257414f30034220876f14033ce7b92109102cc9ca530da68c1",
+  "reusable": false,
+  "runStatus": "RETIRED_NON_COUNTING",
+  "status": "CLOSED_RETIRED",
+  "stoppedBundleSha256": "a926783d15bb509410ba00f8466ffc281e4104ace43d65bfed9e35e6695c83eb"
+}
