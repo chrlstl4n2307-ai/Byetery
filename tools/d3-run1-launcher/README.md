@@ -1,8 +1,24 @@
 # D3-17-RUN1 review launcher
 
-This package isolates RUN1 orchestration from the frozen operator. The only CLI is `replay.mjs --offline-replay`. The versioned F1 composition root is `launcher.mjs`, with `launchRun1` as its sole live entry. It imports the pinned Ed25519 verifier directly. The public-key and fingerprint slots in `owner-grant-key.mjs` are deliberately empty. This version refuses all live grants before reading runtime ports.
+This package isolates RUN1 orchestration from the frozen operator. `replay.mjs --offline-replay` is the synthetic CLI. `live.mjs` is the K6 local CLI for the frozen F1 composition root `launcher.mjs`. The Ed25519 owner key and fingerprint in `owner-grant-key.mjs` are PINNED.
 
-A future owner-reviewed local invocation must supply the exact signed grant and the existing trusted fresh-read, runtime credential, read-only SQL, and loopback API inputs. It must load the frozen operator from a separate clean linked worktree at the pinned business SHA in the same Git common directory. The two checkouts use the same local admission and frozen operator control directory. The composition checks its own current Git commit and execution-critical paths, verifies both ratified capture subtrees, and checks the frozen checkout again before admission and factory invocation. Runtime inputs cannot select a verifier, capture implementation, session observer, operator factory, or composition SHA. The library ships no unversioned runtime wrapper and no live CLI.
+The CLI requires a fresh signed grant bound to the actual K6 checkout and a separate owner authorization for RUN1. It loads the frozen operator from a clean linked worktree at the pinned business SHA in the same Git common directory. The composition checks both checkouts and the ratified capture subtrees before admission and factory invocation. The CLI fixes the verifier, capture implementation and operator factory.
+
+## K6 local CLI
+
+From the composition worktree, the exact command for a separately authorized RUN1 is:
+
+```powershell
+node tools/d3-run1-launcher/live.mjs --live --task-id D3-17-RUN1 --expected-sha c6ba2e837ed0f7b81373655b8106b58ecb86a8cd
+```
+
+The input is a regular UTF-8 file of at most 4 KiB at `%LOCALAPPDATA%\OwnerKeyCustody\Byetery-D3-RUN1\live\RUN1-owner-grant-envelope.json`. The CLI reads it after local and Git checks. The owner grant must bind the new, owner-ratified K6 SHA. A grant for K4b fails. The file input leaves the local terminal available for the existing no-echo credential flow. Grant data and credentials stay out of argv.
+
+The non-secret `BYETERY_K6_API_ORIGIN` selects the separately prepared numeric loopback HTTP API and port. `BYETERY_K6_FROZEN_ROOT` is the absolute path of the frozen linked worktree. The owner supplies the existing Supabase Dev configuration through the normal settings loader, optionally with its path in `BYETERY_CONFIG_FILE`. The existing loader expects `BYETERY_ENV=DEV`, `BYETERY_MODE=TESTNET` and `BYETERY_TESTNET_DEPLOYMENT_ID=5c0cad2f-5f25-4216-8068-6cb9d2d26325`, along with the existing TLS and local API settings. The SQL adapter opens a pool with read-only transactions. Use a local terminal and the reviewed Stellar CLI 28.0.0 on PATH. The signer probe checks fixed Secure Store public identities. The wrapper reads the app role email after admission when the operator asks for that role and reads the password from the owner without echo or persistence.
+
+The pre-admission gate checks the Git controls, sealed ledger, read-only SQL and public Testnet facts. SQL must show zero fresh RUN1 rows, leases, pending work and reconciliation locks. The ledger must still account for four historical successes and preserve the locked contingency slot. A live-state absence observation has the historical archival limit documented in the plan bundle. The CLI verifies the grant again and emits `RUN1_PRE_ADMISSION_READS=PASS` immediately before invoking the frozen launcher.
+
+The frozen order is grant verification, runtime validation, exclusive admission marker, operator factory, then login. A startup Auth failure stops with zero business transactions and the admission marker retained. After an admission or uncertain start, stop for reconciliation and a new owner authorization. The CLI performs no automatic retry. One additional read-only recapture of the same identity remains the maximum. K6 review and publication confer no live execution authority.
 
 ## C1 and C2
 
@@ -10,11 +26,11 @@ The same operator handle owns all five steps and the final counting decision. Ad
 
 After a step confirms, the launcher persists the original identity before starting capture in a separate process. The replay child inherits an empty environment. A pending capture allows one read-only recapture of the same identity while the handle stays open. A terminal mismatch, integrity failure, or inconclusive recapture stops advancement. The parent re-hashes the inventory files. The live capture child has an empty environment and receives only the operation identity. Its SQL requests are served by the ratified read-only receipt reader. The parent verifies the sealed inventory and corroborates the API outcome with SQL, RPC and public Horizon evidence before advancement. No capture observation creates an operation or changes the frozen step.
 
-The read-preflight port invokes its source for each request and verifies a fresh request binding and timestamps. It retains only source, timestamp and ledger metadata. It rejects cached responses and has no fallback on a read failure. A future runner must supply the approved source adapter that performs those reads. The credential port resolves each allowed role once at runtime through the secure-store interface. Only the frozen operator may consume the resulting credentials. Errors at the credential boundary use fixed messages.
+The read-preflight port invokes its source for each request and verifies a fresh request binding and timestamps. It retains only source, timestamp and ledger metadata. It rejects cached responses and stops on a read failure. The credential port resolves each allowed role once at runtime through the secure-store interface. The frozen operator consumes the resulting credentials. Errors at the credential boundary use fixed messages.
 
 ## Owner grant and session policy
 
-The grant is an exact `{ grant, signature }` object. The signature is 64 bytes encoded as unpadded base64url. The separately ratified public key will use unpadded base64url Ed25519 SPKI DER and its lowercase hex SHA-256 fingerprint. Production reads both pins from the versioned placeholder module. Public test vectors cannot substitute for those pins.
+The grant is an exact `{ grant, signature }` object. The signature is 64 bytes encoded as unpadded base64url. The pinned public key is unpadded base64url Ed25519 SPKI DER with its lowercase hex SHA-256 fingerprint. Production reads both pins from the versioned owner-key module.
 
 Sign the UTF-8 bytes starting with `BYETERY-D3-RUN1-OWNER-GRANT-V1` and a single LF. Append one `field=value` line per field in this exact order, including an LF after the last field:
 
