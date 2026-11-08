@@ -9,8 +9,8 @@ import { RUN1, checkLiveSessionConfig, createSessionDeadline } from './boundarie
 import { checkedOutCommit, checkCaptureCheckout, checkSharedGitDirectory, frozenOperatorPath } from './f1-checkout.mjs';
 import { corroborateSharedFacts } from './f1-evidence.mjs';
 import { canonicalGrant, evaluateAuthEvidence } from './grant-schema.mjs';
-import { OWNER_GRANT_KEY_STATUS, verifyOwnerGrant, verifySignedAuthEvidence, verifySignedGrant } from './grant-verifier.mjs';
-import { ROOT, launchRun1 } from './launcher.mjs';
+import { verifySignedAuthEvidence, verifySignedGrant } from './grant-verifier.mjs';
+import { ROOT } from './launcher.mjs';
 import { outputDirectory } from './replay.mjs';
 
 const exec = promisify(execFile);
@@ -43,17 +43,29 @@ test('real Ed25519 verification accepts only the exact public fixture signature'
   assert.throws(() => validate({ ...envelope, grant: { ...grant, nonce: 'c'.repeat(64) } }), /OWNER_GRANT_SIGNATURE_REJECTED/);
 });
 
-test('placeholder rejects valid-looking input, external verifier and runtime before I/O', async (t) => {
+test('placeholder rejects valid-looking input, external verifier and runtime before I/O', (t) => {
   let accesses = 0;
   t.mock.method(globalThis, 'fetch', () => { accesses++; throw new Error('NETWORK_UNEXPECTED'); });
-  const runtime = new Proxy({ verifyOwnerGrant: () => grant }, {
+  const externalVerifier = () => { accesses++; throw new Error('EXTERNAL_VERIFIER_UNEXPECTED'); };
+  const runtime = new Proxy({ verifyOwnerGrant: externalVerifier }, {
     ownKeys() { accesses++; throw new Error('RUNTIME_UNEXPECTED'); },
     get() { accesses++; throw new Error('RUNTIME_UNEXPECTED'); },
   });
-  assert.equal(OWNER_GRANT_KEY_STATUS, 'PLACEHOLDER_FAIL_CLOSED');
-  assert.throws(() => verifyOwnerGrant(envelope, checkedOutSha, now), /OWNER_GRANT_KEY_PLACEHOLDER/);
-  for (const input of [undefined, envelope, { ...envelope, verifyOwnerGrant: () => true }]) {
-    await assert.rejects(launchRun1(input, runtime), /OWNER_GRANT_KEY_PLACEHOLDER/);
+  const unreadableEnvelope = new Proxy({}, {
+    ownKeys() { accesses++; throw new Error('INPUT_UNEXPECTED'); },
+    get() { accesses++; throw new Error('INPUT_UNEXPECTED'); },
+    getOwnPropertyDescriptor() { accesses++; throw new Error('INPUT_UNEXPECTED'); },
+  });
+  const missingPins = [
+    { publicKey: null, fingerprint: null },
+    { ...fixturePin, publicKey: null },
+    { ...fixturePin, fingerprint: null },
+  ];
+  for (const keyPin of missingPins) {
+    for (const input of [undefined, envelope, unreadableEnvelope,
+      { ...envelope, verifyOwnerGrant: externalVerifier, runtime }]) {
+      assert.throws(() => verifySignedGrant(input, keyPin, checkedOutSha, now), /OWNER_GRANT_KEY_PLACEHOLDER/);
+    }
   }
   assert.equal(accesses, 0);
 });
