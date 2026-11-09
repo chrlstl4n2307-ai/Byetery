@@ -12,7 +12,7 @@ import { verifyOwnerGrant } from './grant-verifier.mjs';
 import { createDiagnostics, persistFatal } from './diagnostics.mjs';
 import { verifySessionPins } from './session-pins.mjs';
 
-export const K6 = '24b0276689667ce2b7d259f493c9069d3bab6c78';
+export const K7 = '6b87356a208dd26cf310614265002c5c7a5b1bcf';
 export const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 export const ARGV = Object.freeze(['--live', '--task-id', RUN1.taskId, '--expected-sha', RUN1.businessSha]);
 const runtimeFields = ['apiOrigin', 'frozenRoot', 'publishableKey', 'readSources', 'secureStore', 'sqlPool'];
@@ -37,8 +37,8 @@ async function composition() {
     gitRead(ROOT, ['log', '-1', '--format=%P']),
     gitRead(ROOT, ['status', '--porcelain', '--untracked-files=no']),
   ]);
-  // The owner grant and session manifest pin the actual K7 commit.
-  requireThat(branch === 'instaward/d2-web-mvp' && parent === K6 && !dirty, 'K7_CHECKOUT_REJECTED');
+  // The owner grant and manifest pin the exact H1 follow-up to K7.
+  requireThat(branch === 'instaward/d2-web-mvp' && parent === K7 && !dirty, 'K7_CHECKOUT_REJECTED');
   await checkCaptureCheckout(ROOT, head);
   return head;
 }

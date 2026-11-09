@@ -10,7 +10,7 @@ import { createDiagnostics, persistFatal } from './diagnostics.mjs';
 import { ARGV, runEntry } from './live.mjs';
 import { assertNoRun1Controls, createRoleResolver } from './live-runtime.mjs';
 import { createNoEcho, PromptFailure } from './no-echo.mjs';
-import { verifySessionPins } from './session-pins.mjs';
+import { encodeSessionControl, verifySessionPins } from './session-pins.mjs';
 
 const dummy = 'K7-DUMMY-CREDENTIAL-DO-NOT-LEAK';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -22,21 +22,37 @@ async function scratch(t) {
   return dir;
 }
 
-function terminal(t) {
+function terminal(t, { priorRaw = false, wasFlowing = false } = {}) {
   t.mock.timers.enable({ apis: ['setTimeout'] });
+  const set = globalThis.setTimeout;
+  const clear = globalThis.clearTimeout;
+  const timers = new Set();
+  t.mock.method(globalThis, 'setTimeout', (callback, delay) => {
+    const id = set(() => { timers.delete(id); callback(); }, delay);
+    timers.add(id);
+    return id;
+  });
+  t.mock.method(globalThis, 'clearTimeout', id => { timers.delete(id); clear(id); });
   const input = Object.assign(new EventEmitter(), {
-    isTTY: true, isRaw: false,
+    isTTY: true, isRaw: priorRaw, readableFlowing: wasFlowing,
     setRawMode(raw) { this.isRaw = raw; },
-    setEncoding() {}, resume() {}, pause() {},
+    resume() { this.readableFlowing = true; },
+    pause() { this.readableFlowing = false; },
   });
   let stdout = '';
   const reader = createNoEcho(input, { isTTY: true, write: line => { stdout += line; } });
+  const restored = () => {
+    assert.equal(input.isRaw, priorRaw);
+    assert.equal(input.readableFlowing, wasFlowing);
+    for (const event of ['data', 'end', 'error']) assert.equal(input.listenerCount(event), 0);
+    assert.equal(timers.size, 0);
+  };
   t.after(() => {
     reader.close();
     assert.ok(!stdout.includes(dummy), 'credential leaked in prompt output');
-    assert.equal(input.isRaw, false);
+    restored();
   });
-  return { input, reader, send: value => input.emit('data', value) };
+  return { input, reader, restored, send: value => input.emit('data', value) };
 }
 
 for (const [name, first, idle, arming] of [
@@ -48,33 +64,37 @@ for (const [name, first, idle, arming] of [
   ['stale LF queued at the next prompt', [dummy + '\r'], [], ['\n']],
 ]) {
   test(name + ' leaves the following prompt independent', async t => {
-    const { reader, send } = terminal(t);
+    const { reader, send, restored } = terminal(t);
     const firstRead = reader.read('USER');
     arm(t);
     first.forEach(send);
     assert.ok(await firstRead === dummy);
+    restored();
     idle.forEach(send);
     const secondRead = reader.read('ADMIN');
     arming.forEach(send);
     arm(t);
     send(dummy + '\r');
     assert.ok(await secondRead === dummy);
+    restored();
   });
 }
 
 test('type-ahead is discarded before display, after CR, and while idle', async t => {
-  const { reader, send } = terminal(t);
+  const { reader, send, restored } = terminal(t);
   const a = reader.read('USER');
   send(dummy + '\r');
   arm(t);
   send('a\r' + dummy + '\r');
   assert.equal(await a, 'a');
+  restored();
   send(dummy + '\r');
   const b = reader.read('ADMIN');
   send(dummy + '\r');
   arm(t);
   send('b\r');
   assert.equal(await b, 'b');
+  restored();
 });
 
 for (const [name, code, action] of [
@@ -91,8 +111,47 @@ for (const [name, code, action] of [
     arm(t);
     action(tty, t);
     await failure;
+    tty.restored();
   });
 }
+
+test('four sequential prompts restore cooked stdin before returning to the operator', async t => {
+  const tty = terminal(t);
+  for (const role of ['USER', 'ADMIN', 'COLLECTOR', 'RECYCLER']) {
+    tty.restored();
+    const pending = tty.reader.read(role);
+    assert.equal(tty.input.isRaw, true);
+    arm(t);
+    tty.send(dummy + '\r');
+    assert.ok(await pending === dummy);
+    tty.restored();
+    assert.equal(tty.send('\x03'), false, 'idle Ctrl+C reached a prompt listener');
+  }
+});
+
+test('an existing raw, flowing stream retains its prior state on success and failure', async t => {
+  const tty = terminal(t, { priorRaw: true, wasFlowing: true });
+  const pending = tty.reader.read('USER');
+  arm(t);
+  const bytes = Buffer.from('á\r');
+  tty.send(bytes.subarray(0, 1));
+  tty.send(bytes.subarray(1));
+  assert.equal(await pending, 'á');
+  tty.restored();
+  const failed = assert.rejects(tty.reader.read('ADMIN'), promptCode('PROMPT_EMPTY'));
+  arm(t);
+  tty.send('\n');
+  await failed;
+  tty.restored();
+});
+
+test('Ctrl+C during prompt arming is rejected and clears the pending timer', async t => {
+  const tty = terminal(t);
+  const failed = assert.rejects(tty.reader.read('USER'), promptCode('PROMPT_CONTROL_CHAR'));
+  tty.send('\x03');
+  await failed;
+  tty.restored();
+});
 
 test('backspace on empty is deterministic and exactly 256 characters remain allowed', async t => {
   const { reader, send } = terminal(t);
@@ -186,32 +245,59 @@ test('old admission and empty journal stay intact and do not block distinct K7 c
   }), 'EXACT_ARGV_REQUIRED');
 });
 
-test('session manifest binds three hashes, physical paths, composition and actual parent', async t => {
+async function sessionFixture(t) {
   const root = await scratch(t);
   const directory = join(root, 'tools', 'd3-run1-launcher');
   await mkdir(directory, { recursive: true });
   const head = 'a'.repeat(40);
-  const artifacts = [
-    { path: join(directory, 'live.mjs'), sha256: digest('live fixture') },
-    { path: join(directory, 'launch.ps1'), sha256: digest('wrapper fixture') },
-    { path: join(root, 'pwsh.exe'), sha256: digest('shell fixture'), version: '7.6.9' },
-  ];
-  await Promise.all(artifacts.map((x, i) => writeFile(x.path, ['live fixture', 'wrapper fixture', 'shell fixture'][i])));
-  const [live, wrapper, pwsh] = artifacts;
-  const data = JSON.stringify({ schemaVersion: 1, taskId: RUN1.taskId, compositionRootSha: head, live, wrapper, pwsh });
+  const live = { path: join(directory, 'live.mjs'), sha256: digest('live') };
+  const wrapper = { path: join(directory, 'launch.ps1'), sha256: digest('wrapper') };
+  const pwsh = { path: join(root, 'pwsh.exe'), sha256: digest('pwsh'), version: '7.6.9' };
+  const node = { path: join(root, 'node.exe'), sha256: digest('node'), version: 'v24.16.0' };
+  const session = { schemaVersion: 2, taskId: RUN1.taskId, compositionRootSha: head, live, wrapper, pwsh, node };
+  await Promise.all(Object.entries({ live, wrapper, pwsh, node }).map(([name, pin]) => writeFile(pin.path, name)));
+  const data = encodeSessionControl(session);
   const manifest = join(root, 'control.json');
-  await writeFile(manifest, data);
-  const env = { BYETERY_K7_SESSION_CONTROL_PATH: manifest, BYETERY_K7_SESSION_CONTROL_SHA256: digest(data) };
-  const options = { root, head, parentExecutable: async () => pwsh.path };
+  const writeControl = async bytes => {
+    await writeFile(manifest, bytes);
+    return { BYETERY_K7_SESSION_CONTROL_PATH: manifest, BYETERY_K7_SESSION_CONTROL_SHA256: digest(bytes) };
+  };
+  const options = { root, head, parentExecutable: async () => pwsh.path, nodeExecutable: node };
+  return { session, data, manifest, writeControl, options, env: await writeControl(data) };
+}
+
+test('session manifest binds all artifact hashes, physical paths, composition and actual parent', async t => {
+  const { session, data, manifest, options, env } = await sessionFixture(t);
   assert.equal(await verifySessionPins(env, options), digest(data));
   assert.ok(!(await readFile(manifest)).includes(dummy));
   await assert.rejects(verifySessionPins(env, { ...options, head: 'b'.repeat(40) }), /SESSION_PINS_REJECTED/);
-  await assert.rejects(verifySessionPins(env, { ...options, parentExecutable: async () => live.path }), /SESSION_PINS_REJECTED/);
+  await assert.rejects(verifySessionPins(env, { ...options, parentExecutable: async () => session.live.path }), /SESSION_PINS_REJECTED/);
   await assert.rejects(verifySessionPins({ ...env, BYETERY_K7_SESSION_CONTROL_SHA256: 'c'.repeat(64) }, options), /SESSION_PINS_REJECTED/);
-  for (const [i, artifact] of artifacts.entries()) {
+  for (const artifact of [session.live, session.wrapper, session.pwsh, session.node]) {
     const bytes = await readFile(artifact.path);
-    await writeFile(artifact.path, 'changed ' + i);
+    await writeFile(artifact.path, 'changed');
     await assert.rejects(verifySessionPins(env, options), /SESSION_PINS_REJECTED/);
     await writeFile(artifact.path, bytes);
+  }
+});
+
+test('session rejects an unpinned running Node path or version and a missing Node record', async t => {
+  const { session, env, writeControl, options } = await sessionFixture(t);
+  for (const override of [{ path: session.pwsh.path }, { version: 'v24.16.1' }]) {
+    await assert.rejects(verifySessionPins(env, { ...options, nodeExecutable: { ...session.node, ...override } }), /SESSION_PINS_REJECTED/);
+  }
+  const { node, ...legacy } = session;
+  const bad = await writeControl(JSON.stringify({ ...legacy, schemaVersion: 1 }) + '\n');
+  await assert.rejects(verifySessionPins(bad, options), /SESSION_PINS_REJECTED/);
+});
+
+test('session encoder canonicalizes field order and verifier requires the exact encoded bytes', async t => {
+  const { session, data, writeControl, options } = await sessionFixture(t);
+  const reverse = record => Object.fromEntries(Object.entries(record).reverse());
+  const reordered = reverse({ ...session, node: reverse(session.node) });
+  assert.deepEqual(encodeSessionControl(reordered), data);
+  for (const bytes of [JSON.stringify(reordered) + '\n', data.subarray(0, -1), '\ufeff' + data,
+    JSON.stringify({ ...session, node: { ...session.node, extra: true } }) + '\n']) {
+    await assert.rejects(verifySessionPins(await writeControl(bytes), options), /SESSION_PINS_REJECTED/);
   }
 });

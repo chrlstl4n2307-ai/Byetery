@@ -8,7 +8,7 @@ import { localDb } from '../../backend/tests/testnet-fixtures.ts';
 import { SPEC } from '../d3-evidence-capture/common.mjs';
 import { RUN1 } from './boundaries.mjs';
 import { verifyOwnerGrant } from './grant-verifier.mjs';
-import { ARGV, K6, ROOT, runEntry } from './live.mjs';
+import { ARGV, K7, ROOT, runEntry } from './live.mjs';
 import { readChain } from './live-chain.mjs';
 import { evaluateReadiness, readLedger } from './live-readiness.mjs';
 import { readSql } from './live-sql.mjs';
@@ -144,7 +144,7 @@ test('dirty composition and an unexpected HEAD both fail before runtime', async 
   dirty.ports.composition = async () => { throw Error('DIRTY_EXECUTION_CHECKOUT'); };
   assert.equal(await runEntry(ARGV, {}, dirty.ports), 'COMPOSITION_CHECKOUT_REJECTED');
   const wrong = harness();
-  wrong.ports.composition = async () => K6;
+  wrong.ports.composition = async () => K7;
   assert.equal(await runEntry(ARGV, {}, wrong.ports), 'OWNER_GRANT_REJECTED');
   assert.deepEqual(dirty.events, []);
   assert.deepEqual(wrong.events, []);
@@ -282,6 +282,7 @@ test('a later lifecycle read must match the already confirmed journal identity',
 });
 
 test('grant schema, verifier and owner key remain byte-identical to K6', () => {
+  const K6 = '24b0276689667ce2b7d259f493c9069d3bab6c78';
   for (const name of ['grant-verifier.mjs', 'grant-schema.mjs', 'owner-grant-key.mjs']) {
     const file = 'tools/d3-run1-launcher/' + name;
     const baseline = execFileSync('git', ['show', K6 + ':' + file], { cwd: ROOT, windowsHide: true });

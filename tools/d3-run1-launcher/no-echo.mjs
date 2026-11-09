@@ -1,6 +1,6 @@
 const drainMs = 80;
 const timeoutMs = 30_000;
-
+import { StringDecoder } from 'node:string_decoder';
 export class PromptFailure extends Error {
   constructor(code) {
     super(code);
@@ -8,20 +8,10 @@ export class PromptFailure extends Error {
   }
 }
 
-// Keep the stream flowing between prompts. Pausing it allows ConPTY to
-// deliver a previously queued LF or type-ahead to the next password.
 export function createNoEcho(input = process.stdin, output = process.stdout) {
-  let started = false;
   let closed = false;
-  let priorRaw;
   let prompt;
   let terminal;
-  let pairedLfTimer;
-
-  function clearPair() {
-    clearTimeout(pairedLfTimer);
-    pairedLfTimer = undefined;
-  }
 
   function finish(code) {
     if (!prompt) return;
@@ -31,6 +21,20 @@ export function createNoEcho(input = process.stdin, output = process.stdout) {
     clearTimeout(current.timeout);
     const value = current.value;
     current.value = '';
+    current.decoder = undefined;
+    input.off('data', onData);
+    input.off('end', onEnd);
+    input.off('error', onError);
+    try {
+      if (input.isRaw !== current.priorRaw) input.setRawMode(current.priorRaw);
+    } catch {
+      code ??= 'PROMPT_STREAM_ERROR';
+    }
+    try {
+      if (!current.wasFlowing) input.pause();
+    } catch {
+      code ??= 'PROMPT_STREAM_ERROR';
+    }
     if (current.visible) {
       try { output.write('\n'); } catch { code ??= 'PROMPT_STREAM_ERROR'; }
     }
@@ -39,23 +43,24 @@ export function createNoEcho(input = process.stdin, output = process.stdout) {
   }
 
   function onData(chunk) {
-    for (const ch of chunk) {
-      if (pairedLfTimer !== undefined) {
-        clearPair();
-        if (ch === '\n') continue;
-      }
-      if (!prompt?.visible) continue;
+    const current = prompt;
+    if (!current) return;
+    const text = typeof chunk === 'string' ? chunk : current.decoder.write(chunk);
+    if (!current.visible) {
+      if (text.includes('\x03')) finish('PROMPT_CONTROL_CHAR');
+      return;
+    }
+    for (const ch of text) {
       if (ch === '\r' || ch === '\n') {
-        if (ch === '\r') pairedLfTimer = setTimeout(clearPair, drainMs);
-        finish(prompt.value ? undefined : 'PROMPT_EMPTY');
+        return finish(current.value ? undefined : 'PROMPT_EMPTY');
       } else if (ch === '\b' || ch === '\x7f') {
-        prompt.value = [...prompt.value].slice(0, -1).join('');
+        current.value = [...current.value].slice(0, -1).join('');
       } else if (ch.charCodeAt(0) < 32) {
-        finish('PROMPT_CONTROL_CHAR');
-      } else if (prompt.value.length + ch.length > 256) {
-        finish('PROMPT_TOO_LONG');
+        return finish('PROMPT_CONTROL_CHAR');
+      } else if (current.value.length + ch.length > 256) {
+        return finish('PROMPT_TOO_LONG');
       } else {
-        prompt.value += ch;
+        current.value += ch;
       }
     }
   }
@@ -73,13 +78,7 @@ export function createNoEcho(input = process.stdin, output = process.stdout) {
   function close() {
     if (closed) return;
     closed = true;
-    clearPair();
     finish(terminal ?? 'PROMPT_STREAM_END');
-    if (!started) return;
-    input.off('data', onData);
-    input.off('end', onEnd);
-    input.off('error', onError);
-    try { input.setRawMode(priorRaw); } finally { input.pause(); }
   }
 
   async function read(role) {
@@ -90,34 +89,31 @@ export function createNoEcho(input = process.stdin, output = process.stdout) {
     if (!input.isTTY || !output.isTTY || typeof input.setRawMode !== 'function') {
       throw new PromptFailure('OWNER_TTY_REQUIRED');
     }
-    if (!started) {
-      started = true;
-      priorRaw = Boolean(input.isRaw);
+    return new Promise((resolve, reject) => {
+      const current = { value: '', visible: false, resolve, reject,
+        priorRaw: Boolean(input.isRaw), wasFlowing: input.readableFlowing === true,
+        decoder: new StringDecoder('utf8') };
+      prompt = current;
       try {
         input.setRawMode(true);
-        input.setEncoding('utf8');
-        input.on('data', onData);
         input.on('end', onEnd);
         input.on('error', onError);
+        input.on('data', onData);
+        // Discard bytes queued while idle, including the trailing LF of an
+        // earlier CRLF. No pairing state or timer survives a prompt.
+        current.arm = setTimeout(() => {
+          try {
+            output.write('Contraseña de ' + role + ' (sin eco): ');
+            current.visible = true;
+            current.timeout = setTimeout(() => finish('PROMPT_TIMEOUT'), timeoutMs);
+          } catch {
+            onError();
+          }
+        }, drainMs);
         input.resume();
       } catch {
-        terminal = 'PROMPT_STREAM_ERROR';
-        throw new PromptFailure(terminal);
+        onError();
       }
-    }
-    return new Promise((resolve, reject) => {
-      const current = { value: '', visible: false, resolve, reject };
-      prompt = current;
-      // Flush pending input before advertising that a new password is welcome.
-      current.arm = setTimeout(() => {
-        try {
-          output.write('Contraseña de ' + role + ' (sin eco): ');
-          current.visible = true;
-          current.timeout = setTimeout(() => finish('PROMPT_TIMEOUT'), timeoutMs);
-        } catch {
-          onError();
-        }
-      }, drainMs);
     });
   }
   return Object.freeze({ read, close });
