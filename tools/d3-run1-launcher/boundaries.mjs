@@ -5,8 +5,8 @@ import { join } from 'node:path';
 import { promisify } from 'node:util';
 
 export const RUN1 = Object.freeze({
-  taskId: 'D3-17-FRESH-3RUN',
-  runId: 'D3-17-RUN1',
+  taskId: 'D3-18-RUN1',
+  runId: 'RUN1',
   businessSha: 'c6ba2e837ed0f7b81373655b8106b58ecb86a8cd',
   planHash: '3788fd5b0ce1e07cb91720a7fb16cf8d9a81f1ee86e2eb29b289c56f4fc15c1e',
   batteryId: 'BYE-D3-R1-20261107-5FB1AED9DA08',
@@ -30,13 +30,14 @@ export function requireThat(condition, code) {
 
 // Source must perform the underlying observations within the requested window.
 // A new request binding plus source timestamps reject a reused result.
-export function createReadPreflight(readSources, { now = Date.now, retain = () => {} } = {}) {
+export function createReadPreflight(readSources, { now = Date.now, retain = () => {}, diagnostics } = {}) {
   let lastRead = -1;
   let pending = false;
   return async function readPreflight() {
     requireThat(!pending, 'CONCURRENT_PREFLIGHT_REJECTED');
     pending = true;
     try {
+      diagnostics?.event('PREFLIGHT_ENTER');
       const requestedAt = now();
       const requestId = randomUUID();
       let result;
@@ -52,7 +53,7 @@ export function createReadPreflight(readSources, { now = Date.now, retain = () =
         completedAt - requestedAt <= 60_000 && Number.isSafeInteger(preflight?.observedAt) &&
         preflight.observedAt > lastRead && preflight.observedAt >= requestedAt && preflight.observedAt <= completedAt,
       'PREFLIGHT_FRESHNESS_REJECTED');
-      requireThat(preflight.taskId === RUN1.runId && preflight.runId === 'RUN1' &&
+      requireThat(preflight.taskId === RUN1.taskId && preflight.runId === RUN1.runId &&
         preflight.sameRuntimeSha === RUN1.businessSha && preflight.mode === 'TESTNET', 'PREFLIGHT_SCOPE_REJECTED');
       requireThat(Array.isArray(observations) && observations.length === allowedSources.size &&
         new Set(observations.map(item => item.source)).size === allowedSources.size &&
@@ -63,8 +64,12 @@ export function createReadPreflight(readSources, { now = Date.now, retain = () =
       lastRead = preflight.observedAt;
       await retain({ requestedAt, completedAt, observations: observations.map(({ source, observedAt, ledger }) =>
         ({ source, observedAt, ledger })) });
+      diagnostics?.event('PREFLIGHT_OK');
       // Frozen operator sets f.git on this independent copy.
       return structuredClone(preflight);
+    } catch (error) {
+      diagnostics?.event('PREFLIGHT_FAIL');
+      throw error;
     } finally {
       pending = false;
     }
@@ -72,16 +77,25 @@ export function createReadPreflight(readSources, { now = Date.now, retain = () =
 }
 
 // This port belongs to the eventual owner-approved runtime secure store.
-// No local fallback, cached credentials, network/login, or diagnostics.
-export function createRuntimeCredentials(store) {
+// No local fallback, cached credentials, or login at this boundary.
+export function createRuntimeCredentials(store, diagnostics) {
   const served = new Set();
   return async function credentials(role) {
-    requireThat(ROLES.includes(role) && !served.has(role), 'CREDENTIAL_ROLE_REJECTED');
+    requireThat(ROLES.includes(role), 'CREDENTIAL_ROLE_REJECTED');
+    diagnostics?.event('CREDENTIAL_ENTER', role);
+    if (served.has(role)) {
+      diagnostics?.event('CREDENTIAL_REJECTED', role);
+      throw new Error('CREDENTIAL_ROLE_REJECTED');
+    }
     served.add(role);
     try {
       const item = await store.resolve(role);
-      requireThat(typeof item?.email === 'string' && item.email.length > 0 &&
-        typeof item.password === 'string' && item.password.length > 0, 'CREDENTIALS_UNAVAILABLE');
+      if (!(typeof item?.email === 'string' && item.email.length > 0 &&
+        typeof item.password === 'string' && item.password.length > 0)) {
+        diagnostics?.event('CREDENTIAL_REJECTED', role);
+        throw new Error('CREDENTIALS_UNAVAILABLE');
+      }
+      diagnostics?.event('CREDENTIAL_RETURN', role);
       return { email: item.email, password: item.password };
     } catch {
       throw new Error('CREDENTIALS_UNAVAILABLE');
@@ -140,10 +154,26 @@ export function createSingleAdmission(claimFile, nonce) {
 
 // All linked worktrees use the same claim. The frozen operator still owns
 // its independent lock and journal.
+export function admissionControlName(taskId = RUN1.taskId) {
+  requireThat(/^D3-[0-9]+-RUN1$/.test(taskId) && taskId === RUN1.taskId, 'EXACT_TASK_REQUIRED');
+  return 'byetery-' + taskId.toLowerCase() + '.launcher-admission';
+}
+
+export function runControlPaths(common) {
+  const directory = join(common, 'byetery-d3-operator');
+  return {
+    admission: join(common, admissionControlName()),
+    operatorLock: join(directory, 'operator.lock'),
+    journal: join(directory, RUN1.taskId + '-' + RUN1.businessSha + '.jsonl'),
+    budget: join(directory, RUN1.planHash + '.budget'),
+    consumed: join(directory, RUN1.batteryId + '.consumed'),
+  };
+}
+
 export async function admitLiveOnce(workspace, nonce) {
   requireThat(typeof nonce === 'string' && /^[a-f0-9]{64}$/.test(nonce), 'LIVE_GRANT_NONCE_REJECTED');
   const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key)));
   const { stdout } = await promisify(execFile)('git', ['rev-parse', '--path-format=absolute', '--git-common-dir'],
     { cwd: workspace, env, windowsHide: true });
-  await createSingleAdmission(join(stdout.trim(), 'byetery-d3-17-run1.launcher-admission'), nonce)();
+  await createSingleAdmission(runControlPaths(stdout.trim()).admission, nonce)();
 }

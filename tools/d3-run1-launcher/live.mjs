@@ -9,10 +9,12 @@ import { RUN1, createReadPreflight, requireThat } from './boundaries.mjs';
 import { checkCaptureCheckout, checkedOutCommit } from './f1-checkout.mjs';
 import { exactRecord } from './grant-schema.mjs';
 import { verifyOwnerGrant } from './grant-verifier.mjs';
+import { createDiagnostics, persistFatal } from './diagnostics.mjs';
+import { verifySessionPins } from './session-pins.mjs';
 
-export const K4B = 'ca936a661a8666b808e463c905ed8a7a251a9872';
+export const K6 = '24b0276689667ce2b7d259f493c9069d3bab6c78';
 export const ROOT = fileURLToPath(new URL('../../', import.meta.url));
-export const ARGV = Object.freeze(['--live', '--task-id', RUN1.runId, '--expected-sha', RUN1.businessSha]);
+export const ARGV = Object.freeze(['--live', '--task-id', RUN1.taskId, '--expected-sha', RUN1.businessSha]);
 const runtimeFields = ['apiOrigin', 'frozenRoot', 'publishableKey', 'readSources', 'secureStore', 'sqlPool'];
 const exec = promisify(execFile);
 const maxEnvelopeBytes = 4096;
@@ -35,8 +37,8 @@ async function composition() {
     gitRead(ROOT, ['log', '-1', '--format=%P']),
     gitRead(ROOT, ['status', '--porcelain', '--untracked-files=no']),
   ]);
-  // The owner grant pins the actual K6 commit. Hardcoding a commit's own SHA here is impossible.
-  requireThat(branch === 'instaward/d2-web-mvp' && parent === K4B && !dirty, 'K6_CHECKOUT_REJECTED');
+  // The owner grant and session manifest pin the actual K7 commit.
+  requireThat(branch === 'instaward/d2-web-mvp' && parent === K6 && !dirty, 'K7_CHECKOUT_REJECTED');
   await checkCaptureCheckout(ROOT, head);
   return head;
 }
@@ -82,6 +84,8 @@ export async function runEntry(argv, env, ports) {
     requireThat(argv.length === ARGV.length && ARGV.every((arg, index) => arg === argv[index]), stage);
     stage = 'COMPOSITION_CHECKOUT_REJECTED';
     const head = await ports.composition();
+    stage = 'SESSION_PINS_REJECTED';
+    await ports.verifyPins(head);
     stage = 'OWNER_GRANT_REJECTED';
     const envelope = JSON.parse(await ports.readEnvelope(env));
     requireThat(exactRecord(envelope, ['grant', 'signature']), stage);
@@ -92,15 +96,18 @@ export async function runEntry(argv, env, ports) {
     requireThat(typeof binding.preAdmission === 'function' && typeof binding.close === 'function', stage);
     stage = 'PRE_ADMISSION_READS_REJECTED';
     await binding.preAdmission();
-    await createReadPreflight(binding.runtime.readSources)();
+    await createReadPreflight(binding.runtime.readSources, { diagnostics: ports.diagnostics })();
     await binding.preAdmission();
     stage = 'COMPOSITION_CHECKOUT_REJECTED';
     requireThat(await ports.composition() === head, stage);
+    stage = 'SESSION_PINS_REJECTED';
+    await ports.verifyPins(head);
     stage = 'OWNER_GRANT_REJECTED';
     ports.verifyGrant(envelope, head);
     stage = 'RUN1_STOP_REQUIRES_RECONCILIATION';
     ports.ready();
     const result = await ports.launch(envelope, binding.runtime);
+    if (result?.status !== 'LIVE_CAPTURE_COMPLETE') ports.noteStop?.(result?.status);
     return result?.status === 'LIVE_CAPTURE_COMPLETE' ? 'LIVE_CAPTURE_COMPLETE' : stage;
   } catch {
     return stage;
@@ -112,16 +119,36 @@ export async function runEntry(argv, env, ports) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const diagnostics = createDiagnostics();
+  let head, controlHash, stop;
+  const checkPins = async sha => {
+    head = sha;
+    controlHash = await verifySessionPins(process.env, { root: ROOT, head: sha });
+  };
   const status = await runEntry(process.argv.slice(2), process.env, {
     composition,
+    verifyPins: checkPins,
+    diagnostics,
+    noteStop: code => { stop = code; },
     readEnvelope,
-    verifyGrant: verifyOwnerGrant,
+    verifyGrant(envelope, sha) {
+      const grant = verifyOwnerGrant(envelope, sha);
+      requireThat(grant.expiresAt - grant.issuedAt === 900_000, 'OWNER_GRANT_REJECTED');
+    },
     bindRuntime: async options => (await import('./live-runtime.mjs')).bindRuntime({
-      ...options, root: ROOT, gitRead, localOrigin,
+      ...options, root: ROOT, gitRead, localOrigin, diagnostics,
     }),
     ready: () => process.stdout.write('RUN1_PRE_ADMISSION_READS=PASS\n'),
-    launch: async (envelope, runtime) => (await import('./launcher.mjs')).launchRun1(envelope, runtime),
+    launch: async (envelope, runtime) => (await import('./launcher.mjs')).launchRun1(envelope, runtime, { diagnostics, checkPins }),
   });
+  if (status !== 'LIVE_CAPTURE_COMPLETE') {
+    try {
+      const fatal = await persistFatal(diagnostics, stop ?? status, head, controlHash);
+      process.stdout.write(JSON.stringify({ fatalPath: fatal.path, sha256: fatal.sha256, stage: fatal.stage }) + '\n');
+    } catch {
+      process.stderr.write('DIAGNOSTIC_PERSIST_FAILED\n');
+    }
+  }
   process.stdout.write(status + '\n');
   process.exitCode = status === 'LIVE_CAPTURE_COMPLETE' ? 0 : 1;
 }

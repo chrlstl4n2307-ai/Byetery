@@ -50,14 +50,14 @@ test('live claim is fixed to the Git common directory and refuses duplicate invo
   assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
   assert.match(results.find(result => result.status === 'rejected').reason.message,
     /RUN_ALREADY_CLAIMED_OR_ADMISSION_UNAVAILABLE/);
-  assert.equal(await readFile(join(directory, '.git/byetery-d3-17-run1.launcher-admission'), 'utf8'), nonce + '\n');
+  assert.equal(await readFile(join(directory, '.git/byetery-d3-18-run1.launcher-admission'), 'utf8'), nonce + '\n');
   await assert.rejects(admitLiveOnce(directory, 'a'.repeat(64)), /RUN_ALREADY_CLAIMED/);
 });
 
 function preflightFixture({ requestId, requestedAt }, ledger = 7, pendingDispatches = 0) {
   return {
     requestId,
-    preflight: { observedAt: requestedAt, taskId: RUN1.runId, runId: 'RUN1', mode: 'TESTNET',
+    preflight: { observedAt: requestedAt, taskId: RUN1.taskId, runId: RUN1.runId, mode: 'TESTNET',
       sameRuntimeSha: RUN1.businessSha, pendingDispatches },
     observations: [
       { source: 'LOCAL_GIT', observedAt: requestedAt, ledger: null },

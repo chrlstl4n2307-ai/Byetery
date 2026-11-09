@@ -8,7 +8,9 @@ import { settings } from '../../backend/src/application/config.ts';
 import { plan } from '../../backend/src/d3/model.ts';
 import { activationArguments, preflight } from '../../backend/src/d3/operator-control.ts';
 import { SPEC } from '../d3-evidence-capture/common.mjs';
-import { ROLES, RUN1, requireThat } from './boundaries.mjs';
+import { ROLES, RUN1, requireThat, runControlPaths } from './boundaries.mjs';
+import { promptFailureCode } from './diagnostics.mjs';
+import { createNoEcho, PromptFailure } from './no-echo.mjs';
 import { checkSharedGitDirectory, checkedOutCommit, frozenOperatorPath } from './f1-checkout.mjs';
 import { readChain } from './live-chain.mjs';
 import { evaluateReadiness, readLedger } from './live-readiness.mjs';
@@ -16,7 +18,6 @@ import { lookupRole, readSql } from './live-sql.mjs';
 
 const { Pool } = createRequire(new URL('../../backend/package.json', import.meta.url))('pg');
 const exec = promisify(execFile);
-const controlName = 'byetery-d3-17-run1.launcher-admission';
 const systemEnv = /^(SYSTEMROOT|WINDIR|PATH|PATHEXT|COMSPEC|USERPROFILE|APPDATA|LOCALAPPDATA|TEMP|TMP|HOMEDRIVE|HOMEPATH|PROGRAMFILES|PROGRAMFILES\(X86\)|PROGRAMDATA)$/i;
 
 async function exists(path) {
@@ -37,8 +38,8 @@ async function readJournal(path) {
   return text.split('\n').filter(Boolean).map(line => JSON.parse(line))
     .filter(row => row.phase === 'RESULT' && row.domainState)
     .map(row => {
-      requireThat(row.taskId === RUN1.runId && row.gitSha === RUN1.businessSha &&
-        row.runId === 'RUN1' && row.batteryId === RUN1.batteryId, 'RUN1_JOURNAL_IDENTITY_REJECTED');
+      requireThat(row.taskId === RUN1.taskId && row.gitSha === RUN1.businessSha &&
+        row.runId === RUN1.runId && row.batteryId === RUN1.batteryId, 'RUN1_JOURNAL_IDENTITY_REJECTED');
       return row;
     });
 }
@@ -57,46 +58,42 @@ async function checkPublicSigners(root, env) {
   }));
 }
 
-// The existing no-echo, in-memory owner input boundary. No credential is staged in a file or a child environment.
-function noEcho(role, input = process.stdin, output = process.stdout) {
-  requireThat(input.isTTY && output.isTTY && typeof input.setRawMode === 'function', 'OWNER_TTY_REQUIRED');
-  return new Promise((resolve, reject) => {
-    const priorRaw = Boolean(input.isRaw);
-    let value = '';
-    function finish(cancelled) {
-      clearTimeout(timeout);
-      input.off('data', onData);
-      input.off('end', onEnd);
-      input.off('error', onEnd);
-      input.setRawMode(priorRaw);
-      input.pause();
-      output.write('\n');
-      const password = value;
-      value = '';
-      if (cancelled || !password) reject(Error('OWNER_INPUT_CANCELLED'));
-      else resolve(password);
-    }
-    const onEnd = () => finish(true);
-    const onData = chunk => {
-      for (const ch of chunk) {
-        if (ch === '\r' || ch === '\n') return finish(false);
-        if (ch === '\b' || ch === '\x7f') value = [...value].slice(0, -1).join('');
-        else if (ch.charCodeAt(0) < 32 || value.length >= 256) return finish(true);
-        else value += ch;
+export function createRoleResolver({ checkAdmission, lookup, prompt, diagnostics }) {
+  return Object.freeze({
+    async resolve(role) {
+      try {
+        await checkAdmission(role);
+      } catch (error) {
+        diagnostics?.event('CREDENTIAL_REJECTED', role);
+        throw error;
       }
-    };
-    output.write('Contraseña de ' + role + ' (sin eco): ');
-    input.setRawMode(true);
-    input.setEncoding('utf8');
-    const timeout = setTimeout(onEnd, 30_000);
-    input.once('end', onEnd);
-    input.once('error', onEnd);
-    input.on('data', onData);
-    input.resume();
+      let email;
+      try {
+        email = await lookup(role);
+        diagnostics?.event('CREDENTIAL_SQL_OK', role);
+      } catch (error) {
+        diagnostics?.event('CREDENTIAL_SQL_FAIL', role);
+        throw error;
+      }
+      try {
+        const password = await prompt(role);
+        diagnostics?.event('PROMPT_OK', role);
+        return { email, password };
+      } catch (error) {
+        diagnostics?.event(promptFailureCode(error instanceof PromptFailure ? error.code : undefined), role);
+        throw error;
+      }
+    },
   });
 }
 
-export async function bindRuntime({ head, env, root, gitRead, localOrigin }) {
+export async function assertNoRun1Controls(common) {
+  for (const path of Object.values(runControlPaths(common))) {
+    requireThat(!await exists(path), 'RUN1_PRIOR_CONTROL_REJECTED');
+  }
+}
+
+export async function bindRuntime({ head, env, root, gitRead, localOrigin, diagnostics }) {
   const frozenRoot = env.BYETERY_K6_FROZEN_ROOT;
   const apiOrigin = localOrigin(env.BYETERY_K6_API_ORIGIN);
   requireThat(typeof frozenRoot === 'string' && isAbsolute(frozenRoot) &&
@@ -108,20 +105,15 @@ export async function bindRuntime({ head, env, root, gitRead, localOrigin }) {
   const controls = join(gitDirectory, 'byetery-d3-operator');
   const directory = await exists(controls);
   requireThat(!directory || directory.isDirectory() && !directory.isSymbolicLink(), 'RUN1_CONTROL_DIRECTORY_REJECTED');
-  const admissionPath = join(gitDirectory, controlName);
-  const journalPath = join(controls, RUN1.runId + '-' + RUN1.businessSha + '.jsonl');
-  const forbiddenControls = [admissionPath, join(controls, 'operator.lock'), journalPath,
-    join(controls, RUN1.planHash + '.budget'), join(controls, RUN1.batteryId + '.consumed')];
-  const preAdmission = async () => {
-    for (const path of forbiddenControls) requireThat(!await exists(path), 'RUN1_PRIOR_CONTROL_REJECTED');
-  };
+  const { admission: admissionPath, journal: journalPath } = runControlPaths(gitDirectory);
+  const preAdmission = () => assertNoRun1Controls(gitDirectory);
   await preAdmission();
   const history = await readLedger(root);
   const reviewedPlan = plan(JSON.parse(await readFile(join(root, 'docs/instaward/d3/review/D3-17-FRESH-3RUN/new-plan.json'), 'utf8')));
   requireThat(reviewedPlan.planHash === RUN1.planHash && reviewedPlan.input.gitSha === RUN1.businessSha &&
     reviewedPlan.input.runs[0]?.batteryId === RUN1.batteryId && reviewedPlan.input.runs[0]?.recipient === RUN1.recipient,
   'RUN1_PLAN_REJECTED');
-  const args = activationArguments(['--live', '--task-id', RUN1.runId, '--expected-sha', RUN1.businessSha]);
+  const args = activationArguments(['--live', '--task-id', RUN1.taskId, '--expected-sha', RUN1.businessSha]);
   const config = await settings();
   requireThat(config.mode === 'TESTNET' && config.deploymentId === SPEC.deployment, 'SQL_CONFIG_TARGET_REJECTED');
   const sqlPool = new Pool({ ...config.database, max: 2, query_timeout: 9000, statement_timeout: 9000,
@@ -129,13 +121,16 @@ export async function bindRuntime({ head, env, root, gitRead, localOrigin }) {
   sqlPool.on('error', () => {});
   let baseline;
 
-  const secureStore = Object.freeze({
-    async resolve(role) {
+  const prompt = createNoEcho();
+  const secureStore = createRoleResolver({
+    diagnostics,
+    async checkAdmission(role) {
       requireThat(ROLES.includes(role) && (await exists(admissionPath))?.isFile(), 'ROLE_BEFORE_ADMISSION_REJECTED');
-      const email = await lookupRole(sqlPool, role);
-      return { email, password: await noEcho(role) };
     },
+    lookup: role => lookupRole(sqlPool, role),
+    prompt: prompt.read,
   });
+
   async function readSources({ requestId, identity }) {
     requireThat(identity === RUN1 && await checkedOutCommit(root) === head, 'K6_COMPOSITION_CHANGED');
     await checkSharedGitDirectory(root, frozenRoot);
@@ -149,7 +144,7 @@ export async function bindRuntime({ head, env, root, gitRead, localOrigin }) {
     ]);
     const { baseline: first, ...readiness } = evaluateReadiness({ sql: sqlResult.sql, chain, history, journal, baseline });
     const observation = {
-      ...readiness, taskId: RUN1.runId, runId: 'RUN1', observedAt: Date.now(),
+      ...readiness, taskId: RUN1.taskId, runId: RUN1.runId, observedAt: Date.now(),
       git: { sha: RUN1.businessSha, clean: true }, sameRuntimeSha: RUN1.businessSha, mode: 'TESTNET',
       networkId: SPEC.networkId, contractId: SPEC.contract, wasmSha256: SPEC.wasm, deploymentId: SPEC.deployment,
       payer: SPEC.contract, unresolved: 0, pendingDispatches: 0, signers, uniqueBatteryIds: true, simulationBeforeSend: true,
@@ -164,6 +159,8 @@ export async function bindRuntime({ head, env, root, gitRead, localOrigin }) {
   }
   return {
     runtime: Object.freeze({ apiOrigin, frozenRoot, publishableKey: config.publicKey, readSources, secureStore, sqlPool }),
-    preAdmission, close: () => sqlPool.end(),
+    preAdmission, async close() {
+      try { prompt.close(); } finally { await sqlPool.end(); }
+    },
   };
 }

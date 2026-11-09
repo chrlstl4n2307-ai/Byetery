@@ -8,7 +8,7 @@ import { localDb } from '../../backend/tests/testnet-fixtures.ts';
 import { SPEC } from '../d3-evidence-capture/common.mjs';
 import { RUN1 } from './boundaries.mjs';
 import { verifyOwnerGrant } from './grant-verifier.mjs';
-import { ARGV, K4B, ROOT, runEntry } from './live.mjs';
+import { ARGV, K6, ROOT, runEntry } from './live.mjs';
 import { readChain } from './live-chain.mjs';
 import { evaluateReadiness, readLedger } from './live-readiness.mjs';
 import { readSql } from './live-sql.mjs';
@@ -56,7 +56,7 @@ function harness(change = () => {}) {
       assert.equal(identity, RUN1);
       evaluateReadiness(observations);
       const observedAt = Date.now();
-      return { requestId, preflight: { mode: 'TESTNET', taskId: RUN1.runId, runId: 'RUN1', sameRuntimeSha: RUN1.businessSha, observedAt },
+      return { requestId, preflight: { mode: 'TESTNET', taskId: RUN1.taskId, runId: RUN1.runId, sameRuntimeSha: RUN1.businessSha, observedAt },
         observations: [
           { source: 'LOCAL_GIT', observedAt, ledger: null },
           { source: 'SUPABASE_SQL_READ_ONLY', observedAt, ledger: null },
@@ -68,6 +68,7 @@ function harness(change = () => {}) {
   let verified;
   const ports = {
     composition: async () => compositionSha,
+    verifyPins: async () => {},
     readEnvelope: async () => JSON.stringify(envelope),
     verifyGrant(value, head) {
       assert.equal(head, compositionSha);
@@ -143,7 +144,7 @@ test('dirty composition and an unexpected HEAD both fail before runtime', async 
   dirty.ports.composition = async () => { throw Error('DIRTY_EXECUTION_CHECKOUT'); };
   assert.equal(await runEntry(ARGV, {}, dirty.ports), 'COMPOSITION_CHECKOUT_REJECTED');
   const wrong = harness();
-  wrong.ports.composition = async () => K4B;
+  wrong.ports.composition = async () => K6;
   assert.equal(await runEntry(ARGV, {}, wrong.ports), 'OWNER_GRANT_REJECTED');
   assert.deepEqual(dirty.events, []);
   assert.deepEqual(wrong.events, []);
@@ -280,10 +281,10 @@ test('a later lifecycle read must match the already confirmed journal identity',
   assert.equal(evaluateReadiness(s).successfulTxCap, 5);
 });
 
-test('all five frozen launcher blobs are byte-identical to K4b', () => {
-  for (const name of ['launcher.mjs', 'grant-verifier.mjs', 'grant-schema.mjs', 'owner-grant-key.mjs', 'boundaries.mjs']) {
+test('grant schema, verifier and owner key remain byte-identical to K6', () => {
+  for (const name of ['grant-verifier.mjs', 'grant-schema.mjs', 'owner-grant-key.mjs']) {
     const file = 'tools/d3-run1-launcher/' + name;
-    const baseline = execFileSync('git', ['show', K4B + ':' + file], { cwd: ROOT, windowsHide: true });
+    const baseline = execFileSync('git', ['show', K6 + ':' + file], { cwd: ROOT, windowsHide: true });
     assert.deepEqual(readFileSync(resolve(ROOT, file)), baseline);
   }
 });

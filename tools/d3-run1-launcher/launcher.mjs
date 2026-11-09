@@ -180,11 +180,12 @@ export function replayLauncher(options) {
 
 // The only live composition. Runtime supplies the existing fresh source and
 // credential ports, never the verifier, a session observer or an operator factory.
-export async function launchRun1(ownerGrant, runtime) {
+export async function launchRun1(ownerGrant, runtime, { diagnostics, checkPins } = {}) {
   assertLocalRuntime();
   requireThat(OWNER_GRANT_KEY_STATUS === 'PINNED', 'OWNER_GRANT_KEY_PLACEHOLDER');
   const compositionSha = await checkedOutCommit(ROOT);
   const grant = verifyOwnerGrant(ownerGrant, compositionSha);
+  requireThat(grant.expiresAt - grant.issuedAt === 900_000 && typeof checkPins === 'function', 'LIVE_SESSION_PINS_REQUIRED');
   const sessionConfig = Object.freeze({
     projectRef: 'aemxuqnnwfclzrwwiqfd', source: 'SUPABASE_PROJECT_AUTH_CONFIG',
     jwtExpirySeconds: grant.jwtExpirySeconds, observedAt: grant.jwtObservedAt,
@@ -195,7 +196,7 @@ export async function launchRun1(ownerGrant, runtime) {
     typeof runtime.secureStore?.resolve === 'function' && typeof runtime.sqlPool?.connect === 'function',
   'LIVE_RUNTIME_BINDING_REQUIRED');
   const { apiOrigin, frozenRoot, publishableKey, readSources, secureStore, sqlPool } = runtime;
-  const argv = ['--live', '--task-id', RUN1.runId, '--expected-sha', RUN1.businessSha];
+  const argv = ['--live', '--task-id', RUN1.taskId, '--expected-sha', RUN1.businessSha];
   requireThat(process.argv.slice(2).join('\0') === argv.join('\0'), 'ACTUAL_LOCAL_CLI_REQUIRED');
   await checkSharedGitDirectory(ROOT, frozenRoot);
   const pinnedOperator = await frozenOperatorPath(frozenRoot);
@@ -204,11 +205,12 @@ export async function launchRun1(ownerGrant, runtime) {
     await checkSharedGitDirectory(ROOT, frozenRoot);
     requireThat(await checkedOutCommit(ROOT) === compositionSha &&
       await frozenOperatorPath(frozenRoot) === pinnedOperator, 'EXECUTION_CHECKOUT_CHANGED');
+    await checkPins(compositionSha);
     requireThat(grant.expiresAt > Date.now(), 'GRANT_LIFETIME_REJECTED');
     checkLiveSessionConfig(sessionConfig);
   };
-  const readPreflight = createReadPreflight(readSources);
-  const credentials = createRuntimeCredentials(secureStore);
+  const readPreflight = createReadPreflight(readSources, { diagnostics });
+  const credentials = createRuntimeCredentials(secureStore, diagnostics);
   const evidence = bindLiveEvidence(sqlPool, CAPTURE_CHILD_TIMEOUT_MS);
   return runSingleOperator({
     ...evidence,

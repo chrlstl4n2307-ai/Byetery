@@ -1,14 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
+import { createPublicKey, verify } from 'node:crypto';
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 
-import { RUN1, checkLiveSessionConfig, createSessionDeadline } from './boundaries.mjs';
+import { RUN1, admissionControlName, checkLiveSessionConfig, createSessionDeadline } from './boundaries.mjs';
 import { checkedOutCommit, checkCaptureCheckout, checkSharedGitDirectory, frozenOperatorPath } from './f1-checkout.mjs';
 import { corroborateSharedFacts } from './f1-evidence.mjs';
-import { canonicalGrant, evaluateAuthEvidence } from './grant-schema.mjs';
+import { canonicalGrant, checkGrantScope, evaluateAuthEvidence } from './grant-schema.mjs';
 import { verifySignedAuthEvidence, verifySignedGrant } from './grant-verifier.mjs';
 import { ROOT } from './launcher.mjs';
 import { outputDirectory } from './replay.mjs';
@@ -27,6 +28,7 @@ const fixturePin = Object.freeze({
   fingerprint: '06e3fd8fda29bb60ab59557de61edb0aecdb231134be30e75b455f8e1b792fa9',
 });
 const signature = 'Ogc0EFV59oY51OQnjFKc4qJ_r17TFmR4oUelkss9Uav1sKMYfABnznqsYtCxnRwJNJMGP7fr6R3jHLeRbeHkBQ';
+const historicalGrant = Object.freeze({ ...grant, taskId: 'D3-17-FRESH-3RUN', runId: 'D3-17-RUN1' });
 const envelope = Object.freeze({ grant, signature });
 const validate = (data, pin = fixturePin, sha = checkedOutSha) => verifySignedGrant(data, pin, sha, now);
 const auth = Object.freeze({ schemaVersion: 1, compositionRootSha: checkedOutSha, grantNonce: nonce,
@@ -35,8 +37,11 @@ const auth = Object.freeze({ schemaVersion: 1, compositionRootSha: checkedOutSha
   jwtObservedAtRestored: now + 61_000 });
 const runTimes = { operatorStart: now, completedAt: now + 59_000, now: now + 62_000 };
 
-test('real Ed25519 verification accepts only the exact public fixture signature', () => {
-  assert.deepEqual(validate(envelope), grant);
+test('historical Ed25519 fixture is valid for its original bytes but cannot authorize K7', () => {
+  const key = createPublicKey({ key: Buffer.from(fixturePin.publicKey, 'base64url'), format: 'der', type: 'spki' });
+  assert.ok(verify(null, canonicalGrant(historicalGrant), key, Buffer.from(signature, 'base64url')));
+  assert.throws(() => validate({ grant: historicalGrant, signature }), /GRANT_SCOPE_REJECTED/);
+  assert.throws(() => validate(envelope), /OWNER_GRANT_SIGNATURE_REJECTED/);
   const wrong = Buffer.from(signature, 'base64url');
   wrong[0] ^= 1;
   assert.throws(() => validate({ grant, signature: wrong.toString('base64url') }), /OWNER_GRANT_SIGNATURE_REJECTED/);
@@ -119,13 +124,13 @@ test('canonical UTF-8 is deterministic, exact and independent of property order'
   ].join('\n');
   assert.deepEqual(canonicalGrant(grant), Buffer.from(expected));
   assert.deepEqual(canonicalGrant(reversed), canonicalGrant(grant));
-  assert.deepEqual(validate({ grant: reversed, signature }), grant);
+  checkGrantScope(reversed, checkedOutSha, now);
 });
 
-test('signed expiry leads to a strict 5280 versus 4080 seconds deadline', () => {
-  const verified = validate(envelope);
+test('grant expiry policy leads to a strict 5280 versus 4080 seconds deadline', () => {
+  checkGrantScope(grant, checkedOutSha, now);
   const config = { projectRef: 'aemxuqnnwfclzrwwiqfd', source: 'SUPABASE_PROJECT_AUTH_CONFIG',
-    observedAt: verified.jwtObservedAt, jwtExpirySeconds: verified.jwtExpirySeconds };
+    observedAt: grant.jwtObservedAt, jwtExpirySeconds: grant.jwtExpirySeconds };
   checkLiveSessionConfig(config, now);
   const deadline = expiry => createSessionDeadline({ ...config, jwtExpirySeconds: expiry },
     { operatorStart: now, now: () => now });
@@ -171,7 +176,7 @@ test('capture and evidence subtrees are ratified; no new auth network path or re
   const { stdout } = await exec('git', ['rev-parse', 'HEAD', '--path-format=absolute', '--git-common-dir'], { cwd: ROOT });
   const [head, common] = stdout.trim().split(/\r?\n/);
   await checkCaptureCheckout(ROOT, head);
-  await assert.rejects(access(join(common, 'byetery-d3-17-run1.launcher-admission')), { code: 'ENOENT' });
+  await assert.rejects(access(join(common, admissionControlName())), { code: 'ENOENT' });
   for (const name of ['launcher.mjs', 'f1-checkout.mjs', 'grant-schema.mjs', 'grant-verifier.mjs', 'f1-evidence.mjs', 'f1-capture-child.mjs']) {
     const source = await readFile(new URL('./' + name, import.meta.url), 'utf8');
     assert.doesNotMatch(source, /globalThis\.fetch\s*=|createServer|api\.supabase\.com|SUPABASE_ACCESS_TOKEN|auth\/v1\/token/);
