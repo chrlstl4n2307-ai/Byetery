@@ -253,9 +253,11 @@ export class Coordinator {
       return this.finish(db,id,command,{status:command.kind==='register_battery'||command.kind==='open_return'?201:200,body});
     });
   }
-  async reconcile(): Promise<void> {
-    const ids=await this.repo.transaction(async db=>(await db.query(`select id from app_private.stellar_operations where deployment_id=$1
-      and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN') order by created_at`,[this.repo.deploymentId])).rows.map(r=>r.id as string));
+  async reconcile(trigger: 'manual' | 'periodic' = 'manual'): Promise<void> {
+    const scan=async (db:Db)=>(await db.query<{id:string}>(`select id from app_private.stellar_operations where deployment_id=$1
+      and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN') order by created_at`,[this.repo.deploymentId])).rows.map(r=>r.id);
+    const ids=trigger==='periodic'?await this.repo.tryPeriodicReconcileScan(scan):await this.repo.transaction(scan);
+    if(ids===undefined)return;
     for(const id of ids){if(!this.supervisor.accepting)break;await this.process(id);}
   }
 }

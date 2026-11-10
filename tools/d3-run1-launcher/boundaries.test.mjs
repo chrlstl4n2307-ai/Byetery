@@ -52,7 +52,7 @@ test('live claim is fixed to the Git common directory and refuses duplicate invo
   assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
   assert.match(results.find(result => result.status === 'rejected').reason.message,
     /RUN_ALREADY_CLAIMED_OR_ADMISSION_UNAVAILABLE/);
-  assert.equal(await readFile(join(directory, '.git/byetery-d3-22-run1.launcher-admission'), 'utf8'), nonce + '\n');
+  assert.equal(await readFile(join(directory, '.git/byetery-d3-23-run1.launcher-admission'), 'utf8'), nonce + '\n');
   await assert.rejects(admitLiveOnce(directory, 'a'.repeat(64)), /RUN_ALREADY_CLAIMED/);
 });
 

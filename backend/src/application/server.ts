@@ -24,7 +24,7 @@ try {
   console.log(`Byetery API: ${await listen(server,port)} | Database: SUPABASE DEV | Source: ${repo.mode}`);
   function tick(){
     if(!coordinator.supervisor.accepting)return;
-    void coordinator.supervisor.run('scheduler',()=>coordinator.reconcile()).catch(()=>console.error('Reconciliation pending.'));
+    void coordinator.supervisor.run('scheduler',()=>coordinator.reconcile('periodic')).catch(()=>console.error('Reconciliation pending.'));
   }
   const timer=setInterval(tick,2000);
   let stopping=false;

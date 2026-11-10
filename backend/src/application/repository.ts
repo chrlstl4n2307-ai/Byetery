@@ -19,6 +19,16 @@ export class Repository {
   async transaction<T>(work: (db: Db) => Promise<T>): Promise<T> {
     return databaseTransaction(this.pool,work,'15s',this.deploymentId);
   }
+  async tryPeriodicReconcileScan<T>(read: (db: Db) => Promise<T>): Promise<T | undefined> {
+    return databaseTransaction(this.pool,async db=>{
+      await db.query('set transaction read only');
+      const {rows:[lock]}=await db.query<{acquired:boolean}>(
+        'select pg_try_advisory_xact_lock(hashtextextended($1,0)) as acquired',[this.deploymentId]);
+      if(lock?.acquired===false)return undefined;
+      requireThat(lock?.acquired===true,503,'ReconciliationLockResultInvalid');
+      return read(db);
+    },'15s');
+  }
   async principal(db: Db, identity: Identity): Promise<string> {
     const session = await one(db, `select 1 from auth.sessions where id=$1 and user_id=$2
       and (not_after is null or not_after > now())`, [identity.sessionId,identity.authUserId]);

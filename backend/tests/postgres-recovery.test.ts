@@ -4,6 +4,8 @@ import {EventEmitter} from 'node:events';
 import type {Pool,PoolClient} from 'pg';
 import type {PGlite} from '@electric-sql/pglite';
 import {databaseHealth,databaseTransaction} from '../src/application/database.ts';
+import {Coordinator} from '../src/application/coordinator.ts';
+import {Repository} from '../src/application/repository.ts';
 import {PgTransportDatabase,TransportStore} from '../src/testnet/store.ts';
 import {LocalTransactionWorker,recoveryClassification} from '../src/testnet/worker.ts';
 import {localDb,harness} from './testnet-fixtures.ts';
@@ -14,6 +16,47 @@ import {ACTORS,CONTRACT,invocation} from '../src/testnet/abi.ts';
 import type {Command} from '../src/domain.ts';
 import type {Work} from '../src/testnet/store.ts';
 import {DomainError} from '../src/domain.ts';
+
+test('periodic reconciliation skips a busy scan and the next tick processes the same candidates',async()=>{
+ const repo=new Repository({database:{},deploymentId:'fixture-deployment',mode:'TESTNET',url:'',publicKey:'',serverKey:''});
+ const statements:string[]=[],processed:string[]=[];
+ const tryLock='select pg_try_advisory_xact_lock(hashtextextended($1,0)) as acquired';
+ const blockingLock='select pg_advisory_xact_lock(hashtextextended($1,0))';
+ let acquired=false;
+ const client=Object.assign(new EventEmitter(),{
+  async query(sql:string,values?:unknown[]){
+   statements.push(sql);
+   if(sql===tryLock||sql===blockingLock)assert.deepEqual(values,[repo.deploymentId]);
+   if(sql===tryLock)return {rows:[{acquired}]};
+   if(sql.startsWith('select id from app_private.stellar_operations'))return {rows:[{id:'fixture-operation'}]};
+   return {rows:[]};
+  },
+  release(){statements.push('release');},
+ }) as unknown as PoolClient;
+ repo.pool.connect=async()=>client;
+ const coordinator=new Coordinator(repo,{},undefined,{async process(id){
+  assert.equal(statements.at(-1),'release');
+  processed.push(id);
+  return {status:200,body:{}};
+ }});
+ try{
+  await coordinator.reconcile('periodic');
+  assert.deepEqual(processed,[]);
+  assert.deepEqual(statements.slice(-4),['set transaction read only',tryLock,'commit','release']);
+  assert.equal(statements.filter(sql=>sql===tryLock).length,1);
+  assert.ok(!statements.some(sql=>sql.startsWith('select id')||sql===blockingLock));
+  statements.length=0;
+  acquired=true;
+  await coordinator.reconcile('periodic');
+  assert.deepEqual(processed,['fixture-operation']);
+  assert.equal(statements.filter(sql=>sql===tryLock).length,1);
+  assert.ok(!statements.includes(blockingLock));
+  statements.length=0;
+  await coordinator.reconcile();
+  assert.ok(statements.includes(blockingLock));
+  assert.ok(!statements.includes(tryLock));
+ }finally{await repo.pool.end();}
+});
 
 /** Real SQL/rollback with pg's independent pool/client EventEmitter contract. No TCP. */
 function faultPool(db:PGlite){
