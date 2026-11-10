@@ -8,13 +8,13 @@ import { settings } from '../../backend/src/application/config.ts';
 import { plan } from '../../backend/src/d3/model.ts';
 import { activationArguments, preflight } from '../../backend/src/d3/operator-control.ts';
 import { SPEC } from '../d3-evidence-capture/common.mjs';
-import { ROLES, RUN1, requireThat, runControlPaths } from './boundaries.mjs';
+import { ROLES, RUN1, preflightLeafCode, requireThat, runControlPaths } from './boundaries.mjs';
 import { promptFailureCode } from './diagnostics.mjs';
 import { createNoEcho, PromptFailure } from './no-echo.mjs';
 import { checkSharedGitDirectory, checkedOutCommit, frozenOperatorPath } from './f1-checkout.mjs';
 import { readChain } from './live-chain.mjs';
 import { evaluateReadiness, readLedger } from './live-readiness.mjs';
-import { lookupRole, readSql } from './live-sql.mjs';
+import { assertRoleIdentities, lookupRole, readSql } from './live-sql.mjs';
 
 const { Pool } = createRequire(new URL('../../backend/package.json', import.meta.url))('pg');
 const exec = promisify(execFile);
@@ -72,7 +72,7 @@ export function createRoleResolver({ checkAdmission, lookup, prompt, diagnostics
         email = await lookup(role);
         diagnostics?.event('CREDENTIAL_SQL_OK', role);
       } catch (error) {
-        diagnostics?.event('CREDENTIAL_SQL_FAIL', role);
+        diagnostics?.event('CREDENTIAL_SQL_FAIL', role, undefined, { leaf: preflightLeafCode(error) });
         throw error;
       }
       try {
@@ -120,6 +120,7 @@ export async function bindRuntime({ head, env, root, gitRead, localOrigin, diagn
     options: '-c default_transaction_read_only=on', application_name: 'byetery-d3-k6-readonly' });
   sqlPool.on('error', () => {});
   let baseline;
+  let rolesChecked = false;
 
   const prompt = createNoEcho();
   const secureStore = createRoleResolver({
@@ -137,12 +138,17 @@ export async function bindRuntime({ head, env, root, gitRead, localOrigin, diagn
     await frozenOperatorPath(frozenRoot);
     const gitAt = Date.now();
     const journal = await readJournal(journalPath);
-    const [sqlResult, chain, signers] = await Promise.all([
-      readSql(sqlPool).then(sql => ({ sql, at: Date.now() })),
+    const [chain, signers] = await Promise.all([
       readChain(),
       checkPublicSigners(frozenRoot, env),
     ]);
-    const { baseline: first, ...readiness } = evaluateReadiness({ sql: sqlResult.sql, chain, history, journal, baseline });
+    const sql = await readSql(sqlPool, { coordinate: true });
+    const sqlAt = Date.now();
+    const { baseline: first, ...readiness } = evaluateReadiness({ sql, chain, history, journal, baseline });
+    if (!rolesChecked) {
+      await assertRoleIdentities(sqlPool);
+      rolesChecked = true;
+    }
     const observation = {
       ...readiness, taskId: RUN1.taskId, runId: RUN1.runId, observedAt: Date.now(),
       git: { sha: RUN1.businessSha, clean: true }, sameRuntimeSha: RUN1.businessSha, mode: 'TESTNET',
@@ -153,7 +159,7 @@ export async function bindRuntime({ head, env, root, gitRead, localOrigin, diagn
     baseline = first;
     return { requestId, preflight: observation, observations: [
       { source: 'LOCAL_GIT', observedAt: gitAt, ledger: null },
-      { source: 'SUPABASE_SQL_READ_ONLY', observedAt: sqlResult.at, ledger: null },
+      { source: 'SUPABASE_SQL_READ_ONLY', observedAt: sqlAt, ledger: null },
       { source: 'STELLAR_RPC_TESTNET', observedAt: chain.observedAt, ledger: chain.ledger },
     ] };
   }

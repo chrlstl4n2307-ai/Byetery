@@ -13,6 +13,7 @@ import { createDiagnostics, persistFatal } from './diagnostics.mjs';
 import { verifySessionPins } from './session-pins.mjs';
 
 export const K7 = '6b87356a208dd26cf310614265002c5c7a5b1bcf';
+const D322_PARENT = 'a2e8a8f1c34fe691593b7e5e4ba523a1d8b8f63b';
 export const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 export const ARGV = Object.freeze(['--live', '--task-id', RUN1.taskId, '--expected-sha', RUN1.businessSha]);
 const runtimeFields = ['apiOrigin', 'frozenRoot', 'publishableKey', 'readSources', 'secureStore', 'sqlPool'];
@@ -37,8 +38,8 @@ async function composition() {
     gitRead(ROOT, ['log', '-1', '--format=%P']),
     gitRead(ROOT, ['status', '--porcelain', '--untracked-files=no']),
   ]);
-  // The owner grant and manifest pin the exact H1 follow-up to K7.
-  requireThat(branch === 'instaward/d2-web-mvp' && parent === K7 && !dirty, 'K7_CHECKOUT_REJECTED');
+  // The owner grant and manifest pin the exact recovery child of the published K7 TTY and Node pin checkpoint.
+  requireThat(branch === 'instaward/d2-web-mvp' && parent === D322_PARENT && !dirty, 'D322_CHECKOUT_REJECTED');
   await checkCaptureCheckout(ROOT, head);
   return head;
 }
@@ -46,7 +47,7 @@ async function composition() {
 async function readEnvelope(env) {
   requireThat(typeof env.LOCALAPPDATA === 'string' && isAbsolute(env.LOCALAPPDATA), 'OWNER_CUSTODY_PATH_REQUIRED');
   const base = await realpath(env.LOCALAPPDATA);
-  const path = join(base, 'OwnerKeyCustody', 'Byetery-D3-RUN1', 'live', 'RUN1-owner-grant-envelope.json');
+  const path = join(base, 'OwnerKeyCustody', 'Byetery-D3-RUN1', 'live', RUN1.taskId + '-owner-grant-envelope.json');
   requireThat(await realpath(path) === path && (await lstat(path)).isFile(), 'OWNER_CUSTODY_FILE_REQUIRED');
   const file = await open(path, 'r');
   try {

@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { promisify } from 'node:util';
 
 export const RUN1 = Object.freeze({
-  taskId: 'D3-18-RUN1',
+  taskId: 'D3-22-RUN1',
   runId: 'RUN1',
   businessSha: 'c6ba2e837ed0f7b81373655b8106b58ecb86a8cd',
   planHash: '3788fd5b0ce1e07cb91720a7fb16cf8d9a81f1ee86e2eb29b289c56f4fc15c1e',
@@ -28,14 +28,106 @@ export function requireThat(condition, code) {
   if (!condition) throw new Error(code);
 }
 
+export const PREFLIGHT_LEAF_CODE = /^[A-Z][A-Z0-9_]{1,80}$/;
+export const PREFLIGHT_PHASES = Object.freeze(['PRE_ADMISSION', 'REVIEWED', 'STARTUP_FRESH', 'OPERATOR_STEP']);
+
+export const PREFLIGHT_INNER_CODES = Object.freeze([
+  'TIMEOUT', 'NET', 'HTTP_STATUS', 'RPC_REJECTED', 'TOO_LARGE', 'VALIDATION', 'JSON', 'UNKNOWN',
+]);
+const innerCodes = new Set(PREFLIGHT_INNER_CODES);
+const mappedCodes = new Map([
+  ['PUBLIC_READ_UNAVAILABLE', 'NET'],
+  ['RPC_REJECTED', 'RPC_REJECTED'],
+  ['RESPONSE_TOO_LARGE', 'TOO_LARGE'],
+  ['HORIZON_ACCOUNT_RESPONSE_TOO_LARGE', 'TOO_LARGE'],
+  ['INVALID_PUBLIC_JSON', 'JSON'],
+  ['HORIZON_ACCOUNT_UNAVAILABLE', 'HTTP_STATUS'],
+]);
+const validationCode = /^(?:CHAIN_READINESS_REJECTED|TESTNET_[A-Z0-9_]+|SQL_[A-Z0-9_]+|POOL_OR_TTL_REJECTED|POOL_AUTHORIZATION_REJECTED|SOURCE_SEQUENCE_OR_FUNDING_REJECTED|WALLET_TRUSTLINE_REJECTED|WALLET_LINK_REJECTED|ARCHIVED_BATTERY_COLLISION|REWARD_READINESS_REJECTED|CHAIN_SOURCE_IDENTITY_REJECTED|DURABLE_SOURCE_SEQUENCE_REJECTED|RUN1_[A-Z0-9_]+|EXTERNAL_LEDGER_[A-Z0-9_]+|NONCOUNTING_OPERATION_REJECTED|PREFLIGHT_FRESHNESS_REJECTED|PREFLIGHT_SCOPE_REJECTED|PREFLIGHT_PROVENANCE_REJECTED|CONCURRENT_PREFLIGHT_REJECTED)$/;
+const leafCodes = new Set([
+  ...mappedCodes.keys(), 'ROLE_IDENTITY_NOT_UNIQUE', 'ROLE_BEFORE_ADMISSION_REJECTED',
+  'CHAIN_READINESS_REJECTED', 'TESTNET_IDENTITY_REJECTED', 'TESTNET_CONTRACT_STATE_UNAVAILABLE',
+  'TESTNET_CONTRACT_IDENTITY_REJECTED', 'TESTNET_ACCOUNT_UNAVAILABLE', 'LEDGER_KEY_RESPONSE_MISMATCH',
+  'SQL_READONLY_REQUIRED', 'SQL_DEPLOYMENT_REJECTED', 'SQL_QUIESCENCE_REJECTED', 'SQL_CONFIG_TARGET_REJECTED',
+  'POOL_OR_TTL_REJECTED', 'POOL_AUTHORIZATION_REJECTED', 'SOURCE_SEQUENCE_OR_FUNDING_REJECTED',
+  'WALLET_TRUSTLINE_REJECTED', 'WALLET_LINK_REJECTED', 'ARCHIVED_BATTERY_COLLISION',
+  'REWARD_READINESS_REJECTED', 'CHAIN_SOURCE_IDENTITY_REJECTED', 'DURABLE_SOURCE_SEQUENCE_REJECTED',
+  'RUN1_BATTERY_COLLISION', 'RUN1_CHAIN_SQL_STATE_MISMATCH', 'RUN1_OPERATION_IDENTITY_REJECTED',
+  'RUN1_RESERVATION_REJECTED', 'RUN1_PLAN_REJECTED', 'RUN1_CONTROL_DIRECTORY_REJECTED',
+  'RUN1_JOURNAL_IDENTITY_REJECTED', 'RUN1_JOURNAL_INCOMPLETE', 'RUN1_JOURNAL_REJECTED', 'RUN1_PRIOR_CONTROL_REJECTED',
+  'EXTERNAL_LEDGER_CONSUMPTION_REJECTED', 'EXTERNAL_LEDGER_DIGEST_REJECTED', 'EXTERNAL_LEDGER_POLICY_REJECTED',
+  'NONCOUNTING_OPERATION_REJECTED', 'PREFLIGHT_FRESHNESS_REJECTED', 'PREFLIGHT_SCOPE_REJECTED',
+  'PREFLIGHT_PROVENANCE_REJECTED', 'CONCURRENT_PREFLIGHT_REJECTED', 'K6_COMPOSITION_CHANGED',
+  'SIGNER_CLI_IDENTITY_REJECTED', 'PUBLIC_SIGNER_IDENTITY_REJECTED',
+]);
+
+function errorNames(error) {
+  const names = [];
+  const seen = new Set();
+  for (let current = error, depth = 0; current && depth < 8; current = current.cause, depth++) {
+    if (seen.has(current)) break;
+    seen.add(current);
+    if (typeof current.name === 'string') names.push(current.name);
+  }
+  return names;
+}
+
+function declaredCode(error) {
+  for (const value of [error?.code, error?.message]) {
+    if (typeof value === 'string' && /^[A-Z][A-Z0-9_]{1,80}$/.test(value)) return value;
+  }
+}
+
+export function classifyPreflightInnerCode(error) {
+  if (errorNames(error).some(name => name === 'TimeoutError' || name === 'AbortError')) return 'TIMEOUT';
+  if (error instanceof SyntaxError || errorNames(error).includes('SyntaxError')) return 'JSON';
+  const code = declaredCode(error);
+  if (mappedCodes.has(code)) return mappedCodes.get(code);
+  if (code === 'ROLE_IDENTITY_NOT_UNIQUE' || (typeof code === 'string' && validationCode.test(code))) return 'VALIDATION';
+  return 'UNKNOWN';
+}
+
+export function sanitizePreflightInnerCode(value) {
+  return innerCodes.has(value) ? value : undefined;
+}
+
+export function preflightLeafCode(error) {
+  const seen = new Set();
+  for (let current = error, depth = 0; current && depth < 8; current = current.cause, depth++) {
+    if (seen.has(current)) break;
+    seen.add(current);
+    for (const code of [current.code, current.message]) {
+      if (sanitizePreflightLeafCode(code) !== 'UNKNOWN_LEAF') return code;
+    }
+  }
+  return 'UNKNOWN_LEAF';
+}
+
+export function sanitizePreflightLeafCode(value) {
+  return typeof value === 'string' && PREFLIGHT_LEAF_CODE.test(value) && leafCodes.has(value) ? value : 'UNKNOWN_LEAF';
+}
+
+export function sanitizePreflightPhase(value) {
+  return PREFLIGHT_PHASES.includes(value) ? value : undefined;
+}
+
+function preflightPhaseOf(phaseOf, readNumber) {
+  if (typeof phaseOf === 'function') return sanitizePreflightPhase(phaseOf(readNumber));
+  return readNumber >= 1 ? 'PRE_ADMISSION' : undefined;
+}
+
 // Source must perform the underlying observations within the requested window.
 // A new request binding plus source timestamps reject a reused result.
-export function createReadPreflight(readSources, { now = Date.now, retain = () => {}, diagnostics } = {}) {
+export function createReadPreflight(readSources, { now = Date.now, retain = () => {}, diagnostics, phaseOf } = {}) {
   let lastRead = -1;
   let pending = false;
+  let reads = 0;
   return async function readPreflight() {
     requireThat(!pending, 'CONCURRENT_PREFLIGHT_REJECTED');
     pending = true;
+    let sourceFailure;
+    const readNumber = ++reads;
+    const phase = preflightPhaseOf(phaseOf, readNumber);
     try {
       diagnostics?.event('PREFLIGHT_ENTER');
       const requestedAt = now();
@@ -43,7 +135,8 @@ export function createReadPreflight(readSources, { now = Date.now, retain = () =
       let result;
       try {
         result = await readSources(Object.freeze({ requestId, requestedAt, identity: RUN1 }));
-      } catch {
+      } catch (sourceError) {
+        sourceFailure = sourceError;
         throw new Error('PREFLIGHT_SOURCES_UNAVAILABLE');
       }
       const completedAt = now();
@@ -68,7 +161,11 @@ export function createReadPreflight(readSources, { now = Date.now, retain = () =
       // Frozen operator sets f.git on this independent copy.
       return structuredClone(preflight);
     } catch (error) {
-      diagnostics?.event('PREFLIGHT_FAIL');
+      diagnostics?.event('PREFLIGHT_FAIL', undefined, classifyPreflightInnerCode(sourceFailure ?? error), {
+        leaf: preflightLeafCode(sourceFailure ?? error),
+        readNumber,
+        phase,
+      });
       throw error;
     } finally {
       pending = false;

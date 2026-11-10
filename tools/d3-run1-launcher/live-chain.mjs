@@ -49,27 +49,29 @@ async function horizonAccount(address, fetcher) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
+const CLOSED_AT = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/;
+
 export async function readChain(fetcher = fetch, now = Date.now) {
   const rpc = new PublicReads(fetcher);
-  const [network, latest, entries, ...accountFacts] = await Promise.all([
-    rpc.rpc('getNetwork'), rpc.rpc('getLatestLedger'),
+  const [network, entries, ...accountFacts] = await Promise.all([
+    rpc.rpc('getNetwork'),
     rpc.rpc('getLedgerEntries', { keys: [...Object.values(keys), ...accountKeys] }),
     ...accounts.map(address => horizonAccount(address, fetcher)),
   ]);
-  const observedAt = now();
   const ledger = entries.value.latestLedger;
-  const closeTime = Number(latest.value.closeTime);
   check(network.value.passphrase === SPEC.network &&
     new Asset(SPEC.asset, SPEC.issuer).contractId(SPEC.network) === SPEC.token, 'TESTNET_IDENTITY_REJECTED');
-  check(Number.isSafeInteger(ledger) && ledger > 0 && Number.isSafeInteger(latest.value.sequence) &&
-    Math.abs(ledger - latest.value.sequence) <= 5 && Number.isSafeInteger(closeTime) &&
-    observedAt - closeTime * 1000 < 90_000 && observedAt - closeTime * 1000 >= -10_000);
+  check(Number.isSafeInteger(ledger) && ledger > 0);
+  const baseReserve = (await rpc.horizon('/ledgers/' + ledger)).value;
+  const observedAt = now();
+  check(baseReserve.sequence === ledger && Number.isSafeInteger(baseReserve.base_reserve_in_stroops) &&
+    baseReserve.base_reserve_in_stroops > 0);
+  check(typeof baseReserve.closed_at === 'string' && CLOSED_AT.test(baseReserve.closed_at));
+  const closeMs = Date.parse(baseReserve.closed_at);
+  check(Number.isSafeInteger(closeMs) && observedAt - closeMs < 90_000 && observedAt - closeMs >= -10_000);
   const rows = new Map((entries.value.entries ?? []).map(row => [row.key, row]));
   const requestedKeys = new Set([...Object.values(keys), ...accountKeys]);
   check(rows.size === entries.value.entries?.length && [...rows.keys()].every(key => requestedKeys.has(key)));
-  const baseReserve = (await rpc.horizon('/ledgers/' + ledger)).value;
-  check(baseReserve.sequence === ledger && Number.isSafeInteger(baseReserve.base_reserve_in_stroops) &&
-    baseReserve.base_reserve_in_stroops > 0);
   const read = key => ledgerEntry(key, rows.get(key), ledger, new Date(observedAt).toISOString());
   const code = read(keys.code), contract = read(keys.contract), sac = read(keys.sac), pool = read(keys.pool);
   const collector = read(keys.collector), recycler = read(keys.recycler), battery = read(keys.battery);

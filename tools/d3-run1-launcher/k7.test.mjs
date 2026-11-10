@@ -217,15 +217,15 @@ test('fatal persistence hashes exact on-disk bytes and never serializes arbitrar
   assert.equal(record.errorName, 'K7Stop');
   assert.equal(record.errorCode, 'CREDENTIAL_SQL_FAIL');
   assert.deepEqual(Object.keys(record).sort(), [
-    'compositionRootSha', 'errorCode', 'errorName', 'events', 'role', 'schemaVersion', 'sessionControlSha256',
+    'compositionRootSha', 'errorCode', 'errorName', 'events', 'leaf', 'role', 'schemaVersion', 'sessionControlSha256',
     'stage', 'taskId', 'timestamp',
   ]);
 });
 
 test('old admission and empty journal stay intact and do not block distinct K7 controls', async t => {
   const dir = await scratch(t);
-  const old = 'D3-17-RUN1';
-  const marker = join(dir, 'byetery-d3-17-run1.launcher-admission');
+  const old = 'D3-21-RUN1';
+  const marker = join(dir, 'byetery-d3-21-run1.launcher-admission');
   const journal = join(dir, 'byetery-d3-operator', old + '-' + RUN1.businessSha + '.jsonl');
   await mkdir(dirname(journal));
   await writeFile(marker, 'a'.repeat(64) + '\n');

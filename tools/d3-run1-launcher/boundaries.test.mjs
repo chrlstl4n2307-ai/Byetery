@@ -8,9 +8,11 @@ import { fileURLToPath } from 'node:url';
 
 import {
   MAX_RECAPTURE_ATTEMPTS_AFTER_INITIAL_CAPTURE, RUN1, admitLiveOnce,
-  checkLiveSessionConfig, createReadPreflight, createRuntimeCredentials, createSessionDeadline,
-  createSingleAdmission, SESSION_SAFETY_MARGIN_SECONDS,
+  checkLiveSessionConfig, classifyPreflightInnerCode, createReadPreflight, createRuntimeCredentials,
+  createSessionDeadline, createSingleAdmission, PREFLIGHT_INNER_CODES, SESSION_SAFETY_MARGIN_SECONDS,
+  preflightLeafCode, sanitizePreflightLeafCode, sanitizePreflightPhase,
 } from './boundaries.mjs';
+import { createDiagnostics, persistFatal } from './diagnostics.mjs';
 import { replayLauncher } from './launcher.mjs';
 import { fixture, outputDirectory } from './replay.mjs';
 
@@ -50,7 +52,7 @@ test('live claim is fixed to the Git common directory and refuses duplicate invo
   assert.equal(results.filter(result => result.status === 'fulfilled').length, 1);
   assert.match(results.find(result => result.status === 'rejected').reason.message,
     /RUN_ALREADY_CLAIMED_OR_ADMISSION_UNAVAILABLE/);
-  assert.equal(await readFile(join(directory, '.git/byetery-d3-18-run1.launcher-admission'), 'utf8'), nonce + '\n');
+  assert.equal(await readFile(join(directory, '.git/byetery-d3-22-run1.launcher-admission'), 'utf8'), nonce + '\n');
   await assert.rejects(admitLiveOnce(directory, 'a'.repeat(64)), /RUN_ALREADY_CLAIMED/);
 });
 
@@ -199,4 +201,187 @@ test('no refresh, retry or replacement capability is invoked by default or after
   assert.equal(forbidden, 0);
   assert.equal(fetches, 0);
   assert.equal(MAX_RECAPTURE_ATTEMPTS_AFTER_INITIAL_CAPTURE, 1);
+});
+
+test('preflight innerCode maps each closed class and never copies raw details', async () => {
+  const samples = [
+    [Object.assign(new Error('aborted'), { name: 'AbortError' }), 'TIMEOUT'],
+    [Object.assign(new Error('timeout'), { name: 'TimeoutError' }), 'TIMEOUT'],
+    [Object.assign(new Error('outer'), { cause: Object.assign(new Error('nested'), { name: 'AbortError' }) }), 'TIMEOUT'],
+    [Object.assign(new Error('PUBLIC_READ_UNAVAILABLE'), { name: 'CaptureError', code: 'PUBLIC_READ_UNAVAILABLE' }), 'NET'],
+    [Object.assign(new Error('HORIZON_ACCOUNT_UNAVAILABLE'), { name: 'Error' }), 'HTTP_STATUS'],
+    [Object.assign(new Error('RPC_REJECTED'), { name: 'CaptureError', code: 'RPC_REJECTED' }), 'RPC_REJECTED'],
+    [Object.assign(new Error('RESPONSE_TOO_LARGE'), { name: 'CaptureError', code: 'RESPONSE_TOO_LARGE' }), 'TOO_LARGE'],
+    [Object.assign(new Error('HORIZON_ACCOUNT_RESPONSE_TOO_LARGE'), { name: 'Error' }), 'TOO_LARGE'],
+    [Object.assign(new Error('INVALID_PUBLIC_JSON'), { name: 'CaptureError', code: 'INVALID_PUBLIC_JSON' }), 'JSON'],
+    [new SyntaxError('Unexpected token'), 'JSON'],
+    [new Error('CHAIN_READINESS_REJECTED'), 'VALIDATION'],
+    [new Error('TESTNET_IDENTITY_REJECTED'), 'VALIDATION'],
+    [new Error('SQL_READONLY_REQUIRED'), 'VALIDATION'],
+    [new Error('POOL_OR_TTL_REJECTED'), 'VALIDATION'],
+    [new Error('SOURCE_SEQUENCE_OR_FUNDING_REJECTED'), 'VALIDATION'],
+    [new Error('PREFLIGHT_FRESHNESS_REJECTED'), 'VALIDATION'],
+    [new Error('not a classified failure'), 'UNKNOWN'],
+  ];
+  for (const [error, expected] of samples) {
+    assert.equal(classifyPreflightInnerCode(error), expected);
+  }
+  assert.deepEqual([...PREFLIGHT_INNER_CODES],
+    ['TIMEOUT', 'NET', 'HTTP_STATUS', 'RPC_REJECTED', 'TOO_LARGE', 'VALIDATION', 'JSON', 'UNKNOWN']);
+});
+
+test('PREFLIGHT_FAIL records sanitized innerCode for each class and B-class maps to VALIDATION', async () => {
+  const cases = [
+    [Object.assign(new Error('aborted'), { name: 'AbortError' }), 'TIMEOUT'],
+    [Object.assign(new Error('PUBLIC_READ_UNAVAILABLE'), { code: 'PUBLIC_READ_UNAVAILABLE' }), 'NET'],
+    [new Error('HORIZON_ACCOUNT_UNAVAILABLE'), 'HTTP_STATUS'],
+    [Object.assign(new Error('RPC_REJECTED'), { code: 'RPC_REJECTED' }), 'RPC_REJECTED'],
+    [Object.assign(new Error('RESPONSE_TOO_LARGE'), { code: 'RESPONSE_TOO_LARGE' }), 'TOO_LARGE'],
+    [new SyntaxError('Unexpected token'), 'JSON'],
+    [new Error('unclassified'), 'UNKNOWN'],
+  ];
+  for (const [error, expected] of cases) {
+    const diagnostics = createDiagnostics();
+    const read = createReadPreflight(async () => { throw error; }, { now: () => nowMs, diagnostics });
+    await assert.rejects(read(), /PREFLIGHT_SOURCES_UNAVAILABLE/);
+    assert.equal(diagnostics.fatal('STOP_OPERATOR_REQUIRES_REVIEW').events.at(-1).innerCode, expected);
+  }
+  const freshness = createDiagnostics();
+  let time = nowMs, saved;
+  const read = createReadPreflight(async (request) => {
+    if (!saved) return saved = preflightFixture(request);
+    return saved;
+  }, { now: () => time++, diagnostics: freshness });
+  await read();
+  await assert.rejects(read(), /PREFLIGHT_FRESHNESS_REJECTED/);
+  const fail = freshness.fatal('STOP_OPERATOR_REQUIRES_REVIEW');
+  assert.equal(fail.stage, 'PREFLIGHT_FAIL');
+  assert.equal(fail.events.at(-1).innerCode, 'VALIDATION');
+  assert.equal(Object.hasOwn(fail, 'innerCode'), false);
+});
+
+test('PREFLIGHT_FAIL redacts secrets and rejects a non-whitelist innerCode', async () => {
+  const leak = [
+    'postgres://user:pw@db.abcdefghijklmnop.supabase.co:5432/postgres',
+    'https://abcdefghijklmnop.supabase.com/rest/v1',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.aaa.bbb',
+    'GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS',
+  ].join(' ');
+  const error = new Error(leak);
+  error.stack = leak + '\n    at classify (/workspace/secret.js:1:1)';
+  const diagnostics = createDiagnostics();
+  const read = createReadPreflight(async () => { throw error; }, { now: () => nowMs, diagnostics });
+  await assert.rejects(read(), /PREFLIGHT_SOURCES_UNAVAILABLE/);
+  const result = await persistFatal(diagnostics, 'STOP_OPERATOR_REQUIRES_REVIEW', 'a'.repeat(40), 'b'.repeat(64));
+  const bytes = await readFile(result.path);
+  const text = bytes.toString('utf8');
+  assert.ok(!text.includes('postgres://'));
+  assert.ok(!text.includes('user:pw'));
+  assert.ok(!text.includes('supabase.co'));
+  assert.ok(!text.includes('supabase.com'));
+  assert.ok(!text.includes('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'));
+  assert.ok(!text.includes('GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS'));
+  assert.ok(!text.includes(leak));
+  const record = JSON.parse(text);
+  assert.equal(record.events.at(-1).innerCode, 'UNKNOWN');
+  assert.equal(record.events.at(-1).leaf, 'UNKNOWN_LEAF');
+  assert.equal(record.leaf, 'UNKNOWN_LEAF');
+  assert.equal(record.phase, 'PRE_ADMISSION');
+  assert.equal(record.readNumber, 1);
+  assert.deepEqual(Object.keys(record).sort(), [
+    'compositionRootSha', 'errorCode', 'errorName', 'events', 'leaf', 'phase', 'readNumber',
+    'schemaVersion', 'sessionControlSha256', 'stage', 'taskId', 'timestamp',
+  ]);
+  const raw = createDiagnostics();
+  raw.event('PREFLIGHT_FAIL', undefined, 'NOT_A_REAL_CODE', { leaf: 'user:pw leaked', phase: 'free text phase' });
+  const payload = JSON.stringify(raw.fatal('STOP_OPERATOR_REQUIRES_REVIEW'));
+  assert.ok(!payload.includes('NOT_A_REAL_CODE'));
+  assert.ok(!payload.includes('user:pw leaked'));
+  assert.ok(!payload.includes('free text phase'));
+  assert.equal(Object.hasOwn(raw.fatal('STOP_OPERATOR_REQUIRES_REVIEW').events.at(-1), 'innerCode'), false);
+  assert.equal(raw.fatal('STOP_OPERATOR_REQUIRES_REVIEW').events.at(-1).leaf, 'UNKNOWN_LEAF');
+  assert.equal(Object.hasOwn(raw.fatal('STOP_OPERATOR_REQUIRES_REVIEW').events.at(-1), 'phase'), false);
+});
+
+test('PREFLIGHT_FAIL fatal records requireThat leaf and phase without values or secrets', async () => {
+  assert.equal(preflightLeafCode(new Error('SQL_QUIESCENCE_REJECTED')), 'SQL_QUIESCENCE_REJECTED');
+  assert.equal(preflightLeafCode(Object.assign(new Error('outer'), { cause: new Error('CHAIN_READINESS_REJECTED') })),
+    'CHAIN_READINESS_REJECTED');
+  assert.equal(preflightLeafCode(new Error('password=super-secret')), 'UNKNOWN_LEAF');
+  assert.equal(sanitizePreflightLeafCode('SOURCE_SEQUENCE_OR_FUNDING_REJECTED'), 'SOURCE_SEQUENCE_OR_FUNDING_REJECTED');
+  assert.equal(sanitizePreflightLeafCode('not a code'), 'UNKNOWN_LEAF');
+  assert.equal(sanitizePreflightLeafCode('SQL_SECRET_LOOKING_VALUE'), 'UNKNOWN_LEAF');
+  assert.equal(sanitizePreflightLeafCode('VALIDATION=pool:123'), 'UNKNOWN_LEAF');
+  assert.equal(sanitizePreflightPhase('PRE_ADMISSION'), 'PRE_ADMISSION');
+  assert.equal(sanitizePreflightPhase('reviewed'), undefined);
+  assert.equal(sanitizePreflightPhase('sql said occupied=1'), undefined);
+
+  const cases = [
+    [new Error('SQL_QUIESCENCE_REJECTED'), 'SQL_QUIESCENCE_REJECTED', 'VALIDATION', 'PRE_ADMISSION', 1],
+    [new Error('CHAIN_READINESS_REJECTED'), 'CHAIN_READINESS_REJECTED', 'VALIDATION', 'PRE_ADMISSION', 1],
+    [new Error('SOURCE_SEQUENCE_OR_FUNDING_REJECTED'), 'SOURCE_SEQUENCE_OR_FUNDING_REJECTED', 'VALIDATION', 'PRE_ADMISSION', 1],
+    [Object.assign(new Error('PUBLIC_READ_UNAVAILABLE'), { code: 'PUBLIC_READ_UNAVAILABLE' }),
+      'PUBLIC_READ_UNAVAILABLE', 'NET', 'PRE_ADMISSION', 1],
+    [Object.assign(new Error('timeout'), { name: 'TimeoutError' }), 'UNKNOWN_LEAF', 'TIMEOUT', 'PRE_ADMISSION', 1],
+  ];
+  for (const [error, leaf, inner, phase, readNumber] of cases) {
+    const diagnostics = createDiagnostics();
+    const read = createReadPreflight(async () => { throw error; }, { now: () => nowMs, diagnostics });
+    await assert.rejects(read(), /PREFLIGHT_SOURCES_UNAVAILABLE/);
+    const fatal = diagnostics.fatal('STOP_OPERATOR_REQUIRES_REVIEW');
+    const event = fatal.events.at(-1);
+    assert.equal(fatal.stage, 'PREFLIGHT_FAIL');
+    assert.equal(fatal.leaf, leaf);
+    assert.equal(fatal.phase, phase);
+    assert.equal(fatal.readNumber, readNumber);
+    assert.equal(event.leaf, leaf);
+    assert.equal(event.innerCode, inner);
+    assert.equal(event.phase, phase);
+    assert.equal(event.readNumber, readNumber);
+  }
+
+  const operator = createDiagnostics();
+  let calls = 0;
+  const read = createReadPreflight(async (request) => {
+    calls += 1;
+    if (calls < 3) return preflightFixture(request, 7 + calls);
+    throw new Error('SQL_QUIESCENCE_REJECTED');
+  }, {
+    now: () => nowMs + calls,
+    diagnostics: operator,
+    phaseOf: n => (n === 1 ? 'REVIEWED' : 'STARTUP_FRESH'),
+  });
+  await read();
+  await read();
+  await assert.rejects(read(), /PREFLIGHT_SOURCES_UNAVAILABLE/);
+  const startup = operator.fatal('STOP_OPERATOR_START_REQUIRES_REVIEW');
+  assert.equal(startup.stage, 'PREFLIGHT_FAIL');
+  assert.equal(startup.leaf, 'SQL_QUIESCENCE_REJECTED');
+  assert.equal(startup.phase, 'STARTUP_FRESH');
+  assert.equal(startup.readNumber, 3);
+  assert.equal(startup.events.at(-1).innerCode, 'VALIDATION');
+
+  const freshness = createDiagnostics();
+  let time = nowMs, saved;
+  const again = createReadPreflight(async (request) => {
+    if (!saved) return saved = preflightFixture(request);
+    return saved;
+  }, { now: () => time++, diagnostics: freshness, phaseOf: n => (n === 1 ? 'REVIEWED' : 'STARTUP_FRESH') });
+  await again();
+  await assert.rejects(again(), /PREFLIGHT_FRESHNESS_REJECTED/);
+  const stale = freshness.fatal('PRE_ADMISSION_READS_REJECTED');
+  assert.equal(stale.leaf, 'PREFLIGHT_FRESHNESS_REJECTED');
+  assert.equal(stale.phase, 'STARTUP_FRESH');
+  assert.equal(stale.readNumber, 2);
+
+  const leak = 'postgres://user:pw@db.example.invalid:5432/postgres value=42';
+  const dirty = createDiagnostics();
+  dirty.event('PREFLIGHT_FAIL', undefined, leak, { leaf: leak, phase: leak, readNumber: leak });
+  const serialized = JSON.stringify(dirty.fatal('PRE_ADMISSION_READS_REJECTED'));
+  assert.ok(!serialized.includes('postgres://'));
+  assert.ok(!serialized.includes('user:pw'));
+  assert.ok(!serialized.includes('value=42'));
+  assert.equal(dirty.fatal('PRE_ADMISSION_READS_REJECTED').leaf, 'UNKNOWN_LEAF');
+  assert.equal(Object.hasOwn(dirty.fatal('PRE_ADMISSION_READS_REJECTED'), 'phase'), false);
+  assert.equal(Object.hasOwn(dirty.fatal('PRE_ADMISSION_READS_REJECTED'), 'readNumber'), false);
 });

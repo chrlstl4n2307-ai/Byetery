@@ -6,7 +6,8 @@ import test from 'node:test';
 
 import { localDb } from '../../backend/tests/testnet-fixtures.ts';
 import { SPEC } from '../d3-evidence-capture/common.mjs';
-import { RUN1 } from './boundaries.mjs';
+import { createReadPreflight, RUN1 } from './boundaries.mjs';
+import { createDiagnostics } from './diagnostics.mjs';
 import { verifyOwnerGrant } from './grant-verifier.mjs';
 import { ARGV, K7, ROOT, runEntry } from './live.mjs';
 import { readChain } from './live-chain.mjs';
@@ -201,22 +202,23 @@ test('a changed composition after preflight stops before launch', async () => {
   assert.deepEqual(h.events, ['verify', 'bind', 'controls', 'preflight', 'controls', 'close']);
 });
 
-test('SQL opens a read-only transaction, uses two SELECT queries and rolls back', async () => {
+test('SQL opens a read-only transaction, uses one snapshot SELECT and rolls back', async () => {
   const calls = [];
   const pool = { async connect() {
     return {
       async query(query) {
         calls.push(typeof query === 'string' ? query : query.text);
-        return { rows: typeof query === 'object' && query.text.includes('current_setting') ? [{ read_only: 'on' }] : [] };
+        return { rows: typeof query === 'object' && query.text.includes('current_setting') ? [{ read_only: 'on', wallets: [] }] : [] };
       },
       release() { calls.push('release'); },
     };
   } };
   assert.deepEqual(await readSql(pool), { read_only: 'on', wallets: [] });
   assert.equal(calls[0], 'BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY');
-  assert.equal(calls.length, 5);
-  assert.ok(calls.slice(1, 3).every(sql => /^\s*with/i.test(sql) && !/\b(?:insert|update|delete|grant|alter)\b/i.test(sql)));
-  assert.deepEqual(calls.slice(3), ['ROLLBACK', 'release']);
+  assert.equal(calls.length, 4);
+  assert.match(calls[1], /^\s*with/i);
+  assert.doesNotMatch(calls[1], /\b(?:insert|update|delete|grant|alter)\b/i);
+  assert.deepEqual(calls.slice(2), ['ROLLBACK', 'release']);
 });
 
 test('the readiness SELECTs run against the migrated local PostgreSQL fixture', async () => {
@@ -256,13 +258,15 @@ test('the chain reader uses only fixed public read routes and rejects the wrong 
     }
     assert.equal(url.origin, 'https://soroban-testnet.stellar.org');
     const { method } = JSON.parse(options.body);
-    assert.ok(['getNetwork', 'getLatestLedger', 'getLedgerEntries'].includes(method));
+    assert.ok(['getNetwork', 'getLedgerEntries'].includes(method));
+    assert.equal(['sendTransaction', 'simulateTransaction', 'getLatestLedger'].includes(method), false);
     requests.push(method);
     return Response.json({ jsonrpc: '2.0', id: 1, result: { passphrase: 'offline-wrong-network-fixture' } });
   }), /TESTNET_IDENTITY_REJECTED/);
   assert.equal(requests.filter(method => method === 'public-account').length, 6);
+  assert.equal(requests.filter(method => method === 'sendTransaction' || method === 'simulateTransaction').length, 0);
   assert.deepEqual(requests.filter(method => method !== 'public-account').sort(),
-    ['getLatestLedger', 'getLedgerEntries', 'getNetwork']);
+    ['getLedgerEntries', 'getNetwork']);
 });
 
 test('a later lifecycle read must match the already confirmed journal identity', () => {
@@ -288,4 +292,109 @@ test('grant schema, verifier and owner key remain byte-identical to K6', () => {
     const baseline = execFileSync('git', ['show', K6 + ':' + file], { cwd: ROOT, windowsHide: true });
     assert.deepEqual(readFileSync(resolve(ROOT, file)), baseline);
   }
+});
+
+
+const LEDGER = 5_000_000;
+const OBSERVED_AT = Date.parse('2026-11-09T20:00:10Z');
+
+function chainFetcher({
+  ledger = LEDGER,
+  closedAt = '2026-11-09T20:00:00Z',
+  sequence = ledger,
+  reserve = 50_000_000,
+  ledgerStatus = 200,
+  ledgerThrow,
+  ledgerBodyStream,
+} = {}) {
+  const rpcMethods = [];
+  const fetcher = async (rawUrl, options) => {
+    const url = new URL(rawUrl);
+    if (options.method === 'GET' && url.pathname.startsWith('/accounts/')) {
+      return Response.json({});
+    }
+    if (options.method === 'GET' && url.pathname === '/ledgers/' + ledger) {
+      if (ledgerThrow) throw ledgerThrow;
+      if (ledgerBodyStream) {
+        return {
+          ok: true, status: 200, body: ledgerBodyStream,
+          headers: new Headers({ 'content-type': 'application/json' }),
+        };
+      }
+      if (ledgerStatus !== 200) return new Response('missing', { status: ledgerStatus });
+      const body = { sequence, base_reserve_in_stroops: reserve };
+      if (closedAt !== null) body.closed_at = closedAt;
+      return Response.json(body);
+    }
+    assert.equal(url.origin, 'https://soroban-testnet.stellar.org');
+    const { method } = JSON.parse(options.body);
+    assert.ok(['getNetwork', 'getLedgerEntries'].includes(method));
+    assert.equal(['sendTransaction', 'simulateTransaction', 'getLatestLedger'].includes(method), false);
+    rpcMethods.push(method);
+    if (method === 'getNetwork') {
+      return Response.json({ jsonrpc: '2.0', id: 1, result: { passphrase: SPEC.network } });
+    }
+    return Response.json({ jsonrpc: '2.0', id: 1, result: { latestLedger: ledger, entries: [] } });
+  };
+  fetcher.rpcMethods = rpcMethods;
+  return fetcher;
+}
+
+for (const [label, options, pattern] of [
+  ['closed_at older than 90s', { closedAt: '2026-11-09T19:58:40Z' }, /CHAIN_READINESS_REJECTED/],
+  ['closed_at more than 10s in the future', { closedAt: '2026-11-09T20:00:21Z' }, /CHAIN_READINESS_REJECTED/],
+  ['malformed closed_at with milliseconds', { closedAt: '2026-11-09T20:00:00.000Z' }, /CHAIN_READINESS_REJECTED/],
+  ['malformed closed_at with offset', { closedAt: '2026-11-09T20:00:00+00:00' }, /CHAIN_READINESS_REJECTED/],
+  ['malformed closed_at missing Z', { closedAt: '2026-11-09T20:00:00' }, /CHAIN_READINESS_REJECTED/],
+  ['absent closed_at', { closedAt: null }, /CHAIN_READINESS_REJECTED/],
+  ['ledger sequence mismatch', { sequence: LEDGER + 1 }, /CHAIN_READINESS_REJECTED/],
+  ['Horizon ledger 404', { ledgerStatus: 404 }, /PUBLIC_READ_UNAVAILABLE/],
+  ['Horizon ledger fetch abort', { ledgerThrow: Object.assign(new Error('aborted'), { name: 'AbortError' }) },
+    /PUBLIC_READ_UNAVAILABLE/],
+  ['Horizon ledger fetch timeout', { ledgerThrow: Object.assign(new Error('timeout'), { name: 'TimeoutError' }) },
+    /PUBLIC_READ_UNAVAILABLE/],
+]) {
+  test('the chain reader stops when ' + label, async () => {
+    const fetcher = chainFetcher(options);
+    await assert.rejects(readChain(fetcher, () => OBSERVED_AT), pattern);
+    assert.equal(fetcher.rpcMethods.includes('getLatestLedger'), false);
+    assert.equal(fetcher.rpcMethods.includes('sendTransaction'), false);
+    assert.equal(fetcher.rpcMethods.includes('simulateTransaction'), false);
+  });
+}
+
+test('a mid-body AbortError from Horizon ledger bytes is a raw TIMEOUT-class abort', async () => {
+  const body = {
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from('{');
+      const error = new Error('The operation was aborted');
+      error.name = 'AbortError';
+      throw error;
+    },
+  };
+  const fetcher = chainFetcher({ ledgerBodyStream: body });
+  await assert.rejects(readChain(fetcher, () => OBSERVED_AT), error => {
+    assert.equal(error.name, 'AbortError');
+    assert.match(error.message, /aborted/);
+    return true;
+  });
+});
+
+test('a mid-body AbortError becomes TIMEOUT on PREFLIGHT_FAIL, not UNKNOWN', async () => {
+  const body = {
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from('{');
+      const error = new Error('The operation was aborted');
+      error.name = 'AbortError';
+      throw error;
+    },
+  };
+  const diagnostics = createDiagnostics();
+  const read = createReadPreflight(async () => readChain(chainFetcher({ ledgerBodyStream: body }), () => OBSERVED_AT),
+    { diagnostics });
+  await assert.rejects(read(), /PREFLIGHT_SOURCES_UNAVAILABLE/);
+  const fail = diagnostics.fatal('STOP_OPERATOR_REQUIRES_REVIEW');
+  assert.equal(fail.stage, 'PREFLIGHT_FAIL');
+  assert.equal(fail.events.at(-1).innerCode, 'TIMEOUT');
+  assert.equal(Object.hasOwn(fail, 'innerCode'), false);
 });

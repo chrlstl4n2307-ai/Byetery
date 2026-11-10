@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { mkdtemp, open, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { ROLES, RUN1, requireThat } from './boundaries.mjs';
+import { ROLES, RUN1, requireThat, sanitizePreflightInnerCode, sanitizePreflightLeafCode, sanitizePreflightPhase } from './boundaries.mjs';
 
 const promptFailures = new Set([
   'OWNER_TTY_REQUIRED', 'PROMPT_CONCURRENT', 'PROMPT_EMPTY', 'PROMPT_TIMEOUT',
@@ -35,11 +35,23 @@ export function promptFailureCode(code) {
 
 export function createDiagnostics(now = Date.now) {
   const events = [];
-  function event(stage, role) {
+  let preflightReadCount = 0;
+  function event(stage, role, innerCode, extra) {
     requireThat((roleStages.has(stage) && ROLES.includes(role)) ||
       (preflightStages.has(stage) && role === undefined), 'UNSAFE_DIAGNOSTIC_EVENT');
     const row = { schemaVersion: 1, taskId: RUN1.taskId, stage, errorCode: stage, timestamp: new Date(now()).toISOString() };
     if (role !== undefined) row.role = role;
+    if (stage === 'PREFLIGHT_ENTER') preflightReadCount += 1;
+    if (stage === 'CREDENTIAL_SQL_FAIL') row.leaf = sanitizePreflightLeafCode(extra?.leaf);
+    if (stage === 'PREFLIGHT_FAIL') {
+      const sanitized = sanitizePreflightInnerCode(innerCode);
+      if (sanitized) row.innerCode = sanitized;
+      row.leaf = sanitizePreflightLeafCode(extra?.leaf);
+      const phase = sanitizePreflightPhase(extra?.phase);
+      if (phase) row.phase = phase;
+      const readNumber = (preflightReadCount >= 1 && preflightReadCount <= 32) ? preflightReadCount : extra?.readNumber;
+      if (Number.isInteger(readNumber) && readNumber >= 1 && readNumber <= 32) row.readNumber = readNumber;
+    }
     events.push(Object.freeze(row));
   }
   function fatal(status, compositionRootSha, sessionControlSha256) {
@@ -53,6 +65,11 @@ export function createDiagnostics(now = Date.now) {
     const record = { schemaVersion: 1, taskId: RUN1.taskId, stage, errorName: 'K7Stop',
       errorCode: stage, timestamp: new Date(now()).toISOString(), events: [...events] };
     if (observedFailure?.role) record.role = observedFailure.role;
+    if (observedFailure?.leaf) record.leaf = observedFailure.leaf;
+    if (observedFailure?.stage === 'PREFLIGHT_FAIL') {
+      if (observedFailure.phase) record.phase = observedFailure.phase;
+      if (Number.isInteger(observedFailure.readNumber)) record.readNumber = observedFailure.readNumber;
+    }
     if (commit.test(compositionRootSha ?? '')) record.compositionRootSha = compositionRootSha;
     if (sha256.test(sessionControlSha256 ?? '')) record.sessionControlSha256 = sessionControlSha256;
     return record;

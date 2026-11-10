@@ -209,7 +209,8 @@ export async function launchRun1(ownerGrant, runtime, { diagnostics, checkPins }
     requireThat(grant.expiresAt > Date.now(), 'GRANT_LIFETIME_REJECTED');
     checkLiveSessionConfig(sessionConfig);
   };
-  const readPreflight = createReadPreflight(readSources, { diagnostics });
+  const readPreflight = createReadPreflight(readSources, { diagnostics,
+    phaseOf: n => n === 1 ? 'REVIEWED' : n === 2 ? 'STARTUP_FRESH' : 'OPERATOR_STEP' });
   const credentials = createRuntimeCredentials(secureStore, diagnostics);
   const evidence = bindLiveEvidence(sqlPool, CAPTURE_CHILD_TIMEOUT_MS);
   return runSingleOperator({
