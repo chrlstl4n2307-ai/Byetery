@@ -276,7 +276,8 @@ export async function createLocalOperator(options: OperatorOptions) {
           check(own && typeof own.requestId==='string' && /^[a-f0-9]{64}$/.test(own.requestId),'OriginalRequestRequired'); requestId=own.requestId;
         }
         const safe:SafeEvidence={operationId:original.operationId!,transactionHash:row.transactionHash as string,requestId,batteryId:run.batteryId,operation,confirmedBatteryState:next[operation][0],confirmedRewardState:next[operation][1],confirmationLedger:row.ledger as number,confirmedAt:row.confirmedAt,confirmationMode,...(payload?{payload}:{})};
-        await log({confirmationMode,domainState:safe.confirmedBatteryState,rewardState:safe.confirmedRewardState,transactionHash:safe.transactionHash,...(requestId?{requestId}:{})});
+        await log({operationId:safe.operationId,confirmationMode:safe.confirmationMode,domainState:safe.confirmedBatteryState,
+          rewardState:safe.confirmedRewardState,transactionHash:safe.transactionHash,...(safe.requestId?{requestId:safe.requestId}:{})});
         evidence.push(safe); step++; return {...safe};
       } catch { stopped=true; throw new Error('OperatorStoppedRequiresReview'); }
       finally { busy=false; }
