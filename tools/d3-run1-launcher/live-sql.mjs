@@ -99,9 +99,14 @@ async function readOnly(pool, read, coordinate = false) {
   }
 }
 
-export async function readSql(pool, { coordinate = false } = {}) {
+export async function readSql(pool, options) {
+  return readSqlForRun(pool, RUN1, options);
+}
+
+export async function readSqlForRun(pool, run, { coordinate = false } = {}) {
+  requireThat(/^[A-Z0-9-]{1,32}$/.test(run.batteryId), 'SQL_BATTERY_ID_REJECTED');
   return readOnly(pool, async client => {
-    const { rows } = await client.query({ text: readiness, values: [SPEC.deployment, RUN1.batteryId, SPEC.networkId,
+    const { rows } = await client.query({ text: readiness, values: [SPEC.deployment, run.batteryId, SPEC.networkId,
       coordinate, SPEC.wallets] });
     requireThat(rows.length === 1 && rows[0].read_only === 'on', 'SQL_READONLY_REQUIRED');
     return rows[0];

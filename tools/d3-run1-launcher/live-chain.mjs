@@ -19,8 +19,7 @@ const accountKey = address => X.LedgerKey.account(new X.LedgerKeyAccount({
 })).toXDR('base64');
 const accounts = [...Object.values(SPEC.actors), ...SPEC.wallets];
 const accountKeys = accounts.map(accountKey);
-const keys = Object.freeze({
-  battery: contractKey(vec([sym('Battery'), X.ScVal.scvString(RUN1.batteryId)])),
+const fixedKeys = Object.freeze({
   code: X.LedgerKey.contractCode(new X.LedgerKeyContractCode({ hash: Buffer.from(SPEC.wasm, 'hex') })).toXDR('base64'),
   contract: contractKey(instance),
   sac: dataKey(SPEC.token, instance),
@@ -52,6 +51,12 @@ async function horizonAccount(address, fetcher) {
 const CLOSED_AT = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/;
 
 export async function readChain(fetcher = fetch, now = Date.now) {
+  return readChainForRun(RUN1, fetcher, now);
+}
+
+export async function readChainForRun(run, fetcher, now = Date.now) {
+  check(/^[A-Z0-9-]{1,32}$/.test(run.batteryId), 'CHAIN_BATTERY_ID_REJECTED');
+  const keys = { battery: contractKey(vec([sym('Battery'), X.ScVal.scvString(run.batteryId)])), ...fixedKeys };
   const rpc = new PublicReads(fetcher);
   const [network, entries, ...accountFacts] = await Promise.all([
     rpc.rpc('getNetwork'),

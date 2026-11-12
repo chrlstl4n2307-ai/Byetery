@@ -9,6 +9,7 @@ import { checkedOutCommit, checkCaptureCheckout, checkSharedGitDirectory, frozen
 import { bindLiveEvidence, verifyLiveCorroboration } from './f1-evidence.mjs';
 import { exactRecord } from './grant-schema.mjs';
 import { OWNER_GRANT_KEY_STATUS, verifyOwnerGrant } from './grant-verifier.mjs';
+import { D324_IDENTITY } from '../d3-24-ratification/profile.mjs';
 import {
   RUN1, ROLES, SESSION_PER_STEP_SECONDS, SESSION_SAFETY_MARGIN_SECONDS,
   MAX_RECAPTURE_ATTEMPTS_AFTER_INITIAL_CAPTURE, admitLiveOnce, checkLiveSessionConfig,
@@ -79,9 +80,9 @@ export function sessionWindow(observations, now) {
   };
 }
 
-function scopeFromStep(evidence, index, previous, seenOperations, seenHashes) {
+function scopeFromStep(evidence, index, previous, seenOperations, seenHashes, run) {
   const [operation, lifecycle, reward] = steps[index];
-  requireThat(evidence?.batteryId === BATTERY_ID && evidence.operation === operation &&
+  requireThat(evidence?.batteryId === run.batteryId && evidence.operation === operation &&
     evidence.confirmedBatteryState === lifecycle && evidence.confirmedRewardState === reward &&
     ['OBSERVED', 'RECONCILED_AFTER_OBSERVATION_EXPIRY'].includes(evidence.confirmationMode) &&
     Number.isFinite(Date.parse(evidence.confirmedAt)), 'OPERATOR_EVIDENCE_REJECTED');
@@ -178,6 +179,11 @@ export function replayLauncher(options) {
   return runSingleOperator(options, 'OFFLINE_SYNTHETIC');
 }
 
+// The candidate can exercise the same serial launcher with synthetic ports only.
+export function replayD324Launcher(options, { verifyPlan, verifyCapture }) {
+  return runSingleOperator(options, 'OFFLINE_SYNTHETIC', { run: D324_IDENTITY, verifyPlan, verifyCapture });
+}
+
 // The only live composition. Runtime supplies the existing fresh source and
 // credential ports, never the verifier, a session observer or an operator factory.
 export async function launchRun1(ownerGrant, runtime, { diagnostics, checkPins } = {}) {
@@ -236,7 +242,7 @@ export async function launchRun1(ownerGrant, runtime, { diagnostics, checkPins }
 
 async function runSingleOperator({
   operatorFactory, admitOnce, sessionConfig, observeSessions, preserve, capture, verifyCorroboration, now, onPause = () => {},
-}, mode) {
+}, mode, { run = RUN1, verifyPlan = reviewedPlan, verifyCapture = observeCapture } = {}) {
   let operator;
   let operatorStart;
   let completedAt;
@@ -247,7 +253,7 @@ async function runSingleOperator({
   const seenOperations = new Set();
   const seenHashes = new Set();
   try {
-    await reviewedPlan();
+    await verifyPlan();
     stop = 'STOP_SESSION_GATE';
     let sessionDeadline = createSessionDeadline(sessionConfig, { operatorStart: now(), now });
     sessionDeadline.check(steps.length, true);
@@ -277,19 +283,19 @@ async function runSingleOperator({
       stop = 'STOP_OPERATOR_REQUIRES_REVIEW';
       const evidence = await operator.step(operation);
       stop = 'STOP_INVALID_OPERATOR_EVIDENCE';
-      const scope = scopeFromStep(evidence, index, previous, seenOperations, seenHashes);
+      const scope = scopeFromStep(evidence, index, previous, seenOperations, seenHashes, run);
       seenOperations.add(scope.operationId);
       seenHashes.add(scope.transactionHash);
       previous = { ...scope, requestId: evidence.requestId };
 
       stop = 'STOP_CAPTURE_UNVERIFIED';
       await preserve(scope, evidence);
-      let proof = await observeCapture(await capture(scope, 1), scope, captureClassification);
+      let proof = await verifyCapture(await capture(scope, 1), scope, captureClassification);
       if (proof.status === pending && transientReasons.has(proof.reason)) {
         await onPause(scope);
         // Reconcile the already-confirmed identity even if Auth expires here.
         // Recheck the original sessions before permitting further progression.
-        proof = await observeCapture(await capture(scope, 1 + MAX_RECAPTURE_ATTEMPTS_AFTER_INITIAL_CAPTURE),
+        proof = await verifyCapture(await capture(scope, 1 + MAX_RECAPTURE_ATTEMPTS_AFTER_INITIAL_CAPTURE),
           scope, captureClassification);
       }
       if (proof.status !== converged || !goodReasons.has(proof.reason) || !hex.test(proof.inventorySha256)) break;
@@ -307,7 +313,8 @@ async function runSingleOperator({
     if (accepted.length === steps.length) {
       stop = 'STOP_OPERATOR_DECISION';
       const decision = await operator.countingDecision();
-      requireThat(decision?.batteryId === BATTERY_ID && decision.sha === FROZEN_SHA && decision.status === 'COMPLETED' && decision.countable === true, 'OPERATOR_DECISION_REJECTED');
+      requireThat(decision?.batteryId === run.batteryId && decision.sha === run.businessSha &&
+        decision.status === 'COMPLETED' && decision.countable === true, 'OPERATOR_DECISION_REJECTED');
       if (mode === 'LIVE') completedAt = now();
       stop = mode === 'LIVE' ? 'LIVE_CAPTURE_COMPLETE' : 'OFFLINE_CAPTURE_COMPLETE';
     }

@@ -4,6 +4,7 @@ import {scanRaw} from './sanitizer.mjs';
 import {native,strkey} from './xdr-reader.mjs';
 import {decodedXdr,orderedEvents} from './comparison.mjs';
 import {assertTestnetNetwork} from './network-identity.mjs';
+import {D324_OWNER_EXPORT} from '../d3-24-ratification/profile.mjs';
 export function rewardContent(meta,events){const r=meta.returnNative;check(r&&r.token===SPEC.token&&r.amount==='100000000'&&SPEC.wallets.includes(r.recipient)&&canonical(r.reward_state)==='["Sent"]','REWARD_RETURN_MISSING');
  const transfer=events.some(encoded=>{const e=X.ContractEvent.fromXDR(encoded,'base64');if(!e.contractId||strkey(e.contractId.toBytes(),16)!==SPEC.token)return false;const t=e.body.value.topics.map(native);return t[0]==='transfer'&&t[1]===SPEC.contract&&t[2]===r.recipient&&native(e.body.value.data)==='100000000';});check(transfer,'REWARD_TRANSFER_MISSING');
  const before=meta.balances.find(b=>b.kind==='SAC_POOL'&&b.change==='ledgerEntryState'),after=meta.balances.find(b=>b.kind==='SAC_POOL'&&b.change==='ledgerEntryUpdated'),wb=meta.balances.find(b=>b.account===r.recipient&&b.change==='ledgerEntryState'),wa=meta.balances.find(b=>b.account===r.recipient&&b.change==='ledgerEntryUpdated');
@@ -22,7 +23,9 @@ export function crosscheck(rpc,sql,meta){check(sql&&sql.confirmation&&sql.succes
  if(sql.command==='pay_reward'){const r=meta.returnNative;check(r&&r.token===SPEC.token&&r.amount==='100000000'&&SPEC.wallets.includes(r.recipient),'REWARD_RETURN_MISSING');same('facts.reward',{recipient:r.recipient,token:r.token,amount:r.amount},c.facts.reward);}
  return {status:'PASS',rawFieldsCompared:Object.keys(fields),factsCompared:Object.keys(meta.after),factsReadLedger:c.facts.stateReadLedger,successEvidenceExact:true,operationId:sql.operation_id};
 }
-export function verifyTx(input){provenance(input.provenance);assertTestnetNetwork(input.network.passphrase,input.network.networkId);
+export function verifyTx(input){return verifyWithQuery(input,SPEC.ownerExport?.querySha256);}
+export function verifyD324ExportTransaction(input){return verifyWithQuery(input,D324_OWNER_EXPORT.querySha256);}
+function verifyWithQuery(input,approvedOwnerQuerySha256){provenance(input.provenance);assertTestnetNetwork(input.network.passphrase,input.network.networkId);
  const r=input.rpc;check(['SUCCESS','FAILED','NOT_FOUND'].includes(r.status),'UNKNOWN_RPC_STATUS');check(r.status==='SUCCESS','UNCONFIRMED_TRANSACTION');check(r.txHash===input.expected.hash,'WRONG_TX_HASH');
  const id=identity(r.envelopeXdr,{...input.expected,networkPassphrase:input.network.passphrase});
  const h=input.horizon,l=input.horizonLedger;
@@ -44,7 +47,7 @@ export function verifyTx(input){provenance(input.provenance);assertTestnetNetwor
  const meta=metadata(r.resultMetaXdr);if(id.method==='pay_reward')rewardContent(meta,(r.events?.contractEventsXdr??[]).flat());scanRaw(Buffer.from(r.envelopeXdr,'base64'));scanRaw(Buffer.from(r.resultMetaXdr,'base64'));
  const sqlStatus=input.sql?crosscheck(r,input.sql,meta):{status:'BLOCKED_PENDING_READONLY_CREDENTIAL'};
  if(input.sql){provenance(input.sqlProvenance);const p=input.sqlProvenance;
-  const owner=p.source==='OWNER_READONLY_EXPORT'&&p.querySha256===SPEC.ownerExport?.querySha256&&/^[a-f0-9]{64}$/.test(p.fileSha256??'')&&p.assertion==='OWNER_ASSERTED_READONLY_EXPORT_NOT_SERVER_ATTESTED';
+  const owner=p.source==='OWNER_READONLY_EXPORT'&&/^[a-f0-9]{64}$/.test(approvedOwnerQuerySha256??'')&&p.querySha256===approvedOwnerQuerySha256&&/^[a-f0-9]{64}$/.test(p.fileSha256??'')&&p.assertion==='OWNER_ASSERTED_READONLY_EXPORT_NOT_SERVER_ATTESTED';
   const legacy=p.source==='SQL_READONLY'&&p.roleVerified===true&&p.capabilityProfile==='SELECT_ONLY_NO_DDL_NO_BYPASS_NO_EXECUTE';check(owner||legacy,'UNVERIFIED_SQL_PROVENANCE');}
  return {id,meta,sqlStatus,verification:{TX_IDENTITY_VERIFIED:'PASS',inclusion:'SERVICE_CORROBORATED_INCLUSION',headerSha256:hash(header),ledger:r.ledger,closeTime:l.closed_at,ledgerHash:l.hash,previousLedgerHash:l.prev_hash,headerDecode:'opaque bytes retained; no unsupported SDK header decode claimed',rpcLedgerCorroboration:rl?'PASS':'NOT_CAPTURED',sqlCrosscheck:sqlStatus.status,validatorGradeProof:false}};
 }

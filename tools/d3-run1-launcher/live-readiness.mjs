@@ -35,8 +35,8 @@ function verifiedOperation(row) {
     Number.isSafeInteger(row.ledger) && row.ledger > 0;
 }
 
-function verifyHistory(operations, history) {
-  const old = operations.filter(row => row.battery !== RUN1.batteryId);
+function verifyHistory(operations, history, run) {
+  const old = operations.filter(row => row.battery !== run.batteryId);
   requireThat(old.length === history.confirmed.length + 1 &&
     history.confirmed.every(item => old.some(row => row.id === item.operationId && row.hash === item.txHash &&
       row.battery === item.batteryId && row.command === item.step && row.ledger === item.ledger && verifiedOperation(row))),
@@ -47,9 +47,9 @@ function verifyHistory(operations, history) {
   'NONCOUNTING_OPERATION_REJECTED');
 }
 
-function verifyLifecycle(sql, chain, own, journal) {
+function verifyLifecycle(sql, chain, own, journal, run, terminal) {
   const completed = own.length;
-  requireThat(completed === journal.length && completed < cap &&
+  requireThat(completed === journal.length && (terminal ? completed === cap : completed < cap) &&
     own.every((row, index) => verifiedOperation(row) && row.command === steps[index] &&
       row.source === SPEC.actors[sourceRoles[index]] && row.ledger <= chain.ledger &&
       journal[index].operation === row.command && journal[index].operationId === row.id &&
@@ -67,11 +67,17 @@ function verifyLifecycle(sql, chain, own, journal) {
     chain.battery.request_id === sql.battery.requestId, 'RUN1_CHAIN_SQL_STATE_MISMATCH');
   requireThat(completed === 1 ? sql.requests.length === 0 && sql.battery.requestId === null :
     sql.requests.length === 1 && txHash.test(request.id) && request.id === sql.battery.requestId &&
-    request.recipient === RUN1.recipient && request.state === (completed === 2 ? 'HELD' : 'CONSUMED'),
+    request.recipient === run.recipient && request.state === (completed === 2 ? 'HELD' : 'CONSUMED'),
   'RUN1_RESERVATION_REJECTED');
 }
 
-export function evaluateReadiness({ sql, chain, history, journal, baseline }) {
+export function evaluateReadiness(input) {
+  return evaluateReadinessForRun(input, RUN1);
+}
+
+// The legacy entry point stays pinned to its original task. A new review profile
+// can reuse the checks without changing the legacy launcher or its ledger.
+export function evaluateReadinessForRun({ sql, chain, history, journal, baseline }, run, { terminal = false } = {}) {
   const expected = { mode: 'TESTNET', network: SPEC.networkId, contract: SPEC.contract, wasm: SPEC.wasm,
     admin: SPEC.actors.admin, service: SPEC.actors.service, sac: SPEC.token, reward: reward.toString() };
   requireThat(sql.read_only === 'on' && Object.entries(expected).every(([name, value]) => sql.deployment?.[name] === value),
@@ -81,19 +87,23 @@ export function evaluateReadiness({ sql, chain, history, journal, baseline }) {
   requireThat(sql.wallets.length === 2 && SPEC.wallets.every(address =>
     sql.wallets.some(row => row.address === address && row.verified === true &&
       row.active_links === 1 && row.matching_owner_links === 2)), 'WALLET_LINK_REJECTED');
-  verifyHistory(sql.operations, history);
-  const own = sql.operations.filter(row => row.battery === RUN1.batteryId);
-  verifyLifecycle(sql, chain, own, journal);
-  requireThat(chain.pool >= 3n * reward + payerMargin && Number.isSafeInteger(chain.minimumTtl) && chain.minimumTtl >= 720,
+  verifyHistory(sql.operations, history, run);
+  const own = sql.operations.filter(row => row.battery === run.batteryId);
+  verifyLifecycle(sql, chain, own, journal, run, terminal);
+  requireThat(chain.pool >= (terminal ? 2n : 3n) * reward + payerMargin &&
+    Number.isSafeInteger(chain.minimumTtl) && chain.minimumTtl >= 720 && (!terminal || baseline),
     'POOL_OR_TTL_REJECTED');
   const before = baseline ?? {
     sequences: Object.fromEntries(chain.sources.map(item => [item.role, item.sequence])),
     balances: chain.wallets.map(item => item.balance),
     pool: chain.pool,
   };
-  requireThat(chain.pool === before.pool && chain.wallets.length === 2 && chain.wallets.every((wallet, index) =>
-    wallet.address === SPEC.wallets[index] && wallet.balance === before.balances[index] &&
-    wallet.capacity >= (index === 0 ? 2n : 1n) * reward), 'REWARD_READINESS_REJECTED');
+  requireThat(chain.pool === before.pool - (terminal ? reward : 0n) && chain.wallets.length === 2 &&
+    chain.wallets.every((wallet, index) => {
+      const received = terminal && wallet.address === run.recipient ? reward : 0n;
+      return wallet.address === SPEC.wallets[index] && wallet.balance === before.balances[index] + received &&
+        wallet.capacity >= (index === 0 ? 2n : 1n) * reward - received;
+    }), 'REWARD_READINESS_REJECTED');
   requireThat(chain.sources.length === 4 && Object.entries(SPEC.actors).every(([role, address]) =>
     chain.sources.some(item => item.role === role && item.address === address)), 'CHAIN_SOURCE_IDENTITY_REJECTED');
   const sources = chain.sources.flatMap(item => {
