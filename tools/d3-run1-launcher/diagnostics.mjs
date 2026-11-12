@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdtemp, open, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
+import { D324_IDENTITY } from '../d3-24-ratification/profile.mjs';
 import { join } from 'node:path';
 import { ROLES, RUN1, requireThat, sanitizePreflightInnerCode, sanitizePreflightLeafCode, sanitizePreflightPhase } from './boundaries.mjs';
 
@@ -34,12 +35,20 @@ export function promptFailureCode(code) {
 }
 
 export function createDiagnostics(now = Date.now) {
+  return diagnosticsForRun(RUN1, now);
+}
+
+export function createD324Diagnostics(now = Date.now) {
+  return diagnosticsForRun(D324_IDENTITY, now);
+}
+
+function diagnosticsForRun(run, now) {
   const events = [];
   let preflightReadCount = 0;
   function event(stage, role, innerCode, extra) {
     requireThat((roleStages.has(stage) && ROLES.includes(role)) ||
       (preflightStages.has(stage) && role === undefined), 'UNSAFE_DIAGNOSTIC_EVENT');
-    const row = { schemaVersion: 1, taskId: RUN1.taskId, stage, errorCode: stage, timestamp: new Date(now()).toISOString() };
+    const row = { schemaVersion: 1, taskId: run.taskId, stage, errorCode: stage, timestamp: new Date(now()).toISOString() };
     if (role !== undefined) row.role = role;
     if (stage === 'PREFLIGHT_ENTER') preflightReadCount += 1;
     if (stage === 'CREDENTIAL_SQL_FAIL') row.leaf = sanitizePreflightLeafCode(extra?.leaf);
@@ -58,11 +67,13 @@ export function createDiagnostics(now = Date.now) {
     const last = events.at(-1);
     const internal = residual.get(status);
     const observedFailure = (internal === 'STARTUP_OPERATOR_INDETERMINATE' ||
-      internal === 'STEP_OPERATOR_INDETERMINATE' || status === 'PRE_ADMISSION_READS_REJECTED') &&
+      internal === 'STEP_OPERATOR_INDETERMINATE' || status === 'PRE_ADMISSION_READS_REJECTED' ||
+      (run === D324_IDENTITY && ['D324_PRE_ADMISSION_REJECTED', 'D324_RUN_STOPPED_RECONCILE'].includes(status))) &&
       knownFailures.has(last?.stage) ? last : undefined;
     const stage = observedFailure?.stage ?? internal ??
-      (entryFailures.has(status) ? status : 'RUN1_STOP_REQUIRES_RECONCILIATION');
-    const record = { schemaVersion: 1, taskId: RUN1.taskId, stage, errorName: 'K7Stop',
+      (entryFailures.has(status) || (run === D324_IDENTITY &&
+        ['D324_PRE_ADMISSION_REJECTED', 'D324_RUN_STOPPED_RECONCILE'].includes(status)) ? status : 'RUN1_STOP_REQUIRES_RECONCILIATION');
+    const record = { schemaVersion: 1, taskId: run.taskId, stage, errorName: 'K7Stop',
       errorCode: stage, timestamp: new Date(now()).toISOString(), events: [...events] };
     if (observedFailure?.role) record.role = observedFailure.role;
     if (observedFailure?.leaf) record.leaf = observedFailure.leaf;

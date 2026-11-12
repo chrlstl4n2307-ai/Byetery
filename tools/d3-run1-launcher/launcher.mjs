@@ -109,6 +109,10 @@ function scopeFromStep(evidence, index, previous, seenOperations, seenHashes, ru
   });
 }
 
+export function d324ScopeFromStep(evidence, index, previous, seenOperations, seenHashes) {
+  return scopeFromStep(evidence, index, previous, seenOperations, seenHashes, D324_IDENTITY);
+}
+
 function sameScope(actual, expected) {
   return actual && Object.keys(actual).length === Object.keys(expected).length &&
     Object.entries(expected).every(([key, value]) => actual[key] === value);

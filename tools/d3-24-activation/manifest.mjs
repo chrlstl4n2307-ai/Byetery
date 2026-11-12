@@ -8,6 +8,7 @@ import { requireThat as check } from '../d3-run1-launcher/boundaries.mjs';
 import { checkedOutCommit, checkSharedGitDirectory } from '../d3-run1-launcher/f1-checkout.mjs';
 import { RUN1, RUN_CAP, hex, readD324Ledger, readD324Plan, OWNER_QUERY_SHA256 } from '../d3-24-ratification/identity.mjs';
 import { verifyD324OperatorCommit } from '../d3-24-ratification/operator-identity.mjs';
+import { ACTIVATION_PARENT, BOOTSTRAP_BINARIES } from '../d3-24-operational/bootstrap-pins.mjs';
 
 export const BASE_COMMIT = 'da230383715e615b6c45f814c75fa88eb7d63147';
 const parentComposition = 'ae50b48399aefdc68339ac55d3f214adc77349a4';
@@ -27,7 +28,7 @@ const reviewProofs = new WeakSet();
 export const isD324ReviewBinding = value => reviewProofs.has(value);
 
 function gitAt(root, ...args) {
-  return execFileSync('git', args, { cwd: root, windowsHide: true, timeout: 10_000, stdio: ['ignore', 'pipe', 'pipe'] });
+  return execFileSync('git', ['--no-replace-objects', ...args], { cwd: root, windowsHide: true, timeout: 10_000, stdio: ['ignore', 'pipe', 'pipe'] });
 }
 
 // Local Git observations. The final checkout must be clean. Use the previously
@@ -42,6 +43,7 @@ export async function observeD324Checkout(root, operatorRoot) {
   const parents = revision('rev-list', '--parents', '-n', '1', sha).split(' ').slice(1);
   check(parents.length === 1, 'D324_CHECKOUT_REJECTED');
   const target = { sha, parent: parents[0], tree: revision('rev-parse', sha + '^{tree}') };
+  check(!revision('for-each-ref', '--count=1', 'refs/replace'), 'D324_GIT_REPLACEMENTS_REJECTED');
   const operator = verifyD324OperatorCommit();
   await checkSharedGitDirectory(root, operatorRoot);
   check(root !== operatorRoot && await checkedOutCommit(operatorRoot, ['.']) === operator.sha, 'D324_OPERATOR_CHECKOUT_REJECTED');
@@ -56,19 +58,31 @@ export async function observeD324Checkout(root, operatorRoot) {
   }
   check(await checkedOutCommit(root, ['.']) === sha, 'D324_CHECKOUT_CHANGED');
   return { target, operator: { sha: operator.sha, parent: operator.parent, tree: operator.tree }, artifacts: files };
+
 }
 
 // The digest is an independent owner-approved pin in the future design. This
 // validator returns review facts only, even when every pin matches.
 export async function verifyD324RatificationManifest(raw, independentlyPinnedSha256, observed) {
+  return verifyManifest(raw, independentlyPinnedSha256, observed, false);
+}
+
+export function verifyD324ActivationManifest(raw, approvedDigest, observed) {
+  return verifyManifest(raw, approvedDigest, observed, true);
+}
+
+async function verifyManifest(raw, independentlyPinnedSha256, observed, final) {
   check(Buffer.isBuffer(raw) && raw.length <= 8192 && hex.test(independentlyPinnedSha256 ?? '') &&
     hash(raw) === independentlyPinnedSha256, 'D324_MANIFEST_DIGEST_REJECTED');
   const data = strictJson(new TextDecoder('utf-8', { fatal: true }).decode(raw));
-  check(raw.equals(Buffer.from(canonical(data) + '\n')) && exactRecord(data, manifestKeys) &&
-    data.schema === 'BYETERY_D324_ACTIVATION_REVIEW_V1', 'D324_MANIFEST_SCHEMA_REJECTED');
+  const fields = final ? [...manifestKeys, 'binaries', 'operatorRoot'] : manifestKeys;
+  const expectedSchema = final ? 'BYETERY_D324_FINAL_ACTIVATION_V2' : 'BYETERY_D324_ACTIVATION_REVIEW_V1';
+  check(raw.equals(Buffer.from(canonical(data) + '\n')) && exactRecord(data, fields) &&
+    data.schema === expectedSchema, 'D324_MANIFEST_SCHEMA_REJECTED');
   const { target, operator, identity, budget } = data;
   check(exactRecord(target, ['sha', 'parent', 'tree']) && Object.values(target).every(x => typeof x === 'string' && commit.test(x)) &&
-    target.parent === BASE_COMMIT && target.sha !== BASE_COMMIT && canonical(target) === canonical(observed?.target),
+    target.parent === (final ? ACTIVATION_PARENT : BASE_COMMIT) && target.sha !== target.parent &&
+    canonical(target) === canonical(observed?.target),
   'D324_MANIFEST_TARGET_REJECTED');
   const pinnedOperator = verifyD324OperatorCommit();
   const pin = { sha: pinnedOperator.sha, parent: pinnedOperator.parent, tree: pinnedOperator.tree };
@@ -85,6 +99,8 @@ export async function verifyD324RatificationManifest(raw, independentlyPinnedSha
     canonical(data.artifacts) === canonical(observed?.artifacts) && data.artifacts.exportQuery === OWNER_QUERY_SHA256 &&
     typeof data.k5Sha256 === 'string' && hex.test(data.k5Sha256) &&
     typeof data.sessionControlSha256 === 'string' && hex.test(data.sessionControlSha256), 'D324_MANIFEST_ARTIFACT_REJECTED');
+  if (final) check(canonical(data.binaries) === canonical(BOOTSTRAP_BINARIES) &&
+    typeof data.operatorRoot === 'string' && data.operatorRoot === observed?.operatorRoot, 'D324_MANIFEST_RUNTIME_REJECTED');
   const proof = Object.freeze({ sha: target.sha, manifestSha256: independentlyPinnedSha256,
     k5Sha256: data.k5Sha256, sessionControlSha256: data.sessionControlSha256, liveAuthority: false });
   reviewProofs.add(proof);

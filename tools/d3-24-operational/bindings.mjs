@@ -13,7 +13,7 @@ export { verifyD324SessionPins } from '../d3-run1-launcher/session-pins.mjs';
 
 // Bound read ports. This adapter has no admission, credentials, submission or
 // operator factory. The eventual ratified launcher must supply the reviewed ports.
-export function bindD324Readiness({ pool, fetcher, checkCheckout, controls, readSignerIdentities, now = Date.now, diagnostics }) {
+export function bindD324Readiness({ pool, fetcher, checkCheckout, controls, readSignerIdentities, now = Date.now, diagnostics, phaseOf }) {
   const plan = readD324Plan();
   const args = activationArguments(D324_ARGV);
   let baseline;
@@ -43,7 +43,7 @@ export function bindD324Readiness({ pool, fetcher, checkCheckout, controls, read
       { source: 'SUPABASE_SQL_READ_ONLY', observedAt: facts.sqlAt, ledger: null },
       { source: 'STELLAR_RPC_TESTNET', observedAt: facts.chain.observedAt, ledger: facts.chain.ledger },
     ] };
-  }, { now, diagnostics });
+  }, { now, diagnostics, phaseOf });
 
   return Object.freeze({ readPreflight, async verifyCompletion() {
     check(baseline, 'D324_BASELINE_REQUIRED');

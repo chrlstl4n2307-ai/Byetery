@@ -45,7 +45,7 @@ async function readJournal(path) {
 }
 
 // Reuses the reviewed local Stellar CLI public-key probe, never its signing commands.
-async function checkPublicSigners(root, env) {
+export async function checkPublicSigners(root, env) {
   const safeEnv = Object.fromEntries(Object.entries(env).filter(([key]) => systemEnv.test(key)));
   const options = { cwd: root, env: safeEnv, windowsHide: true, timeout: 30_000, maxBuffer: 4096, encoding: 'utf8' };
   const { stdout: version } = await exec('stellar', ['--version'], options);
