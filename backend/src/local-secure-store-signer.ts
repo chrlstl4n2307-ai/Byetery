@@ -4,9 +4,11 @@ import { createHash } from 'node:crypto';
 import { Keypair, Networks, Transaction, xdr, Address, scValToNative } from '@stellar/stellar-sdk';
 import type { SigningRequest, SigningResult, StellarSigner, PhasedStellarSigner } from './stellar-signer.ts';
 import { DomainError } from './domain.ts';
+import {d324Scope,D324} from './application/d324-scope.ts';
 
 export interface ProcessResult { exitCode: number|null; stdout: string; stderr: string }
-export type SignerProcess = (input: string,observer?:{started(pid:number):void;closed(pid:number):void},beforeSpawn?:()=>void) => Promise<ProcessResult>;
+export type SignerProcess = (input: string,observer?:{started(pid:number):void;closed(pid:number):void},beforeSpawn?:()=>void,
+  beforeKeyUse?:()=>Promise<void>) => Promise<ProcessResult>;
 const LIMIT=131072;
 const actors={
   admin:'GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F',
@@ -21,26 +23,62 @@ const equalBytes=(a:Uint8Array,b:Uint8Array)=>Buffer.from(a).equals(Buffer.from(
 function fail(code: string): never {throw new DomainError(code);}
 
 /** No shell, CLI arguments, RPC access, logging or credentials in child env. */
-export function signerProcess(binary: string, timeoutMs=30000): SignerProcess {
+export function signerProcess(binary: string, timeoutMs=30000,spawnChild:typeof spawn=spawn): SignerProcess {
   if(!path.isAbsolute(binary)||!Number.isInteger(timeoutMs)||timeoutMs<1||timeoutMs>120000) fail('InvalidSignerConfiguration');
-  return (input,observer,beforeSpawn)=>new Promise((resolve,reject)=>{
+  return (input,observer,beforeSpawn,beforeKeyUse)=>new Promise((resolve,reject)=>{
     if(Buffer.byteLength(input)>LIMIT) return reject(new DomainError('SignerInputTooLarge'));
     const env: NodeJS.ProcessEnv={};
     for(const name of ['SystemRoot','WINDIR','USERPROFILE','APPDATA','LOCALAPPDATA','TEMP','TMP','HOMEDRIVE','HOMEPATH'])
       if(process.env[name]) env[name]=process.env[name];
     beforeSpawn?.();
-    const child=spawn(binary,[],{shell:false,windowsHide:true,stdio:['pipe','pipe','pipe'],env});
+    const child=spawnChild(binary,[],{shell:false,windowsHide:true,stdio:['pipe','pipe','pipe'],env});
     if(child.pid)observer?.started(child.pid);
     child.once('close',()=>{if(child.pid)observer?.closed(child.pid);});
-    let stdout='',stderr='',size=0,done=false;
-    const finish=(error?:DomainError,result?:ProcessResult)=>{if(done)return;done=true;clearTimeout(timer);if(error){child.kill();reject(error);}else resolve(result!);};
+    let stdout='',stderr='',size=0,done=false,pendingError:DomainError|undefined;
+    let stages=0,authorizing=false,lineBuffer='';
+    const requestHash=createHash('sha256').update(input).digest('hex');
+    const finish=(error?:DomainError,result?:ProcessResult)=>{
+      if(done)return;
+      if(error){
+        if(pendingError)return;
+        pendingError=error;clearTimeout(timer);child.stdin.destroy();child.kill();
+        // The caller retains SQL locks until close proves the child is gone.
+        return;
+      }
+      done=true;clearTimeout(timer);
+      if(pendingError)reject(pendingError);else resolve(result!);
+    };
     const timer=setTimeout(()=>finish(new DomainError('SignerTimeout')),timeoutMs);
-    const output=(target:'stdout'|'stderr',b:Buffer)=>{size+=b.length;if(size>LIMIT)return finish(new DomainError('SignerOutputTooLarge'));if(target==='stdout')stdout+=b.toString('utf8');else stderr+=b.toString('utf8');};
+    const output=(target:'stdout'|'stderr',b:Buffer)=>{
+      size+=b.length;if(size>LIMIT)return finish(new DomainError('SignerOutputTooLarge'));
+      if(target==='stderr'){stderr+=b.toString('utf8');return;}
+      if(!beforeKeyUse||stages===2){stdout+=b.toString('utf8');return;}
+      lineBuffer+=b.toString('utf8');
+      const end=lineBuffer.indexOf('\n');if(end<0)return;
+      if(authorizing)return finish(new DomainError('SignerProtocolRejected'));
+      const raw=lineBuffer.slice(0,end);lineBuffer=lineBuffer.slice(end+1);
+      let ready:Record<string,unknown>;
+      try{ready=JSON.parse(raw);}catch{return finish(new DomainError('SignerProtocolRejected'));}
+      const stage=stages===0?'LOAD':'SIGN';
+      if(Object.keys(ready).sort().join(',')!=='requestHash,stage,status,version'||ready.version!==3
+        ||ready.status!=='key_ready'||ready.stage!==stage||ready.requestHash!==requestHash||lineBuffer)
+        return finish(new DomainError('SignerProtocolRejected'));
+      authorizing=true;
+      void beforeKeyUse().then(()=>{
+        if(done||pendingError)return;
+        stages++;authorizing=false;
+        child.stdin.write(JSON.stringify({version:3,status:'key_permit',stage,requestHash})+'\n');
+        if(stages===2)child.stdin.end();
+      }).catch(()=>finish(new DomainError('D324KeyUseAuthorityRejected')));
+    };
     child.stdout.on('data',b=>output('stdout',b));child.stderr.on('data',b=>output('stderr',b));
     child.on('error',()=>finish(new DomainError('SignerProcessFailed')));
     child.stdin.on('error',()=>finish(new DomainError('SignerProcessFailed')));
-    child.on('close',exitCode=>finish(undefined,{exitCode,stdout,stderr}));
-    child.stdin.end(input);
+    child.on('close',exitCode=>{
+      if(beforeKeyUse&&stages!==2&&!pendingError)pendingError=new DomainError('SignerProtocolRejected');
+      finish(undefined,{exitCode,stdout,stderr});
+    });
+    if(beforeKeyUse)child.stdin.write(input+'\n');else child.stdin.end(input);
   });
 }
 
@@ -60,9 +98,18 @@ export class LocalSecureStoreSigner implements StellarSigner, PhasedStellarSigne
     if(!expected||!same(expected,request.expectedSigners)) fail('SignerNotAllowed');
     let unsigned: Transaction;
     try {unsigned=new Transaction(request.transactionXdr,Networks.TESTNET);}catch{fail('InvalidXdr');}
-    const input=JSON.stringify({version:phase?2:1,network_passphrase:Networks.TESTNET,transaction_xdr:request.transactionXdr,
+    const op=unsigned.operations[0];
+    const protectedRequest=op?.type==='invokeHostFunction'&&(()=>{
+      const fn=op.func;
+      if(fn.type!=='hostFunctionTypeInvokeContract')return false;
+      const value=fn.invokeContract.args[0];
+      return value?.type==='scvString'&&d324Scope(D324.deploymentId,value.str.toString());
+    })();
+    if(protectedRequest&&(!phase||!request.withKeyUse))fail('D324KeyUseAuthorityRequired');
+    const encode=(keyUse?:import('./stellar-signer.ts').KeyUseFence)=>JSON.stringify({version:keyUse?3:phase?2:1,
+      network_passphrase:Networks.TESTNET,transaction_xdr:request.transactionXdr,
       current_ledger:request.currentLedger,signature_expiration_ledger:request.expirationLedger,
-      ...(phase?{phase,expected_hash:expectedHash??null}:{})});
+      ...(phase?{phase,expected_hash:expectedHash??null}:{}),...(keyUse?{key_use:keyUse}:{})});
     let response: ProcessResult;
     const label=phase==='authorize'?'AUTH_SIGN':'ENVELOPE_SIGN';
     await request.audit?.(label+'_START');
@@ -73,16 +120,22 @@ export class LocalSecureStoreSigner implements StellarSigner, PhasedStellarSigne
         catch(error){spawnDenied=true;throw error;}
       });
       processCalled=true;
-      return this.run(input,request.childObserver,beforeSpawn);
+      return this.run(encode(),request.childObserver,beforeSpawn);
     };
     try {
       request.assertAdmission?.();
-      response=await (request.startAuthorized?request.startAuthorized(start):start());
+      response=await (protectedRequest?request.withKeyUse!(async(fence,valid,revalidate)=>{
+        request.assertAdmission?.();valid();
+        processCalled=true;
+        return this.run(encode(fence),request.childObserver,()=>{
+          try{request.assertAdmission?.();valid();}catch(error){spawnDenied=true;throw error;}
+        },async()=>{request.assertAdmission?.();await revalidate();valid();});
+      }):request.startAuthorized?request.startAuthorized(start):start());
     }
     catch(e){
       // A failed or interrupted process is ambiguous. Record this proof only
       // when the fenced callback never reached the physical process boundary.
-      if(phase==='sign_envelope'&&request.startAuthorized&&(!processCalled||spawnDenied)){
+      if(phase==='sign_envelope'&&(request.startAuthorized||request.withKeyUse)&&(!processCalled||spawnDenied)){
         try{await request.audit?.('ENVELOPE_SIGN_NOT_STARTED');}catch{ /* Ambiguous START remains durable. */ }
       }
       if(e instanceof DomainError)throw e;
@@ -95,7 +148,7 @@ export class LocalSecureStoreSigner implements StellarSigner, PhasedStellarSigne
     let out: {version?:number;status?:string;signed_xdr?:string;transaction_xdr?:string;method?:string;signers?:string[]};
     try{out=JSON.parse(response.stdout);}catch{fail('SignerInvalidOutput');}
     const encoded=phase?out.transaction_xdr:out.signed_xdr;
-    if((phase&&out.version!==2)||out.status!==(phase==='authorize'?'authorized':'signed')||out.method!==request.method||!Array.isArray(out.signers)||!same(out.signers,expected)||typeof encoded!=='string')fail('SignerInvalidOutput');
+    if((phase&&out.version!==(protectedRequest?3:2))||out.status!==(phase==='authorize'?'authorized':'signed')||out.method!==request.method||!Array.isArray(out.signers)||!same(out.signers,expected)||typeof encoded!=='string')fail('SignerInvalidOutput');
     let signed: Transaction;
     try{signed=new Transaction(encoded,Networks.TESTNET);}catch{fail('SignerInvalidOutput');}
     if(signed.signatures.length!==(phase==='authorize'?0:1)||unsigned.signatures.length!==0||signed.source!==expected[0]||signed.operations.length!==1||unsigned.operations.length!==1)fail('SignerInvalidOutput');

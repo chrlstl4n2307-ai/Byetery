@@ -9,6 +9,7 @@ import { canonical } from '../application/validation.ts';
 import type { OperationProcessor } from '../application/coordinator.ts';
 import type { Reply } from '../application/errors.ts';
 import type { PhasedStellarSigner } from '../stellar-signer.ts';
+import type { KeyUseFence } from '../stellar-signer.ts';
 import { TestnetRpc } from './rpc.ts';
 import { ACTORS, CONTRACT, TOKEN, WASM, invocation } from './abi.ts';
 import { TestnetTransport, type ContextGuard } from './transport.ts';
@@ -80,6 +81,37 @@ export class PersistedContextGuard implements ContextGuard {
       return startD324Effect(assertStillValid,start);
     });
     return started.result;
+  }
+  async withD324KeyUse<T>(w:Work,use:(fence:KeyUseFence,assertStillValid:()=>void,revalidate:()=>Promise<void>)=>Promise<T>):Promise<T>{
+    const healthy=this.connectionGuard();
+    return this.repo.transaction(async db=>{
+      const c=w.signingClaim;
+      ensure(c&&c.operationId===w.operationId&&c.networkId===w.networkId&&c.sourceAccount===w.sourceAccount,
+        'D324DispatchAuthorityRequired');
+      const lease=await one(db,`select 1 from api_private.testnet_source_leases
+        where network_id=decode($1,'hex') and source_account=$2 and deployment_id=$3
+          and operation_id=$4 and worker=$5 and generation=$6 and lease_until>clock_timestamp() for share`,
+        [c.networkId,c.sourceAccount,w.deploymentId,c.operationId,c.worker,c.generation]);
+      ensure(lease,'D324DispatchAuthorityRequired');
+      await assertPersistedAuthority(db,w,true);
+      const valid=await assertD324Work(db,w,this.d324InstanceId);
+      ensure(valid,'D324DispatchAuthorityRequired');
+      const check=()=>{healthy();valid();};
+      const revalidate=async()=>{
+        check();
+        // The child asks immediately before credential access and again after
+        // loading the key. A lost SQL connection cannot issue either permit.
+        await db.query('select 1');
+        check();
+      };
+      const fence:KeyUseFence={schema:'BYETERY_D324_KEY_USE_V1',operationId:w.operationId,contextHash:w.contextHash,
+        instanceId:this.d324InstanceId!,leaseGeneration:String(c.generation),notAfter:valid.notAfter};
+      check();
+      // Retain all authorization/session/lease locks until the child exits.
+      const result=await use(Object.freeze(fence),check,revalidate);
+      check();
+      return result;
+    });
   }
 }
 

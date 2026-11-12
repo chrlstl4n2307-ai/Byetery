@@ -1,4 +1,5 @@
 //! Testnet-only local signer. No RPC, database, or transaction submit.
+pub mod fenced;
 pub mod phased;
 use serde::{Deserialize, Serialize};
 use soroban_cli::xdr::*;
@@ -38,6 +39,18 @@ pub struct Validated {
     pub method: String,
     pub source: &'static str,
     pub signers: Vec<&'static str>,
+}
+pub fn reserved(tx: &Transaction) -> bool {
+    tx.operations.iter().any(|op| match &op.body {
+        OperationBody::InvokeHostFunction(body) => match &body.host_function {
+            HostFunction::InvokeContract(call) => {
+                matches!(call.args.first(), Some(ScVal::String(id))
+                if id.0.as_slice() == b"BYE-D3-R1-20261111-DCDE088CA870")
+            }
+            _ => false,
+        },
+        _ => false,
+    })
 }
 fn require(ok: bool, code: &'static str) -> Result<()> {
     if ok {
@@ -313,6 +326,7 @@ pub async fn sign_request(request: Request) -> Result<SignedResponse> {
         .map_err(|_| "ClockInvalid")?
         .as_secs();
     let validated = validate(&request, now)?;
+    require(!reserved(&validated.tx), "D324KeyUseAuthorityRequired")?;
     let mut signers = Vec::new();
     for public in &validated.signers {
         signers.push(secure_signer(public)?);

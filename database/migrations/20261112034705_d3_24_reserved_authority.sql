@@ -263,7 +263,12 @@ end $$;
 create or replace function api_private.guard_testnet_close_pair() returns trigger language plpgsql set search_path=pg_catalog as $$
 declare op uuid; w api_private.testnet_work; o app_private.stellar_operations; n integer;
 begin
- if TG_TABLE_NAME='stellar_operations' then op:=NEW.id; else op:=NEW.operation_id; end if;
+ if TG_TABLE_NAME='stellar_operations' then op:=NEW.id;
+ elsif TG_TABLE_NAME='return_requests' then
+  select id into op from app_private.stellar_operations
+   where deployment_id=NEW.deployment_id and battery_id=NEW.battery_id and request_id=NEW.request_id
+    and command='open_return' and state='CANCELLED_LOCAL';
+ else op:=NEW.operation_id; end if;
  select * into w from api_private.testnet_work where operation_id=op;
  if not found then return null; end if;
  select * into o from app_private.stellar_operations where id=op;
@@ -272,6 +277,12 @@ begin
     and (n>0 or w.state='ABORTED_PRE_DISPATCH' or o.state='CANCELLED_LOCAL') then
   if w.state<>'ABORTED_PRE_DISPATCH' or o.state<>'CANCELLED_LOCAL' or o.error_code is distinct from 'D324ExecutionExpired'
     or n<>1 or not api_private.d324_unsigned_close_proof(w)
+    or (o.command='open_return' and not exists(select 1 from app_private.return_requests r
+       where r.deployment_id=o.deployment_id and r.battery_id=o.battery_id and r.request_id=o.request_id
+        and r.reservation_state='RELEASED'))
+    or (o.command='pay_reward' and not exists(select 1 from app_private.reward_attempts r
+       where r.deployment_id=o.deployment_id and r.battery_id=o.battery_id and r.operation_id=o.id
+        and r.state='FAILED' and r.error_code='D324ExecutionExpired'))
     or exists(select 1 from api_private.testnet_source_leases where operation_id=op and lease_until>clock_timestamp())
     or not exists(select 1 from api_private.idempotency i where i.operation_id=op and i.response_status=409
        and i.response_body->>'class'='TERMINAL_UNSIGNED')
@@ -291,5 +302,29 @@ begin
    raise exception 'UnsignedClosePairRequired' using errcode='23514'; end if;
  end if;
  return null;
+end $$;
+create constraint trigger d324_return_close_pair after update on app_private.return_requests
+ deferrable initially deferred for each row execute function api_private.guard_testnet_close_pair();
+create constraint trigger d324_reward_close_pair after update on app_private.reward_attempts
+ deferrable initially deferred for each row execute function api_private.guard_testnet_close_pair();
+-- Preserve ordinary reward semantics. Only an exact reviewed, zero-dispatch
+-- terminal close can resolve a queued D3-24 attempt as a local failure.
+create or replace function app_private.guard_attempt() returns trigger language plpgsql set search_path=pg_catalog as $$
+declare b chain_private.batteries; op app_private.stellar_operations; w api_private.testnet_work;
+begin
+ select * into b from chain_private.batteries where deployment_id=NEW.deployment_id and battery_id=NEW.battery_id;
+ select * into op from app_private.stellar_operations where id=NEW.operation_id and deployment_id=NEW.deployment_id;
+ if b.state is distinct from 'RECYCLED' or b.request_id is distinct from NEW.request_id or op.command is distinct from 'pay_reward' then raise exception 'RewardNotEligible' using errcode='23514'; end if;
+ if TG_OP='INSERT' and (NEW.state<>'QUEUED' or b.reward_state<>'PENDING') then raise exception 'InvalidRewardAttempt' using errcode='23514'; end if;
+ if TG_OP='UPDATE' and OLD.state in ('SUCCEEDED','FAILED') and NEW.state<>OLD.state then raise exception 'AttemptTerminal' using errcode='23514'; end if;
+ if NEW.state='SUCCEEDED' and (b.reward_state<>'SENT' or op.state<>'CONFIRMED') then raise exception 'PaymentNotConfirmed' using errcode='23514'; end if;
+ if NEW.state='FAILED' and op.state<>'REJECTED' then
+  select * into w from api_private.testnet_work where operation_id=op.id;
+  if (NEW.deployment_id='5c0cad2f-5f25-4216-8068-6cb9d2d26325' and NEW.battery_id='BYE-D3-R1-20261111-DCDE088CA870'
+    and TG_OP='UPDATE' and OLD.state='QUEUED' and op.state='CANCELLED_LOCAL' and op.error_code='D324ExecutionExpired'
+    and NEW.error_code='D324ExecutionExpired' and w.state='ABORTED_PRE_DISPATCH'
+    and api_private.d324_unsigned_close_proof(w)) is not true then raise exception 'FailureNotConfirmed' using errcode='23514'; end if;
+ end if;
+ return NEW;
 end $$;
 commit;

@@ -593,6 +593,8 @@ name = "byetery-secure-store-signer"
 version = "0.1.0"
 dependencies = [
  "ed25519-dalek 2.2.0",
+ "keyring",
+ "sep5",
  "serde",
  "serde_json",
  "sha2 0.10.9",
@@ -601,6 +603,8 @@ dependencies = [
  "soroban-spec-typescript",
  "stellar-strkey 0.0.16",
  "tokio",
+ "whoami",
+ "zeroize",
 ]
 
 [[package]]

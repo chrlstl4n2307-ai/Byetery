@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { Address, Contract, Networks, StrKey, Transaction, TransactionBuilder, rpc, scValToNative, xdr } from '@stellar/stellar-sdk';
 import { ensure, type Battery, type Command, type Deployment, type ReturnRequest } from '../domain.ts';
 import { evidenceCommitment } from '../evidence.ts';
-import type { PhasedStellarSigner, SigningRequest } from '../stellar-signer.ts';
+import type { PhasedStellarSigner, SigningRequest, KeyUseFence } from '../stellar-signer.ts';
 import type { TransactionTransport } from './worker.ts';
 import type { Work } from './store.ts';
 import { NETWORK_ID, SIGNER_FEE_CAP, ENVELOPE_TIME_POLICY, hasSafeValidity, readSupportedEnvelope, type Confirmation, type FinalizedBody, type Observation, type PreparedBody,
@@ -24,6 +24,7 @@ export interface ContextGuard {
   validateFacts?(work:Work,battery:Battery,request:ReturnRequest|null):Promise<void>;
   connectionGuard?():()=>void;
   startD324Signing?<T>(work:Work,start:(assertStillValid:()=>void)=>Promise<T>):Promise<T>;
+  withD324KeyUse?<T>(work:Work,use:(fence:KeyUseFence,assertStillValid:()=>void,revalidate:()=>Promise<void>)=>Promise<T>):Promise<T>;
 }
 
 /** Checks the simulation's exact invocation tree before any signer is launched. */
@@ -162,15 +163,19 @@ export class TestnetTransport implements TransactionTransport {
     ensure(l.sequence>=body.preparedLedger&&l.sequence-body.preparedLedger<=20&&tx.timeBounds
       &&hasSafeValidity(tx.timeBounds.maxTime,l.closeTime,minimumSeconds),'InvalidSigningWindow');
     let startAuthorized:SigningRequest['startAuthorized'];
+    let withKeyUse:SigningRequest['withKeyUse'];
     if('batteryId' in w.command&&d324Scope(w.deploymentId,w.command.batteryId)){
       ensure(this.guard.startD324Signing,'D324DispatchAuthorityRequired');
       const startSigning=this.guard.startD324Signing.bind(this.guard);
       startAuthorized=start=>startSigning(w,start);
+      ensure(this.guard.withD324KeyUse,'D324KeyUseAuthorityRequired');
+      withKeyUse=use=>this.guard.withD324KeyUse!(w,use);
     }
     return {transactionXdr:body.transactionXdr,method:w.command.kind,expectedSigners:invocation(w.command).signers,
       networkPassphrase:Networks.TESTNET,currentLedger:l.sequence,expirationLedger:body.preparedLedger+60,
       audit:w.auditPhase,assertAdmission:()=>this.supervisor?.assertAdmission(),
       ...(startAuthorized?{startAuthorized}:{}),
+      ...(withKeyUse?{withKeyUse}:{}),
       childObserver:this.supervisor?{started:pid=>this.supervisor!.childStarted(pid),closed:pid=>this.supervisor!.childClosed(pid)}:undefined};
   }
   async attachSorobanAuthorization(body:PreparedBody,w:Work){

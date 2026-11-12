@@ -97,7 +97,7 @@ pub fn verify_authorization(auth: &SorobanAuthorizationEntry, expiration: u32) -
 
 /// Returns the original body. A normalized copy goes through ALL v1 guards.
 pub fn validate_phase(r: &PhasedRequest, now: u64) -> Result<crate::Validated> {
-    require(r.version == 2, "UnsupportedVersion")?;
+    require(r.version == 2 || r.version == 3, "UnsupportedVersion")?;
     require(
         r.phase == "authorize" || r.phase == "sign_envelope",
         "InvalidPhase",
@@ -166,6 +166,10 @@ pub fn validate_phase(r: &PhasedRequest, now: u64) -> Result<crate::Validated> {
         )?;
     }
     validated.tx = original;
+    require(
+        r.version == 3 || !crate::reserved(&validated.tx),
+        "D324KeyUseAuthorityRequired",
+    )?;
     Ok(validated)
 }
 
@@ -173,6 +177,7 @@ pub async fn sign_phase(r: PhasedRequest) -> Result<PhasedResponse> {
     use soroban_cli::{
         config::network::Network, print::Print, signer::sign_soroban_authorizations,
     };
+    require(r.version == 2, "UnsupportedVersion")?;
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map_err(|_| "ClockInvalid")?

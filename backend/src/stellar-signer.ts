@@ -1,4 +1,12 @@
 /** Signing is separate from simulation, persistence and submission. */
+export interface KeyUseFence {
+  schema:'BYETERY_D324_KEY_USE_V1';
+  operationId:string;
+  contextHash:string;
+  instanceId:string;
+  leaseGeneration:string;
+  notAfter:number;
+}
 export interface SigningRequest {
   transactionXdr: string;
   networkPassphrase: string;
@@ -9,6 +17,7 @@ export interface SigningRequest {
   audit?: (phase:string)=>Promise<void>;
   assertAdmission?:()=>void;
   startAuthorized?:<T>(start:(assertStillValid:()=>void)=>Promise<T>)=>Promise<T>;
+  withKeyUse?:<T>(use:(fence:KeyUseFence,assertStillValid:()=>void,revalidate:()=>Promise<void>)=>Promise<T>)=>Promise<T>;
   childObserver?:{started(pid:number):void;closed(pid:number):void};
 }
 export interface SigningResult { transactionXdr: string; signers: string[] }

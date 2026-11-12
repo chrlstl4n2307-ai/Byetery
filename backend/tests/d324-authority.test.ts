@@ -7,6 +7,7 @@ import {Pool} from 'pg';
 import {Keypair,Networks} from '@stellar/stellar-sdk';
 import {D324_COMMANDS,D324_TIME,D324Authority} from '../src/application/d324-authority.ts';
 import {D324} from '../src/application/d324-scope.ts';
+import {prepareD324Sessions,type PreparedD324Sessions} from '../src/application/d324-sessions.ts';
 import {Coordinator,type Action} from '../src/application/coordinator.ts';
 import {SupabaseAuth} from '../src/application/auth.ts';
 import {api} from '../src/application/http.ts';
@@ -39,6 +40,19 @@ type Users=Record<Role,string>;
 const fixedScope={taskId:D324.taskId,runId:D324.runId,businessSha:operatorSha,planHash,batteryId:D324.batteryId,recipient:D324.recipient};
 const reservedBudget={historicalConfirmed:5,limitWithoutContingency:19,remaining:14,runCap:5,tx20Authorized:false};
 type Identities=Awaited<ReturnType<typeof setupSessions>>;
+// Only fixtures can synthesize validated Auth identities. Product admission
+// requires the opaque receipt produced by the server's trusted validator.
+class FixtureAuthority extends D324Authority {
+  readonly sessionChallenge:string;
+  constructor(...args:ConstructorParameters<typeof D324Authority>){super(...args);this.sessionChallenge=args[0].challenge;}
+  override async admit(repo:Repository,input:Parameters<D324Authority['admit']>[1],identities:Identities|PreparedD324Sessions){
+    const prepared='preparationId' in identities?identities:await prepareD324Sessions(repo,
+      {validate:async header=>identities[header!.slice(7) as Role]},
+      {ADMIN:'Bearer ADMIN',USER:'Bearer USER',COLLECTOR:'Bearer COLLECTOR',RECYCLER:'Bearer RECYCLER'},
+      this.instanceId,this.sessionChallenge,()=>input.execution? (input.execution as {issuedAt:number}).issuedAt+1:Date.now());
+    return super.admit(repo,input,prepared);
+  }
+}
 function fixtureApproval(identities:Identities,{grantIssuedAt=Date.now()-1000,windowMs=300_000,now=Date.now,manifestSchema='BYETERY_D324_FINAL_ACTIVATION_V3'}={}) {
   const instanceId=nonce(),challenge=nonce(),wallNow=now(),grantNonce=nonce();
   const manifest=json({schema:manifestSchema,networkId:D324.networkId,deploymentId:D324.deploymentId,
@@ -57,7 +71,7 @@ function fixtureApproval(identities:Identities,{grantIssuedAt=Date.now()-1000,wi
     issuedAt:wallNow-1,expiresAt:wallNow+200000};
   const liveBytes=wire('BYETERY-D324-ONE-LIVE-APPROVAL-V3',live),liveHash=sha(liveBytes);
   const admissionProof=signRunner(wire('BYETERY-D324-ADMISSION-PROOF-V1',{liveHash,challenge,instanceId}));
-  return {authority:new D324Authority({compositionSha,operatorSha,planHash,manifestSha256,ownerPublicKey:owner.publicKey,
+  return {authority:new FixtureAuthority({compositionSha,operatorSha,planHash,manifestSha256,ownerPublicKey:owner.publicKey,
     ownerKeyFingerprint:sha(owner.publicKey.export({type:'spki',format:'der'})),instanceId,challenge},async()=>{},now),
   input:{manifest,manifestApproval:signOwner(Buffer.from('BYETERY-D324-MANIFEST-APPROVAL-V3\n'+manifestSha256+'\n')),
     grant,grantSignature:signOwner(grantBytes),live,liveSignature:signOwner(liveBytes),admissionProof,execution,executionSignature:signOwner(executionBytes)},liveHash};
@@ -88,6 +102,78 @@ async function count(repo:Repository,table:'stellar_operations'|'d324_step'|'d32
   const schema=table==='stellar_operations'?'app_private':'api_private';
   return repo.transaction(async db=>Number((await db.query('select count(*) from '+schema+'.'+table)).rows[0].count));
 }
+
+const sessionHeaders={ADMIN:'Bearer ADMIN',USER:'Bearer USER',COLLECTOR:'Bearer COLLECTOR',RECYCLER:'Bearer RECYCLER'} as const;
+function prepareFixtureSessions(f:Awaited<ReturnType<typeof local>>,a:ReturnType<typeof fixtureApproval>,identities=f.identities){
+  return prepareD324Sessions(f.repo,{validate:async header=>identities[header!.slice(7) as Role]},sessionHeaders,
+    a.authority.instanceId,a.authority.sessionChallenge);
+}
+test('four verified sessions prepare without business writes, bind once and cannot survive forged restart',async()=>{
+  const f=await local(),a=fixtureApproval(f.identities);
+  try{
+    const receipt=await prepareFixtureSessions(f,a);
+    assert.equal(receipt.sessions.length,4);
+    assert.equal(await count(f.repo,'d324_admission'),0);
+    assert.equal(await count(f.repo,'d324_step'),0);
+    assert.equal(await count(f.repo,'stellar_operations'),0);
+    await assert.rejects(a.authority.admit(f.repo,a.input,structuredClone(receipt)),/D324SessionPreparationRequired/);
+    const other=fixtureApproval(f.identities);
+    await assert.rejects(other.authority.admit(f.repo,other.input,receipt),/D324SessionPreparationRequired/);
+    const id=await a.authority.admit(f.repo,a.input,receipt);
+    assert.equal(typeof id,'string');
+    await assert.rejects(a.authority.admit(f.repo,a.input,receipt),/D324SessionPreparationRequired/);
+    await assert.rejects(a.authority.admit(f.repo,a.input,await prepareFixtureSessions(f,a)),/D324AdmissionUnavailable/);
+    const {rows:[persisted]}=await f.db.query<{sessions:unknown}>('select sessions from api_private.d324_admission where id=$1',[id]);
+    assert.deepEqual(persisted.sessions,a.input.execution.sessions);
+  }finally{await f.db.close();}
+});
+test('session preparation rejects missing, wrong role, expired, revoked and substituted sessions',async()=>{
+  for(const fault of ['missing','role','expired','revoked','different-session'] as const){
+    const f=await local(),a=fixtureApproval(f.identities);
+    try{
+      const headers={...sessionHeaders} as Record<Role,string>;
+      if(fault==='missing')delete (headers as Partial<typeof headers>).RECYCLER;
+      if(fault==='role')headers.RECYCLER='Bearer USER';
+      if(fault==='expired')f.identities.RECYCLER.tokenExpiresAt=Date.now();
+      if(fault==='revoked')await f.db.query('delete from auth.sessions where id=$1',[f.identities.RECYCLER.sessionId]);
+      if(fault==='different-session')f.identities.RECYCLER.sessionId=randomUUID();
+      await assert.rejects(prepareD324Sessions(f.repo,{validate:async header=>f.identities[header!.slice(7) as Role]},headers,
+        a.authority.instanceId,a.authority.sessionChallenge),/D324SessionScopeRejected/);
+      assert.equal(await count(f.repo,'stellar_operations'),0);
+      assert.equal(await count(f.repo,'d324_admission'),0);
+    }finally{await f.db.close();}
+  }
+});
+test('prepared sessions cannot bypass missing LIVE, manifest, revoked membership or revoked session',async()=>{
+  for(const fault of ['live','manifest','membership','session'] as const){
+    const f=await local(),a=fixtureApproval(f.identities);
+    try{
+      const receipt=await prepareFixtureSessions(f,a);
+      if(fault==='membership')await f.db.query("update api_private.memberships set enabled=false where user_id=$1 and role='RECYCLER'",[f.users.RECYCLER]);
+      if(fault==='session')await f.db.query('delete from auth.sessions where id=$1',[f.identities.RECYCLER.sessionId]);
+      const input={...a.input,...(fault==='live'?{live:undefined}:{}),...(fault==='manifest'?{manifestApproval:a.input.liveSignature}:{})};
+      await assert.rejects(a.authority.admit(f.repo,input,receipt),/D324/);
+      assert.equal(await count(f.repo,'d324_admission'),0);
+      assert.equal(await count(f.repo,'stellar_operations'),0);
+    }finally{await f.db.close();}
+  }
+});
+test('session preparation clips to the shortest SQL or JWT deadline with the unchanged 120-second margin',async()=>{
+  const f=await local();
+  try{
+    const tokenCutoff=Date.now()+240_000;
+    f.identities.COLLECTOR.tokenExpiresAt=tokenCutoff;
+    const sqlCutoff=tokenCutoff-30_000;
+    await f.db.query('update auth.sessions set not_after=$2 where id=$1',[f.identities.RECYCLER.sessionId,new Date(sqlCutoff)]);
+    const a=fixtureApproval(f.identities),prepared=await prepareFixtureSessions(f,a);
+    assert.equal(prepared.effectiveNotAfter,sqlCutoff-120_000);
+    assert(Object.isFrozen(prepared)&&Object.isFrozen(prepared.sessions));
+    assert(prepared.sessions.every(Object.isFrozen));
+    assert.doesNotMatch(JSON.stringify(prepared),/Bearer|password|email|refresh_token/);
+    await assert.rejects(a.authority.admit(f.repo,a.input,prepared),/D324ExecutionScopeRejected|D324SessionScopeRejected/);
+    assert.equal(await count(f.repo,'d324_admission'),0);
+  }finally{await f.db.close();}
+});
 
 test('reserved registration requires independent proof before queue while ordinary ADMIN and auth behavior survive',async()=>{
   const f=await local();
@@ -195,7 +281,7 @@ async function queueFake(store:TransportStore,op:string,repo:Repository,key=Keyp
   return fake;
 }
 
-async function verifyFiveSteps(expireDuring?:number){
+async function verifyFiveSteps(expireDuring?:number,closeBefore?:number){
   const f=await local(),origin=Date.now();
   let now=origin;
   const a=fixtureApproval(f.identities,{grantIssuedAt:origin-1000,windowMs:D324_TIME.executionMs,now:()=>now});
@@ -206,8 +292,8 @@ async function verifyFiveSteps(expireDuring?:number){
       $$select current_setting('byetery.fixture_clock')::timestamptz$$`);
     const {rows:definitions}=await f.db.query<{definition:string}>(`select pg_get_functiondef(oid) as definition
       from pg_proc where pronamespace='api_private'::regnamespace
-      and proname in ('d324_enqueue_window','d324_guard_dispatch')`);
-    assert.equal(definitions.length,2);
+      and proname in ('d324_enqueue_window','d324_guard_dispatch','d324_unsigned_close_proof','guard_testnet_close_pair','guard_testnet_lease')`);
+    assert.equal(definitions.length,5);
     for(const {definition} of definitions)await f.db.exec(definition.replaceAll('clock_timestamp()','pg_temp.d324_fixture_clock()'));
     wrapPool(f.repo,(query,sql,params)=>query(sql.replaceAll('clock_timestamp()','pg_temp.d324_fixture_clock()'),params));
     const advance=async(t:number)=>{now=t;await f.db.query("select set_config('byetery.fixture_clock',$1,false)",[new Date(t).toISOString()]);};
@@ -234,6 +320,43 @@ async function verifyFiveSteps(expireDuring?:number){
       await assert.rejects(c.acknowledge(identity,action,input,key+'x',proofFor(key+'x')),
         ordinal===5?/D324BudgetExhausted/:/D324ReplayConflict/);
       const fake=await queueFake(store,op,f.repo);
+      if(closeBefore===ordinal){
+        const claim=await store.claim(op,'fixture-domain-close'),work=await store.work(op);
+        await store.release(claim);
+        await advance(a.input.execution.executionNotAfter);
+        const decision={schema:'BYETERY_D324_PRE_DISPATCH_CLOSE_V1',taskId:D324.taskId,deploymentId:D324.deploymentId,batteryId:D324.batteryId,
+          compositionSha,operatorSha,planHash,instanceId:a.authority.instanceId,admissionId:id,operationId:op,sourceAccount:claim.sourceAccount,
+          leaseGeneration:claim.generation,contextHash:work.contextHash,decisionId:'fixture-domain-close-'+ordinal,reason:'D324ExecutionExpired'};
+        await a.authority.closeExpiredUnsigned(f.repo,decision,signOwner(wire('BYETERY-D324-PRE-DISPATCH-CLOSE-V1',decision)));
+        await assert.rejects(a.authority.closeExpiredUnsigned(f.repo,decision,
+          signOwner(wire('BYETERY-D324-PRE-DISPATCH-CLOSE-V1',decision))),/D324CloseStateRejected/);
+        assert.equal((await store.work(op)).state,'ABORTED_PRE_DISPATCH');
+        assert.equal((await store.work(op)).dispatchAttempts,0);
+        assert.equal(await store.identity(op),null);
+        assert.equal(fake.submitted.length,0);
+        if(ordinal===2){
+          const {rows:[request]}=await f.db.query<{reservation_state:string}>(
+            'select reservation_state from app_private.return_requests where deployment_id=$1 and request_id=decode($2,\'hex\')',
+            [D324.deploymentId,work.command.kind==='open_return'?work.command.requestId:null]);
+          assert.equal(request.reservation_state,'RELEASED');
+        }else{
+          const {rows:[reward]}=await f.db.query<{state:string;error_code:string}>(
+            'select state,error_code from app_private.reward_attempts where operation_id=$1',[op]);
+          assert.deepEqual(reward,{state:'FAILED',error_code:'D324ExecutionExpired'});
+        }
+        assert.equal(Number((await f.db.query<{count:number}>(`select count(*) from app_private.return_requests
+          where deployment_id=$1 and reservation_state='HELD'`,[D324.deploymentId])).rows[0].count),0);
+        assert.equal(Number((await f.db.query<{count:number}>(`select count(*) from app_private.reward_attempts
+          where deployment_id=$1 and state='QUEUED'`,[D324.deploymentId])).rows[0].count),0);
+        const ordinary=String((await c.acknowledge(f.identities.ADMIN,register,{batteryId:'BYE-D324-DOMAIN-CLOSE'},
+          'ordinary-after-domain-close-'+ordinal)).body.operationId);
+        await queueFake(store,ordinary,f.repo,fake.key);
+        const freshClaim=await store.claim(ordinary,'ordinary-after-close');
+        await store.release(freshClaim);
+        assert.equal(await count(f.repo,'d324_step'),ordinal);
+        assert.equal(await count(f.repo,'stellar_operations'),ordinal+1);
+        return false;
+      }
       await assert.rejects(f.db.query("update api_private.testnet_work set state='PREPARING' where operation_id=$1",[op]),
         /D324PreparationAuthorityRequired/);
       const worker=new LocalTransactionWorker(store,fake,async(db,w:Work)=>{
@@ -274,9 +397,9 @@ async function verifyFiveSteps(expireDuring?:number){
       return true;
     };
     const verifyStop=async(ordinal:number)=>{
-      assert.equal(expireDuring,ordinal);
+      assert.equal(expireDuring??closeBefore,ordinal);
       assert.equal(await count(f.repo,'d324_step'),ordinal);
-      assert.equal(await count(f.repo,'stellar_operations'),ordinal);
+      assert.equal(await count(f.repo,'stellar_operations'),ordinal+(closeBefore?1:0));
       const {rows:[confirmed]}=await f.db.query<{count:number}>("select count(*) from app_private.stellar_operations where state='CONFIRMED'");
       assert.equal(Number(confirmed.count),ordinal-1);
     };
@@ -303,6 +426,8 @@ async function verifyFiveSteps(expireDuring?:number){
 test('five synthetic steps project by minute 68 with the launch grant expired; budget and idempotency preserved',()=>verifyFiveSteps());
 for(const ordinal of [1,2,3,4,5])
   test('execution deadline during step '+ordinal+' blocks transport with the confirmed prefix intact',()=>verifyFiveSteps(ordinal));
+for(const ordinal of [2,5])
+  test('reviewed close resolves exact domain effects and preserves budget '+ordinal,()=>verifyFiveSteps(undefined,ordinal));
 
 test('expired/revoked or restarted worker cannot sign; revocation during source check prevents send and preserves original identity',async()=>{
   for(const scenario of ['different-instance','revoked','expired','before-send','membership-before-send','history-before-send'] as const){
@@ -547,9 +672,9 @@ test('H2 permits reviewed closure when real signer audit recorded START but the 
     await assert.rejects(signer.signEnvelope({transactionXdr:prepared.transactionXdr,method:'register_battery',
       expectedSigners:[ACTORS.admin],networkPassphrase:Networks.TESTNET,currentLedger:1,expirationLedger:2,
       audit:phase=>store.phase(claim,phase),
-      startAuthorized:async start=>{
+      withKeyUse:async use=>{
         await until(f,a.input.execution.executionNotAfter);
-        return guard.startD324Signing(work,start);
+        return guard.withD324KeyUse(work,use);
       }},prepared.transactionHash),/D324DispatchAuthorityRequired/);
     assert.equal(spawns,0);
     const {rows}=await f.db.query<{phase:string}>("select evidence->>'phase' as phase from api_private.testnet_observations where operation_id=$1 order by id",[op]);
@@ -755,7 +880,47 @@ test('PostgreSQL protects both sides of the install race and serializes admissio
         await store.preparing(claim);
         const work=await store.work(op);work.signingClaim=claim;
         const guard=new PersistedContextGuard(repo,a.authority.instanceId);
+        let releaseKeyUse!:()=>void,entered!:()=>void;
+        const keyUseBlocked=new Promise<void>(resolve=>{releaseKeyUse=resolve;});
+        const keyUseEntered=new Promise<void>(resolve=>{entered=resolve;});
+        const use=guard.withD324KeyUse(work,async(fence,valid)=>{
+          assert.equal(fence.operationId,op);assert.equal(fence.leaseGeneration,String(claim.generation));
+          valid();entered();await keyUseBlocked;valid();return 'SYNTHETIC_KEY_USE';
+        });
+        await keyUseEntered;
+        const otherConnection=await pool.connect();
+        try{
+          for(const [query,params] of [
+            ['delete from auth.sessions where id=$1',[identities.ADMIN.sessionId]],
+            ['update api_private.d324_admission set revoked_at=clock_timestamp() where id=$1',[grant.id]],
+            ["update api_private.memberships set enabled=false where user_id=$1 and role='ADMIN'",[users.ADMIN]],
+            ['update api_private.testnet_source_leases set lease_until=clock_timestamp() where operation_id=$1',[op]],
+          ] as const){
+            await otherConnection.query('begin');await otherConnection.query("set local lock_timeout='100ms'");
+            await assert.rejects(otherConnection.query(query,[...params]),(error:unknown)=>(error as {code?:string}).code==='55P03');
+            await otherConnection.query('rollback');
+          }
+        }finally{otherConnection.release();releaseKeyUse();}
+        assert.equal(await use,'SYNTHETIC_KEY_USE');
         assert.equal(await guard.startD324Signing(work,async before=>{before();return 'SYNTHETIC_START';}),'SYNTHETIC_START');
+        let signingConnection=0,syntheticKeyUses=0;
+        wrapPool(repo,async(query,sql,params)=>{
+          if(sql==='select 1'){
+            const fact=await query('select pg_backend_pid() as connection');
+            signingConnection=Number((fact.rows[0] as {connection:number}).connection);
+          }
+          return query(sql,params);
+        });
+        await assert.rejects(guard.withD324KeyUse(work,async(_fence,_valid,revalidate)=>{
+          await revalidate(); // Child LOAD acknowledgement, before loading its synthetic key.
+          assert(signingConnection>0);
+          await pool.query('select pg_terminate_backend($1)',[signingConnection]);
+          await pool.query('update api_private.d324_admission set revoked_at=clock_timestamp() where id=$1',[grant.id]);
+          await revalidate(); // Child SIGN acknowledgement must fail before Ed25519 use.
+          syntheticKeyUses++;
+          return 'MUST_NOT_SIGN';
+        }),/DatabaseConnectionInterrupted/);
+        assert.equal(syntheticKeyUses,0);
         const deadline=a.input.execution.executionNotAfter;
         await pool.query('select pg_sleep(greatest(0,extract(epoch from ($1::timestamptz-clock_timestamp()))))',[new Date(deadline+5)]);
         await assert.rejects(guard.startD324Signing(work,async()=>assert.fail('Expired signer callback executed')),
@@ -765,7 +930,9 @@ test('PostgreSQL protects both sides of the install race and serializes admissio
           batteryId:D324.batteryId,compositionSha,operatorSha,planHash,instanceId:a.authority.instanceId,
           admissionId:grant.id,operationId:op,sourceAccount:work.sourceAccount,leaseGeneration:claim.generation,
           contextHash:work.contextHash,decisionId:'postgres-reviewed-close',reason:'D324ExecutionExpired'};
-        await a.authority.closeExpiredUnsigned(repo,decision,signOwner(wire('BYETERY-D324-PRE-DISPATCH-CLOSE-V1',decision)));
+        const closures=await Promise.allSettled([1,2].map(()=>a.authority.closeExpiredUnsigned(repo,decision,
+          signOwner(wire('BYETERY-D324-PRE-DISPATCH-CLOSE-V1',decision)))));
+        assert.equal(closures.filter(r=>r.status==='fulfilled').length,1);
         assert.equal((await store.work(op)).state,'ABORTED_PRE_DISPATCH');
         const ordinary=String((await c.acknowledge(identities.ADMIN,register,{batteryId:'BYE-PG-SAME-SOURCE'},'postgres-ordinary-close')).body.operationId);
         const localTransport=await queueFake(store,ordinary,repo,fake.key);

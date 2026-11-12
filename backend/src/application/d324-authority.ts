@@ -6,6 +6,7 @@ import {one,type Db,type Repository} from './repository.ts';
 import {canonical} from './validation.ts';
 import {ACTORS} from '../testnet/abi.ts';
 import {D324,d324Scope} from './d324-scope.ts';
+import {consumePreparedD324Sessions,type PreparedD324Sessions} from './d324-sessions.ts';
 
 export const D324_COMMANDS=['register_battery','open_return','confirm_collection','confirm_recycling','pay_reward'] as const;
 const roles=['ADMIN','USER','COLLECTOR','RECYCLER','USER'] as const;
@@ -118,7 +119,8 @@ export class D324Authority {
   }
   get instanceId(){return this.#pins.instanceId;}
 
-  async admit(repo:Repository,input:AdmissionInput,verifiedSessions:ExecutionSessions):Promise<string> {
+  async admit(repo:Repository,input:AdmissionInput,prepared:PreparedD324Sessions):Promise<string> {
+    const verifiedSessions=consumePreparedD324Sessions(prepared,this.instanceId,this.#pins.challenge,this.#now);
     const pin=this.#pins, now=this.#now();
     requireThat(repo.mode==='TESTNET'&&d324Scope(repo.deploymentId,D324.batteryId),403,'D324ScopeRejected');
     requireThat(Buffer.isBuffer(input.manifest)&&input.manifest.length<=8192,403,'D324AuthorityMalformed');
@@ -191,10 +193,14 @@ export class D324Authority {
       // Validate actual sessions again under locks. A DB-imposed expiry may
       // be earlier than the access token expiry included in the signed authorization.
       for(const session of sessions){
-        const row=await one(db,`select 1 from auth.sessions where id=$1 and user_id=$2
-          and (not_after is null or not_after >= $3::timestamptz) for share`,
-        [session.sessionId,session.authUserId,new Date(executionExpires+D324_TIME.sessionMarginMs)]);
-        requireThat(row,403,'D324SessionScopeRejected');
+        const row=await one(db,`select m.actor_address from auth.sessions s
+          join app_private.users u on u.auth_user_id=s.user_id and u.status='ACTIVE'
+          join api_private.memberships m on m.user_id=u.id and m.deployment_id=$4 and m.role=$5 and m.enabled
+          where s.id=$1 and s.user_id=$2 and (s.not_after is null or s.not_after >= $3::timestamptz)
+          for share of s,u,m`,
+        [session.sessionId,session.authUserId,new Date(executionExpires+D324_TIME.sessionMarginMs),repo.deploymentId,session.role]);
+        requireThat(row&&(session.role!=='COLLECTOR'||row.actor_address===ACTORS.collector)
+          &&(session.role!=='RECYCLER'||row.actor_address===ACTORS.recycler),403,'D324SessionScopeRejected');
       }
       const row=await one(db,`insert into api_private.d324_admission
         (id,deployment_id,battery_id,instance_id,grant_nonce,grant_hash,manifest_hash,live_hash,runner_key,admitted_at,expires_at,execution_hash,sessions)
@@ -231,7 +237,7 @@ export class D324Authority {
           and operation_id=$4 and generation=$5 and lease_until<=clock_timestamp() for update`,
       [D324.networkId,source,D324.deploymentId,operationId,generation]);
       requireThat(lease,409,'D324CloseLeaseChanged');
-      const match=await one(db,`select 1 from api_private.d324_step s join api_private.d324_admission a on a.id=s.admission_id
+      const match=await one(db,`select o.command,encode(o.request_id,'hex') as request_id from api_private.d324_step s join api_private.d324_admission a on a.id=s.admission_id
         join api_private.testnet_work w on w.operation_id=s.operation_id and w.deployment_id=s.deployment_id
         join app_private.stellar_operations o on o.id=s.operation_id and o.deployment_id=s.deployment_id
         where s.operation_id=$1 and a.id=$2 and s.deployment_id=$3 and s.battery_id=$4 and a.instance_id=decode($5,'hex')
@@ -245,6 +251,19 @@ export class D324Authority {
       // The transition trigger verifies the zero-dispatch facts against SQL.
       await db.query("update api_private.testnet_work set state='ABORTED_PRE_DISPATCH' where operation_id=$1",[operationId]);
       await db.query("update app_private.stellar_operations set state='CANCELLED_LOCAL',error_code='D324ExecutionExpired' where id=$1",[operationId]);
+      if(match.command==='open_return'){
+        const released=await one(db,`update app_private.return_requests set reservation_state='RELEASED'
+          where deployment_id=$1 and battery_id=$2 and request_id=decode($3,'hex') and reservation_state='HELD'
+          and not exists(select 1 from chain_private.return_requests where deployment_id=$1 and request_id=decode($3,'hex'))
+          returning request_id`,[D324.deploymentId,D324.batteryId,match.request_id]);
+        requireThat(released,409,'D324CloseDomainConflict');
+      }
+      if(match.command==='pay_reward'){
+        const failed=await one(db,`update app_private.reward_attempts set state='FAILED',error_code='D324ExecutionExpired'
+          where deployment_id=$1 and battery_id=$2 and operation_id=$3 and state='QUEUED'
+          returning operation_id`,[D324.deploymentId,D324.batteryId,operationId]);
+        requireThat(failed,409,'D324CloseDomainConflict');
+      }
       const updated=await one(db,`update api_private.idempotency set response_status=409,response_body=$2::jsonb
         where operation_id=$1 and response_body is null returning operation_id`,[operationId,JSON.stringify({
         source:'TESTNET',operationId,class:'TERMINAL_UNSIGNED',state:'CANCELLED_LOCAL',transportState:'ABORTED_PRE_DISPATCH',
@@ -400,7 +419,9 @@ export async function assertD324Work(db:D324Sql,w:DurableScope,instanceId:string
     ensure(Number.isFinite(remaining)&&performance.now()-started<remaining,'D324DispatchAuthorityRequired');
   };
   assertStillValid();
-  return assertStillValid;
+  // Charge the whole SQL round trip and clock skew against the permission.
+  // A child receives this absolute bound in addition to its monotonic budget.
+  return Object.assign(assertStillValid,{notAfter:Math.floor(Date.now()+remaining-(performance.now()-started))});
 }
 
 // The transaction may release its locks after this synchronous invocation.
