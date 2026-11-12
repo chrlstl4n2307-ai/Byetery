@@ -127,6 +127,11 @@ export interface OperatorOptions {
    * Must be supplied under the future preflight task, never sourced from env. */
   readPreflight: () => Promise<Preflight>; credentials: CredentialInput;
   observationSignal?: AbortSignal;
+  d324Proofs?: {
+    assertAdmission(scope:{taskId:string;operatorSha:string;planHash:string;batteryId:string;recipient:string}):Promise<void>;
+    proofFor(input:{action:{kind:string;resource?:string};body:unknown;idempotencyKey:string;
+      principal:string;sessionId:string}):Promise<string>;
+  };
 }
 /** No invocations in D3-5. The future local entrypoint supplies CLI args and
  * no-echo credentials; no password CLI/env/file option is exposed here. */
@@ -140,9 +145,21 @@ export async function createLocalOperator(options: OperatorOptions) {
   const reviewed=await options.readPreflight();
   activation(p, args, git, process.env,reviewed.taskId);
   const run = p.input.runs.find(r=>r.runId===reviewed.runId); check(run,'ExactRunRequired');
+  const d324=args.taskId==='D3-24-RUN1';
+  const reservedBattery=run.batteryId==='BYE-D3-R1-20261111-DCDE088CA870';
+  check(d324===reservedBattery,'D324OperatorScopeRejected');
+  if(d324)check(run.runId==='RUN1'&&run.recipient==='GDXAWG56PVUHWGB5VSJRN6OUZTEL7M3SLKL46CDKKXQ42CU2XCS3PXCS',
+    'D324OperatorScopeRejected');
+  const proofs=d324?options.d324Proofs:undefined;
+  if(d324) {
+    check(proofs&&run.recipient,'D324ProofProviderRequired');
+    await proofs.assertAdmission({taskId:args.taskId,operatorSha:args.expectedSha,planHash:p.planHash,
+      batteryId:run.batteryId,recipient:run.recipient});
+  }
   const origin = localApiOrigin(options.apiOrigin);
   const lock = await acquireOperatorLock(options.root);
   const sessions = new Map<Role,Session>(); let closed = false; let busy = false; let stopped = false;
+  const principals = new Map<Role,string>();
   const journal = join(lock.directory, `${args.taskId}-${args.expectedSha}.jsonl`);
   const budgetFile=join(lock.directory,`${p.planHash}.budget`);
   let previous: string[]=[];
@@ -158,11 +175,13 @@ export async function createLocalOperator(options: OperatorOptions) {
     check(f.runId===run!.runId && f.taskId===reviewed.taskId,'ExactRunRequired');
     check(budget.used < reservedCap, 'TxBudgetExceeded');
   }
-  async function api(role: Role, path: string, method = 'GET', body?: unknown, key?: string, signal?:AbortSignal): Promise<ApiResult> {
+  async function api(role: Role, path: string, method = 'GET', body?: unknown, key?: string, signal?:AbortSignal,
+    writeProof?:string): Promise<ApiResult> {
     const session = sessions.get(role); check(session, 'RoleSessionRequired');
     try {
       const r = await fetch(origin + path, {method,redirect:'error',credentials:'omit',signal:signal??AbortSignal.timeout(30_000),
-        headers:{Authorization:'Bearer '+session.bearer(),...(body!==undefined?{'Content-Type':'application/json'}:{}),...(key?{'Idempotency-Key':key}:{})},
+        headers:{Authorization:'Bearer '+session.bearer(),...(body!==undefined?{'Content-Type':'application/json'}:{}),
+          ...(key?{'Idempotency-Key':key}:{}),...(writeProof?{'X-Byetery-D324-Proof':writeProof}:{})},
         ...(body!==undefined?{body:JSON.stringify(body)}:{})});
       const value = await r.json() as Record<string,unknown>;
       check(value && typeof value==='object' && !Array.isArray(value) && value.source === 'TESTNET','TestnetResponseRequired');
@@ -178,6 +197,10 @@ export async function createLocalOperator(options: OperatorOptions) {
       const session = await passwordSession(options.publishableKey,await options.credentials(role)); sessions.set(role,session);
       const me = await api(role,'/api/me');
       check(me.status===200 && Array.isArray(me.body.roles) && me.body.roles.includes(role) && me.body.membershipStatus==='ENABLED','RoleSessionMismatch');
+      if(proofs){
+        check(typeof me.body.userId==='string'&&/^[a-f0-9-]{36}$/.test(me.body.userId),'D324PrincipalRequired');
+        principals.set(role,me.body.userId);
+      }
     }
   } catch (e) {
     for (const session of sessions.values()) try { await session.close(); } catch { /* no token propagation */ }
@@ -221,13 +244,27 @@ export async function createLocalOperator(options: OperatorOptions) {
         const base={taskId:args.taskId,gitSha:args.expectedSha,runId:run.runId,batteryId:run.batteryId,role,operation};
         const log=async(extra:Partial<JournalEntry>)=>appendJournal(journal,{...base,phase:'RESULT',timestamp:new Date().toISOString(),...extra});
         await log({phase:'INTENT'}); // fsync BEFORE possible API mutation.
+        let writeProof:string|undefined;
+        if(proofs){
+          const kinds={register_battery:'register',open_return:'return',confirm_collection:'collection',
+            confirm_recycling:'recycling',pay_reward:'reward'};
+          const resource=operation==='open_return'||operation==='pay_reward'?run.batteryId:
+            operation==='confirm_collection'||operation==='confirm_recycling'?requestId!:undefined;
+          const session=sessions.get(role),principal=principals.get(role);
+          check(session&&principal,'D324PrincipalRequired');
+          const {session_id:sessionId}=JSON.parse(Buffer.from(session.bearer().split('.')[1],'base64url').toString('utf8')) as {session_id?:string};
+          check(typeof sessionId==='string'&&/^[a-f0-9-]{36}$/.test(sessionId),'D324SessionRequired');
+          writeProof=await proofs.proofFor({action:{kind:kinds[operation],...(resource===undefined?{}:{resource})},
+            body,idempotencyKey:key,principal,sessionId});
+          check(/^[A-Za-z0-9_-]{1,4096}$/.test(writeProof),'D324WriteProofRequired');
+        }
         let original:OperationIdentity={operationId:null,transactionHash:null};
         let last:OperationReceipt|undefined;
         let confirmationMode: ConfirmationMode;
         try{
           const receipt=await submitAndObserveOperation(async()=>{
             try {
-              const result=await api(role,path,'POST',body,key);
+              const result=await api(role,path,'POST',body,key,undefined,writeProof);
               check(result.status===202,'ApplicationRejectedOrUnresolved');
               return identity(result.body);
             }catch(error){
