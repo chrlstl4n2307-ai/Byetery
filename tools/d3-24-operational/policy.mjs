@@ -1,4 +1,4 @@
-import { createPublicKey, verify } from 'node:crypto';
+import { verifyDetachedEd25519 } from '../d3-24-activation/ed25519.mjs';
 import { hash } from '../d3-evidence-capture/common.mjs';
 import { checkLiveSessionConfig, LIVE_JWT_EXPIRY_SECONDS, requireThat as check } from '../d3-run1-launcher/boundaries.mjs';
 import { canonicalGrant, exactRecord, MAX_JWT_OBSERVATION_AGE_MS } from '../d3-run1-launcher/grant-schema.mjs';
@@ -52,15 +52,7 @@ export function verifyD324OwnerEnvelope(envelope, { compositionSha, k5Bytes, k5S
   check(exactRecord(envelope, ['grant', 'signature']), 'GRANT_ENVELOPE_REJECTED');
   const { grant, signature } = envelope;
   const bytes = verifyD324GrantScope(grant, compositionSha, now);
-  const der = Buffer.from(OWNER_GRANT_PUBLIC_KEY, 'base64url');
-  const key = createPublicKey({ key: der, type: 'spki', format: 'der' });
-  check(der.length === 44 && der.toString('base64url') === OWNER_GRANT_PUBLIC_KEY &&
-    hash(der) === OWNER_GRANT_PUBLIC_KEY_FINGERPRINT && key.asymmetricKeyType === 'ed25519',
-  'OWNER_GRANT_PUBLIC_KEY_REJECTED');
-  check(typeof signature === 'string' && /^[A-Za-z0-9_-]{86}$/.test(signature), 'OWNER_GRANT_SIGNATURE_REJECTED');
-  const raw = Buffer.from(signature, 'base64url');
-  check(raw.length === 64 && raw.toString('base64url') === signature && verify(null, bytes, key, raw),
-    'OWNER_GRANT_SIGNATURE_REJECTED');
+  verifyDetachedEd25519(bytes, signature, OWNER_GRANT_PUBLIC_KEY, OWNER_GRANT_PUBLIC_KEY_FINGERPRINT);
   const sessionConfig = Object.freeze({ projectRef, source: 'SUPABASE_PROJECT_AUTH_CONFIG',
     jwtExpirySeconds: grant.jwtExpirySeconds, observedAt: grant.jwtObservedAt });
   checkLiveSessionConfig(sessionConfig, now);
