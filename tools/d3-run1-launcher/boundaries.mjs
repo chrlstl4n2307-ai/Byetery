@@ -1,3 +1,4 @@
+import { D324_IDENTITY } from '../d3-24-ratification/profile.mjs';
 import { execFile } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { open } from 'node:fs/promises';
@@ -118,7 +119,15 @@ function preflightPhaseOf(phaseOf, readNumber) {
 
 // Source must perform the underlying observations within the requested window.
 // A new request binding plus source timestamps reject a reused result.
-export function createReadPreflight(readSources, { now = Date.now, retain = () => {}, diagnostics, phaseOf } = {}) {
+export function createReadPreflight(readSources, options) {
+  return createReadPreflightForRun(RUN1, readSources, options);
+}
+
+export function createD324ReadPreflight(readSources, options) {
+  return createReadPreflightForRun(D324_IDENTITY, readSources, options);
+}
+
+function createReadPreflightForRun(run, readSources, { now = Date.now, retain = () => {}, diagnostics, phaseOf } = {}) {
   let lastRead = -1;
   let pending = false;
   let reads = 0;
@@ -134,7 +143,7 @@ export function createReadPreflight(readSources, { now = Date.now, retain = () =
       const requestId = randomUUID();
       let result;
       try {
-        result = await readSources(Object.freeze({ requestId, requestedAt, identity: RUN1 }));
+        result = await readSources(Object.freeze({ requestId, requestedAt, identity: run }));
       } catch (sourceError) {
         sourceFailure = sourceError;
         throw new Error('PREFLIGHT_SOURCES_UNAVAILABLE');
@@ -146,8 +155,8 @@ export function createReadPreflight(readSources, { now = Date.now, retain = () =
         completedAt - requestedAt <= 60_000 && Number.isSafeInteger(preflight?.observedAt) &&
         preflight.observedAt > lastRead && preflight.observedAt >= requestedAt && preflight.observedAt <= completedAt,
       'PREFLIGHT_FRESHNESS_REJECTED');
-      requireThat(preflight.taskId === RUN1.taskId && preflight.runId === RUN1.runId &&
-        preflight.sameRuntimeSha === RUN1.businessSha && preflight.mode === 'TESTNET', 'PREFLIGHT_SCOPE_REJECTED');
+      requireThat(preflight.taskId === run.taskId && preflight.runId === run.runId &&
+        preflight.sameRuntimeSha === run.businessSha && preflight.mode === 'TESTNET', 'PREFLIGHT_SCOPE_REJECTED');
       requireThat(Array.isArray(observations) && observations.length === allowedSources.size &&
         new Set(observations.map(item => item.source)).size === allowedSources.size &&
         observations.every(({ source, observedAt, ledger }) => allowedSources.has(source) &&

@@ -5,6 +5,7 @@ import { isAbsolute, join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { RUN1, requireThat } from './boundaries.mjs';
 import { exactRecord } from './grant-schema.mjs';
+import { D324_IDENTITY } from '../d3-24-ratification/profile.mjs';
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const hex = /^[a-f0-9]{64}$/;
@@ -37,8 +38,16 @@ function canonicalPin(pin, hasVersion = false) {
 }
 
 export function encodeSessionControl(session) {
+  return encodeControlForTask(session, RUN1.taskId);
+}
+
+export function encodeD324SessionControl(session) {
+  return encodeControlForTask(session, D324_IDENTITY.taskId);
+}
+
+function encodeControlForTask(session, expectedTaskId) {
   reject(exactRecord(session, ['schemaVersion', 'taskId', 'compositionRootSha', 'live', 'wrapper', 'pwsh', 'node']) &&
-    session.schemaVersion === 2 && session.taskId === RUN1.taskId &&
+    session.schemaVersion === 2 && session.taskId === expectedTaskId &&
     typeof session.compositionRootSha === 'string' && commit.test(session.compositionRootSha));
   const { schemaVersion, taskId, compositionRootSha } = session;
   const live = canonicalPin(session.live);
@@ -49,15 +58,23 @@ export function encodeSessionControl(session) {
   return Buffer.from(JSON.stringify({ schemaVersion, taskId, compositionRootSha, live, wrapper, pwsh, node }) + '\n', 'utf8');
 }
 
-export async function verifySessionPins(env, { root, head, parentExecutable = parentPowerShell,
-  nodeExecutable = { path: process.execPath, version: process.version } }) {
-  const expected = env.BYETERY_K7_SESSION_CONTROL_SHA256;
+export function verifySessionPins(env, options) {
+  return verifyPins(env, options, encodeSessionControl, 'd3-run1-launcher', 'BYETERY_K7');
+}
+
+export function verifyD324SessionPins(env, options) {
+  return verifyPins(env, options, encodeD324SessionControl, 'd3-24-operational', 'BYETERY_D324');
+}
+
+async function verifyPins(env, { root, head, parentExecutable = parentPowerShell,
+  nodeExecutable = { path: process.execPath, version: process.version } }, encode, launcher, prefix) {
+  const expected = env[prefix + '_SESSION_CONTROL_SHA256'];
   reject(typeof expected === 'string' && hex.test(expected));
-  const bytes = await checkedFile(env.BYETERY_K7_SESSION_CONTROL_PATH, 8192);
+  const bytes = await checkedFile(env[prefix + '_SESSION_CONTROL_PATH'], 8192);
   reject(digest(bytes) === expected);
   const session = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
-  reject(bytes.equals(encodeSessionControl(session)) && session.compositionRootSha === head);
-  const directory = join(await realpath(root), 'tools', 'd3-run1-launcher');
+  reject(bytes.equals(encode(session)) && session.compositionRootSha === head);
+  const directory = join(await realpath(root), 'tools', launcher);
   reject(session.live.path === join(directory, 'live.mjs') && session.wrapper.path === join(directory, 'launch.ps1'));
   reject(await realpath(await parentExecutable()) === session.pwsh.path);
   reject(await realpath(nodeExecutable.path) === session.node.path && nodeExecutable.version === session.node.version);
