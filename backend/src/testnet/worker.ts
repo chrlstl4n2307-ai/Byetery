@@ -4,6 +4,7 @@ import { finalizedBody, signedIdentity, preparedIdentity, assertPersistedEnvelop
   type Observation, type StateEvidence, type TransactionIdentity, type TransportState } from './identity.ts';
 import { TransportStore, type Work, type Sql, type Claim } from './store.ts';
 import {invocation} from './abi.ts';
+import {d324Scope} from '../application/d324-scope.ts';
 
 /** VOL-003 ports have no RPC implementation and no production signer binding. */
 export interface TransactionTransport {
@@ -11,7 +12,7 @@ export interface TransactionTransport {
   prepareAndSimulate(context: Work): Promise<PreparedBody>;
   attachSorobanAuthorization(body: PreparedBody, context: Work): Promise<PreparedBody>;
   signEnvelope(body: FinalizedBody, context: Work): Promise<string>;
-  submit(identity: TransactionIdentity): Promise<{ transactionHash: string;status?:string;ledger?:number }>;
+  submit(identity: TransactionIdentity,beforeSend?:()=>void): Promise<{ transactionHash: string;status?:string;ledger?:number }>;
   observe(identity: TransactionIdentity): Promise<Observation>;
   inspectExpiredEffect(identity: TransactionIdentity, context: Work): Promise<StateEvidence>;
   /** Stricter non-application proof for a pre-dispatch authorization hold. */
@@ -48,10 +49,13 @@ export class DurableTransactionWorker {
   private async execute(id:string,worker:string,review?:ReviewedUnsignedResume):Promise<TransportState>{
     const healthy=this.store.database.connectionGuard?.()??(()=>{});
     const existing=await this.store.work(id);
+    const protectedBattery='batteryId' in existing.command&&d324Scope(existing.deploymentId,existing.command.batteryId);
+    if(review&&protectedBattery)
+      throw new DomainError('D3ReplayForbidden');
     if(resolved(existing.state)){ensure(!review,'UnsignedRecoveryMismatch');return existing.state;}
     if(await this.store.hasIdentityHold(id)){ensure(!review,'UnsignedRecoveryMismatch');return existing.state;}
     const priorIdentity=existing.dispatchAttempts===0?await this.store.identity(id):null;
-    if(existing.dispatchAttempts===0&&await this.store.authorizationRevoked(id)){
+    if(!protectedBattery&&existing.dispatchAttempts===0&&await this.store.authorizationRevoked(id)){
       ensure(priorIdentity&&!review,'AuthorizationRevoked');
       const claim=await this.store.claim(id,worker);
       try{
@@ -80,7 +84,16 @@ export class DurableTransactionWorker {
         return (await this.store.work(id)).state;
       }
       if(['READY','SIGNED'].includes(work.state)){
-        if(!await this.verifyOriginal(claim,work,identity))return work.state;
+        if(!await this.verifyOriginal(claim,work,identity)||!identity)return work.state;
+        if(protectedBattery){
+          // With no durable intent, an unexpected receipt needs review. The
+          // signed envelope is preserved, and this path never submits it.
+          if(!await this.store.requiresReview(id))await this.store.reviewRequired(claim,'D324SignedWithoutIntent');
+          let observation:Observation|undefined;
+          try{observation=await this.transport.observe(identity);}catch{ /* Lookup unavailable is still uncertain. */ }
+          await this.store.observeD324SignedWithoutIntent(claim,identity.transactionHash,observation);
+          return work.state;
+        }
         throw new DomainError('SignedIdentityRequiresReviewedDispatch');
       }
       if(!identity) {
@@ -89,6 +102,7 @@ export class DurableTransactionWorker {
         await this.store.preparing(claim);
         const context=await this.store.work(id);
         context.auditPhase=phase=>this.store.phase(claim,phase);
+        context.signingClaim=claim;
         const prepared=await this.phase(id,'PREPARING',()=>this.transport.prepareAndSimulate(context));
         if(prepared.simulation)await this.store.prepared(claim,prepared.simulation);
         healthy();
@@ -118,6 +132,9 @@ export class DurableTransactionWorker {
       }
       return (await this.store.work(id)).state;
     } catch(error){
+      if(error instanceof DomainError&&error.code==='D324DispatchAuthorityRequired'){
+        try{await this.store.reviewRequired(claim,error.code);}catch{ /* Original durable state remains authoritative. */ }
+      }
       try{await this.store.phase(claim,'PHASE_OUTCOME_UNKNOWN');}catch{ /* A committed START remains UNKNOWN if diagnostics fail. */ }
       if(error instanceof DomainError&&error.code==='RuntimeStopping'){try{await this.store.phase(claim,'SHUTDOWN_INTERRUPTED');}catch{ /* START/state remains durable. */ }}
       if(error instanceof DomainError&&error.code==='DatabaseConnectionInterrupted'){
@@ -139,7 +156,9 @@ export class DurableTransactionWorker {
     // Reload committed bytes: never submit a transient prepared/signer object.
     const durable=await this.store.identity(claim.operationId);
     if(!durable){await this.store.holdUnverifiedIdentity(claim);return;}
-    if(!await this.verifyOriginal(claim,await this.store.work(claim.operationId),durable))return;
+    const work=await this.store.work(claim.operationId);
+    if(!await this.verifyOriginal(claim,work,durable))return;
+    const protectedBattery='batteryId' in work.command&&d324Scope(work.deploymentId,work.command.batteryId);
     if(!hasSafeValidity(durable.maxTime,validity.closeTime,ENVELOPE_TIME_POLICY.minimumBeforeDispatch)
       ||BigInt(validity.closeTime)<BigInt(durable.minTime)
       ||!durable.authorizationExpirations.every(v=>v>validity.ledger))return;
@@ -157,10 +176,20 @@ export class DurableTransactionWorker {
     healthy();
     this.supervisor?.assertAdmission();
     try {
-      const reply=await this.transport.submit(durable);
+      const reply=protectedBattery
+        ?await this.store.startD324Submission(claim,assertStillValid=>{
+          const beforeSend=()=>{healthy();this.supervisor?.assertAdmission();assertStillValid();};
+          healthy();this.supervisor?.assertAdmission();
+          return this.transport.submit(durable,beforeSend);
+        })
+        :await this.transport.submit(durable);
       ensure(reply.transactionHash===durable.transactionHash,'SubmitIdentityMismatch');
       await this.store.unknown(claim,'SUBMIT_RESPONSE',{...reply,sourceCheck:sourceCheck??null});
-    } catch {
+    } catch (error) {
+      if(protectedBattery&&error instanceof DomainError&&['D324DispatchAuthorityRequired','AuthorizationRevoked'].includes(error.code)){
+        await this.store.reviewRequired(claim,error.code);
+        return;
+      }
       // Raw RPC errors/envelopes never go to logs/evidence. Durable intent is ambiguous.
       await this.store.unknown(claim,'RPC_OUTAGE',{transactionHash:durable.transactionHash,sourceCheck:sourceCheck??null});
     }
@@ -279,6 +308,7 @@ export class DurableTransactionWorker {
     ensure(review.decisionId.trim().length>0,'RetryReviewRequired');
     const i=await this.store.identity(review.operationId);
     const originalWork=await this.store.work(review.operationId);
+    ensure(!('batteryId' in originalWork.command&&d324Scope(originalWork.deploymentId,originalWork.command.batteryId)),'D3ReplayForbidden');
     ensure(!originalWork.idempotencyKey?.startsWith('d3:'),'D3ReplayForbidden');
     ensure(i && i.transactionHash===review.transactionHash,'RetryIdentityMismatch');
     const c=await this.store.claim(review.operationId,worker);

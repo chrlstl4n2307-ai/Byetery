@@ -9,10 +9,12 @@ export class TestnetRpc {
   readonly transport:typeof fetch;
   private readonly transactionResponses=new WeakMap<object,string>();
   constructor(transport:typeof fetch=fetch){this.transport=transport;}
-  private async call<T>(method:string,params:object={}):Promise<T>{
+  private async call<T>(method:string,params:object={},beforeSend?:()=>void):Promise<T>{
+    const options={method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(15000),redirect:'error' as const};
+    beforeSend?.();
     try {
-      const response=await this.transport(TESTNET_RPC,{method:'POST',headers:{'content-type':'application/json'},
-        body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal:AbortSignal.timeout(15000),redirect:'error'});
+      const response=await this.transport(TESTNET_RPC,options);
       ensure(response.ok&&response.body,'RpcUnavailable');
       const chunks:Uint8Array[]=[];let size=0;
       for await(const chunk of response.body){size+=chunk.length;ensure(size<=8*1024*1024,'RpcResponseTooLarge');chunks.push(chunk);}
@@ -38,8 +40,8 @@ export class TestnetRpc {
     return {account:new Account(address,value.account.seqNum.toString()),balance:value.account.balance.toString(),ledger:r.latestLedger};
   }
   simulate(transaction:string){return this.call<rpc.Api.RawSimulateTransactionResponse>('simulateTransaction',{transaction,authMode:'record'});}
-  async send(transaction:string){
-    const r=await this.call<rpc.Api.RawSendTransactionResponse>('sendTransaction',{transaction});
+  async send(transaction:string,beforeSend?:()=>void){
+    const r=await this.call<rpc.Api.RawSendTransactionResponse>('sendTransaction',{transaction},beforeSend);
     ensure(['PENDING','DUPLICATE','TRY_AGAIN_LATER','ERROR'].includes(r.status)&&/^[0-9a-f]{64}$/.test(r.hash),'InvalidSubmitResponse');
     return {status:r.status,hash:r.hash,latestLedger:r.latestLedger};
   }

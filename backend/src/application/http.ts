@@ -45,7 +45,7 @@ export function api(auth: SupabaseAuth, coordinator: Coordinator, historyChain: 
       else if(target.battery) reply=await batteryDetail(coordinator.repo,identity,target.battery);
       else {
         const key=req.headers['idempotency-key'];requireThat(typeof key==='string',400,'IdempotencyKeyRequired');
-        reply=await coordinator.acknowledge(identity,target.action!,await body(req),key);
+        reply=await coordinator.acknowledge(identity,target.action!,await body(req),key,req.headers['x-byetery-d324-proof']);
       }
     } catch(error) {
       const known=error instanceof AppError;

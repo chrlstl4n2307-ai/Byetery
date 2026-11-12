@@ -184,7 +184,10 @@ const migrations=async()=> (await readdir(migrationDir)).filter(name=>name.endsW
 planned(28,'forward migration preserves existing rows, signed state, RLS and ACLs',async()=>{
   const db=new PGlite();try{
     await db.exec('create schema auth; create table auth.users(id uuid primary key); create role anon; create role authenticated;');
-    const files=await migrations();for(const file of files.slice(0,-1))await db.exec(await readFile(new URL(file,migrationDir),'utf8'));
+    const target='20261104022000_d3_reviewed_pre_dispatch_close.sql';
+    const files=await migrations();
+    assert(files.includes(target));
+    for(const file of files.filter(name=>name<target))await db.exec(await readFile(new URL(file,migrationDir),'utf8'));
     const f=await harness(db);
     // The old schema did not have phase observations. Seed the previous writer's exact state sequence.
     const historical=new TransportStore({transaction:work=>f.adapter.transaction(sql=>work({query:<T>(statement:string,params?:unknown[])=>
@@ -196,7 +199,7 @@ planned(28,'forward migration preserves existing rows, signed state, RLS and ACL
       (select jsonb_agg(to_jsonb(e)) from api_private.testnet_envelopes e) identity,
       (select jsonb_agg(to_jsonb(o)) from app_private.stellar_operations o) operations,
       (select jsonb_agg(jsonb_build_array(relname,relrowsecurity,relforcerowsecurity,relacl) order by relname) from pg_class where relnamespace='api_private'::regnamespace and relkind='r') policy`);
-    const before=(await snapshot()).rows;await db.exec(await readFile(new URL(files.at(-1)!,migrationDir),'utf8'));assert.deepEqual((await snapshot()).rows,before);
+    const before=(await snapshot()).rows;await db.exec(await readFile(new URL(target,migrationDir),'utf8'));assert.deepEqual((await snapshot()).rows,before);
   }finally{await db.close();}
 });
 withIncident(29,'fault at each close write rolls back the entire pair',async f=>{

@@ -10,6 +10,8 @@ import { AppError, commandFailure, failure, jsonSafe, requireThat, type Reply } 
 import { bid, bytes, canonical, object, rid, text, uuid } from './validation.ts';
 import {requiredAuthority,type ApplicationCommandKind} from './authority.ts';
 import {assertLifecycleWritable,HISTORICAL_DEPLOYMENT} from './historical-lifecycle.ts';
+import type {D324Authority} from './d324-authority.ts';
+import {D324,d324Scope} from './d324-scope.ts';
 export interface Action { kind: 'register'|'return'|'cancel'|'collection'|'recycling'|'reward'|'challenge'|'verify'; resource?: string }
 const commandForAction={register:'register_battery',return:'open_return',cancel:'cancel_return',collection:'confirm_collection',recycling:'confirm_recycling',reward:'pay_reward'} as const satisfies Record<Exclude<Action['kind'],'challenge'|'verify'>,ApplicationCommandKind>;
 /** Faults are injectable by server-side tests only. Never read from HTTP or env. */
@@ -19,7 +21,9 @@ const hash=(v: string|Buffer)=>createHash('sha256').update(v).digest();
 export class Coordinator {
   readonly repo: Repository; readonly wallets: WalletService; readonly faults: Faults;
   readonly processor?:OperationProcessor;readonly supervisor:ExecutionSupervisor;
-  constructor(repo: Repository, faults: Faults = {}, wallets = new WalletService(repo),processor?:OperationProcessor) {this.repo=repo;this.faults=faults;this.wallets=wallets;this.processor=processor;this.supervisor=processor?.supervisor??new ExecutionSupervisor();}
+  readonly d324?:D324Authority;
+  constructor(repo: Repository, faults: Faults = {}, wallets = new WalletService(repo),processor?:OperationProcessor,
+    d324?:D324Authority) {this.repo=repo;this.faults=faults;this.wallets=wallets;this.processor=processor;this.d324=d324;this.supervisor=processor?.supervisor??new ExecutionSupervisor();}
   async get(identity: Identity, batteryId: string): Promise<Reply> {
     return this.repo.transaction(async db=>{const user=await this.repo.principal(db,identity);await this.repo.role(db,user,'USER');return {status:200,body:await this.repo.view(db,bid(batteryId))};});
   }
@@ -27,18 +31,40 @@ export class Coordinator {
     return this.runMutation(identity,action,input,key,false);
   }
   /** HTTP acknowledgement never executes the Testnet processor. */
-  async acknowledge(identity:Identity,action:Action,input:unknown,key:string):Promise<Reply>{
-    return this.runMutation(identity,action,input,key,true);
+  async acknowledge(identity:Identity,action:Action,input:unknown,key:string,d324Proof?:unknown):Promise<Reply>{
+    return this.runMutation(identity,action,input,key,true,d324Proof);
   }
-  private async runMutation(identity:Identity,action:Action,input:unknown,key:string,acknowledge:boolean):Promise<Reply>{
+  private async runMutation(identity:Identity,action:Action,input:unknown,key:string,acknowledge:boolean,d324Proof?:unknown):Promise<Reply>{
     requireThat(this.supervisor.accepting,503,'RuntimeStopping');
-    return this.supervisor.run('request:'+randomUUID(),()=>this.acceptMutation(identity,action,input,key,acknowledge));
+    return this.supervisor.run('request:'+randomUUID(),()=>this.acceptMutation(identity,action,input,key,acknowledge,d324Proof));
   }
-  private async acceptMutation(identity:Identity,action:Action,input:unknown,key:string,acknowledge:boolean):Promise<Reply>{
+  private async acceptMutation(identity:Identity,action:Action,input:unknown,key:string,acknowledge:boolean,d324Proof?:unknown):Promise<Reply>{
     requireThat(/^[A-Za-z0-9._:-]{8,128}$/.test(key),400,'InvalidIdempotencyKey');
     const inputHash=hash(canonical({action,input}));
     const queued=await this.repo.transaction(async db=>{
-      const user=await this.repo.principal(db,identity),d=this.repo.deploymentId;
+      const d=this.repo.deploymentId;
+      if(d324Scope(d,D324.batteryId)&&action.kind!=='challenge'&&action.kind!=='verify'){
+        const byRequest=action.kind==='cancel'||action.kind==='collection'||action.kind==='recycling';
+        const requestId=byRequest&&typeof action.resource==='string'&&/^[a-f0-9]{64}$/.test(action.resource)
+          ?action.resource:null;
+        const target=byRequest
+          ?requestId&&(await one(db,"select battery_id from app_private.return_requests where deployment_id=$1 and request_id=decode($2,'hex')",[d,requestId]))?.battery_id
+          :action.kind==='register'?(input as Record<string,unknown>|null)?.batteryId:action.resource;
+        if(d324Scope(d,target)){
+          requireThat(this.repo.mode==='TESTNET'&&this.d324,403,'D324AuthorityRequired');
+          const proofInput={identity,command:commandForAction[action.kind],requestId,idempotencyKey:key,inputHash,proof:d324Proof};
+          const claim=await this.d324.authorize(db,proofInput);
+          if(claim.replay) return {id:claim.operationId,reply:null,protected:true};
+          requireThat(!await one(db,'select 1 from api_private.idempotency where deployment_id=$1 and user_id=$2 and key=$3',
+            [d,claim.principal,key]),409,'IdempotencyConflict');
+          await this.d324.reserveStep(db,claim,proofInput);
+          await this.queue(db,claim.principal,action,input,key,claim.operationId);
+          await db.query(`insert into api_private.idempotency(deployment_id,user_id,key,input_hash,operation_id)
+            values($1,$2,$3,$4,$5)`,[d,claim.principal,key,inputHash,claim.operationId]);
+          return {id:claim.operationId,reply:null,protected:true};
+        }
+      }
+      const user=await this.repo.principal(db,identity);
       // Preserve GAP1 USER/reward checks before cache lookup; privileged queue
       // failures retain their existing application Reply/idempotency semantics.
       if(action.kind==='challenge'||action.kind==='verify')await this.repo.role(db,user,'USER');
@@ -79,10 +105,16 @@ export class Coordinator {
       await db.query(`insert into api_private.idempotency(deployment_id,user_id,key,input_hash,operation_id,response_status,response_body)
         values($1,$2,$3,$4,$5,$6,$7)`,[d,user,key,inputHash,id,reply?.status??null,reply?.body??null]);
       return {id,reply};
+    }).catch(error=>{
+      // The candidate migration can expire a verified proof while this
+      // transaction is committing. PostgreSQL has already rolled it back.
+      if(error instanceof Error&&'code' in error&&error.code==='23514'&&error.message==='D324WriteProofExpired')
+        throw new AppError(403,'D324WriteProofExpired');
+      throw error;
     });
     if(queued.reply) return queued.reply;
     requireThat(queued.id,500,'OperationMissing');
-    if(acknowledge&&this.repo.mode==='TESTNET'){
+    if((acknowledge||queued.protected)&&this.repo.mode==='TESTNET'){
       // Acknowledge the committed intent. The status route is the current view.
       return {status:202,body:{source:'TESTNET',deploymentId:this.repo.deploymentId,operationId:queued.id,
         class:'ACCEPTED',state:'ACCEPTED',statusUrl:'/api/operations/'+queued.id}};
@@ -105,7 +137,7 @@ export class Coordinator {
       [this.repo.deploymentId,batteryId,requestId,kind,revision,raw,ev.payloadHash,commitment,`${this.repo.deploymentId}/${batteryId}/${requestId}/${kind}/${revision}`,user]);
     return ev;
   }
-  private async queue(db: Db, user: string, action: Action, input: unknown, key: string): Promise<string> {
+  private async queue(db: Db, user: string, action: Action, input: unknown, key: string, id:string=randomUUID()): Promise<string> {
     const d=this.repo.deploymentId; let command: Command; let batteryId: string; let claim: Awaited<ReturnType<typeof one>>;
     const body=object(input,action.kind==='register'?['batteryId','metadata']:action.kind==='return'?['walletLinkId']:['collection','recycling'].includes(action.kind)?['evidence']:[]);
     if(['cancel','collection','recycling'].includes(action.kind)) {
@@ -114,6 +146,8 @@ export class Coordinator {
       requireThat(claim,404,'RequestNotFound'); batteryId=claim.battery_id;
       if(action.kind==='cancel') requireThat(claim.user_id===user,403,'RequestOwnerRequired');
     } else batteryId=bid(action.kind==='register'?body.batteryId:action.resource);
+    const protectedBattery=d324Scope(d,batteryId);
+    if(protectedBattery&&claim)requireThat(claim.recipient_snapshot===D324.recipient,403,'D324RecipientRejected');
     try{assertLifecycleWritable(d,batteryId);}catch{throw new AppError(409,'HistoricalLifecyclePermanentlyNonCounting');}
     const stoppedD3=await one(db,`select 1 from app_private.stellar_operations o join api_private.testnet_work w on w.operation_id=o.id
       where o.deployment_id=$1 and o.battery_id=$2 and o.idempotency_key like 'd3:%'
@@ -150,7 +184,9 @@ export class Coordinator {
         const walletId=body.walletLinkId===undefined?null:uuid(body.walletLinkId);
         const wallet=await one(db,`select * from app_private.wallet_links where deployment_id=$1 and user_id=$2 and revoked_at is null
           and ($3::uuid is null or id=$3) order by verified_at desc,id limit 1`,[d,user,walletId]);
-        requireThat(wallet,409,'VerifiedWalletRequired'); const requestId=newRequestId();
+        requireThat(wallet,409,'VerifiedWalletRequired');
+        if(protectedBattery)requireThat(wallet.address===D324.recipient,403,'D324RecipientRejected');
+        const requestId=newRequestId();
         await db.query(`insert into app_private.return_requests(deployment_id,request_id,battery_id,user_id,wallet_link_id,recipient_snapshot)
           values($1,decode($2,'hex'),$3,$4,$5,$6)`,[d,requestId,batteryId,user,wallet.id,wallet.address]);
         command={kind:'open_return',batteryId,requestId,recipient:wallet.address};
@@ -169,14 +205,14 @@ export class Coordinator {
           :{kind:'confirm_recycling',batteryId,requestId,recycler:actor,evidence:ev};
       } else {
         requireThat(action.kind==='reward',400,'UnknownAction');
-        const owner=await one(db,'select user_id from app_private.return_requests where deployment_id=$1 and request_id=$2',[d,battery.request_id]);
+        const owner=await one(db,'select user_id,recipient_snapshot from app_private.return_requests where deployment_id=$1 and request_id=$2',[d,battery.request_id]);
+        if(protectedBattery)requireThat(owner?.user_id===user&&owner.recipient_snapshot===D324.recipient,403,'D324RecipientRejected');
         await this.repo.role(db,user,requiredAuthority('pay_reward',user,owner?.user_id??null).role);
         requireThat(battery.reward_state!=='SENT',409,'RewardAlreadySent');
         requireThat(battery.state==='RECYCLED' && battery.reward_state==='PENDING',409,'RewardNotEligible');
         command={kind:'pay_reward',batteryId};
       }
     }
-    const id=randomUUID();
     await db.query(`insert into app_private.stellar_operations(id,deployment_id,principal,idempotency_key,command,battery_id,request_id,parameters,parameters_hash)
       values($1,$2,$3,$4,$5,$6,decode($7,'hex'),$8,$9)`,[id,d,user,key,command.kind,batteryId,'requestId' in command?command.requestId:null,command,hash(canonical(command))]);
     if(command.kind==='pay_reward') await db.query(`insert into app_private.reward_attempts(deployment_id,battery_id,request_id,operation_id,attempt_number)

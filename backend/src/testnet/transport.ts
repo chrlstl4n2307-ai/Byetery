@@ -17,7 +17,14 @@ const stateOrder=['REGISTERED','RETURNED','COLLECTED','RECYCLED'];
 const key=(tag:string,arg:xdr.ScVal)=>xdr.LedgerKey.contractData(new xdr.LedgerKeyContractData({
   contract:new Address(CONTRACT).toScAddress(),durability:xdr.ContractDataDurability.persistent,
   key:xdr.ScVal.scvVec([xdr.ScVal.scvSymbol(tag),arg])}));
-export interface ContextGuard {validate(work:Work):Promise<void>;validateFacts?(work:Work,battery:Battery,request:ReturnRequest|null):Promise<void>;connectionGuard?():()=>void}
+import {d324Scope} from '../application/d324-scope.ts';
+
+export interface ContextGuard {
+  validate(work:Work):Promise<void>;
+  validateFacts?(work:Work,battery:Battery,request:ReturnRequest|null):Promise<void>;
+  connectionGuard?():()=>void;
+  startD324Signing?<T>(work:Work,start:(assertStillValid:()=>void)=>Promise<T>):Promise<T>;
+}
 
 /** Checks the simulation's exact invocation tree before any signer is launched. */
 export function validateAuth(tx:Transaction,command:Command){
@@ -154,9 +161,16 @@ export class TestnetTransport implements TransactionTransport {
     ensure(envelope.type==='envelopeTypeTx'&&envelope.v1.tx.cond.type==='precondTime','UnsupportedEnvelopePreconditions');
     ensure(l.sequence>=body.preparedLedger&&l.sequence-body.preparedLedger<=20&&tx.timeBounds
       &&hasSafeValidity(tx.timeBounds.maxTime,l.closeTime,minimumSeconds),'InvalidSigningWindow');
+    let startAuthorized:SigningRequest['startAuthorized'];
+    if('batteryId' in w.command&&d324Scope(w.deploymentId,w.command.batteryId)){
+      ensure(this.guard.startD324Signing,'D324DispatchAuthorityRequired');
+      const startSigning=this.guard.startD324Signing.bind(this.guard);
+      startAuthorized=start=>startSigning(w,start);
+    }
     return {transactionXdr:body.transactionXdr,method:w.command.kind,expectedSigners:invocation(w.command).signers,
       networkPassphrase:Networks.TESTNET,currentLedger:l.sequence,expirationLedger:body.preparedLedger+60,
       audit:w.auditPhase,assertAdmission:()=>this.supervisor?.assertAdmission(),
+      ...(startAuthorized?{startAuthorized}:{}),
       childObserver:this.supervisor?{started:pid=>this.supervisor!.childStarted(pid),closed:pid=>this.supervisor!.childClosed(pid)}:undefined};
   }
   async attachSorobanAuthorization(body:PreparedBody,w:Work){
@@ -175,9 +189,17 @@ export class TestnetTransport implements TransactionTransport {
   async assertSourceSequence(i:TransactionIdentity){const a=await this.rpc.account(i.sourceAccount);
     ensure(BigInt(a.account.sequenceNumber())===BigInt(i.sequence)-1n,'REVIEWED_RESOLUTION_REQUIRED');
     return {sequence:a.account.sequenceNumber(),balance:a.balance,ledger:a.ledger};}
-  async submit(i:TransactionIdentity){const tx=new Transaction(Buffer.from(i.envelopeBytes).toString('base64'),Networks.TESTNET);
+  async submit(i:TransactionIdentity,beforeSend?:()=>void){const tx=new Transaction(Buffer.from(i.envelopeBytes).toString('base64'),Networks.TESTNET);
     ensure(hex(tx.hash())===i.transactionHash&&i.networkId===NETWORK_ID&&i.contractAddress===CONTRACT,'IdentityMismatch');
-    const r=await this.rpc.send(tx.toXDR());ensure(r.hash===i.transactionHash,'SubmitIdentityMismatch');
+    const envelope=tx.toEnvelope();
+    if(envelope.type==='envelopeTypeTx'&&envelope.v1.tx.operations.some(({body})=>{
+      if(body.type!=='invokeHostFunction')return false;
+      const host=body.invokeHostFunctionOp.hostFunction;
+      if(host.type!=='hostFunctionTypeInvokeContract')return false;
+      const first=host.invokeContract.args[0];
+      return first?.type==='scvString'&&d324Scope(i.deploymentId,first.str.toString());
+    }))ensure(beforeSend,'D324DispatchAuthorityRequired');
+    const r=await this.rpc.send(tx.toXDR(),beforeSend);ensure(r.hash===i.transactionHash,'SubmitIdentityMismatch');
     return {transactionHash:r.hash,status:r.status,ledger:r.latestLedger};
   }
   async observe(i:TransactionIdentity):Promise<Observation>{

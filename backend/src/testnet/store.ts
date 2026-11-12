@@ -2,8 +2,10 @@ import type { Pool } from 'pg';
 import { DomainError, ensure, type Command } from '../domain.ts';
 import {assertPersistedAuthority} from '../application/persisted-authority.ts';
 import {authorizationHold,reviewEvidence} from './review.ts';
-import { NETWORK_ID, preparedIdentity, signedEnvelopeDigest, type OperationContext, type TransportState, type TransactionIdentity, type Confirmation, type StateEvidence } from './identity.ts';
+import { NETWORK_ID, preparedIdentity, signedEnvelopeDigest, type OperationContext, type TransportState, type TransactionIdentity, type Confirmation, type Observation, type StateEvidence } from './identity.ts';
 import {databaseHealth,databaseTransaction} from '../application/database.ts';
+import {assertD324Work,startD324Effect} from '../application/d324-authority.ts';
+import {D324,d324Scope} from '../application/d324-scope.ts';
 
 export interface Sql { query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<{ rows: T[] }> }
 export interface TransportDatabase { transaction<T>(work: (db: Sql) => Promise<T>): Promise<T>;connectionGuard?():()=>void }
@@ -21,6 +23,7 @@ export interface Work extends OperationContext {
   principal: string;
   idempotencyKey?: string;
   auditPhase?:(phase:string)=>Promise<void>;
+  signingClaim?:Claim;
   state: TransportState; dispatchAttempts: number;
   confirmation: Confirmation | null; stateEvidence: StateEvidence | null;
 }
@@ -28,7 +31,9 @@ export interface Claim { networkId: string; sourceAccount: string; operationId: 
 type Row = Record<string, any>; // Private SQL rows are mapped into typed server objects below.
 export class TransportStore {
   readonly database: TransportDatabase;
-  constructor(database: TransportDatabase) { this.database = database; }
+  private readonly d324InstanceId?:string;
+  readonly #d324DispatchClaims=new WeakSet<Claim>();
+  constructor(database: TransportDatabase,d324InstanceId?:string) { this.database=database;this.d324InstanceId=d324InstanceId; }
   /** Called only after the application has authenticated/authorized/queued the logical operation. */
   async queue(deploymentId: string, operationId: string, source: string, argumentsXdr: readonly string[]): Promise<void> {
     await this.database.transaction(async db => {
@@ -111,6 +116,7 @@ export class TransportStore {
     await this.database.transaction(async db => {
       const w=await this.fence(db,c);
       ensure(['CLAIMED','PREPARING'].includes(w.state),'InvalidPreparationState');
+      await assertD324Work(db,w,this.d324InstanceId,'prepare');
       await db.query("update api_private.testnet_work set state='PREPARING' where operation_id=$1",[c.operationId]);
     });
   }
@@ -137,7 +143,7 @@ export class TransportStore {
     });
   }
   async phase(c:Claim,phase:string){
-    ensure(['AUTH_SIGN_START','AUTH_SIGN_RETURNED','ENVELOPE_SIGN_START','ENVELOPE_SIGN_RETURNED','IDENTITY_PERSIST_START','PREPARATION_INTERRUPTED','SHUTDOWN_INTERRUPTED','PHASE_OUTCOME_UNKNOWN'].includes(phase),'InvalidExecutionPhase');
+    ensure(['AUTH_SIGN_START','AUTH_SIGN_RETURNED','ENVELOPE_SIGN_START','ENVELOPE_SIGN_RETURNED','ENVELOPE_SIGN_NOT_STARTED','IDENTITY_PERSIST_START','PREPARATION_INTERRUPTED','SHUTDOWN_INTERRUPTED','PHASE_OUTCOME_UNKNOWN'].includes(phase),'InvalidExecutionPhase');
     await this.database.transaction(async db=>{const w=await this.fence(db,c);await this.evidence(db,w,'EXECUTION_PHASE',{
       schemaVersion:'BYETERY_EXECUTION_PHASE_V1',phase,operationId:w.operationId,publicActor:w.sourceAccount,generation:c.generation,attempt:1});});
   }
@@ -208,6 +214,7 @@ export class TransportStore {
     const identity=preparedIdentity(body);
     await this.database.transaction(async db=>{
       const w=await this.fence(db,c);
+      await assertD324Work(db,w,this.d324InstanceId);
       ensure(w.state==='PREPARING'&&w.sourceAccount===identity.sourceAccount,'IdentityContextMismatch');
       await this.evidence(db,w,'EXECUTION_PHASE',{phase:'SIGNING_IDENTITY_VALIDATED',stage,...identity},body.preparedLedger);
     });
@@ -216,6 +223,8 @@ export class TransportStore {
     reference?:{ledger:number;identity:TransactionIdentity}): Promise<void> {
     const allowed=await this.database.transaction(async db => {
       const w=await this.fence(db,c);
+      const protectedBattery='batteryId' in w.command&&d324Scope(w.deploymentId,w.command.batteryId);
+      if(protectedBattery)ensure(!reviewedSameHashRetry&&w.dispatchAttempts===0,'D3ReplayForbidden');
       ensure(w.state==='READY' || (reviewedSameHashRetry && w.state==='SUBMITTED_OR_UNKNOWN'),'DispatchRequiresReview');
       ensure(!reviewedSameHashRetry || !!decisionId?.trim(),'RetryReviewRequired');
       ensure(w.dispatchAttempts<2,'RetryLimit');
@@ -238,6 +247,7 @@ export class TransportStore {
           await reviewEvidence(db,w,'AUTHORIZATION_REVOKED');return false;
         }
       }
+      await assertD324Work(db,w,this.d324InstanceId,'dispatch');
       await db.query("update api_private.testnet_work set state='DISPATCH_INTENT',dispatch_attempts=dispatch_attempts+1 where operation_id=$1",[w.operationId]);
       await db.query("update app_private.stellar_operations set state='SUBMITTED' where id=$1 and state='READY'",[w.operationId]);
       if(w.command.kind==='pay_reward')await db.query("update app_private.reward_attempts set state='SUBMITTED' where operation_id=$1 and state='QUEUED'",[w.operationId]);
@@ -246,10 +256,40 @@ export class TransportStore {
         ...(i?{transactionHash:i.transactionHash,minTime:i.minTime,maxTime:i.maxTime,sequence:i.sequence,
           sourceAccount:i.sourceAccount,envelopeSha256:signedEnvelopeDigest(i.envelopeBytes)}:{})},
       reference?.ledger??null);
-      return true;
+      return {protectedBattery};
     });
     // Throw AFTER commit so the hold evidence and membership serialization survive.
     ensure(allowed,'AuthorizationRevoked');
+    if(allowed.protectedBattery)this.#d324DispatchClaims.add(c);
+  }
+  async startD324Submission<T>(c:Claim,start:(assertStillValid:()=>void)=>Promise<T>):Promise<T>{
+    // DISPATCH_INTENT is already committed. Only the original uninterrupted
+    // attempt can enter this continuation, and it can do so once.
+    ensure(this.#d324DispatchClaims.delete(c),'D324DispatchAuthorityRequired');
+    const started=await this.database.transaction(async db=>{
+      await db.query('select pg_advisory_xact_lock(hashtextextended($1,0))',[D324.deploymentId]);
+      const w=await this.fence(db,c);
+      ensure(w.state==='DISPATCH_INTENT'&&w.dispatchAttempts===1,'D324DispatchAuthorityRequired');
+      await assertPersistedAuthority(db,w,true);
+      const assertStillValid=await assertD324Work(db,w,this.d324InstanceId);
+      ensure(assertStillValid,'D324DispatchAuthorityRequired');
+      return startD324Effect(assertStillValid,start);
+    });
+    return started.result;
+  }
+  async observeD324SignedWithoutIntent(c:Claim,transactionHash:string,observation:Observation|undefined){
+    await this.database.transaction(async db=>{
+      const w=await this.fence(db,c);
+      ensure('batteryId' in w.command&&d324Scope(w.deploymentId,w.command.batteryId)&&w.dispatchAttempts===0
+        &&['READY','SIGNED'].includes(w.state),'D324DispatchAuthorityRequired');
+      const {rows:[envelope]}=await db.query(`select 1 from api_private.testnet_envelopes
+        where operation_id=$1 and transaction_hash=decode($2,'hex')`,[w.operationId,transactionHash]);
+      ensure(envelope,'IdentityContextMismatch');
+      const ledger=observation?.status==='NOT_FOUND'?observation.observationLedger:observation?.confirmation.observationLedger;
+      ensure(!observation||observation.status==='NOT_FOUND'||observation.confirmation.transactionHash===transactionHash,'ConfirmationMismatch');
+      await this.evidence(db,w,'STATE_READ',{classification:'D324_SIGNED_WITHOUT_INTENT',transactionHash,
+        status:observation?.status??'OBSERVATION_UNAVAILABLE',observation:observation??null},ledger??null);
+    });
   }
   /** Revocation-specific observations never masquerade as send/RPC failure. */
   async revokedObservation(c:Claim,data:Record<string,unknown>,ledger:number|null=null):Promise<void>{

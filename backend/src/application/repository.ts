@@ -15,7 +15,7 @@ export class Repository {
   readonly pool: Pool;
   readonly deploymentId: string;
   readonly mode:'MOCK'|'TESTNET';
-  constructor(config: Settings) { this.pool = new Pool(config.database);databaseHealth(this.pool); this.deploymentId = config.deploymentId;this.mode=config.mode??'MOCK'; }
+  constructor(config: Settings) { this.pool = new Pool(config.database);databaseHealth(this.pool); this.deploymentId = config.deploymentId.toLowerCase();this.mode=config.mode??'MOCK'; }
   async transaction<T>(work: (db: Db) => Promise<T>): Promise<T> {
     return databaseTransaction(this.pool,work,'15s',this.deploymentId);
   }

@@ -8,6 +8,7 @@ export interface SigningRequest {
   expectedSigners: string[];
   audit?: (phase:string)=>Promise<void>;
   assertAdmission?:()=>void;
+  startAuthorized?:<T>(start:(assertStillValid:()=>void)=>Promise<T>)=>Promise<T>;
   childObserver?:{started(pid:number):void;closed(pid:number):void};
 }
 export interface SigningResult { transactionXdr: string; signers: string[] }

@@ -19,12 +19,14 @@ import { string } from './abi.ts';
 import { Address, xdr } from '@stellar/stellar-sdk';
 import {assertPersistedAuthority} from '../application/persisted-authority.ts';
 import {assertLifecycleWritable} from '../application/historical-lifecycle.ts';
+import {assertD324Work,startD324Effect} from '../application/d324-authority.ts';
 
 const hash=(c:unknown)=>createHash('sha256').update(canonical(c)).digest('hex');
 /** Reads committed logical state immediately before each signing phase. */
 export class PersistedContextGuard implements ContextGuard {
   readonly repo:Repository;
-  constructor(repo:Repository){this.repo=repo;}
+  private readonly d324InstanceId?:string;
+  constructor(repo:Repository,d324InstanceId?:string){this.repo=repo;this.d324InstanceId=d324InstanceId;}
   connectionGuard(){return databaseHealth(this.repo.pool).guard();}
   async validateFacts(w:Work,b:Battery,r:ReturnRequest|null){
     if(w.command.kind==='register_battery'||w.command.kind==='set_role')return;
@@ -43,6 +45,7 @@ export class PersistedContextGuard implements ContextGuard {
     ensure(w.deploymentId===d.deploymentId&&w.networkId===d.networkId&&w.contractAddress===d.contractAddress,'OperationContextMismatch');
     ensure(manifest?.hash===WASM&&op&&op.hash===w.contextHash&&hash(op.parameters)===w.contextHash&&hash(w.command)===w.contextHash,'OperationContextMismatch');
     await assertPersistedAuthority(db,w);
+    await assertD324Work(db,w,this.d324InstanceId);
     ensure(invocation(w.command).signers[0]===w.sourceAccount,'WrongSigner');
     if(w.command.kind==='open_return'){
       const r=await one(db,`select recipient_snapshot,battery_id,reservation_state from app_private.return_requests
@@ -61,15 +64,32 @@ export class PersistedContextGuard implements ContextGuard {
       ensure(e&&createHash('sha256').update(e.manifest_bytes).digest('hex')===w.command.evidence.payloadHash,'EvidenceContextMismatch');
     }
   });}
+  async startD324Signing<T>(w:Work,start:(assertStillValid:()=>void)=>Promise<T>):Promise<T>{
+    const started=await this.repo.transaction(async db=>{
+      const c=w.signingClaim;
+      ensure(c&&c.operationId===w.operationId&&c.networkId===w.networkId&&c.sourceAccount===w.sourceAccount,
+        'D324DispatchAuthorityRequired');
+      const lease=await one(db,`select 1 from api_private.testnet_source_leases
+        where network_id=decode($1,'hex') and source_account=$2 and deployment_id=$3
+          and operation_id=$4 and worker=$5 and generation=$6 and lease_until>clock_timestamp() for share`,
+      [c.networkId,c.sourceAccount,w.deploymentId,c.operationId,c.worker,c.generation]);
+      ensure(lease,'D324DispatchAuthorityRequired');
+      await assertPersistedAuthority(db,w,true);
+      const assertStillValid=await assertD324Work(db,w,this.d324InstanceId);
+      ensure(assertStillValid,'D324DispatchAuthorityRequired');
+      return startD324Effect(assertStillValid,start);
+    });
+    return started.result;
+  }
 }
 
 /** Real implementation, selected explicitly. Its durable worker owns signing/dispatch. */
 export class TestnetStellarService implements StellarService,OperationProcessor {
   readonly repo:Repository;readonly store:TransportStore;readonly transport:TestnetTransport;readonly worker:DurableTransactionWorker;readonly supervisor:ExecutionSupervisor;
-  constructor(repo:Repository,rpcClient:TestnetRpc,signer:PhasedStellarSigner,supervisor=new ExecutionSupervisor()){
+  constructor(repo:Repository,rpcClient:TestnetRpc,signer:PhasedStellarSigner,supervisor=new ExecutionSupervisor(),d324InstanceId?:string){
     ensure(repo.mode==='TESTNET','TestnetConfigurationRequired');this.repo=repo;this.supervisor=supervisor;
-    this.store=new TransportStore(new PgTransportDatabase(repo.pool));
-    this.transport=new TestnetTransport(rpcClient,signer,new PersistedContextGuard(repo),id=>this.store.work(id),repo.deploymentId,supervisor);
+    this.store=new TransportStore(new PgTransportDatabase(repo.pool),d324InstanceId);
+    this.transport=new TestnetTransport(rpcClient,signer,new PersistedContextGuard(repo,d324InstanceId),id=>this.store.work(id),repo.deploymentId,supervisor);
     this.worker=new DurableTransactionWorker(this.store,this.transport,async(db,w)=>{
       const facts=w.confirmation?.facts??(w.stateEvidence?.outcome==='APPLIED'?JSON.parse(w.stateEvidence.evidence).facts:null);
       ensure(facts,'ProjectionFactsMissing');

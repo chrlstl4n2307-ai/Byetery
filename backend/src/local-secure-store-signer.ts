@@ -6,7 +6,7 @@ import type { SigningRequest, SigningResult, StellarSigner, PhasedStellarSigner 
 import { DomainError } from './domain.ts';
 
 export interface ProcessResult { exitCode: number|null; stdout: string; stderr: string }
-export type SignerProcess = (input: string,observer?:{started(pid:number):void;closed(pid:number):void}) => Promise<ProcessResult>;
+export type SignerProcess = (input: string,observer?:{started(pid:number):void;closed(pid:number):void},beforeSpawn?:()=>void) => Promise<ProcessResult>;
 const LIMIT=131072;
 const actors={
   admin:'GBZ4HNGFYAA7FXRYECY4LBSIKSQPJPUFYJZALOWGTXUURNDR5OINUT2F',
@@ -23,11 +23,12 @@ function fail(code: string): never {throw new DomainError(code);}
 /** No shell, CLI arguments, RPC access, logging or credentials in child env. */
 export function signerProcess(binary: string, timeoutMs=30000): SignerProcess {
   if(!path.isAbsolute(binary)||!Number.isInteger(timeoutMs)||timeoutMs<1||timeoutMs>120000) fail('InvalidSignerConfiguration');
-  return (input,observer)=>new Promise((resolve,reject)=>{
+  return (input,observer,beforeSpawn)=>new Promise((resolve,reject)=>{
     if(Buffer.byteLength(input)>LIMIT) return reject(new DomainError('SignerInputTooLarge'));
     const env: NodeJS.ProcessEnv={};
     for(const name of ['SystemRoot','WINDIR','USERPROFILE','APPDATA','LOCALAPPDATA','TEMP','TMP','HOMEDRIVE','HOMEPATH'])
       if(process.env[name]) env[name]=process.env[name];
+    beforeSpawn?.();
     const child=spawn(binary,[],{shell:false,windowsHide:true,stdio:['pipe','pipe','pipe'],env});
     if(child.pid)observer?.started(child.pid);
     child.once('close',()=>{if(child.pid)observer?.closed(child.pid);});
@@ -64,8 +65,29 @@ export class LocalSecureStoreSigner implements StellarSigner, PhasedStellarSigne
       ...(phase?{phase,expected_hash:expectedHash??null}:{})});
     let response: ProcessResult;
     const label=phase==='authorize'?'AUTH_SIGN':'ENVELOPE_SIGN';
-    await request.audit?.(label+'_START');request.assertAdmission?.();
-    try {response=await this.run(input,request.childObserver);}catch(e){if(e instanceof DomainError)throw e;fail('SignerProcessFailed');}
+    await request.audit?.(label+'_START');
+    let processCalled=false,spawnDenied=false;
+    const start=(assertStillValid?:()=>void)=>{
+      const beforeSpawn=assertStillValid&&(()=>{
+        try {request.assertAdmission?.();assertStillValid();}
+        catch(error){spawnDenied=true;throw error;}
+      });
+      processCalled=true;
+      return this.run(input,request.childObserver,beforeSpawn);
+    };
+    try {
+      request.assertAdmission?.();
+      response=await (request.startAuthorized?request.startAuthorized(start):start());
+    }
+    catch(e){
+      // A failed or interrupted process is ambiguous. Record this proof only
+      // when the fenced callback never reached the physical process boundary.
+      if(phase==='sign_envelope'&&request.startAuthorized&&(!processCalled||spawnDenied)){
+        try{await request.audit?.('ENVELOPE_SIGN_NOT_STARTED');}catch{ /* Ambiguous START remains durable. */ }
+      }
+      if(e instanceof DomainError)throw e;
+      fail('SignerProcessFailed');
+    }
     // Do not print or propagate helper output, even on error. Only stable codes leave here.
     if(response.exitCode!==0) fail('SignerProcessFailed');
     if(response.stderr.trim()) fail('SignerUnexpectedStderr');
