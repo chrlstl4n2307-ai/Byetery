@@ -13,6 +13,37 @@ import { plan, check, CONTRACT, type Operation } from './model.ts';
 export interface Credentials { email: string; password: string }
 export type CredentialInput = (role: Role) => Promise<Credentials>;
 export interface Session { bearer(): string; close(): Promise<void> }
+export interface PreparedRoleSessions {readonly prepared:true;close():Promise<void>}
+const preparedRoleSessions=new WeakMap<object,{origin:string;sessions:Map<Role,Session>;principals:Map<Role,string>}>();
+/** Auth and read-only profile preparation. Bearers stay in a private runtime
+ * map. The server must independently validate them before issuing its receipt. */
+export async function prepareLocalRoleSessions(options:{apiOrigin:string;publishableKey:string;credentials:CredentialInput;
+  verify:(sessions:ReadonlyMap<Role,Session>)=>Promise<void>;fetcher?:typeof fetch}):Promise<PreparedRoleSessions>{
+  assertLocalRuntime();
+  const origin=localApiOrigin(options.apiOrigin),fetcher=options.fetcher??fetch;
+  const sessions=new Map<Role,Session>(),principals=new Map<Role,string>();
+  const close=async()=>{
+    let failed=false;
+    for(const session of sessions.values())try{await session.close();}catch{failed=true;}
+    sessions.clear();principals.clear();check(!failed,'LogoutFailed');
+  };
+  try{
+    for(const role of ['USER','ADMIN','COLLECTOR','RECYCLER'] as const){
+      const session=await passwordSession(options.publishableKey,await options.credentials(role),fetcher);
+      sessions.set(role,session);
+      const r=await fetcher(origin+'/api/me',{redirect:'error',credentials:'omit',signal:AbortSignal.timeout(30_000),
+        headers:{Authorization:'Bearer '+session.bearer()}});
+      const me=await r.json() as Record<string,unknown>;
+      check(r.status===200&&me.source==='TESTNET'&&Array.isArray(me.roles)&&me.roles.includes(role)
+        &&me.membershipStatus==='ENABLED'&&typeof me.userId==='string'&&/^[a-f0-9-]{36}$/.test(me.userId),'RoleSessionMismatch');
+      principals.set(role,me.userId);
+    }
+    await options.verify(new Map(sessions));
+    const prepared=Object.freeze({prepared:true as const,close});
+    preparedRoleSessions.set(prepared,{origin,sessions,principals});
+    return prepared;
+  }catch{await close();throw new Error('OperatorSessionPreparationStopped');}
+}
 const AUTH_ORIGIN = 'https://aemxuqnnwfclzrwwiqfd.supabase.co';
 /** Existing ordinary password grant, also used by application/dev-fixture.ts.
  * No admin credential, generate_link, cookie, persistence or token refresh. */
@@ -127,6 +158,7 @@ export interface OperatorOptions {
    * Must be supplied under the future preflight task, never sourced from env. */
   readPreflight: () => Promise<Preflight>; credentials: CredentialInput;
   observationSignal?: AbortSignal;
+  preparedSessions?:PreparedRoleSessions;
   d324Proofs?: {
     assertAdmission(scope:{taskId:string;operatorSha:string;planHash:string;batteryId:string;recipient:string}):Promise<void>;
     proofFor(input:{action:{kind:string;resource?:string};body:unknown;idempotencyKey:string;
@@ -153,8 +185,7 @@ export async function createLocalOperator(options: OperatorOptions) {
   const proofs=d324?options.d324Proofs:undefined;
   if(d324) {
     check(proofs&&run.recipient,'D324ProofProviderRequired');
-    await proofs.assertAdmission({taskId:args.taskId,operatorSha:args.expectedSha,planHash:p.planHash,
-      batteryId:run.batteryId,recipient:run.recipient});
+    check(options.preparedSessions,'D324SessionPreparationRequired');
   }
   const origin = localApiOrigin(options.apiOrigin);
   const lock = await acquireOperatorLock(options.root);
@@ -193,7 +224,15 @@ export async function createLocalOperator(options: OperatorOptions) {
     // Existing journal means prior execution/intent may exist. Never resume POST
     // automatically, even when the old process is no longer holding the lock.
     const f = await open(journal,'wx',0o600); await f.sync(); await f.close();
-    for (const role of ['USER','ADMIN','COLLECTOR','RECYCLER'] as const) {
+    if(proofs){
+      const prepared=preparedRoleSessions.get(options.preparedSessions!);
+      check(prepared&&prepared.origin===origin&&prepared.sessions.size===4,'D324SessionPreparationRequired');
+      preparedRoleSessions.delete(options.preparedSessions!);
+      for(const [role,session] of prepared.sessions)sessions.set(role,session);
+      for(const [role,principal] of prepared.principals)principals.set(role,principal);
+      await proofs.assertAdmission({taskId:args.taskId,operatorSha:args.expectedSha,planHash:p.planHash,
+        batteryId:run.batteryId,recipient:run.recipient!});
+    }else for (const role of ['USER','ADMIN','COLLECTOR','RECYCLER'] as const) {
       const session = await passwordSession(options.publishableKey,await options.credentials(role)); sessions.set(role,session);
       const me = await api(role,'/api/me');
       check(me.status===200 && Array.isArray(me.body.roles) && me.body.roles.includes(role) && me.body.membershipStatus==='ENABLED','RoleSessionMismatch');

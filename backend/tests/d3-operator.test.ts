@@ -10,13 +10,29 @@ import {plan,NETWORK_ID,CONTRACT,WASM,ACTORS,AMOUNT} from '../src/d3/model.ts';
 import {assertLocalRuntime,localRuntime} from '../src/d3/operator-guard.ts';
 import {activation,activationArguments,preflight,REVIEWED_RUNTIME_FEE_CAP,LIVE_TASK,
   sanitizeJournal,appendJournal,acquireOperatorLock,consumeBattery,Budget,runDecision,type Preflight,type JournalEntry} from '../src/d3/operator-control.ts';
-import {passwordSession,localApiOrigin,reconcileViaHistory,negativeEvidenceReady,createLocalOperator,requireActualArguments,requireModuleWorktree} from '../src/d3/live-operator.ts';
+import {passwordSession,localApiOrigin,reconcileViaHistory,negativeEvidenceReady,createLocalOperator,requireActualArguments,requireModuleWorktree,prepareLocalRoleSessions} from '../src/d3/live-operator.ts';
 import {d3Input,walletA,walletB} from './d3-fixtures.ts';
 import {localDb,harness} from './testnet-fixtures.ts';
 import {TransportStore} from '../src/testnet/store.ts';
 import {LocalTransactionWorker} from '../src/testnet/worker.ts';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
+test('four-session operator preparation performs only Auth and profile reads and keeps tokens private',async()=>{
+ const requests:{path:string;method:string}[]=[];let role='';let validated=false;
+ const fake:typeof fetch=async(input,init)=>{
+  const path=String(input);requests.push({path,method:init?.method??'GET'});
+  if(path.includes('/token?'))return new Response(JSON.stringify({access_token:'synthetic_'+role}));
+  if(path.includes('/logout?'))return new Response('{}');
+  assert.equal(path,'http://127.0.0.1:3001/api/me');
+  return new Response(JSON.stringify({source:'TESTNET',roles:[role],membershipStatus:'ENABLED',userId:'10000000-0000-0000-0000-000000000001'}));
+ };
+  const prepared=await prepareLocalRoleSessions({apiOrigin:'http://127.0.0.1:3001',publishableKey:'sb_publishable_fixture',
+   credentials:async r=>{role=r;return {email:'fixture@example.invalid',password:'synthetic'};},fetcher:fake,
+   verify:async sessions=>{assert.equal(sessions.size,4);validated=true;}});
+  assert(validated);assert.deepEqual(Object.keys(prepared),['prepared','close']);
+  assert.equal(requests.length,8);assert.equal(requests.filter(r=>r.path.includes('/api/')&&r.method!=='GET').length,0);
+  await prepared.close();assert.equal(requests.filter(r=>r.path.includes('/logout?')).length,4);
+});
 const args={live:true,taskId:LIVE_TASK,expectedSha:d3Input().gitSha};
 const git={sha:args.expectedSha,clean:true};
 function facts():Preflight {return {taskId:LIVE_TASK,runId:'RUN1',observedAt:Date.now(),git:{...git},networkId:NETWORK_ID,contractId:CONTRACT,wasmSha256:WASM,
