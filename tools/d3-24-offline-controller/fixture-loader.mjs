@@ -15,7 +15,7 @@ source=source.replace(old,"const compositionSha='bc9dc8bff9bbc34da37abfb51f59d1d
   .replace("manifestSchema='BYETERY_D324_FINAL_ACTIVATION_V3'}", "manifestSchema='BYETERY_D324_FINAL_ACTIVATION_V3',readiness=async()=>{}}")
   .replace('instanceId,challenge},async()=>{},now)', 'instanceId,challenge},readiness,now)')
   .replace('new FixtureAuthority(','new D324Authority(').replace(/\btest\(/g,'skipTest(');
-source='const skipTest=()=>{};\n'+source+'\nexport {local,fixtureApproval,roles,count,prove,transportFixture,queueFake};';
+source='const skipTest=()=>{};\n'+source+'\nexport {local,setupSessions,fixtureApproval,roles,count,prove,transportFixture,queueFake};';
 registerHooks({resolve(s,c,next){return s==='offline:d324-fixture'?{url,shortCircuit:true}:next(s,c);},
   load(u,c,next){return u===url?{format:'module-typescript',source,shortCircuit:true}:next(u,c);}});
 export const F=await import('offline:d324-fixture');

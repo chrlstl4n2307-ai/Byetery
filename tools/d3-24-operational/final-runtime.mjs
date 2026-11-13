@@ -22,8 +22,25 @@ import { preserveD324OwnerExport, readD324OwnerExport } from './export-readonly.
 import { loadD324Operator } from './operator-binding.mjs';
 import { isD324OwnerAuthorization, loadD324OwnerAuthorization } from './owner-authorization.mjs';
 import { D324_ARGV } from './policy.mjs';
+import { prepareD324Bridge } from './prelive-bridge.mjs';
+import { isD324PrivateSessionClient } from './private-session-channel.mjs';
 
 const { Pool } = createRequire(new URL('../../backend/package.json', import.meta.url))('pg');
+
+// V3 candidate binding. The historical entrypoints still reject activation.
+// The published bridge owns orchestration and restricts its port to fixtures.
+export async function prepareD324RuntimeV3Review({ channel, sessionOptions, localControl, port }) {
+  check(isD324PrivateSessionClient(channel) && port.classification === 'OFFLINE_SYNTHETIC',
+    'D324_OPERATIONAL_RATIFICATION_REQUIRED');
+  const { onFixtureHeaders, ...options } = sessionOptions;
+  const control = Object.freeze({ ...channel, async prepare(headers) {
+    const receipt = await channel.prepare(headers);
+    // The synthetic proof port needs the same bearers in process memory.
+    onFixtureHeaders?.(headers, receipt);
+    return receipt;
+  } });
+  return prepareD324Bridge({ sessionOptions: { ...options, control }, localControl, port });
+}
 
 // This function has no caller-injected runtime, submitter, grant verifier or
 // credential source. The owner authorization brand is minted only by custody.

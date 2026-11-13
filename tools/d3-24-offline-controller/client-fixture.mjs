@@ -4,7 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { join, resolve } from 'node:path';
 import { prepareOfflineController } from './controller.mjs';
 import { prepareD324Bridge } from '../d3-24-operational/prelive-bridge.mjs';
-import { createOfflineLocalControl, verifyBridgeLauncher } from './local-control.mjs';
+import { prepareD324RuntimeV3Review } from '../d3-24-operational/final-runtime.mjs';
+import { connectD324PrivateSessions } from '../d3-24-operational/private-session-channel.mjs';
+import { createOfflineLocalControl, verifyBridgeLauncher, verifyV3FixtureSupervisor } from './local-control.mjs';
 import { loadD324Operator } from '../d3-24-operational/operator-binding.mjs';
 import { D324_ARGV } from '../d3-24-operational/policy.mjs';
 import { runD324Entry } from '../d3-24-operational/live.mjs';
@@ -21,10 +23,12 @@ const scenario = process.env.OFFLINE_SCENARIO;
 const directory = process.env.OFFLINE_CASE_DIR;
 assert.match(origin ?? '', /^http:\/\/127\.0\.0\.1:\d+$/);
 assert.equal(resolve(directory, '..'), resolve(root, '.test-output'));
-const bridge = process.argv[2] === '--bridge-review';
+const runtimeV3 = process.argv[2] === '--runtime-v3-review';
+const bridge = runtimeV3 || process.argv[2] === '--bridge-review';
 if (bridge) process.argv.splice(2, 1);
 assert.deepEqual(process.argv.slice(2), D324_ARGV);
-if (bridge) await verifyBridgeLauncher(root, process.env.OFFLINE_PWSH);
+if (runtimeV3) await verifyV3FixtureSupervisor(process.env.OFFLINE_PWSH);
+else if (bridge) await verifyBridgeLauncher(root, process.env.OFFLINE_PWSH);
 assert.equal(await runD324Entry(D324_ARGV), 'D324_OPERATIONAL_RATIFICATION_REQUIRED');
 const capability = process.env.OFFLINE_CAPABILITY;
 assert.match(capability ?? '', /^[a-f0-9]{64}$/);
@@ -62,7 +66,7 @@ const journal = join(operatorRoot, '.git', 'byetery-d3-operator', RUN1.taskId + 
 const lock = join(operatorRoot, '.git', 'byetery-d3-operator', 'operator.lock');
 const planFile = join(root, 'tools/d3-24-composition/plans/security-repair-v2.json');
 const plan = readD324Plan();
-const localControl = await createOfflineLocalControl({ root, directory, pwshPath: process.env.OFFLINE_PWSH, bridge });
+const localControl = await createOfflineLocalControl({ root, directory, pwshPath: process.env.OFFLINE_PWSH, bridge, runtimeV3 });
 const preflight = () => ({
   taskId: RUN1.taskId, runId: RUN1.runId, observedAt: Date.now(),
   git: { sha: operator.sha, clean: true }, networkId: SPEC.networkId, contractId: SPEC.contract,
@@ -87,6 +91,17 @@ const sessionFetch = (url, options) => {
   return fetch(url, options);
 };
 let headers, usedHandle, active, running, ordinal = 0;
+const channel = runtimeV3 ? connectD324PrivateSessions() : undefined;
+if (channel) {
+  process.channel.unref();
+  for (const path of ['/prepare', '/admit', '/admission-check', '/discard']) {
+    const response = await fetch(origin + path, { method: 'POST' });
+    assert.equal(response.status, 404);
+    await response.body?.cancel();
+  }
+  await assert.rejects(prepareD324RuntimeV3Review({channel: {}, port: {classification:'OFFLINE_SYNTHETIC'}}),
+    /D324_OPERATIONAL_RATIFICATION_REQUIRED/);
+}
 const captures = [];
 const roles = ['ADMIN', 'USER', 'COLLECTOR', 'RECYCLER', 'USER'];
 const sessionOptions = {
@@ -149,6 +164,17 @@ const port = {
   async close() { await running?.close(); },
 };
 
+// Retain the fixture bearer copies in memory only for the existing proof port.
+// The review runtime gets a branded IPC client and exposes no raw handles.
+const optionsForRuntime = { ...sessionOptions, control: undefined };
+async function prepareRuntime(options) {
+  return prepareD324RuntimeV3Review({ ...options, channel,
+    sessionOptions: { ...optionsForRuntime, onFixtureHeaders(value, receipt) {
+      headers = value;
+      usedHandle = receipt.id;
+    } } });
+}
+
 const expectedNegative = {
   'expired-session': 'OperatorSessionPreparationStopped', 'wrong-role': 'OperatorSessionPreparationStopped',
   'changed-session': 'D324SessionScopeRejected', 'missing-manifest': 'D324AuthorityMalformed',
@@ -185,7 +211,7 @@ if (scenario === 'outside-battery' || scenario === 'reserved-battery-wrong-task'
   let failure;
   try {
     const options = { classification: 'OFFLINE_SYNTHETIC', sessionOptions, localControl, port };
-    active = await (bridge ? prepareD324Bridge(options) : prepareOfflineController(options));
+    active = await (runtimeV3 ? prepareRuntime(options) : bridge ? prepareD324Bridge(options) : prepareOfflineController(options));
     const prepared = await state();
     assert.equal(prepared.logins, 4);
     assert.equal(prepared.operations + prepared.admissions, 0);
@@ -203,12 +229,14 @@ if (scenario === 'outside-battery' || scenario === 'reserved-battery-wrong-task'
     if (scenario === 'k5-tamper') await writeFile(localControl.k5Path, 'tampered');
     if (scenario === 'session-control-tamper') await writeFile(localControl.sessionPath, '{}');
     if (scenario === 'legacy-admission') {
-      await sessionOptions.control.admit(prepared.lastPreparation, {});
+      if (channel) await channel.admitRevalidated(usedHandle, null, {fixtureOnly:true});
+      else await sessionOptions.control.admit(prepared.lastPreparation, {});
       assert.fail('Bridge accepted a legacy admission request');
     } else if (scenario === 'prepared-close') {
       await Promise.all([active.close(), active.close()]);
       await assert.rejects(active.execute({ fixtureOnly: true }), /OFFLINE_CONTROLLER_CONSUMED/);
-      await assert.rejects(sessionOptions.control.admit(prepared.lastPreparation, {}), /HANDLE/);
+      await assert.rejects(channel ? channel.admitRevalidated(usedHandle, headers, {fixtureOnly:true}) :
+        sessionOptions.control.admit(prepared.lastPreparation, {}), /HANDLE/);
     } else {
       const result = await active.execute(scenario === 'nonfixture-input' ? { grant: {} } : { fixtureOnly: true });
       assert.equal(result.confirmed.length, RUN_CAP);
@@ -247,7 +275,8 @@ if (scenario === 'outside-battery' || scenario === 'reserved-battery-wrong-task'
   } else {
     if (failure) throw failure;
     await assert.rejects(active.execute({ fixtureOnly: true }), /OFFLINE_CONTROLLER_CONSUMED/);
-    await assert.rejects(sessionOptions.control.admit(usedHandle, {}), /HANDLE/);
+    await assert.rejects(channel ? channel.admitRevalidated(usedHandle, headers, {fixtureOnly:true}) :
+      sessionOptions.control.admit(usedHandle, {}), /HANDLE/);
     const counts = await state();
     assert.equal(counts.admissions, 1);
     assert.equal(counts.operations, RUN_CAP);
@@ -257,6 +286,7 @@ if (scenario === 'outside-battery' || scenario === 'reserved-battery-wrong-task'
     assert.equal(counts.leases, 0);
     assert.equal(counts.quiescenceReads, RUN_CAP + 1);
     if (bridge) assert.equal(counts.admissionAuthReads, 4);
+    if (runtimeV3) assert.deepEqual(counts.ownerExport, {rows:RUN_CAP,readOnly:true});
     assert.equal(projectD324Journal(await readFile(journal)).length, RUN_CAP);
     const exportPath = join(directory, 'OFFLINE-export.json');
     await writeFile(exportPath, JSON.stringify({
@@ -265,6 +295,11 @@ if (scenario === 'outside-battery' || scenario === 'reserved-battery-wrong-task'
     }, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
     console.log(JSON.stringify({ scenario, result: 'PASS', publishedLauncherClosed: true,
       operatorSha: operator.sha, steps: RUN_CAP, captures: captures.length, released: true,
+      ...(runtimeV3 ? {privateIpc:true,postgres:true,admissions:counts.admissions,authRevalidations:counts.admissionAuthReads,
+        readOnlyExportRows:counts.ownerExport.rows} : {}),
       journal: join(directory, 'operator-state', RUN1.taskId + '-' + RUN1.businessSha + '.jsonl'), exportPath }));
   }
 }
+headers = undefined;
+channel?.close();
+if (channel && process.connected) process.disconnect();

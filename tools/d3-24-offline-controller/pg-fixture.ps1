@@ -1,5 +1,6 @@
-param([Parameter(Mandatory)][string]$Bin,[switch]$Backend)
+param([Parameter(Mandatory)][string]$Bin,[switch]$Backend,[switch]$RuntimeV3,[string[]]$Cases)
 $ErrorActionPreference = 'Stop'
+if (($RuntimeV3 -and $Backend) -or ($Cases -and -not $RuntimeV3)) { throw 'OfflinePostgresModeRejected' }
 $root = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
 $out = Join-Path $root '.test-output'
 New-Item -ItemType Directory -Force -Path $out | Out-Null
@@ -73,6 +74,9 @@ GRANT anon, authenticated, service_role TO postgres, byetery_gap2b WITH ADMIN TR
         if ($Backend) {
             & npm --prefix backend run verify
             if ($LASTEXITCODE -ne 0) { throw 'OfflineBackendVerifyFailed' }
+        } elseif ($RuntimeV3) {
+            & node --experimental-strip-types tools/d3-24-offline-controller/run-offline.mjs --runtime-v3-review @Cases
+            if ($LASTEXITCODE -ne 0) { throw 'OfflineRuntimeV3Failed' }
         } else {
             & node --experimental-strip-types --test tools/d3-24-operational/postgres.test.mjs
             if ($LASTEXITCODE -ne 0) { throw 'OfflinePostgresCoordinationFailed' }

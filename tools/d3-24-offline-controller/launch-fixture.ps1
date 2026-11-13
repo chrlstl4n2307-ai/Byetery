@@ -1,7 +1,8 @@
 $ErrorActionPreference = 'Stop'
 $node = $args[0]
 $operatorArguments = @($args | Select-Object -Skip 1)
-$bridgeReview = $operatorArguments[0] -ceq '--bridge-review'
+$runtimeV3 = $operatorArguments[0] -ceq '--runtime-v3-review'
+$bridgeReview = $runtimeV3 -or $operatorArguments[0] -ceq '--bridge-review'
 if ($bridgeReview -and ($env:NODE_OPTIONS -or $env:NODE_PATH)) {
     throw 'D324_BRIDGE_LAUNCHER_REJECTED'
 }
@@ -21,9 +22,13 @@ if ($LASTEXITCODE -ne 1 -or $result -cne 'D324_OPERATIONAL_RATIFICATION_REQUIRED
     throw 'PUBLISHED_LAUNCHER_NOT_CLOSED'
 }
 if ($bridgeReview) {
-    $expectedHead = '5dfe151fdfcfbc4afd747410eb097515d4ac9a9c'
+    $expectedHead = if ($runtimeV3) {'2ae596c578deff3a0eb2a3a9ac3dd8e9c9a74732'} else {'5dfe151fdfcfbc4afd747410eb097515d4ac9a9c'}
     $head = & git --no-replace-objects -C $PSScriptRoot rev-parse HEAD
     if ($LASTEXITCODE -ne 0 -or $head -cne $expectedHead) { throw 'D324_BRIDGE_LAUNCHER_REJECTED' }
+}
+if ($runtimeV3) {
+    [Console]::WriteLine('D324_V3_FIXTURE_LAUNCHER_VERIFIED')
+    exit 0
 }
 & $node --experimental-strip-types (Join-Path $PSScriptRoot 'client-fixture.mjs') @operatorArguments
 exit $LASTEXITCODE

@@ -12,19 +12,31 @@ import { ACTORS } from '../../backend/src/testnet/abi.ts';
 import { createD324BridgeSessionControl, createD324SessionControl } from '../d3-24-composition/session-control.mjs';
 import { SQL_RECEIPT_QUERY } from '../d3-receipt-capture/sources.mjs';
 import { X } from '../d3-evidence-capture/xdr-reader.mjs';
-import { RUN1 } from '../d3-24-ratification/identity.mjs';
+import { RUN1, RUN_CAP } from '../d3-24-ratification/identity.mjs';
 import { readSqlForRun } from '../d3-run1-launcher/live-sql.mjs';
+import { serveD324PrivateSessions } from '../d3-24-operational/private-session-channel.mjs';
+import { openOfflinePostgres } from './postgres-fixture.mjs';
+import { readD324OwnerExport } from '../d3-24-operational/export-readonly.mjs';
 
 // This process is only a synthetic loopback fixture; no application server startup.
 const scenario=process.argv[2]??'success';
-const bridge=process.argv[3]==='--bridge-review';
+const runtimeV3=process.argv[3]==='--runtime-v3-review';
+const bridge=runtimeV3||process.argv[3]==='--bridge-review';
 const capability=process.env.OFFLINE_CAPABILITY;
 if(!process.send||!/^[a-f0-9]{64}$/.test(capability??''))throw Error('OFFLINE_FIXTURE_PARENT_REQUIRED');
-const f=await F.local();
+let f;
+try {
+  f=runtimeV3?await openOfflinePostgres():await F.local();
+} catch(error) {
+  const code=/^[A-Za-z0-9_]{1,80}$/.test(error?.code??error?.message)?error.code??error.message:'UNKNOWN';
+  console.error('D324_FIXTURE_POSTGRES_STARTUP: '+code);
+  process.exit(1);
+}
 // Review objects are not in the base fixture's migration directory. Model the
 // readiness query's required columns only in this disposable database.
 await f.db.exec(`create schema review_private;
   create table review_private.registration_intents(deployment_id uuid,battery_id text,status text)`);
+if(runtimeV3)await readD324OwnerExport(f.repo.pool,[]);
 if(scenario==='busy-quiescence')await f.db.query("insert into review_private.registration_intents values($1,'BYE-SYNTHETIC-HOLD','WAITING')",[D324.deploymentId]);
 for(const i of Object.values(f.identities))i.tokenExpiresAt=Math.floor(i.tokenExpiresAt/1000)*1000;
 const sessionLimit = Date.now() + 600_000;
@@ -65,7 +77,9 @@ await f.db.query(`insert into app_private.wallet_links(id,deployment_id,network_
   [wallet,D324.deploymentId,D324.networkId,f.users.USER,D324.recipient]);
 const store=F.transportFixture(f.repo,approval.authority.instanceId);
 const fakes=new Map(),originals=new Map();
+let ownerExport;
 let auth,app,control,origin,lastPreparation,logins=0,logouts=0,dispatches=0,proofs=0,authReads=0,admissionAuthReads=0;
+let admissionAttempt=false;
 const check=(ok,code)=>{if(!ok)throw Error(code);};
 const issue=role=>{
   const i=f.identities[role],h=Buffer.from(JSON.stringify({alg:'EdDSA',typ:'JWT'})).toString('base64url');
@@ -79,19 +93,46 @@ const decode=header=>{
   check(parts?.length===3&&!revoked.has(token)&&verify(null,Buffer.from(parts[0]+'.'+parts[1]),key.publicKey,Buffer.from(parts[2],'base64url')),'SyntheticTokenRejected');
   const c=JSON.parse(Buffer.from(parts[1],'base64url'));check(c.exp*1000>Date.now(),'SyntheticTokenExpired');return c;
 };
+async function exportSummary() {
+  if(!runtimeV3||scenario!=='success'||originals.size!==RUN_CAP)return null;
+  return ownerExport??=(async()=>{
+    const result=await readD324OwnerExport(f.repo.pool,[...originals.keys()]);
+    const exported=JSON.parse(result.content);
+    check(exported.rows.every(row=>row.logical_state==='CONFIRMED'&&
+      row.envelope.transaction_hash===originals.get(row.operation_id)?.transactionHash),'D324_FIXTURE_EXPORT_IDENTITY_REJECTED');
+    return {rows:exported.rows.length,readOnly:exported.metadata.transaction_read_only==='on'};
+  })();
+}
 const counts=async()=>({admissions:await F.count(f.repo,'d324_admission'),operations:await F.count(f.repo,'stellar_operations'),
   steps:await F.count(f.repo,'d324_step'),logins,logouts,proofs,dispatches,quiescenceReads,authReads,admissionAuthReads,lastPreparation,
   expectedEffectiveNotAfter:sessionLimit-120_000,
   leases:Number((await f.db.query('select count(*) from api_private.testnet_source_leases where lease_until>clock_timestamp()')).rows[0].count),
   sends:[...fakes.values()].reduce((n,t)=>n+t.submitted.length,0),signatures:[...fakes.values()].reduce((n,t)=>n+t.signCount,0),
-  identities:[...originals.values()],classification:'OFFLINE_SYNTHETIC'});
+  identities:[...originals.values()],classification:'OFFLINE_SYNTHETIC',
+  ...(runtimeV3?{ownerExport:await exportSummary()}: {})});
 const reply=(r,status,body)=>{r.writeHead(status,{'content-type':'application/json','cache-control':'no-store'});r.end(JSON.stringify(body));};
+async function fixtureAdmission(headers){
+  let data=approval.input;
+  if(scenario==='missing-manifest')data={...data,manifest:undefined};
+  if(scenario==='missing-grant')data={...data,grant:undefined};
+  if(scenario==='wrong-plan')data={...data,grant:{...data.grant,planHash:'0'.repeat(64)}};
+  if(scenario==='expired-grant')data={...data,grant:{...data.grant,issuedAt:Date.now()-910000,expiresAt:Date.now()-10000}};
+  if(scenario==='unauthorized')data={...data,live:undefined};
+  if(scenario==='changed-session')
+    await f.db.query('update auth.sessions set id=$1 where id=$2',[randomUUID(),f.identities.RECYCLER.sessionId]);
+  if(scenario==='auth-revoked-at-admission')revoked.add(headers.RECYCLER.slice(7));
+  if(scenario==='shorter-sql-session')await f.db.query('update auth.sessions set not_after=$2 where id=$1',
+    [f.identities.RECYCLER.sessionId,new Date(Date.now()+360_000)]);
+  admissionAttempt=runtimeV3;
+  return data;
+}
 const server=createServer(async(req,res)=>{
   try{
     if(req.headers['x-fixture-capability']!==capability)return reply(res,403,{code:'OFFLINE_FIXTURE_ACCESS_DENIED'});
     const p=req.url;
     if(p==='/auth/v1/user'){
       authReads++;
+      if(admissionAttempt&&admissionAuthReads<4)admissionAuthReads++;
       try { return reply(res,200,{id:decode(req.headers.authorization).sub}); }
       catch { return reply(res,401,{code:'SyntheticTokenRejected'}); }
     }
@@ -126,6 +167,7 @@ const server=createServer(async(req,res)=>{
       return app.emit('request',req,res);
     }
     if(p==='/state')return reply(res,200,await counts());
+    if(runtimeV3&&['/prepare','/discard','/admission-check','/admit'].includes(p))return reply(res,404,{});
     let raw='';for await(const b of req){raw+=b;check(raw.length<=50000,'SyntheticInputTooLarge');}
     const input=JSON.parse(raw||'{}');
     if(p==='/auth/v1/token?grant_type=password'){
@@ -142,18 +184,7 @@ const server=createServer(async(req,res)=>{
     if(p==='/discard'){control.discard(input.id);return reply(res,200,{});}
     if(p==='/admission-check'){await control.checkAdmission(input.ack);return reply(res,200,{valid:true});}
     if(p==='/admit'){
-      let data=approval.input;
-      if(scenario==='missing-manifest')data={...data,manifest:undefined};
-      if(scenario==='missing-grant')data={...data,grant:undefined};
-      if(scenario==='wrong-plan')data={...data,grant:{...data.grant,planHash:'0'.repeat(64)}};
-      if(scenario==='expired-grant')data={...data,grant:{...data.grant,issuedAt:Date.now()-910000,expiresAt:Date.now()-10000}};
-      if(scenario==='unauthorized')data={...data,live:undefined};
-      if(scenario==='changed-session'){
-        await f.db.query('update auth.sessions set id=$1 where id=$2',[randomUUID(),f.identities.RECYCLER.sessionId]);
-      }
-      if(scenario==='auth-revoked-at-admission')revoked.add(input.headers.RECYCLER.slice(7));
-      if(scenario==='shorter-sql-session')await f.db.query('update auth.sessions set not_after=$2 where id=$1',
-        [f.identities.RECYCLER.sessionId,new Date(Date.now()+360_000)]);
+      const data=await fixtureAdmission(input.headers);
       const before=authReads;
       try {
         const ack=bridge ? await control.admitRevalidated(input.id,input.headers,data) : await control.admit(input.id,data);
@@ -223,7 +254,14 @@ globalThis.fetch=(url,options={})=>{
 auth=new SupabaseAuth({url:origin,publicKey:'sb_publishable_fixture'});
 control=(bridge?createD324BridgeSessionControl:createD324SessionControl)(
   {repo:f.repo,auth,authority:approval.authority,challenge:approval.input.execution.challenge});
+const closeSessions=runtimeV3?serveD324PrivateSessions(control,(input,headers)=>{
+  check(input?.fixtureOnly===true&&Object.keys(input).length===1,'D324_BRIDGE_FIXTURE_REQUIRED');
+  return fixtureAdmission(headers);
+}):()=>control.close();
 app=api(auth,new Coordinator(f.repo,{},undefined,undefined,approval.authority),{
   network:async()=>{throw Error('OFFLINE_HISTORY_NETWORK_DISABLED');},transaction:async()=>{throw Error('OFFLINE_HISTORY_NETWORK_DISABLED');}});
 process.send({ready:true,origin});
-process.on('message',async m=>{if(m?.stop){control.close();server.closeAllConnections();await new Promise(r=>server.close(r));await f.db.close();process.exit(0);}});
+process.on('message',async m=>{
+  if(m?.sessionClosed===true)closeSessions();
+  if(m?.stop){closeSessions();server.closeAllConnections();await new Promise(r=>server.close(r));await f.db.close();process.exit(0);}
+});

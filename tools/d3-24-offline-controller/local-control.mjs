@@ -12,6 +12,8 @@ const sha=b=>createHash('sha256').update(b).digest('hex');
 export const BASE='bc9dc8bff9bbc34da37abfb51f59d1d58f165068';
 export const BRIDGE_BASE='5dfe151fdfcfbc4afd747410eb097515d4ac9a9c';
 const bridgeTree='e214ad3a215a3fb92a2d4cf73c50355c74edb152';
+export const V3_BASE='2ae596c578deff3a0eb2a3a9ac3dd8e9c9a74732';
+const v3Tree='6f39853a64273976fc37b8cafcfe8e04e353d329';
 const liveHash='a6bfab15b16e64530ce1f167e5b254d230bb4cece9c80d3c4e5be9cec4f97098';
 const wrapperHash='3f46f03080e6ff290c7fda58e3992c3a94eb136876fa5178631c751d65f8984a';
 const bridgePublished = {
@@ -51,6 +53,13 @@ export async function verifyBridgeLauncher(root, pwshPath) {
     throw Error('D324_BRIDGE_LAUNCHER_REJECTED');
 }
 
+export async function verifyV3FixtureSupervisor(pwshPath) {
+  if(await inspectParent()!==await realpath(process.execPath) ||
+    sha(await readFile(process.execPath))!==BOOTSTRAP_BINARIES.nodeSha256 ||
+    sha(await readFile(pwshPath))!==BOOTSTRAP_BINARIES.pwshSha256)
+    throw Error('D324_BRIDGE_LAUNCHER_REJECTED');
+}
+
 async function readControl(path, maxBytes=8192) {
   const file = await lstat(path);
   if (!file.isFile() || !file.size || file.size > maxBytes || await realpath(path) !== path)
@@ -62,23 +71,27 @@ async function readControl(path, maxBytes=8192) {
  * Uses the unchanged production encoders/validators and exact executable bytes.
  * The real PowerShell parent check is exercised by the fixture driver.
  */
-export async function createOfflineLocalControl({root,directory,pwshPath,bridge=false}) {
-  const head=bridge?BRIDGE_BASE:BASE;
+export async function createOfflineLocalControl({root,directory,pwshPath,bridge=false,runtimeV3=false}) {
+  const head=runtimeV3?V3_BASE:bridge?BRIDGE_BASE:BASE;
   const git=(...args)=>execFileSync('git',['--no-replace-objects',...args],
     {cwd:root,encoding:'utf8',windowsHide:true,timeout:10000}).trim();
   function checkComposition() {
-    if(git('rev-parse','HEAD')!==head || (bridge &&
-      (git('rev-parse','HEAD^{tree}')!==bridgeTree || git('rev-parse','HEAD^')!==BASE ||
+    if(git('rev-parse','HEAD')!==head || ((bridge||runtimeV3) &&
+      (git('rev-parse','HEAD^{tree}')!==(runtimeV3?v3Tree:bridgeTree) || git('rev-parse','HEAD^')!==(runtimeV3?BRIDGE_BASE:BASE) ||
        git('for-each-ref','--count=1','refs/replace'))))
       throw Error('OFFLINE_COMPOSITION_PIN_REJECTED');
   }
   checkComposition();
   const bridgeHashes = new Map();
-  if (bridge) {
+  if (bridge||runtimeV3) {
     for (const [path, expected] of Object.entries(bridgePublished)) bridgeHashes.set(path, expected);
     // Review-only continuity for uncommitted bytes. Future authorization must
     // use a committed tree and an independently approved external manifest.
     for (const path of bridgeCandidate) bridgeHashes.set(path, sha(await readControl(join(root,path),65536)));
+    if(runtimeV3)for(const path of [
+      'tools/d3-24-operational/final-runtime.mjs', 'tools/d3-24-operational/private-session-channel.mjs',
+      'tools/d3-24-offline-controller/postgres-fixture.mjs', 'tools/d3-24-offline-controller/fixture-loader.mjs',
+    ]) bridgeHashes.set(path,sha(await readControl(join(root,path),65536)));
   }
   await mkdir(directory,{recursive:true});
   const pin=async path=>({path:await realpath(path),sha256:sha(await readFile(path))});
@@ -105,7 +118,7 @@ export async function createOfflineLocalControl({root,directory,pwshPath,bridge=
     }
     verifyD324K5(await readControl(k5Path),k5Sha,head);
     await verifyD324SessionPins({BYETERY_D324_SESSION_CONTROL_PATH:sessionPath,BYETERY_D324_SESSION_CONTROL_SHA256:sessionSha},
-      {root,head});
+      {root,head,...(runtimeV3?{parentExecutable:async()=>pwshPath}:{})});
     if(SIGNER.binarySha256!=='9710311d384345f8197e7d8635c75808930e74bdda5081d83c2aa21b302b1f10'||SIGNER.custodyRiskAccepted!==false)
       throw Error('OFFLINE_SIGNER_PIN_REJECTED');
   };
