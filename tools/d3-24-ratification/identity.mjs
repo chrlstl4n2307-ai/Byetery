@@ -23,7 +23,8 @@ export const retired = Object.freeze({
 export const uuid = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 export const hex = /^[a-f0-9]{64}$/;
 
-export function readD324Plan(raw = read(fileURLToPath(new URL('./plan.json', import.meta.url)))) {
+// The original reviewed plan.json is historical and remains byte-identical.
+export function readD324Plan(raw = read(fileURLToPath(new URL('../d3-24-composition/plans/security-repair-v2.json', import.meta.url)))) {
   check(hash(raw) === RUN1.planHash, 'D324_PLAN_DIGEST_REJECTED');
   const reviewed = plan(strictJson(raw.toString('utf8')));
   const run = reviewed.input.runs[0];
@@ -54,7 +55,9 @@ export async function readD324Ledger(raw = read(fileURLToPath(successorLedger)))
   const remaining = policy.executionLimitWithoutMarginAuth - confirmed.length;
   check(entries.length === 6 && last.type === 'D3_24_RATIFICATION_CANDIDATE' &&
     p.taskId === RUN1.taskId && p.status === 'PREPARED_NOT_RATIFIED' &&
-    p.planHash === RUN1.planHash && p.operatorShaCandidate === RUN1.businessSha &&
+    // This is an immutable historical proposal, not authority for the new plan.
+    p.planHash === '3c03cfe14ea2bb091fba229c378ebea859b8ebdadbdbb6ee739b23b1b831a02d' &&
+    p.operatorShaCandidate === 'c50e4eb1f7f538a231c5ecfc31d19283998dc234' &&
     addition.taskId === HISTORICAL.taskId && addition.status === 'CONSUMED_NON_COUNTING_RUN' &&
     addition.captureInventorySha256 === 'd83c28228a24a0a51c8bc8f3cbe150e3b7f981508c915ea20a9432778d3d6737' &&
     Object.entries(retired).every(([key, value]) => addition[key] === value), 'D324_LEDGER_SCOPE_REJECTED');
@@ -69,7 +72,9 @@ export async function readD324Ledger(raw = read(fileURLToPath(successorLedger)))
     new Set(confirmed.map(row => row.txHash)).size === confirmed.length, 'D324_DUPLICATE_HISTORY');
   return Object.freeze({ confirmed: Object.freeze(confirmed.map(row => Object.freeze({ ...row }))),
     confirmedConsumed: confirmed.length, excludedPreDispatch: Object.freeze(history.excludedPreDispatch),
-    ledgerSha256, remaining, runCap: RUN_CAP, txAuthorized: false, contingencyAuthorized: TX20_AUTHORIZED });
+    ledgerSha256, remaining, runCap: RUN_CAP, txAuthorized: false, contingencyAuthorized: TX20_AUTHORIZED,
+    historicalCandidateBinding: Object.freeze({ operatorSha: p.operatorShaCandidate, planHash: p.planHash }),
+    currentCandidateBinding: Object.freeze({ operatorSha: RUN1.businessSha, planHash: RUN1.planHash, status: 'REVIEW_ONLY' }) });
 }
 
 export function assertD324Scope(scope) {
