@@ -17,6 +17,8 @@ import { readSqlForRun } from '../d3-run1-launcher/live-sql.mjs';
 import { serveD324PrivateSessions } from '../d3-24-operational/private-session-channel.mjs';
 import { openOfflinePostgres } from './postgres-fixture.mjs';
 import { readD324OwnerExport } from '../d3-24-operational/export-readonly.mjs';
+import { prepareD324Sessions } from '../../backend/src/application/d324-sessions.ts';
+import { V3_BOOTSTRAP_BASE } from '../d3-24-composition/manifest-v3.mjs';
 
 // This process is only a synthetic loopback fixture; no application server startup.
 const scenario=process.argv[2]??'success';
@@ -53,7 +55,9 @@ const quiescence=async()=>{
     throw Error('SQL_QUIESCENCE_REJECTED');
   return sql;
 };
-const approval=F.fixtureApproval(f.identities,{...(scenario==='execution-exceeds-prepared'?{windowMs:540_000}:{}),readiness:async()=>{
+const approval=F.fixtureApproval(f.identities,{...(scenario==='execution-exceeds-prepared'?{windowMs:540_000}:{}),
+  ...(runtimeV3?{compositionSha:V3_BOOTSTRAP_BASE}:{}),
+  ...(scenario==='legacy-manifest'?{manifestSchema:'BYETERY_D324_FINAL_ACTIVATION_V2'}:{}),readiness:async()=>{
   const sql=await quiescence();if(sql.occupied!==0||sql.operations.length!==0)throw Error('SQL_QUIESCENCE_REJECTED');
 }});
 const key=generateKeyPairSync('ed25519'),revoked=new Set();
@@ -80,6 +84,7 @@ const fakes=new Map(),originals=new Map();
 let ownerExport;
 let auth,app,control,origin,lastPreparation,logins=0,logouts=0,dispatches=0,proofs=0,authReads=0,admissionAuthReads=0;
 let admissionAttempt=false;
+let duplicateRejected=false;
 const check=(ok,code)=>{if(!ok)throw Error(code);};
 const issue=role=>{
   const i=f.identities[role],h=Buffer.from(JSON.stringify({alg:'EdDSA',typ:'JWT'})).toString('base64url');
@@ -108,13 +113,15 @@ const counts=async()=>({admissions:await F.count(f.repo,'d324_admission'),operat
   expectedEffectiveNotAfter:sessionLimit-120_000,
   leases:Number((await f.db.query('select count(*) from api_private.testnet_source_leases where lease_until>clock_timestamp()')).rows[0].count),
   sends:[...fakes.values()].reduce((n,t)=>n+t.submitted.length,0),signatures:[...fakes.values()].reduce((n,t)=>n+t.signCount,0),
-  identities:[...originals.values()],classification:'OFFLINE_SYNTHETIC',
+  identities:[...originals.values()],classification:'OFFLINE_SYNTHETIC',duplicateRejected,
   ...(runtimeV3?{ownerExport:await exportSummary()}: {})});
 const reply=(r,status,body)=>{r.writeHead(status,{'content-type':'application/json','cache-control':'no-store'});r.end(JSON.stringify(body));};
 async function fixtureAdmission(headers){
   let data=approval.input;
   if(scenario==='missing-manifest')data={...data,manifest:undefined};
   if(scenario==='missing-grant')data={...data,grant:undefined};
+  if(scenario==='forged-grant')data={...data,grantSignature:data.manifestApproval};
+  if(scenario==='forged-live')data={...data,liveSignature:data.grantSignature};
   if(scenario==='wrong-plan')data={...data,grant:{...data.grant,planHash:'0'.repeat(64)}};
   if(scenario==='expired-grant')data={...data,grant:{...data.grant,issuedAt:Date.now()-910000,expiresAt:Date.now()-10000}};
   if(scenario==='unauthorized')data={...data,live:undefined};
@@ -254,6 +261,22 @@ globalThis.fetch=(url,options={})=>{
 auth=new SupabaseAuth({url:origin,publicKey:'sb_publishable_fixture'});
 control=(bridge?createD324BridgeSessionControl:createD324SessionControl)(
   {repo:f.repo,auth,authority:approval.authority,challenge:approval.input.execution.challenge});
+if(scenario==='duplicate-admission') {
+  const original=control;
+  control=Object.freeze({...original,async admitRevalidated(id,headers,input){
+    const ack=await original.admitRevalidated(id,headers,input);
+    // Fresh server receipt, same durable identity. This reaches SQL uniqueness
+    // before the first operation, independently of the IPC one-attempt fence.
+    const fresh=await prepareD324Sessions(f.repo,auth,headers,approval.authority.instanceId,input.execution.challenge);
+    try { await approval.authority.admit(f.repo,input,fresh); }
+    catch(error) {
+      if(error.code!=='D324AdmissionUnavailable')throw error;
+      duplicateRejected=true;
+    }
+    check(duplicateRejected,'D324_FIXTURE_DUPLICATE_ACCEPTED');
+    return ack;
+  }});
+}
 const closeSessions=runtimeV3?serveD324PrivateSessions(control,(input,headers)=>{
   check(input?.fixtureOnly===true&&Object.keys(input).length===1,'D324_BRIDGE_FIXTURE_REQUIRED');
   return fixtureAdmission(headers);

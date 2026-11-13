@@ -1,4 +1,18 @@
-# D3-24 final activation candidate
+# D3-24 activation review
+
+## Current V3 bootstrap candidate
+
+`launch.ps1 -V3Review` verifies the pinned PowerShell, Node and bootstrap before observing the published review baseline `3ee1e4e5b5d047ccac6782459aa405a37ead983b`. The isolated supervisor requires that result before starting the synthetic server and client. The supervisor connects the existing `OFFLINE_SYNTHETIC` controller over inherited IPC. The server validates four sessions and revalidates them before the existing `D324Authority.admit` transaction. Neither this mode nor the package verifier opens an operational port.
+
+`launch.ps1 -V3VerifyPackage` is the review-only external package verifier. It requires the fixed owner's Ed25519 approval in the V3 domain and a clean, direct child of the published review baseline. The manifest carries the exact Git SHA/parent/tree, independent operator SHA/parent/tree, plan, task, deployment, network, battery, recipient, artifact hashes, ledger, budget, binaries, K5 and session-control. The bootstrap hashes the entry modules against the target Git objects. The owner package then rechecks the existing capture profile, operator checkout, binaries, physical PowerShell parent, K5 and session-control. The session-control file retains its existing schema 2. That schema binds executable paths and versions and is separate from the activation manifest schema.
+
+The owner package uses the existing physical custody directory. `activation-manifest.json` is canonical UTF-8 JSON with final LF. `manifest-approval.sig` signs `BYETERY-D324-MANIFEST-APPROVAL-V3\n<manifest-sha256>\n`. `execution-approval.json` contains exactly `grant`, `grantSignature`, `execution`, `executionSignature`, `live`, `liveSignature`. The execution document binds all four session identities, the server instance/challenge and runner key. LIVE signs the manifest, grant and execution hashes in the V3 LIVE domain. The durable server independently requires the runner's PoP and SQL session/expiry, budget and quiescence checks. Ratification must follow commit review so the target SHA/tree and custody documents stay external.
+
+Default launch, direct Node LIVE, and the old executor all return `D324_OPERATIONAL_RATIFICATION_REQUIRED`. The historical files and their pins remain in their exact commits. The real server/worker binding, four real sessions, effective database privileges, migration/readback, and signer/custody approval require separate work. This candidate creates no approved manifest, grant or LIVE permit.
+
+## Historical V2 design
+
+The following section records the earlier activation design and is retained for its historical checkout. Its custody files and fixture command apply to that checkout.
 
 This candidate starts from `436061d6381fccb52e94ae57123c31803ede30e2`. The previous review manifest remains a historical V1 format. The candidate keeps the exact D3-24 plan, battery and recipient and loads the factory from the independent clean operator at `c50e4eb1f7f538a231c5ecfc31d19283998dc234`. Preparation confers no PRE-LIVE or LIVE authority.
 

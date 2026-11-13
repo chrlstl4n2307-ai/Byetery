@@ -12,7 +12,7 @@ if(createHash('sha256').update(source).digest('hex')!=='7e1ac4be128af00c00ac4696
 const old="const compositionSha='a'.repeat(40),operatorSha='b'.repeat(40),planHash='c'.repeat(64);";
 if(source.split(old).length!==2||source.split('new FixtureAuthority(').length!==2)throw Error('OFFLINE_FIXTURE_DRIFT');
 source=source.replace(old,"const compositionSha='bc9dc8bff9bbc34da37abfb51f59d1d58f165068',operatorSha='d85e54e00e98c8d8bc6294c883708a701ce55440',planHash='0435d8436d13881ebbdf31e729cf36a80e538bc149300219353f68817b37d72d';")
-  .replace("manifestSchema='BYETERY_D324_FINAL_ACTIVATION_V3'}", "manifestSchema='BYETERY_D324_FINAL_ACTIVATION_V3',readiness=async()=>{}}")
+  .replace("manifestSchema='BYETERY_D324_FINAL_ACTIVATION_V3'}", "manifestSchema='BYETERY_D324_FINAL_ACTIVATION_V3',compositionSha='bc9dc8bff9bbc34da37abfb51f59d1d58f165068',readiness=async()=>{}}")
   .replace('instanceId,challenge},async()=>{},now)', 'instanceId,challenge},readiness,now)')
   .replace('new FixtureAuthority(','new D324Authority(').replace(/\btest\(/g,'skipTest(');
 source='const skipTest=()=>{};\n'+source+'\nexport {local,setupSessions,fixtureApproval,roles,count,prove,transportFixture,queueFake};';

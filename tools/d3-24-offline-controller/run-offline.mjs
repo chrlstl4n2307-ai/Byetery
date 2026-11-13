@@ -18,6 +18,7 @@ if(bridge){
   cases.push('missing-grant','auth-revoked-at-admission','shorter-sql-session','partial-login','prepared-close',
     'execution-exceeds-prepared','legacy-admission','nonfixture-input');
 }
+if(runtimeV3)cases.push('duplicate-admission','forged-grant','forged-live','legacy-manifest');
 if(selected.some(scenario=>!cases.includes(scenario))||new Set(selected).size!==selected.length)
   throw Error('OFFLINE_SCENARIO_REJECTED');
 const pwsh=execFileSync('pwsh',['-NoProfile','-NonInteractive','-Command','[Console]::Write((Get-Process -Id $PID).Path)'],
@@ -31,8 +32,17 @@ const git=(cwd,...args)=>execFileSync('git',['--no-replace-objects',...args],{cw
 const head=runtimeV3?V3_BASE:bridge?BRIDGE_BASE:BASE;
 if(git(root,'rev-parse','HEAD')!==head)throw Error('OFFLINE_COMPOSITION_PIN_REJECTED');
 const objects=git(root,'rev-parse','--path-format=absolute','--git-path','objects');
+const mode=runtimeV3?'--runtime-v3-review':'--bridge-review';
+const wrapperArgs=['-NoProfile','-NonInteractive','-File',join(directory,'launch-fixture.ps1'),process.execPath,
+  ...(bridge?[mode]:[]),...D324_ARGV];
 let passed=0;
 for(const scenario of selected.length?selected:cases){
+  const fixtureEnv={...env,OFFLINE_CAPABILITY:randomBytes(32).toString('hex')};
+  if(runtimeV3){
+    fixtureEnv.BYETERY_D324_TEST_PG_PORT=process.env.BYETERY_D324_TEST_PG_PORT;
+    const bootstrap=execFileSync(pwsh,wrapperArgs,{env:fixtureEnv,encoding:'utf8',windowsHide:true,timeout:30000}).trim();
+    if(bootstrap!=='D324_V3_BOOTSTRAP_REVIEW_PASS')throw Error('D324_BRIDGE_LAUNCHER_REJECTED');
+  }
   const caseDir=await mkdtemp(join(output,'controller-'));
   const operatorRoot=join(caseDir,'operator');
   const compositionRoot=join(caseDir,'composition');
@@ -46,9 +56,6 @@ for(const scenario of selected.length?selected:cases){
   await symlink(dependencyPath,join(operatorRoot,'backend','node_modules'),'junction');
   if(git(operatorRoot,'rev-parse','--path-format=absolute','--git-common-dir')===git(root,'rev-parse','--path-format=absolute','--git-common-dir'))
     throw Error('OFFLINE_GIT_ISOLATION_REQUIRED');
-  const fixtureEnv={...env,OFFLINE_CAPABILITY:randomBytes(32).toString('hex')};
-  const mode=runtimeV3?'--runtime-v3-review':'--bridge-review';
-  if(runtimeV3)fixtureEnv.BYETERY_D324_TEST_PG_PORT=process.env.BYETERY_D324_TEST_PG_PORT;
   const server=fork(join(directory,'server-fixture.mjs'),[scenario,...(bridge?[mode]:[])],
     {execArgv:['--experimental-strip-types'],env:fixtureEnv,windowsHide:true,silent:true});
   let client,diagnostics='';
@@ -58,20 +65,17 @@ for(const scenario of selected.length?selected:cases){
     const origin=await new Promise((resolve,reject)=>{server.once('message',m=>m.ready?resolve(m.origin):reject(Error('OFFLINE_NOT_READY')));
       server.once('exit',()=>reject(Error('OFFLINE_SERVER_EXITED')));server.once('error',reject);});
     const childEnv={...fixtureEnv,OFFLINE_ORIGIN:origin,OFFLINE_CASE_DIR:caseDir,OFFLINE_SCENARIO:scenario};
-    let launcherOutput='';
-    function observeChild(child, capture=false){
-      child.stdout.on('data',b=>{if(capture)launcherOutput=(launcherOutput+b).slice(-3000);else process.stdout.write(b);});
+    function observeChild(child){
+      child.stdout.on('data',b=>process.stdout.write(b));
       child.stderr.on('data',b=>{diagnostics=(diagnostics+b).slice(-3000);});
       return new Promise((resolve,reject)=>{child.once('close',resolve);child.once('error',reject);});
     }
-    function run(exe,args,capture=false){
+    function run(exe,args){
       client=spawn(exe,args,{env:childEnv,windowsHide:true,stdio:['ignore','pipe','pipe']});
-      return observeChild(client,capture);
+      return observeChild(client);
     }
-    let code=await run(pwsh,['-NoProfile','-NonInteractive','-File',join(directory,'launch-fixture.ps1'),process.execPath,
-      ...(bridge?[mode]:[]),...D324_ARGV],runtimeV3);
-    if(runtimeV3&&code===0){
-      if(launcherOutput.trim()!=='D324_V3_FIXTURE_LAUNCHER_VERIFIED')throw Error('D324_BRIDGE_LAUNCHER_REJECTED');
+    let code;
+    if(runtimeV3){
       client=fork(join(directory,'client-fixture.mjs'),[mode,...D324_ARGV],
         {execArgv:['--experimental-strip-types'],env:childEnv,windowsHide:true,silent:true});
       const launcher=client;
@@ -91,7 +95,7 @@ for(const scenario of selected.length?selected:cases){
         launcher.off('message',toServer);
         if(server.connected)server.send({sessionClosed:true});
       }
-    }
+    }else code=await run(pwsh,wrapperArgs);
     if(['crash-reconcile','uncertain-retry'].includes(scenario)){
       if(code!==73||await run(process.execPath,['--experimental-strip-types',join(directory,'recovery-fixture.mjs')])!==0)
         throw Error('OFFLINE_RECOVERY_FAILED');

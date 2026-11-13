@@ -185,6 +185,8 @@ const expectedNegative = {
   'missing-grant': 'D324AuthorityMalformed', 'auth-revoked-at-admission': 'InvalidSession',
   'shorter-sql-session': 'D324_SESSION_REVALIDATION_REJECTED', 'partial-login': 'OperatorSessionPreparationStopped',
   'execution-exceeds-prepared': 'D324_SESSION_WINDOW_REJECTED', 'legacy-admission': 'D324SessionScopeRejected',
+  'forged-grant': 'D324SignatureRejected', 'forged-live': 'D324SignatureRejected',
+  'legacy-manifest': 'D324ManifestMismatch',
   'nonfixture-input': 'D324_BRIDGE_FIXTURE_REQUIRED',
 };
 
@@ -284,9 +286,10 @@ if (scenario === 'outside-battery' || scenario === 'reserved-battery-wrong-task'
     assert.equal(counts.sends, RUN_CAP);
     assert.equal(counts.logouts, 4);
     assert.equal(counts.leases, 0);
-    assert.equal(counts.quiescenceReads, RUN_CAP + 1);
+    assert.equal(counts.quiescenceReads, RUN_CAP + (scenario === 'duplicate-admission' ? 2 : 1));
     if (bridge) assert.equal(counts.admissionAuthReads, 4);
-    if (runtimeV3) assert.deepEqual(counts.ownerExport, {rows:RUN_CAP,readOnly:true});
+    if (scenario === 'success' && runtimeV3) assert.deepEqual(counts.ownerExport, {rows:RUN_CAP,readOnly:true});
+    if (scenario === 'duplicate-admission') assert.equal(counts.duplicateRejected, true);
     assert.equal(projectD324Journal(await readFile(journal)).length, RUN_CAP);
     const exportPath = join(directory, 'OFFLINE-export.json');
     await writeFile(exportPath, JSON.stringify({
@@ -296,7 +299,7 @@ if (scenario === 'outside-battery' || scenario === 'reserved-battery-wrong-task'
     console.log(JSON.stringify({ scenario, result: 'PASS', publishedLauncherClosed: true,
       operatorSha: operator.sha, steps: RUN_CAP, captures: captures.length, released: true,
       ...(runtimeV3 ? {privateIpc:true,postgres:true,admissions:counts.admissions,authRevalidations:counts.admissionAuthReads,
-        readOnlyExportRows:counts.ownerExport.rows} : {}),
+        readOnlyExportRows:counts.ownerExport?.rows ?? 0,duplicateRejected:counts.duplicateRejected} : {}),
       journal: join(directory, 'operator-state', RUN1.taskId + '-' + RUN1.businessSha + '.jsonl'), exportPath }));
   }
 }

@@ -13,6 +13,17 @@ const exact = (obj, names) => obj && typeof obj === 'object' && !Array.isArray(o
 const check = (ok, code) => { if (!ok) throw Error(code); };
 // This pure review never authenticates an approval or grants execution authority.
 export function inspectV3ManifestFields(raw) {
+  return inspectManifest(raw, COMPONENTS.server);
+}
+
+// The bootstrap candidate is a direct child of the published review runtime.
+// Its own SHA and tree come only from the detached owner-approved document.
+export const V3_BOOTSTRAP_BASE = '3ee1e4e5b5d047ccac6782459aa405a37ead983b';
+export function inspectV3BootstrapManifest(raw) {
+  return inspectManifest(raw, V3_BOOTSTRAP_BASE);
+}
+
+function inspectManifest(raw, parent) {
   check(Buffer.isBuffer(raw) && raw.length > 0 && raw.length <= 8192, 'D324_V3_MANIFEST_REJECTED');
   const manifest = strictJson(new TextDecoder('utf-8', { fatal: true }).decode(raw));
   check(raw.equals(Buffer.from(canonical(manifest) + '\n')) && exact(manifest, ['schema', 'target', 'identity', 'networkId',
@@ -21,7 +32,7 @@ export function inspectV3ManifestFields(raw) {
   const operator = verifyD324OperatorCommit();
   check(canonical(manifest.identity) === canonical(RUN1) && manifest.networkId === SPEC.networkId &&
     manifest.deploymentId === SPEC.deployment && canonical(manifest.operator) === canonical({ sha: operator.sha, parent: operator.parent, tree: operator.tree }) &&
-    exact(manifest.target, ['sha', 'parent', 'tree']) && manifest.target.parent === COMPONENTS.server &&
+    exact(manifest.target, ['sha', 'parent', 'tree']) && manifest.target.parent === parent &&
     manifest.target.sha !== manifest.target.parent && /^[a-f0-9]{40}$/.test(manifest.target?.sha ?? '') &&
     /^[a-f0-9]{40}$/.test(manifest.target?.tree ?? '') && manifest.artifacts?.exportQuery === OWNER_QUERY_SHA256,
   'D324_V3_SCOPE_REJECTED');

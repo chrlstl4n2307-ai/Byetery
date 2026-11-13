@@ -1,8 +1,7 @@
+import { join } from 'node:path';
 import { realpath } from 'node:fs/promises';
-import { isAbsolute, join } from 'node:path';
-import { bytes, hash, read } from '../d3-evidence-capture/common.mjs';
+import { bytes, hash, read, SPEC } from '../d3-evidence-capture/common.mjs';
 import { strictJson } from '../d3-evidence-capture/owner-export.mjs';
-import { verifyD324ActivationManifest, observeD324Checkout } from '../d3-24-activation/manifest.mjs';
 import { verifyDetachedEd25519 } from '../d3-24-activation/ed25519.mjs';
 import { RUN1 } from '../d3-24-ratification/identity.mjs';
 import { requireThat as check } from '../d3-run1-launcher/boundaries.mjs';
@@ -10,15 +9,14 @@ import { canonicalGrant, exactRecord } from '../d3-run1-launcher/grant-schema.mj
 import { OWNER_GRANT_PUBLIC_KEY, OWNER_GRANT_PUBLIC_KEY_FINGERPRINT } from '../d3-run1-launcher/owner-grant-key.mjs';
 import { encodeD324SessionControl, verifyD324SessionPins } from '../d3-run1-launcher/session-pins.mjs';
 import { BOOTSTRAP_BINARIES } from './bootstrap-pins.mjs';
-import { verifyD324OwnerEnvelope, liveDeadline } from './policy.mjs';
-import { resolveD324Operator } from './operator-binding.mjs';
+import { liveDeadline, verifyD324GrantScope, verifyD324K5 } from './policy.mjs';
+import { D324_TIME } from '../../backend/src/application/d324-authority.ts';
+import { observeV3Checkout } from './entry-bootstrap.mjs';
 
 const asciiSignature = /^[A-Za-z0-9_-]{86}\n$/;
 const utf8 = raw => new TextDecoder('utf-8', { fatal: true }).decode(raw);
-const authorizations = new WeakSet();
 const signedByOwner = (message, signature) => verifyDetachedEd25519(message, signature,
   OWNER_GRANT_PUBLIC_KEY, OWNER_GRANT_PUBLIC_KEY_FINGERPRINT);
-export const isD324OwnerAuthorization = value => authorizations.has(value);
 
 export function verifyManifestApproval(raw, detached) {
   const signature = utf8(detached);
@@ -55,31 +53,70 @@ export async function verifyBoundSession({ root, head, path, expectedHash }) {
   return session;
 }
 
-// No digest, public key, path to the operator, or approval is supplied by argv.
-export async function loadD324OwnerAuthorization(root) {
-  const local = process.env.LOCALAPPDATA;
-  check(typeof local === 'string' && isAbsolute(local) && await realpath(local) === local, 'D324_OWNER_CUSTODY_REJECTED');
-  const directory = join(local, 'OwnerKeyCustody', 'Byetery-D3-RUN1', 'live', RUN1.taskId);
-  check(await realpath(directory) === directory, 'D324_OWNER_CUSTODY_REJECTED');
-  const file = (name, max) => read(join(directory, name), max);
-  const raw = file('activation-manifest.json', 8192);
-  const manifestSha = verifyManifestApproval(raw, file('manifest-approval.sig', 87));
+const hex = /^[a-f0-9]{64}$/;
+const uuid = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
+const roles = ['ADMIN','USER','COLLECTOR','RECYCLER'];
+const wire = (domain, data) => Buffer.concat([Buffer.from(domain + '\n'), bytes(data)]);
+
+// Check the exact documents the durable server consumes. This observation
+// confers no admission: the server revalidates Auth, SQL and the runner proof.
+export function checkV3ExecutionDocuments(input, manifest, now) {
+  const grantBytes = verifyD324GrantScope(input.grant, manifest.target.sha, now);
+  const { execution, live, grant } = input;
+  check(exactRecord(execution, ['schema', ...Object.keys(RUN1), 'deploymentId', 'networkId', 'compositionSha',
+    'instanceId', 'challenge', 'runnerPublicKey', 'issuedAt', 'executionNotAfter', 'sessions']) &&
+    execution.schema === 'BYETERY_D324_EXECUTION_V1' && Object.entries(RUN1).every(([k,v]) => execution[k] === v) &&
+    execution.deploymentId === SPEC.deployment && execution.networkId === SPEC.networkId &&
+    execution.compositionSha === manifest.target.sha && [execution.instanceId, execution.challenge, execution.runnerPublicKey].every(v => typeof v === 'string' && hex.test(v)) &&
+    Number.isSafeInteger(execution.issuedAt) && Number.isSafeInteger(execution.executionNotAfter) &&
+    grant.issuedAt <= execution.issuedAt && execution.issuedAt <= now && now < execution.executionNotAfter &&
+    execution.executionNotAfter - execution.issuedAt <= D324_TIME.executionMs &&
+    Array.isArray(execution.sessions) && execution.sessions.length === roles.length &&
+    execution.sessions.every((s,i) => exactRecord(s, ['role','authUserId','sessionId','tokenExpiresAt']) && s.role === roles[i] &&
+      typeof s.authUserId === 'string' && uuid.test(s.authUserId) && typeof s.sessionId === 'string' && uuid.test(s.sessionId) &&
+      Number.isSafeInteger(s.tokenExpiresAt) && execution.executionNotAfter <= s.tokenExpiresAt - D324_TIME.sessionMarginMs) &&
+    new Set(execution.sessions.map(s => s.sessionId)).size === roles.length &&
+    new Set(execution.sessions.map(s => s.authUserId)).size === roles.length, 'D324_V3_EXECUTION_REJECTED');
+  const executionBytes = wire('BYETERY-D324-EXECUTION-V1', execution);
+  check(exactRecord(live, ['schema','taskId','runId','deploymentId','manifestSha256','grantSha256','executionSha256',
+    'instanceId','challenge','runnerPublicKey','issuedAt','expiresAt']) &&
+    live.schema === 'BYETERY_D324_ONE_LIVE_APPROVAL_V3' && live.taskId === RUN1.taskId && live.runId === RUN1.runId &&
+    live.deploymentId === SPEC.deployment && live.manifestSha256 === hash(bytes(manifest)) &&
+    live.grantSha256 === hash(grantBytes) && live.executionSha256 === hash(executionBytes) &&
+    ['instanceId','challenge','runnerPublicKey'].every(k => live[k] === execution[k]) &&
+    Number.isSafeInteger(live.issuedAt) && Number.isSafeInteger(live.expiresAt) &&
+    execution.issuedAt <= live.issuedAt && live.issuedAt <= now && now < live.expiresAt && live.expiresAt <= liveDeadline(grant),
+  'D324_V3_LIVE_REJECTED');
+  return { grantBytes, executionBytes, liveBytes: wire('BYETERY-D324-ONE-LIVE-APPROVAL-V3', live) };
+}
+
+export function verifyV3ExecutionDocuments(input, manifest, now = Date.now()) {
+  const { grantBytes, executionBytes, liveBytes } = checkV3ExecutionDocuments(input, manifest, now);
+  signedByOwner(grantBytes, input.grantSignature);
+  signedByOwner(executionBytes, input.executionSignature);
+  signedByOwner(liveBytes, input.liveSignature);
+  return Object.freeze({ reviewOnly: true, liveAuthority: false });
+}
+
+export async function verifyV3OwnerPackage(directory, root) {
+  const readFile = (name, size) => read(join(directory, name), size);
+  const raw = readFile('activation-manifest.json', 8192);
+  const signature = utf8(readFile('manifest-approval.sig', 87));
+  check(asciiSignature.test(signature), 'D324_MANIFEST_APPROVAL_REJECTED');
+  const manifestSha = hash(raw);
+  signedByOwner(Buffer.from('BYETERY-D324-MANIFEST-APPROVAL-V3\n' + manifestSha + '\n'), signature.slice(0, -1));
+  const { inspectV3BootstrapManifest } = await import('../d3-24-composition/manifest-v3.mjs');
+  inspectV3BootstrapManifest(raw);
   const manifest = strictJson(utf8(raw));
-  const operator = await resolveD324Operator(root, manifest.operatorRoot);
-  const observed = await observeD324Checkout(root, operator.root);
-  const proof = await verifyD324ActivationManifest(raw, manifestSha, { ...observed, operatorRoot: operator.root });
-  const session = await verifyBoundSession({ root, head: proof.sha, path: join(directory, 'session-control.json'),
-    expectedHash: proof.sessionControlSha256 });
-  const envelope = strictJson(utf8(file('owner-grant.json', 4096)));
-  const verified = verifyD324OwnerEnvelope(envelope, { compositionSha: proof.sha,
-    k5Bytes: file('K5-UNSIGNED-TEMPLATE.txt', 8192), k5Sha256: proof.k5Sha256, now: Date.now() });
-  const permit = strictJson(utf8(file('live-approval.json', 4096)));
-  check(exactRecord(permit, ['approval', 'signature']), 'D324_LIVE_APPROVAL_REQUIRED');
-  const signedBytes = checkLaunchScope(permit.approval, manifestSha, verified.grant, Date.now());
-  signedByOwner(signedBytes, permit.signature);
-  const result = Object.freeze({ manifestSha, sha: proof.sha, operator, ...verified,
-    api: Object.freeze({ ...permit.approval.api }), nodePath: session.node.path, sessionControlSha256: proof.sessionControlSha256, approvalExpiresAt: permit.approval.expiresAt,
-    continuity: hash(Buffer.concat([Buffer.from(manifestSha), canonicalGrant(verified.grant), signedBytes])) });
-  authorizations.add(result);
-  return result;
+  observeV3Checkout(root, manifest.target);
+  const { verifyD324CaptureProfile } = await import('../d3-24-capture-profile/profile.mjs');
+  await verifyD324CaptureProfile(root, {taskId: RUN1.taskId, manifestBytes: raw, manifestApproval: signature.slice(0, -1)});
+  const { resolveD324Operator } = await import('./operator-binding.mjs');
+  await resolveD324Operator(root, manifest.operatorRoot);
+  await verifyBoundSession({root,head:manifest.target.sha,path:join(directory,'session-control.json'),
+    expectedHash:manifest.sessionControlSha256});
+  verifyD324K5(readFile('K5-UNSIGNED-TEMPLATE.txt',8192),manifest.k5Sha256,manifest.target.sha);
+  const input = strictJson(utf8(readFile('execution-approval.json',8192)));
+  check(exactRecord(input, ['grant','grantSignature','execution','executionSignature','live','liveSignature']), 'D324_V3_EXECUTION_REJECTED');
+  return verifyV3ExecutionDocuments(input,manifest);
 }

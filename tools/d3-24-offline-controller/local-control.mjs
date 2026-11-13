@@ -8,12 +8,14 @@ import { encodeD324SessionControl, verifyD324SessionPins } from '../d3-run1-laun
 import { verifyD324K5 } from '../d3-24-operational/policy.mjs';
 import { SIGNER } from '../d3-24-composition/pins.mjs';
 import { BOOTSTRAP_BINARIES } from '../d3-24-operational/bootstrap-pins.mjs';
+import { V3_BOOTSTRAP_BASE } from '../d3-24-composition/manifest-v3.mjs';
 const sha=b=>createHash('sha256').update(b).digest('hex');
 export const BASE='bc9dc8bff9bbc34da37abfb51f59d1d58f165068';
 export const BRIDGE_BASE='5dfe151fdfcfbc4afd747410eb097515d4ac9a9c';
 const bridgeTree='e214ad3a215a3fb92a2d4cf73c50355c74edb152';
-export const V3_BASE='2ae596c578deff3a0eb2a3a9ac3dd8e9c9a74732';
-const v3Tree='6f39853a64273976fc37b8cafcfe8e04e353d329';
+export const V3_BASE=V3_BOOTSTRAP_BASE;
+const v3Parent='2ae596c578deff3a0eb2a3a9ac3dd8e9c9a74732';
+const v3Tree='0b0119d2adb42aa767490908751c7bb236dd2e93';
 const liveHash='a6bfab15b16e64530ce1f167e5b254d230bb4cece9c80d3c4e5be9cec4f97098';
 const wrapperHash='3f46f03080e6ff290c7fda58e3992c3a94eb136876fa5178631c751d65f8984a';
 const bridgePublished = {
@@ -77,7 +79,7 @@ export async function createOfflineLocalControl({root,directory,pwshPath,bridge=
     {cwd:root,encoding:'utf8',windowsHide:true,timeout:10000}).trim();
   function checkComposition() {
     if(git('rev-parse','HEAD')!==head || ((bridge||runtimeV3) &&
-      (git('rev-parse','HEAD^{tree}')!==(runtimeV3?v3Tree:bridgeTree) || git('rev-parse','HEAD^')!==(runtimeV3?BRIDGE_BASE:BASE) ||
+      (git('rev-parse','HEAD^{tree}')!==(runtimeV3?v3Tree:bridgeTree) || git('rev-parse','HEAD^')!==(runtimeV3?v3Parent:BASE) ||
        git('for-each-ref','--count=1','refs/replace'))))
       throw Error('OFFLINE_COMPOSITION_PIN_REJECTED');
   }
@@ -90,6 +92,8 @@ export async function createOfflineLocalControl({root,directory,pwshPath,bridge=
     for (const path of bridgeCandidate) bridgeHashes.set(path, sha(await readControl(join(root,path),65536)));
     if(runtimeV3)for(const path of [
       'tools/d3-24-operational/final-runtime.mjs', 'tools/d3-24-operational/private-session-channel.mjs',
+      'tools/d3-24-operational/launch.ps1', 'tools/d3-24-operational/entry-bootstrap.mjs',
+      'tools/d3-24-operational/owner-authorization.mjs', 'tools/d3-24-composition/manifest-v3.mjs',
       'tools/d3-24-offline-controller/postgres-fixture.mjs', 'tools/d3-24-offline-controller/fixture-loader.mjs',
     ]) bridgeHashes.set(path,sha(await readControl(join(root,path),65536)));
   }
@@ -99,7 +103,7 @@ export async function createOfflineLocalControl({root,directory,pwshPath,bridge=
     live:await pin(join(root,'tools/d3-24-operational/live.mjs')),
     wrapper:await pin(join(root,'tools/d3-24-operational/launch.ps1')),
     pwsh:{...await pin(pwshPath),version:'7.6.9'},node:{...await pin(process.execPath),version:process.version}};
-  if(session.live.sha256!==liveHash || session.wrapper.sha256!==wrapperHash ||
+  if(session.live.sha256!==liveHash || (!runtimeV3 && session.wrapper.sha256!==wrapperHash) ||
     session.node.sha256!==BOOTSTRAP_BINARIES.nodeSha256 || session.pwsh.sha256!==BOOTSTRAP_BINARIES.pwshSha256)
     throw Error('OFFLINE_COMPOSITION_PIN_REJECTED');
   const sessionBytes=encodeD324SessionControl(session),sessionSha=sha(sessionBytes);
