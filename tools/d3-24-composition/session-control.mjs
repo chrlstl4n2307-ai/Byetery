@@ -22,22 +22,45 @@ export function sessionIdentityDigest(identities) {
 export function createD324SessionControl({ repo, auth, authority, challenge }) {
   check(repo.mode === 'TESTNET' && repo.deploymentId === D324.deploymentId, 'D324_CONTROL_SCOPE_REJECTED');
   const receipts = new Map();
+  let closed = false;
+  function take(id) {
+    const item = receipts.get(id);
+    check(!closed && item, 'D324_SESSION_HANDLE_REJECTED');
+    receipts.delete(id);
+    return item;
+  }
+  async function admit(item, input) {
+    const admissionId = await authority.admit(repo, input, item.core);
+    return Object.freeze({ admissionId, identityDigest: item.identityDigest, taskId: RUN1.taskId,
+      operatorSha: RUN1.businessSha, planHash: RUN1.planHash });
+  }
   return Object.freeze({
     async prepare(headers) {
+      check(!closed, 'D324_SESSION_CONTROL_CLOSED');
       const core = await prepareD324Sessions(repo, auth, headers, authority.instanceId, challenge);
+      check(!closed, 'D324_SESSION_CONTROL_CLOSED');
+      check(new Set(core.sessions.map(session => session.authUserId)).size === 4, 'D324_SESSION_SET_REJECTED');
       const id = randomUUID(), identityDigest = sessionIdentityDigest(core.sessions);
       receipts.set(id, { core, identityDigest });
       return Object.freeze({ id, identityDigest, effectiveNotAfter: core.effectiveNotAfter, taskId: RUN1.taskId,
         operatorSha: RUN1.businessSha, planHash: RUN1.planHash, businessAuthority: false });
     },
     async admit(id, input) {
-      const item = receipts.get(id);
-      check(item, 'D324_SESSION_HANDLE_REJECTED');
-      receipts.delete(id); // one attempt, including rejected/uncertain outcomes
-      const admissionId = await authority.admit(repo, input, item.core);
-      return Object.freeze({ admissionId, identityDigest: item.identityDigest, taskId: RUN1.taskId,
-        operatorSha: RUN1.businessSha, planHash: RUN1.planHash });
+      return admit(take(id), input);
     },
+    async admitRevalidated(id, headers, input) {
+      const item = take(id); // consume before any await, even on failure
+      const fresh = await prepareD324Sessions(repo, auth, headers, authority.instanceId, challenge);
+      check(!closed && Date.now() < item.core.effectiveNotAfter &&
+        fresh.effectiveNotAfter >= item.core.effectiveNotAfter &&
+        sessionIdentityDigest(fresh.sessions) === item.identityDigest, 'D324_SESSION_REVALIDATION_REJECTED');
+      check(Number.isSafeInteger(input?.execution?.executionNotAfter) &&
+        input.execution.executionNotAfter <= item.core.effectiveNotAfter, 'D324_SESSION_WINDOW_REJECTED');
+      // Use the original bound receipt. The authority rechecks the current
+      // SQL sessions and signed execution deadline under locks before insert.
+      return admit(item, input);
+    },
+    discard(id) { receipts.delete(id); },
     async checkAdmission(ack) {
       check(ack?.taskId === RUN1.taskId && ack.operatorSha === RUN1.businessSha && ack.planHash === RUN1.planHash,
         'D324_ADMISSION_IDENTITY_REJECTED');
@@ -51,6 +74,11 @@ export function createD324SessionControl({ repo, auth, authority, challenge }) {
         check(rows.length === 1 && sessionIdentityDigest(rows[0].sessions) === ack.identityDigest, 'D324_ADMISSION_IDENTITY_REJECTED');
       });
     },
-    close() { receipts.clear(); },
+    close() { closed = true; receipts.clear(); },
   });
+}
+
+export function createD324BridgeSessionControl(dependencies) {
+  const { prepare, admitRevalidated, checkAdmission, discard, close } = createD324SessionControl(dependencies);
+  return Object.freeze({ prepare, admitRevalidated, checkAdmission, discard, close });
 }

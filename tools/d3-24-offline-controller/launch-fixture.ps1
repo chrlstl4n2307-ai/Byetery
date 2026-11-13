@@ -1,6 +1,10 @@
 $ErrorActionPreference = 'Stop'
 $node = $args[0]
 $operatorArguments = @($args | Select-Object -Skip 1)
+$bridgeReview = $operatorArguments[0] -ceq '--bridge-review'
+if ($bridgeReview -and ($env:NODE_OPTIONS -or $env:NODE_PATH)) {
+    throw 'D324_BRIDGE_LAUNCHER_REJECTED'
+}
 $published = Join-Path $PSScriptRoot '../d3-24-operational/launch.ps1'
 $shell = (Get-Process -Id $PID).Path
 if ($env:OFFLINE_CAPABILITY -cnotmatch '^[a-f0-9]{64}$' -or
@@ -15,6 +19,11 @@ if ((Get-FileHash -LiteralPath $published).Hash -ine '3f46f03080e6ff290c7fda58e3
 $result = & $shell -NoProfile -NonInteractive -File $published
 if ($LASTEXITCODE -ne 1 -or $result -cne 'D324_OPERATIONAL_RATIFICATION_REQUIRED') {
     throw 'PUBLISHED_LAUNCHER_NOT_CLOSED'
+}
+if ($bridgeReview) {
+    $expectedHead = '5dfe151fdfcfbc4afd747410eb097515d4ac9a9c'
+    $head = & git --no-replace-objects -C $PSScriptRoot rev-parse HEAD
+    if ($LASTEXITCODE -ne 0 -or $head -cne $expectedHead) { throw 'D324_BRIDGE_LAUNCHER_REJECTED' }
 }
 & $node --experimental-strip-types (Join-Path $PSScriptRoot 'client-fixture.mjs') @operatorArguments
 exit $LASTEXITCODE

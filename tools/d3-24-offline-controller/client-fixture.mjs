@@ -3,7 +3,8 @@ import { readFile, writeFile, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join, resolve } from 'node:path';
 import { prepareOfflineController } from './controller.mjs';
-import { createOfflineLocalControl } from './local-control.mjs';
+import { prepareD324Bridge } from '../d3-24-operational/prelive-bridge.mjs';
+import { createOfflineLocalControl, verifyBridgeLauncher } from './local-control.mjs';
 import { loadD324Operator } from '../d3-24-operational/operator-binding.mjs';
 import { D324_ARGV } from '../d3-24-operational/policy.mjs';
 import { runD324Entry } from '../d3-24-operational/live.mjs';
@@ -20,7 +21,10 @@ const scenario = process.env.OFFLINE_SCENARIO;
 const directory = process.env.OFFLINE_CASE_DIR;
 assert.match(origin ?? '', /^http:\/\/127\.0\.0\.1:\d+$/);
 assert.equal(resolve(directory, '..'), resolve(root, '.test-output'));
+const bridge = process.argv[2] === '--bridge-review';
+if (bridge) process.argv.splice(2, 1);
 assert.deepEqual(process.argv.slice(2), D324_ARGV);
+if (bridge) await verifyBridgeLauncher(root, process.env.OFFLINE_PWSH);
 assert.equal(await runD324Entry(D324_ARGV), 'D324_OPERATIONAL_RATIFICATION_REQUIRED');
 const capability = process.env.OFFLINE_CAPABILITY;
 assert.match(capability ?? '', /^[a-f0-9]{64}$/);
@@ -58,7 +62,7 @@ const journal = join(operatorRoot, '.git', 'byetery-d3-operator', RUN1.taskId + 
 const lock = join(operatorRoot, '.git', 'byetery-d3-operator', 'operator.lock');
 const planFile = join(root, 'tools/d3-24-composition/plans/security-repair-v2.json');
 const plan = readD324Plan();
-const localControl = await createOfflineLocalControl({ root, directory, pwshPath: process.env.OFFLINE_PWSH });
+const localControl = await createOfflineLocalControl({ root, directory, pwshPath: process.env.OFFLINE_PWSH, bridge });
 const preflight = () => ({
   taskId: RUN1.taskId, runId: RUN1.runId, observedAt: Date.now(),
   git: { sha: operator.sha, clean: true }, networkId: SPEC.networkId, contractId: SPEC.contract,
@@ -91,6 +95,11 @@ const sessionOptions = {
   control: {
     prepare: async value => { headers = value; return post('/prepare', { headers }); },
     admit: async (id, input) => { usedHandle = id; return post('/admit', { id, ...input }); },
+    ...(bridge ? { admitRevalidated: async (id, current, input) => {
+      usedHandle = id;
+      return post('/admit', { id, headers: current, ...input });
+    },
+    discard: id => post('/discard', { id }) } : {}),
     checkAdmission: ack => post('/admission-check', { ack }),
   },
 };
@@ -147,6 +156,10 @@ const expectedNegative = {
   unauthorized: 'D324AuthorityMalformed', 'busy-quiescence': 'SQL_QUIESCENCE_REJECTED',
   'revoke-before-sign': 'OperatorStoppedRequiresReview', 'uncertain-retry': 'OperatorStoppedRequiresReview',
   'k5-tamper': 'D324_K5_REJECTED', 'session-control-tamper': 'SESSION_PINS_REJECTED',
+  'missing-grant': 'D324AuthorityMalformed', 'auth-revoked-at-admission': 'InvalidSession',
+  'shorter-sql-session': 'D324_SESSION_REVALIDATION_REJECTED', 'partial-login': 'OperatorSessionPreparationStopped',
+  'execution-exceeds-prepared': 'D324_SESSION_WINDOW_REJECTED', 'legacy-admission': 'D324SessionScopeRejected',
+  'nonfixture-input': 'D324_BRIDGE_FIXTURE_REQUIRED',
 };
 
 async function assertLockReleased() {
@@ -171,24 +184,50 @@ if (scenario === 'outside-battery' || scenario === 'reserved-battery-wrong-task'
 } else {
   let failure;
   try {
-    active = await prepareOfflineController({ classification: 'OFFLINE_SYNTHETIC', sessionOptions, localControl, port });
+    const options = { classification: 'OFFLINE_SYNTHETIC', sessionOptions, localControl, port };
+    active = await (bridge ? prepareD324Bridge(options) : prepareOfflineController(options));
     const prepared = await state();
     assert.equal(prepared.logins, 4);
     assert.equal(prepared.operations + prepared.admissions, 0);
     assert.equal(active.summary.businessAuthority, false);
+    if (bridge) {
+      assert.equal(active.summary.operatorSha, RUN1.businessSha);
+      assert.equal(active.summary.planHash, RUN1.planHash);
+      assert.equal(active.summary.maximumExecutionMs, 4_500_000);
+      assert.equal(active.summary.sessionMarginMs, 120_000);
+      assert.equal(active.summary.effectiveNotAfter, prepared.expectedEffectiveNotAfter);
+      assert.equal(prepared.authReads, 8);
+      assert.doesNotMatch(JSON.stringify(active.summary), /Bearer|eyJ|password|email|authUserId|sessionId/);
+    }
     await assert.rejects(verifyD324CaptureProfile(root, { taskId: RUN1.taskId }), /D324_CAPTURE_IDENTITY_REJECTED/);
     if (scenario === 'k5-tamper') await writeFile(localControl.k5Path, 'tampered');
     if (scenario === 'session-control-tamper') await writeFile(localControl.sessionPath, '{}');
-    const result = await active.execute({ fixtureOnly: true });
-    assert.equal(result.confirmed.length, RUN_CAP);
+    if (scenario === 'legacy-admission') {
+      await sessionOptions.control.admit(prepared.lastPreparation, {});
+      assert.fail('Bridge accepted a legacy admission request');
+    } else if (scenario === 'prepared-close') {
+      await Promise.all([active.close(), active.close()]);
+      await assert.rejects(active.execute({ fixtureOnly: true }), /OFFLINE_CONTROLLER_CONSUMED/);
+      await assert.rejects(sessionOptions.control.admit(prepared.lastPreparation, {}), /HANDLE/);
+    } else {
+      const result = await active.execute(scenario === 'nonfixture-input' ? { grant: {} } : { fixtureOnly: true });
+      assert.equal(result.confirmed.length, RUN_CAP);
+    }
   } catch (error) {
     failure = error;
   } finally {
     await active?.close();
   }
   await assertLockReleased();
-  if (expectedNegative[scenario]) {
-    assert.equal(failure?.message, expectedNegative[scenario]);
+  if (scenario === 'prepared-close') {
+    if (failure) throw failure;
+    const counts = await state();
+    assert.equal(counts.admissions + counts.operations + counts.sends, 0);
+    assert.equal(counts.logouts, 4);
+    console.log(JSON.stringify({ scenario, result: 'PASS', admissions: 0, logouts: 4, sends: 0 }));
+  } else if (expectedNegative[scenario]) {
+    const actual = failure?.message ?? 'NO_REJECTION';
+    assert.equal(actual, expectedNegative[scenario], 'Unexpected bridge rejection: '+actual);
     const counts = await state();
     const started = ['revoke-before-sign', 'uncertain-retry'].includes(scenario) ? 1 : 0;
     assert.equal(counts.admissions, started);
@@ -198,6 +237,8 @@ if (scenario === 'outside-battery' || scenario === 'reserved-battery-wrong-task'
     const sent = scenario === 'uncertain-retry' ? 1 : 0;
     assert.equal(counts.sends, sent);
     assert.equal(counts.signatures, sent);
+    if (scenario === 'partial-login') assert.equal(counts.logouts, 3);
+    if (scenario === 'auth-revoked-at-admission' || scenario === 'shorter-sql-session') assert.equal(counts.authReads, 12);
     if (scenario === 'uncertain-retry') {
       await assert.rejects(active.execute({ fixtureOnly: true }), /OFFLINE_CONTROLLER_CONSUMED/);
       process.exit(73);
@@ -215,6 +256,7 @@ if (scenario === 'outside-battery' || scenario === 'reserved-battery-wrong-task'
     assert.equal(counts.logouts, 4);
     assert.equal(counts.leases, 0);
     assert.equal(counts.quiescenceReads, RUN_CAP + 1);
+    if (bridge) assert.equal(counts.admissionAuthReads, 4);
     assert.equal(projectD324Journal(await readFile(journal)).length, RUN_CAP);
     const exportPath = join(directory, 'OFFLINE-export.json');
     await writeFile(exportPath, JSON.stringify({

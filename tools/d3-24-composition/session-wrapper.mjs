@@ -14,30 +14,47 @@ export async function prepareCompositionSessions({ root, operatorRoot, apiOrigin
   credentials, fetcher, control }) {
   const pin = await resolveD324Operator(root, operatorRoot);
   const { prepareLocalRoleSessions } = await import(pathToFileURL(pin.path).href);
-  let receipt;
-  const prepared = await prepareLocalRoleSessions({ apiOrigin, publishableKey, credentials, fetcher,
-    verify: async sessions => {
-      const headers = {}, claims = [];
-      for (const [role, session] of sessions) {
-        const bearer = session.bearer();
-        const c = JSON.parse(Buffer.from(bearer.split('.')[1], 'base64url').toString());
-        headers[role] = 'Bearer ' + bearer;
-        claims.push({ role, authUserId: c.sub, sessionId: c.session_id, tokenExpiresAt: c.exp * 1000 });
-      }
-      // Decoding is a consistency check only. The independent server Auth
-      // validator must validate each exact bearer before returning this digest.
-      receipt = await control.prepare(headers);
-      check(receipt?.businessAuthority === false && receipt.taskId === RUN1.taskId && receipt.operatorSha === RUN1.businessSha &&
-        receipt.planHash === RUN1.planHash && receipt.identityDigest === sessionIdentityDigest(claims) &&
-        Number.isSafeInteger(receipt.effectiveNotAfter) && receipt.effectiveNotAfter > Date.now(), 'D324_SESSION_BINDING_REJECTED');
-    } });
+  let receipt, readHeaders, prepared;
+  function describe(sessions) {
+    const headers = {}, claims = [];
+    for (const [role, session] of sessions) {
+      const bearer = session.bearer();
+      const c = JSON.parse(Buffer.from(bearer.split('.')[1], 'base64url').toString());
+      headers[role] = 'Bearer ' + bearer;
+      claims.push({ role, authUserId: c.sub, sessionId: c.session_id, tokenExpiresAt: c.exp * 1000 });
+    }
+    return { headers, claims };
+  }
+  try {
+    prepared = await prepareLocalRoleSessions({ apiOrigin, publishableKey, credentials, fetcher,
+      verify: async sessions => {
+        const { headers, claims } = describe(sessions);
+        // Decoding is a consistency check. The server validates each exact bearer.
+        receipt = await control.prepare(headers);
+        check(receipt?.businessAuthority === false && receipt.taskId === RUN1.taskId && receipt.operatorSha === RUN1.businessSha &&
+          receipt.planHash === RUN1.planHash && receipt.identityDigest === sessionIdentityDigest(claims) &&
+          Number.isSafeInteger(receipt.effectiveNotAfter) && receipt.effectiveNotAfter > Date.now(), 'D324_SESSION_BINDING_REJECTED');
+        if (control.admitRevalidated) {
+          check(new Set(claims.map(claim => claim.authUserId)).size === 4 &&
+            receipt.effectiveNotAfter <= Math.min(...claims.map(claim => claim.tokenExpiresAt)) - 120_000,
+          'D324_SESSION_BINDING_REJECTED');
+          readHeaders = () => describe(sessions).headers;
+        }
+      } });
+  } catch (error) {
+    if (receipt?.id) await control.discard?.(receipt.id);
+    throw error;
+  }
   let attempted = false, acknowledgement, closed = false;
+  let closePromise;
   return Object.freeze({
     summary: Object.freeze({ ...receipt, businessAuthority: false }),
     async admit(signedInput) {
       check(!attempted && !closed && Date.now() < receipt.effectiveNotAfter, 'D324_SESSION_ADMISSION_CONSUMED');
       attempted = true;
-      const ack = await control.admit(receipt.id, signedInput);
+      const ack = readHeaders
+        ? await control.admitRevalidated(receipt.id, readHeaders(), signedInput)
+        : await control.admit(receipt.id, signedInput);
       check(ack?.identityDigest === receipt.identityDigest && ack.taskId === RUN1.taskId &&
         ack.operatorSha === RUN1.businessSha && ack.planHash === RUN1.planHash, 'D324_SESSION_BINDING_REJECTED');
       await control.checkAdmission(ack);
@@ -58,6 +75,13 @@ export async function prepareCompositionSessions({ root, operatorRoot, apiOrigin
         },
       }) });
     },
-    async close() { if (!closed) { closed = true; await prepared.close(); } },
+    close() {
+      closed = true;
+      readHeaders = undefined;
+      return closePromise ??= (async () => {
+        try { await control.discard?.(receipt.id); }
+        finally { await prepared.close(); }
+      })();
+    },
   });
 }
