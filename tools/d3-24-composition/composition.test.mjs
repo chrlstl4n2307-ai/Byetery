@@ -15,14 +15,25 @@ import { liveEntry, runD324Entry } from '../d3-24-operational/live.mjs';
 import { D324_ARGV } from '../d3-24-operational/policy.mjs';
 import { BOOTSTRAP_BINARIES } from '../d3-24-operational/bootstrap-pins.mjs';
 import { D324_CAPTURE_PROFILE_SHA256 } from '../d3-24-capture-profile/profile.mjs';
+import { MATERIALIZED_D324_PROFILE, reviewMaterializedComposition,
+  inspectPinnedMaterializedV3Fields, verifyPinnedMaterializedV3Capture } from './postcommit-review.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
+// Test checkout locations, not configurable identity pins or production gates.
+// Draft = parent21f plus the exact 23 committed blobs, without a new commit.
+const draftRoot = process.env.D324_TEST_DRAFT_ROOT ?? fileURLToPath(new URL('../../../B24verifiers-draft', import.meta.url));
+const materializedRoot = process.env.D324_TEST_MATERIALIZED_ROOT ?? fileURLToPath(new URL('../../../B24composition-21f5', import.meta.url));
 const oldPlan = 'tools/d3-24-ratification/plan.json';
 test('candidate joins exact sibling capture and server bytes without inventing a future commit', async () => {
-  const r = await reviewCompositionCandidate(root);
+  const r = await reviewCompositionCandidate(draftRoot);
   assert.equal(r.base, COMPONENTS.server); assert.equal(r.futureCommit, null); assert.equal(r.futureTree, null);
   assert.equal(r.operator.sha, COMPONENTS.operator); assert.equal(r.liveAuthority, false);
   assert.equal(r.planHash, RUN1.planHash); assert.equal(r.remainingExternal, 14);
+  await assert.rejects(reviewCompositionCandidate(materializedRoot), /D324_CANDIDATE_BASE_REJECTED/);
+  const committed = await reviewMaterializedComposition(materializedRoot);
+  assert.equal(committed.compositionSha, MATERIALIZED_D324_PROFILE.sha);
+  assert.equal(committed.tree, MATERIALIZED_D324_PROFILE.tree);
+  assert.equal(committed.externalManifestApproved, false); assert.equal(committed.liveAuthority, false);
 });
 test('new canonical plan binds the new independent operator; historical plan stays intact', () => {
   assert.equal(readD324Plan().input.gitSha, COMPONENTS.operator);
@@ -51,7 +62,18 @@ function v3() { return { schema: 'BYETERY_D324_FINAL_ACTIVATION_V3', identity: R
 test('V3 field inspection is explicitly review-only and cannot materialize or approve a manifest', async () => {
   const r = inspectV3ManifestFields(bytes(v3())); assert.equal(r.reviewOnly, true); assert.equal(r.liveAuthority, false);
   assert.equal(COMPOSITION_COMMIT, null);
-  await assert.rejects(verifyMaterializedV3Capture(root, { manifestBytes: bytes(v3()) }), /D324_COMPOSITION_NOT_MATERIALIZED/);
+  // Preserve the original dirty-checkout rejection rather than widening its regex.
+  await assert.rejects(verifyMaterializedV3Capture(draftRoot, { manifestBytes: bytes(v3()) }), /D324_COMPOSITION_NOT_MATERIALIZED/);
+  // A clean target reaches the next gate: the old test input lacks mandatory fields.
+  await assert.rejects(verifyMaterializedV3Capture(materializedRoot, { manifestBytes: bytes(v3()) }), /D324_CAPTURE_IDENTITY_REJECTED/);
+  const pin = MATERIALIZED_D324_PROFILE;
+  const manifest = { ...v3(), target: { sha: pin.sha, parent: pin.parent, tree: pin.tree } };
+  const inspected = inspectPinnedMaterializedV3Fields(bytes(manifest));
+  assert.equal(inspected.externalManifestApproved, false); assert.equal(inspected.liveAuthority, false);
+  await assert.rejects(verifyPinnedMaterializedV3Capture(materializedRoot, { manifestBytes: bytes(manifest) }), /D324_MATERIALIZED_INPUT_REJECTED/);
+  await assert.rejects(verifyPinnedMaterializedV3Capture(materializedRoot, {
+    taskId: RUN1.taskId, manifestBytes: bytes(manifest), manifestApproval: 'A'.repeat(86),
+  }), /OWNER_GRANT_SIGNATURE_REJECTED/);
 });
 for (const [name, mutate] of [
   ['V2 downgrade', m => { m.schema = 'BYETERY_D324_FINAL_ACTIVATION_V2'; }],
