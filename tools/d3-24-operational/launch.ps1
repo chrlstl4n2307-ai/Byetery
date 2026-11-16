@@ -12,7 +12,7 @@ try {
     (Get-FileHash -LiteralPath $nodePath).Hash -ine 'b3094d0b49f9ad602262a9921551737bb97637c05dd357a06ae98188d7290aa3'){throw 'PIN'}
  if($V3Review -or $V3VerifyPackage){
   $bootstrap=Join-Path $PSScriptRoot 'entry-bootstrap.mjs'
-  if((Get-FileHash -LiteralPath $bootstrap).Hash -ine '453e1b5e88494609fce42895ab4943250ab349aee100ac78459255d172f00b56'){throw 'PIN'}
+  if((Get-FileHash -LiteralPath $bootstrap).Hash -ine '2128101bfdc6cbb052d08bf3f96692d8977443ef8a782bde08b65f51909d27cb'){throw 'PIN'}
   $mode=if($V3Review){'--v3-review'}else{'--v3-verify-package'}
   & $nodePath $bootstrap $mode
   exit $LASTEXITCODE

@@ -5,9 +5,9 @@ import { isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = realpathSync(fileURLToPath(new URL('../../', import.meta.url)));
-const reviewSha = '3ee1e4e5b5d047ccac6782459aa405a37ead983b';
-const reviewParent = '2ae596c578deff3a0eb2a3a9ac3dd8e9c9a74732';
-const reviewTree = '0b0119d2adb42aa767490908751c7bb236dd2e93';
+const reviewSha = 'f1b4309b1d14260a8302d828dab5dd2fcdf0aa8b';
+const reviewParent = '3ee1e4e5b5d047ccac6782459aa405a37ead983b';
+const reviewTree = 'bc72c4be281a034c20574a99242a22c99fde868e';
 const rejected = 'D324_OPERATIONAL_RATIFICATION_REQUIRED';
 const demand = ok => { if (!ok) throw Error('D324_BOOTSTRAP_REJECTED'); };
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -78,11 +78,18 @@ async function reviewOwnerPackage() {
   demand(manifest.schema === 'BYETERY_D324_FINAL_ACTIVATION_V3');
   observeV3Checkout(root, manifest.target);
   // Bind the imported entry modules to the approved Git objects as well as HEAD.
-  for (const name of ['entry-bootstrap.mjs', 'owner-authorization.mjs', 'final-runtime.mjs', 'private-session-channel.mjs', 'prelive-bridge.mjs']) {
-    const path = 'tools/d3-24-operational/' + name;
+  const modules = [
+    ...['entry-bootstrap.mjs', 'owner-authorization.mjs', 'final-runtime.mjs', 'private-session-channel.mjs', 'prelive-bridge.mjs',
+      'server-worker.mjs', 'h2-review.mjs'].map(name => 'tools/d3-24-operational/' + name),
+    'tools/d3-24-composition/manifest-v3.mjs',
+    'tools/d3-24-composition/integration-bindings.mjs',
+    'tools/d3-24-capture-profile/profile.mjs',
+  ];
+  for (const path of modules) {
     const blob = execFileSync('git', ['--no-replace-objects','show',manifest.target.sha + ':' + path],
       {cwd:root,stdio:['ignore','pipe','pipe'],timeout:10000,windowsHide:true});
-    demand(controlFile(join(root,'tools','d3-24-operational'),name,65536).equals(blob));
+    const slash = path.lastIndexOf('/');
+    demand(controlFile(join(root,path.slice(0, slash)),path.slice(slash + 1),65536).equals(blob));
   }
   const { verifyV3OwnerPackage } = await import('./owner-authorization.mjs');
   await verifyV3OwnerPackage(directory, root);
@@ -100,7 +107,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     demand(args === '--v3-review');
     verifyPowerShellParent('-V3Review');
     observeV3Checkout(root, {sha:reviewSha,parent:reviewParent,tree:reviewTree}, {review:true});
-    // Authorization stays external. This review command opens no server port.
+    // This reports the published base identity, even in a candidate worktree.
+    // The prospective tree is reviewed separately and opens no server port.
     const bootstrap = fileURLToPath(import.meta.url);
     demand(lstatSync(bootstrap).isFile() && realpathSync(bootstrap) === bootstrap);
     process.stdout.write('D324_V3_BOOTSTRAP_REVIEW_PASS\n');

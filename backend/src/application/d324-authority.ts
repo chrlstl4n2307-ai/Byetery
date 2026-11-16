@@ -118,6 +118,7 @@ export class D324Authority {
     this.#now=now;
   }
   get instanceId(){return this.#pins.instanceId;}
+  get challenge(){return this.#pins.challenge;}
 
   async admit(repo:Repository,input:AdmissionInput,prepared:PreparedD324Sessions):Promise<string> {
     const verifiedSessions=consumePreparedD324Sessions(prepared,this.instanceId,this.#pins.challenge,this.#now);

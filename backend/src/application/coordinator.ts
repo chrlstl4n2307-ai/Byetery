@@ -18,12 +18,21 @@ const commandForAction={register:'register_battery',return:'open_return',cancel:
 export interface Faults { hold?: (command: Command) => boolean; omitSigner?: (signer: string, command: Command) => boolean }
 export interface OperationProcessor { supervisor?:ExecutionSupervisor;process(id:string):Promise<Reply> }
 const hash=(v: string|Buffer)=>createHash('sha256').update(v).digest();
+const d324ProcessorScope=(instanceParam:number)=>`(a.instance_id=decode($${instanceParam},'hex')
+  or s.dispatch_xid is not null or exists(select 1 from api_private.testnet_envelopes e
+    where e.deployment_id=s.deployment_id and e.operation_id=s.operation_id))`;
 export class Coordinator {
   readonly repo: Repository; readonly wallets: WalletService; readonly faults: Faults;
   readonly processor?:OperationProcessor;readonly supervisor:ExecutionSupervisor;
   readonly d324?:D324Authority;
+  private readonly d324Only:boolean;
   constructor(repo: Repository, faults: Faults = {}, wallets = new WalletService(repo),processor?:OperationProcessor,
-    d324?:D324Authority) {this.repo=repo;this.faults=faults;this.wallets=wallets;this.processor=processor;this.d324=d324;this.supervisor=processor?.supervisor??new ExecutionSupervisor();}
+    d324?:D324Authority, d324Only=false) {
+    requireThat(!d324Only || (repo.mode==='TESTNET' && repo.deploymentId===D324.deploymentId && d324 && processor),
+      503,'D324RuntimeScopeRejected');
+    this.repo=repo;this.faults=faults;this.wallets=wallets;this.processor=processor;this.d324=d324;this.d324Only=d324Only;
+    this.supervisor=processor?.supervisor??new ExecutionSupervisor();
+  }
   async get(identity: Identity, batteryId: string): Promise<Reply> {
     return this.repo.transaction(async db=>{const user=await this.repo.principal(db,identity);await this.repo.role(db,user,'USER');return {status:200,body:await this.repo.view(db,bid(batteryId))};});
   }
@@ -64,6 +73,7 @@ export class Coordinator {
           return {id:claim.operationId,reply:null,protected:true};
         }
       }
+      requireThat(!this.d324Only,403,'D324RuntimeScopeRejected');
       const user=await this.repo.principal(db,identity);
       // Preserve GAP1 USER/reward checks before cache lookup; privileged queue
       // failures retain their existing application Reply/idempotency semantics.
@@ -232,6 +242,14 @@ export class Coordinator {
     return this.finish(db,id,command,commandFailure(code));
   }
   async process(id: string): Promise<Reply> {
+    if(this.d324Only) await this.repo.transaction(async db=>{
+      requireThat(await one(db,`select 1 from api_private.d324_step s
+        join api_private.d324_admission a on a.id=s.admission_id
+        where s.deployment_id=$1 and s.battery_id=$2 and s.operation_id=$3
+          and ${d324ProcessorScope(4)}`,
+      [this.repo.deploymentId,D324.batteryId,id,this.d324!.instanceId]),
+      403,'D324RuntimeScopeRejected');
+    });
     if(this.processor)return this.supervisor.run(id,()=>this.processor!.process(id));
     requireThat(this.repo.mode==='MOCK',503,'TestnetProcessorRequired');
     const submitted=await this.repo.transaction(async db=>{
@@ -290,8 +308,19 @@ export class Coordinator {
     });
   }
   async reconcile(trigger: 'manual' | 'periodic' = 'manual'): Promise<void> {
-    const scan=async (db:Db)=>(await db.query<{id:string}>(`select id from app_private.stellar_operations where deployment_id=$1
-      and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN') order by created_at`,[this.repo.deploymentId])).rows.map(r=>r.id);
+    const scan=async (db:Db)=>{
+      const result=this.d324Only
+        ? await db.query<{id:string}>(`select o.id from app_private.stellar_operations o where o.deployment_id=$1
+          and o.state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN')
+          and o.battery_id=$2 and exists(select 1 from api_private.d324_step s
+            join api_private.d324_admission a on a.id=s.admission_id
+            where s.deployment_id=o.deployment_id and s.battery_id=o.battery_id and s.operation_id=o.id
+              and ${d324ProcessorScope(3)})
+          order by o.created_at`,[this.repo.deploymentId,D324.batteryId,this.d324!.instanceId])
+        : await db.query<{id:string}>(`select id from app_private.stellar_operations where deployment_id=$1
+          and state in ('QUEUED','AWAITING_AUTH','READY','SUBMITTED','UNKNOWN') order by created_at`,[this.repo.deploymentId]);
+      return result.rows.map(row=>row.id);
+    };
     const ids=trigger==='periodic'?await this.repo.tryPeriodicReconcileScan(scan):await this.repo.transaction(scan);
     if(ids===undefined)return;
     for(const id of ids){if(!this.supervisor.accepting)break;await this.process(id);}

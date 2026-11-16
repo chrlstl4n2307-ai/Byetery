@@ -17,6 +17,13 @@ const asciiSignature = /^[A-Za-z0-9_-]{86}\n$/;
 const utf8 = raw => new TextDecoder('utf-8', { fatal: true }).decode(raw);
 const signedByOwner = (message, signature) => verifyDetachedEd25519(message, signature,
   OWNER_GRANT_PUBLIC_KEY, OWNER_GRANT_PUBLIC_KEY_FINGERPRINT);
+const reviewedPackages = new WeakMap();
+
+export function readReviewedV3Package(receipt, root) {
+  const value = reviewedPackages.get(receipt);
+  check(value && value.root === root, 'D324_VERIFIED_PACKAGE_REQUIRED');
+  return value;
+}
 
 export function verifyManifestApproval(raw, detached) {
   const signature = utf8(detached);
@@ -98,15 +105,15 @@ export function verifyV3ExecutionDocuments(input, manifest, now = Date.now()) {
   return Object.freeze({ reviewOnly: true, liveAuthority: false });
 }
 
-export async function verifyV3OwnerPackage(directory, root) {
+export async function verifyV3OwnerManifest(directory, root) {
   const readFile = (name, size) => read(join(directory, name), size);
   const raw = readFile('activation-manifest.json', 8192);
   const signature = utf8(readFile('manifest-approval.sig', 87));
   check(asciiSignature.test(signature), 'D324_MANIFEST_APPROVAL_REJECTED');
   const manifestSha = hash(raw);
   signedByOwner(Buffer.from('BYETERY-D324-MANIFEST-APPROVAL-V3\n' + manifestSha + '\n'), signature.slice(0, -1));
-  const { inspectV3BootstrapManifest } = await import('../d3-24-composition/manifest-v3.mjs');
-  inspectV3BootstrapManifest(raw);
+  const { inspectV3IntegratedManifest } = await import('../d3-24-composition/manifest-v3.mjs');
+  const { runtimeBindings } = inspectV3IntegratedManifest(raw);
   const manifest = strictJson(utf8(raw));
   observeV3Checkout(root, manifest.target);
   const { verifyD324CaptureProfile } = await import('../d3-24-capture-profile/profile.mjs');
@@ -116,7 +123,27 @@ export async function verifyV3OwnerPackage(directory, root) {
   await verifyBoundSession({root,head:manifest.target.sha,path:join(directory,'session-control.json'),
     expectedHash:manifest.sessionControlSha256});
   verifyD324K5(readFile('K5-UNSIGNED-TEMPLATE.txt',8192),manifest.k5Sha256,manifest.target.sha);
+  const receipt = Object.freeze({ reviewOnly: true, liveAuthority: false });
+  reviewedPackages.set(receipt, Object.freeze({ root, target: Object.freeze({ ...manifest.target }),
+    operatorRoot: manifest.operatorRoot, manifestSha256: manifestSha,
+    ...runtimeBindings,
+    verifyExecution(input, proof) {
+      check(exactRecord(input, ['grant','grantSignature','execution','executionSignature','live','liveSignature']),
+        'D324_V3_EXECUTION_REJECTED');
+      verifyV3ExecutionDocuments(input, manifest);
+      check(typeof proof === 'string' && asciiSignature.test(proof + '\n'), 'D324_ADMISSION_PROOF_REQUIRED');
+      return { ...structuredClone(input), manifest: Buffer.from(raw),
+        manifestApproval: signature.slice(0, -1), admissionProof: proof };
+    },
+    verifyDocuments(input) { return verifyV3ExecutionDocuments(input, manifest); },
+  }));
+  return receipt;
+}
+
+export async function verifyV3OwnerPackage(directory, root) {
+  const manifest = readReviewedV3Package(await verifyV3OwnerManifest(directory, root), root);
+  const readFile = (name, size) => read(join(directory, name), size);
   const input = strictJson(utf8(readFile('execution-approval.json',8192)));
   check(exactRecord(input, ['grant','grantSignature','execution','executionSignature','live','liveSignature']), 'D324_V3_EXECUTION_REJECTED');
-  return verifyV3ExecutionDocuments(input,manifest);
+  return manifest.verifyDocuments(input);
 }

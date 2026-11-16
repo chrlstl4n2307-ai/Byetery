@@ -6,7 +6,9 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { bytes, hash, SPEC } from '../d3-evidence-capture/common.mjs';
-import { inspectV3BootstrapManifest, inspectV3ManifestFields, V3_BOOTSTRAP_BASE } from '../d3-24-composition/manifest-v3.mjs';
+import { inspectV3BootstrapManifest, inspectV3IntegratedManifest, inspectV3ManifestFields, V3_BOOTSTRAP_BASE } from '../d3-24-composition/manifest-v3.mjs';
+import { D324_H2_BUNDLE_SHA256, D324_INTEGRATION_BASE } from '../d3-24-composition/integration-bindings.mjs';
+import { SIGNER } from '../d3-24-composition/pins.mjs';
 import { D324_CAPTURE_PROFILE_SHA256 } from '../d3-24-capture-profile/profile.mjs';
 import { RUN1, OWNER_QUERY_SHA256, readD324Ledger } from '../d3-24-ratification/identity.mjs';
 import { operatorCandidate } from '../d3-24-ratification/operator-identity.mjs';
@@ -60,10 +62,35 @@ test('manifest V3 review schema binds explicit parent, operator, plan, budget, a
 });
 
 test('review compares the exact SHA, parent and tree and never accepts them as a materialized child',()=>{
-  const target={sha:V3_BOOTSTRAP_BASE,parent:'2ae596c578deff3a0eb2a3a9ac3dd8e9c9a74732',tree:'0b0119d2adb42aa767490908751c7bb236dd2e93'};
+  const target={sha:D324_INTEGRATION_BASE,parent:V3_BOOTSTRAP_BASE,tree:'bc72c4be281a034c20574a99242a22c99fde868e'};
   assert.deepEqual(observeV3Checkout(root,target,{review:true}),target);
   for(const key of Object.keys(target)) assert.throws(()=>observeV3Checkout(root,{...target,[key]:'a'.repeat(40)},{review:true}),/BOOTSTRAP_REJECTED/);
   assert.throws(()=>observeV3Checkout(root,target),/BOOTSTRAP_REJECTED/);
+});
+
+test('integrated manifest pins H2 and the signer together and preserves the historical parser',()=>{
+  const signer = {
+    path: 'C:\\synthetic-review\\byetery-secure-store-signer.exe',
+    sha256: SIGNER.binarySha256, bytes: SIGNER.bytes, architecture: 'WINDOWS_X64', protocol: 'V3',
+    custody: 'OPTION_A_REVIEW_ONLY', releaseOwnerSidSha256: hex, operatingSidSha256: 'b'.repeat(64),
+    fileDaclSha256: hex, rootDaclSha256: hex, binDaclSha256: hex,
+  };
+  const integrated = { ...manifest, target: { ...manifest.target, parent: D324_INTEGRATION_BASE },
+    runtimeBindings: { h2BundleSha256: D324_H2_BUNDLE_SHA256, signer } };
+  const reviewed = inspectV3IntegratedManifest(bytes(integrated));
+  assert.deepEqual(reviewed.runtimeBindings, integrated.runtimeBindings);
+  assert.equal(reviewed.liveAuthority, false);
+  assert.throws(()=>inspectV3BootstrapManifest(bytes(integrated)),/D324_V3_/);
+  assert.throws(()=>inspectV3IntegratedManifest(bytes(manifest)),/D324_V3_/);
+  for (const substituted of [
+    { ...integrated, runtimeBindings: null },
+    { ...integrated, target: manifest.target },
+    { ...integrated, runtimeBindings: { ...integrated.runtimeBindings, h2BundleSha256: hex } },
+    ...[
+      { sha256: hex }, { bytes: SIGNER.bytes - 1 }, { releaseOwnerSidSha256: signer.operatingSidSha256 },
+      { binDaclSha256: 'invalid' }, { custody: 'OPTION_A_APPROVED' }, { path: 'signer.exe' },
+    ].map(change => ({ ...integrated, runtimeBindings: { ...integrated.runtimeBindings, signer: { ...signer, ...change } } })),
+  ]) assert.throws(()=>inspectV3IntegratedManifest(bytes(substituted)),/D324_V3_/);
 });
 
 test('grant, execution and LIVE are independent and scope changes break verification',()=>{

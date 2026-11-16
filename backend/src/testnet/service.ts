@@ -115,13 +115,22 @@ export class PersistedContextGuard implements ContextGuard {
   }
 }
 
+/** Store and signing checks must use the same server-owned D3-24 identity. */
+export function createTestnetContext(repo:Repository,d324InstanceId?:string) {
+  return {
+    store:new TransportStore(new PgTransportDatabase(repo.pool),d324InstanceId),
+    guard:new PersistedContextGuard(repo,d324InstanceId),
+  };
+}
+
 /** Real implementation, selected explicitly. Its durable worker owns signing/dispatch. */
 export class TestnetStellarService implements StellarService,OperationProcessor {
   readonly repo:Repository;readonly store:TransportStore;readonly transport:TestnetTransport;readonly worker:DurableTransactionWorker;readonly supervisor:ExecutionSupervisor;
   constructor(repo:Repository,rpcClient:TestnetRpc,signer:PhasedStellarSigner,supervisor=new ExecutionSupervisor(),d324InstanceId?:string){
     ensure(repo.mode==='TESTNET','TestnetConfigurationRequired');this.repo=repo;this.supervisor=supervisor;
-    this.store=new TransportStore(new PgTransportDatabase(repo.pool),d324InstanceId);
-    this.transport=new TestnetTransport(rpcClient,signer,new PersistedContextGuard(repo,d324InstanceId),id=>this.store.work(id),repo.deploymentId,supervisor);
+    const {store,guard}=createTestnetContext(repo,d324InstanceId);
+    this.store=store;
+    this.transport=new TestnetTransport(rpcClient,signer,guard,id=>this.store.work(id),repo.deploymentId,supervisor);
     this.worker=new DurableTransactionWorker(this.store,this.transport,async(db,w)=>{
       const facts=w.confirmation?.facts??(w.stateEvidence?.outcome==='APPLIED'?JSON.parse(w.stateEvidence.evidence).facts:null);
       ensure(facts,'ProjectionFactsMissing');

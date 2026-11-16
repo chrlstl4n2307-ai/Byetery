@@ -1,5 +1,6 @@
 import { canonical } from '../d3-evidence-capture/common.mjs';
 import { RUN1 } from '../d3-24-ratification/identity.mjs';
+import { D324_SESSION_ROLES } from '../../backend/src/application/d324-sessions.ts';
 import { resolveD324Operator } from '../d3-24-operational/operator-binding.mjs';
 import { sessionIdentityDigest } from './session-control.mjs';
 import { pathToFileURL } from 'node:url';
@@ -14,7 +15,7 @@ export async function prepareCompositionSessions({ root, operatorRoot, apiOrigin
   credentials, fetcher, control }) {
   const pin = await resolveD324Operator(root, operatorRoot);
   const { prepareLocalRoleSessions } = await import(pathToFileURL(pin.path).href);
-  let receipt, readHeaders, prepared;
+  let receipt, readHeaders, claimsForExecution, prepared;
   function describe(sessions) {
     const headers = {}, claims = [];
     for (const [role, session] of sessions) {
@@ -39,6 +40,8 @@ export async function prepareCompositionSessions({ root, operatorRoot, apiOrigin
             receipt.effectiveNotAfter <= Math.min(...claims.map(claim => claim.tokenExpiresAt)) - 120_000,
           'D324_SESSION_BINDING_REJECTED');
           readHeaders = () => describe(sessions).headers;
+          claimsForExecution = Object.freeze(D324_SESSION_ROLES.map(role =>
+            Object.freeze(claims.find(claim => claim.role === role))));
         }
       } });
   } catch (error) {
@@ -49,6 +52,11 @@ export async function prepareCompositionSessions({ root, operatorRoot, apiOrigin
   let closePromise;
   return Object.freeze({
     summary: Object.freeze({ ...receipt, businessAuthority: false }),
+    executionBinding() {
+      check(!attempted && !closed && claimsForExecution && Date.now() < receipt.effectiveNotAfter,
+        'D324_SESSION_ADMISSION_CONSUMED');
+      return claimsForExecution;
+    },
     async admit(signedInput) {
       check(!attempted && !closed && Date.now() < receipt.effectiveNotAfter, 'D324_SESSION_ADMISSION_CONSUMED');
       attempted = true;
@@ -78,6 +86,7 @@ export async function prepareCompositionSessions({ root, operatorRoot, apiOrigin
     close() {
       closed = true;
       readHeaders = undefined;
+      claimsForExecution = undefined;
       return closePromise ??= (async () => {
         try { await control.discard?.(receipt.id); }
         finally { await prepared.close(); }

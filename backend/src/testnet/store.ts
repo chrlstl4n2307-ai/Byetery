@@ -84,6 +84,13 @@ export class TransportStore {
       ensure(r, 'SourceAccountBusy');
       const current=await this.workIn(db,id);
       ensure(current.state!=='ABORTED_PRE_DISPATCH','TransportResolved');
+      // A provisional claim for unsigned D3 work must roll back on denial.
+      // Recovery of a durable original identity remains observation-only.
+      if(current.dispatchAttempts===0&&['CLAIMED','PREPARING'].includes(current.state)
+        &&'batteryId' in current.command&&d324Scope(current.deploymentId,current.command.batteryId)){
+        await assertPersistedAuthority(db,current,true);
+        await assertD324Work(db,current,this.d324InstanceId);
+      }
       return {networkId:w.networkId,sourceAccount:w.sourceAccount,operationId:id,worker,generation:String(r.generation)};
     });
   }

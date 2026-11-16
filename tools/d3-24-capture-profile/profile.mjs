@@ -6,6 +6,7 @@ import { promisify } from 'node:util';
 import { canonical, SPEC } from '../d3-evidence-capture/common.mjs';
 import { verifyDetachedEd25519 } from '../d3-24-activation/ed25519.mjs';
 import { OWNER_GRANT_PUBLIC_KEY, OWNER_GRANT_PUBLIC_KEY_FINGERPRINT } from '../d3-run1-launcher/owner-grant-key.mjs';
+import { D324_H2_BUNDLE_PATH, D324_INTEGRATION_BASE, inspectD324IntegrationBindings } from '../d3-24-composition/integration-bindings.mjs';
 
 const exec = promisify(execFile);
 const hex40 = /^[a-f0-9]{40}$/;
@@ -94,6 +95,10 @@ async function checkSnapshot(root, binding) {
   for (const [name, path] of Object.entries(artifacts)) {
     await exactFile(root, path, await gitText(root, 'rev-parse', target.sha + ':' + path), binding.artifacts[name]);
   }
+  if (binding.runtimeBindings) {
+    await exactFile(root, D324_H2_BUNDLE_PATH,
+      await gitText(root, 'rev-parse', target.sha + ':' + D324_H2_BUNDLE_PATH), binding.runtimeBindings.h2BundleSha256);
+  }
   await exactFile(root, ledgerPath, await gitText(root, 'rev-parse', target.sha + ':' + ledgerPath), ledgerSha256);
   requireThat(await gitText(root, 'rev-parse', 'HEAD') === target.sha &&
     !await gitText(root, 'status', '--porcelain=v1', '--untracked-files=all'), 'D324_CAPTURE_CHECKOUT_CHANGED');
@@ -137,8 +142,12 @@ export async function verifyD324CaptureProfile(rootInput, input) {
     manifest.ledgerSha256 === ledgerSha256 &&
     exact(manifest.binaries, ['nodeSha256', 'pwshSha256']) && Object.values(manifest.binaries).every(v => typeof v === 'string' && hex64.test(v)) &&
     typeof manifest.operatorRoot === 'string' && isAbsolute(manifest.operatorRoot), 'D324_CAPTURE_MANIFEST_REJECTED');
+  const integrated = manifest.target.parent === D324_INTEGRATION_BASE;
+  requireThat(integrated || !Object.hasOwn(manifest, 'runtimeBindings'), 'D324_CAPTURE_COMPOSITION_REJECTED');
+  const runtimeBindings = integrated ? inspectD324IntegrationBindings(manifest.runtimeBindings) : undefined;
   const root = await physicalRoot(rootInput);
-  const binding = { root, target: Object.freeze({ ...manifest.target }), artifacts: Object.freeze({ ...manifest.artifacts }) };
+  const binding = { root, target: Object.freeze({ ...manifest.target }), artifacts: Object.freeze({ ...manifest.artifacts }),
+    runtimeBindings };
   await checkSnapshot(root, binding);
   const proof = Object.freeze({ taskId: id.taskId, compositionSha: manifest.target.sha,
     manifestSha256: hash(raw), captureProfileSha256: D324_CAPTURE_PROFILE_SHA256, authority: 'CAPTURE_READ_ONLY', liveAuthority: false });

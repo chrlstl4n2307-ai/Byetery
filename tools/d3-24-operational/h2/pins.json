@@ -1,0 +1,25 @@
+{
+  "schema": "BYETERY_D324_H2_WINDOWS_REVIEW_V1",
+  "temporalDecision": "OWNER_APPROVED",
+  "decisionDate": "2026-11-14",
+  "terminalWindowMs": 30000,
+  "stagedSourceSha256": {
+    "roles/h2-approval-verifier.mjs": "2c1f3950f2beb18f2d9264cfa2ddccb985957d9aae00d68318ede19fa0c490fc",
+    "roles/h2-role-process.mjs": "1cbfaa627a570e4022e126b9cb0ba73d3f8eaccde3ddb52684b0abaf334c86c1",
+    "sql/h2-option-a.sql": "7c06ff7c87ee8d438fe0ec92100bd5a2dd47a4b262657138e1d1cb0c647b0706",
+    "sql/h2-privilege-delta.sql": "7bcec26fc7bffbe86a4251032d9e841a63c1c1139c4089eb21d97adec1463fb6",
+    "sql/h2-revocable-approval-proposal.sql": "87479f573adb1ba61ed8d5c219553bc916685456457432a24158f762fe272547",
+    "sql/h2-verified-approval-proposal.sql": "fe910fbc0ca60520e18cc7475228aacb518b5e301453596308dd96fe3b7754e3",
+    "windows/Actor-H2Lab.ps1": "c0119584da3039d8875a27ba24395310f82e8aaef43606e21c6cacd3ce9f617a",
+    "windows/H2ProcessBoundary.cs": "2b571d77d24d090bfffe09838885d410d287f31fc8055598cec002b82a1b1171",
+    "windows/Invoke-H2RolePipe.ps1": "40515557d277a56ca8e0184b4ab59cd99c646eea9b3d10653652bbbcd018a019",
+    "windows/New-H2Release.ps1": "c89a709e3e21fae1cd89a673bd5580c4cbd0e699d4d5c2adb93de7c8adafa1ac",
+    "windows/Protect-H2Fork.mjs": "1e259d381a29aca067ade80290fff3a8260a0cb6b2cc8b15ba9a4daa7a658eb9",
+    "windows/Relay-H2Role-Windows.mjs": "b106e4741182542dabb9f54dbd163dff5373f4faf690bdba6bebce42f28c3d0f",
+    "windows/Revoke-H2Role.mjs": "321018d8341cdb3274adeb7f819f2038aa7f08030e4c7b4758b4d70d1e0fc365",
+    "windows/Verify-H2NodeBoundary.mjs": "f98a5fb098be04c25e2699cff54d1ba9a845c806a31a3603c88c036fb0ad7939",
+    "windows/Verify-ProcessAcl.ps1": "12761a6d6770c2e5d4220b6d9de90246b48de74c7bc69750efc60e7bd1bbcf05",
+    "windows/windows-probe.ps1": "f3e207b83001581a1a20ea5c0840220129ef113413343f12f23e4fde4839b444",
+    "windows/Start-H2CredentialBroker.ps1": "e97202f84cd9779cc10da44991c31e3759720097cd4eea8a1ae8676d635e0f1a"
+  }
+}

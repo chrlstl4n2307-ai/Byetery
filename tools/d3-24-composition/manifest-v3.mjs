@@ -7,6 +7,7 @@ import { COMPONENTS } from './pins.mjs';
 import { BOOTSTRAP_BINARIES } from '../d3-24-operational/bootstrap-pins.mjs';
 import { execFileSync } from 'node:child_process';
 import { isAbsolute } from 'node:path';
+import { D324_INTEGRATION_BASE, inspectD324IntegrationBindings } from './integration-bindings.mjs';
 
 const exact = (obj, names) => obj && typeof obj === 'object' && !Array.isArray(obj) &&
   Object.keys(obj).sort().join(',') === names.toSorted().join(',');
@@ -23,11 +24,16 @@ export function inspectV3BootstrapManifest(raw) {
   return inspectManifest(raw, V3_BOOTSTRAP_BASE);
 }
 
-function inspectManifest(raw, parent) {
+export function inspectV3IntegratedManifest(raw) {
+  return inspectManifest(raw, D324_INTEGRATION_BASE, true);
+}
+
+function inspectManifest(raw, parent, integrated = false) {
   check(Buffer.isBuffer(raw) && raw.length > 0 && raw.length <= 8192, 'D324_V3_MANIFEST_REJECTED');
   const manifest = strictJson(new TextDecoder('utf-8', { fatal: true }).decode(raw));
   check(raw.equals(Buffer.from(canonical(manifest) + '\n')) && exact(manifest, ['schema', 'target', 'identity', 'networkId',
-    'deploymentId', 'operator', 'ledgerSha256', 'budget', 'artifacts', 'k5Sha256', 'sessionControlSha256', 'binaries', 'operatorRoot']) &&
+    'deploymentId', 'operator', 'ledgerSha256', 'budget', 'artifacts', 'k5Sha256', 'sessionControlSha256', 'binaries', 'operatorRoot',
+    ...(integrated ? ['runtimeBindings'] : [])]) &&
     manifest.schema === 'BYETERY_D324_FINAL_ACTIVATION_V3', 'D324_V3_MANIFEST_REJECTED');
   const operator = verifyD324OperatorCommit();
   check(canonical(manifest.identity) === canonical(RUN1) && manifest.networkId === SPEC.networkId &&
@@ -45,7 +51,9 @@ function inspectManifest(raw, parent) {
     [manifest.k5Sha256,manifest.sessionControlSha256].every(v => typeof v === 'string' && /^[a-f0-9]{64}$/.test(v)) &&
     canonical(manifest.binaries) === canonical(BOOTSTRAP_BINARIES) &&
     typeof manifest.operatorRoot === 'string' && isAbsolute(manifest.operatorRoot), 'D324_V3_BINDINGS_REJECTED');
-  return Object.freeze({ sha256: hash(raw), reviewOnly: true, liveAuthority: false });
+  const runtimeBindings = integrated ? inspectD324IntegrationBindings(manifest.runtimeBindings) : undefined;
+  return Object.freeze({ sha256: hash(raw), reviewOnly: true, liveAuthority: false,
+    ...(integrated ? { runtimeBindings } : {}) });
 }
 
 export async function verifyMaterializedV3Capture(root, input) {
